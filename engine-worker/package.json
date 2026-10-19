@@ -1,0 +1,22 @@
+{
+  "name": "@linha-zero/engine-worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/main.ts",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@linha-zero/engine": "*",
+    "nats": "^2.29.3",
+    "pg": "^8.23.1",
+    "tsx": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.0",
+    "@types/pg": "^8.15.0",
+    "vitest": "^3.0.0"
+  }
+}
