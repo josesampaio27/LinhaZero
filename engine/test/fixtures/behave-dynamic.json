@@ -1,0 +1,488 @@
+[
+ {
+  "model": 102,
+  "params": {
+   "depthFt": 1.0,
+   "mxDead": 0.15,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.1,
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1500.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 0.3,
+  "windMs": 0.0,
+  "ros": 0.6681395942450562,
+  "intensity": 27.81100072112712
+ },
+ {
+  "model": 102,
+  "params": {
+   "depthFt": 1.0,
+   "mxDead": 0.15,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.1,
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1500.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 0.3,
+  "windMs": 2.0,
+  "ros": 14.222386138594278,
+  "intensity": 592.0002265447549
+ },
+ {
+  "model": 102,
+  "params": {
+   "depthFt": 1.0,
+   "mxDead": 0.15,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.1,
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1500.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 0.6,
+  "windMs": 0.0,
+  "ros": 0.46932835205526724,
+  "intensity": 21.53601355647162
+ },
+ {
+  "model": 102,
+  "params": {
+   "depthFt": 1.0,
+   "mxDead": 0.15,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.1,
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1500.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 0.6,
+  "windMs": 2.0,
+  "ros": 9.990380911734945,
+  "intensity": 458.4274054768868
+ },
+ {
+  "model": 102,
+  "params": {
+   "depthFt": 1.0,
+   "mxDead": 0.15,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.1,
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1500.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 1.2,
+  "windMs": 0.0,
+  "ros": 0.0133187043910856,
+  "intensity": 0.050902612897278626
+ },
+ {
+  "model": 102,
+  "params": {
+   "depthFt": 1.0,
+   "mxDead": 0.15,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.1,
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1500.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 1.2,
+  "windMs": 2.0,
+  "ros": 0.04292346832282709,
+  "intensity": 0.164048741385676
+ },
+ {
+  "model": 122,
+  "params": {
+   "depthFt": 1.5,
+   "mxDead": 0.15,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.5,
+    0.5,
+    0.0,
+    0.6,
+    1.0
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1800.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 0.3,
+  "windMs": 0.0,
+  "ros": 0.3989624838715243,
+  "intensity": 35.385775187172676
+ },
+ {
+  "model": 122,
+  "params": {
+   "depthFt": 1.5,
+   "mxDead": 0.15,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.5,
+    0.5,
+    0.0,
+    0.6,
+    1.0
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1800.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 0.3,
+  "windMs": 2.0,
+  "ros": 7.221621358502512,
+  "intensity": 640.518044200731
+ },
+ {
+  "model": 122,
+  "params": {
+   "depthFt": 1.5,
+   "mxDead": 0.15,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.5,
+    0.5,
+    0.0,
+    0.6,
+    1.0
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1800.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 0.6,
+  "windMs": 0.0,
+  "ros": 0.3636034075015218,
+  "intensity": 31.569167815787
+ },
+ {
+  "model": 122,
+  "params": {
+   "depthFt": 1.5,
+   "mxDead": 0.15,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.5,
+    0.5,
+    0.0,
+    0.6,
+    1.0
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1800.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 0.6,
+  "windMs": 2.0,
+  "ros": 6.581586589687609,
+  "intensity": 571.4336204154297
+ },
+ {
+  "model": 122,
+  "params": {
+   "depthFt": 1.5,
+   "mxDead": 0.15,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.5,
+    0.5,
+    0.0,
+    0.6,
+    1.0
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1800.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 1.2,
+  "windMs": 0.0,
+  "ros": 0.06482090541846044,
+  "intensity": 1.37244732980298
+ },
+ {
+  "model": 122,
+  "params": {
+   "depthFt": 1.5,
+   "mxDead": 0.15,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.5,
+    0.5,
+    0.0,
+    0.6,
+    1.0
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1800.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 1.2,
+  "windMs": 2.0,
+  "ros": 1.1733234426076231,
+  "intensity": 24.842674063350334
+ },
+ {
+  "model": 161,
+  "params": {
+   "depthFt": 0.6,
+   "mxDead": 0.2,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.2,
+    0.9,
+    1.5000000000000002,
+    0.2,
+    0.9
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1600.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 0.3,
+  "windMs": 0.0,
+  "ros": 0.07840620765089942,
+  "intensity": 5.967363241924393
+ },
+ {
+  "model": 161,
+  "params": {
+   "depthFt": 0.6,
+   "mxDead": 0.2,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.2,
+    0.9,
+    1.5000000000000002,
+    0.2,
+    0.9
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1600.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 0.3,
+  "windMs": 2.0,
+  "ros": 0.9295358931432284,
+  "intensity": 70.74539742426417
+ },
+ {
+  "model": 161,
+  "params": {
+   "depthFt": 0.6,
+   "mxDead": 0.2,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.2,
+    0.9,
+    1.5000000000000002,
+    0.2,
+    0.9
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1600.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 0.6,
+  "windMs": 0.0,
+  "ros": 0.07471445885858936,
+  "intensity": 5.610454992287207
+ },
+ {
+  "model": 161,
+  "params": {
+   "depthFt": 0.6,
+   "mxDead": 0.2,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.2,
+    0.9,
+    1.5000000000000002,
+    0.2,
+    0.9
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1600.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 0.6,
+  "windMs": 2.0,
+  "ros": 0.8857687844699013,
+  "intensity": 66.5141121914184
+ },
+ {
+  "model": 161,
+  "params": {
+   "depthFt": 0.6,
+   "mxDead": 0.2,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.2,
+    0.9,
+    1.5000000000000002,
+    0.2,
+    0.9
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1600.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 1.2,
+  "windMs": 0.0,
+  "ros": 0.020651704342825285,
+  "intensity": 0.5068046305106407
+ },
+ {
+  "model": 161,
+  "params": {
+   "depthFt": 0.6,
+   "mxDead": 0.2,
+   "heatBtuLb": 8000.0,
+   "loadTonsAcre": [
+    0.2,
+    0.9,
+    1.5000000000000002,
+    0.2,
+    0.9
+   ],
+   "savPerFt": [
+    2000.0,
+    109,
+    30,
+    1800.0,
+    1600.0
+   ],
+   "dynamic": true
+  },
+  "liveHerb": 1.2,
+  "windMs": 2.0,
+  "ros": 0.244833936194308,
+  "intensity": 6.008364758162458
+ }
+]
