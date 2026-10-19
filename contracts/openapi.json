@@ -1,0 +1,1149 @@
+{
+  "openapi": "3.0.4",
+  "info": {
+    "title": "LinhaZero API",
+    "description": "Weather and incidents from the ingested snapshots, and server runs of the fire engine (queue, progress by SSE, results). Contracts: contracts/README.md.",
+    "version": "v1"
+  },
+  "paths": {
+    "/api/v1/health": {
+      "get": {
+        "tags": [
+          "Health"
+        ],
+        "summary": "Whether Postgres and NATS answer, and how many engine workers are idle.",
+        "description": "200 even with no idle worker, so the web can tell \"no workers\" apart from \"API down\"; 503 when Postgres or NATS fail.",
+        "operationId": "Health_Get",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/incidents/active": {
+      "get": {
+        "tags": [
+          "Incidents"
+        ],
+        "summary": "Active rural fires from fogos.pt inside a bounding box.",
+        "operationId": "Incidents_Active",
+        "parameters": [
+          {
+            "name": "bbox",
+            "in": "query",
+            "description": "minLon,minLat,maxLon,maxLat in degrees, for example -8.4,41.4,-8.2,41.5.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/IncidentsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/runs": {
+      "post": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Queues a run of decisions A and B on the engine workers.",
+        "description": "Answers 202 at once with the run id; follow it with GET /runs/{id}/events. 503 when the queue is unavailable,\nand then the web runs the ensemble in the browser.",
+        "operationId": "Runs_Create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RunRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunAccepted"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/runs/{id}": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "State of a run, and its result once done.",
+        "operationId": "Runs_Get",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The run id returned by POST /runs.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunStatusResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/runs/{id}/events": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "Progress of a run as Server-Sent Events.",
+        "description": "The event name is the type: progress, done or failed, with the RunEvent JSON as data. The stream ends after done\nor failed. An \"event: ping\" with no data every 15 s keeps proxies from closing the connection.",
+        "operationId": "Runs_Events",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The run id returned by POST /runs.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/RunEvent"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/runs/{id}/rasters/{decision}/{layer}": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "One result raster of a finished run.",
+        "description": "Little-endian Float32, rows × cols × 4 bytes (rows and cols are in the result). Results never change, so it is cached for a year.",
+        "operationId": "Runs_Raster",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The run id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "decision",
+            "in": "path",
+            "description": "A or B.",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "layer",
+            "in": "path",
+            "description": "arrival (minutes until the fire arrives) or probability (share of runs where the cell burns).",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/Stream"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/weather": {
+      "get": {
+        "tags": [
+          "Weather"
+        ],
+        "summary": "Wind, humidity, fire risk and warnings for a point in mainland Portugal.",
+        "description": "Built from the newest snapshots saved by ingest: the nearest IPMA station within 25 km and 3 h, otherwise the\nOpen-Meteo model. Each source says how old it is and whether it is stale.",
+        "operationId": "Weather_Get",
+        "parameters": [
+          {
+            "name": "lat",
+            "in": "query",
+            "description": "Latitude, 36.5 to 42.5.",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          },
+          {
+            "name": "lon",
+            "in": "query",
+            "description": "Longitude, -10 to -6.",
+            "schema": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeatherResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WeatherUnavailableResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Cell": {
+        "required": [
+          "row",
+          "col"
+        ],
+        "type": "object",
+        "properties": {
+          "row": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "col": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "A grid cell."
+      },
+      "Decisions": {
+        "required": [
+          "A",
+          "B"
+        ],
+        "type": "object",
+        "properties": {
+          "A": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterventionCells"
+            }
+          },
+          "B": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/InterventionCells"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "description": "The interventions of decision A and of decision B (at most 50 each)."
+      },
+      "Ensemble": {
+        "required": [
+          "runs",
+          "windDirJitterDeg",
+          "windSpeedJitterPct",
+          "seed"
+        ],
+        "type": "object",
+        "properties": {
+          "runs": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "windDirJitterDeg": {
+            "type": "number",
+            "format": "double"
+          },
+          "windSpeedJitterPct": {
+            "type": "number",
+            "format": "double"
+          },
+          "seed": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Paired ensemble options, shared by A and B: number of runs (1–500), wind jitter and seed."
+      },
+      "ErrorResponse": {
+        "required": [
+          "error"
+        ],
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Every 4xx/5xx body: a message in Portuguese, shown to the user as is."
+      },
+      "FireRisk": {
+        "required": [
+          "level",
+          "label",
+          "municipality",
+          "date"
+        ],
+        "type": "object",
+        "properties": {
+          "level": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "label": {
+            "type": "string"
+          },
+          "municipality": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "description": "IPMA fire risk (1 Reduzido to 5 Máximo) for the municipality nearest to the point."
+      },
+      "ForecastHour": {
+        "required": [
+          "time",
+          "directionDeg",
+          "speedMs",
+          "humidityPct"
+        ],
+        "type": "object",
+        "properties": {
+          "time": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "directionDeg": {
+            "type": "number",
+            "format": "double"
+          },
+          "speedMs": {
+            "type": "number",
+            "format": "double"
+          },
+          "humidityPct": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "temperatureC": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "cloudPct": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "One hour of the Open-Meteo forecast: wind, and the air (humidity, temperature, cloud cover in %) from which the\nbrowser computes fuel moisture. The engine can follow these hours (weatherSteps) or use a single wind."
+      },
+      "HealthResponse": {
+        "required": [
+          "postgres",
+          "nats",
+          "idleWorkers"
+        ],
+        "type": "object",
+        "properties": {
+          "postgres": {
+            "type": "boolean"
+          },
+          "nats": {
+            "type": "boolean"
+          },
+          "idleWorkers": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The GET /api/v1/health body. `idleWorkers` counts the engine workers waiting for a job right now\n(a worker in the middle of a run is not counted)."
+      },
+      "Incident": {
+        "required": [
+          "id",
+          "lat",
+          "lon",
+          "place",
+          "status",
+          "startedAt",
+          "nature",
+          "resources"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "lat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lon": {
+            "type": "number",
+            "format": "double"
+          },
+          "place": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "nature": {
+            "type": "string"
+          },
+          "resources": {
+            "$ref": "#/components/schemas/IncidentResources"
+          }
+        },
+        "additionalProperties": false,
+        "description": "One active rural fire from fogos.pt, normalised."
+      },
+      "IncidentResources": {
+        "required": [
+          "people",
+          "vehicles",
+          "aerial"
+        ],
+        "type": "object",
+        "properties": {
+          "people": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "vehicles": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "aerial": {
+            "type": "integer",
+            "format": "int32"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Means on the ground: people, land vehicles and aircraft."
+      },
+      "IncidentsResponse": {
+        "required": [
+          "incidents",
+          "source"
+        ],
+        "type": "object",
+        "properties": {
+          "incidents": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Incident"
+            }
+          },
+          "source": {
+            "$ref": "#/components/schemas/SourceStatus"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The GET /api/v1/incidents/active body (contracts/examples/incidents.json)."
+      },
+      "InterventionCells": {
+        "required": [
+          "cells"
+        ],
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Cell"
+            }
+          },
+          "startMin": {
+            "type": "number",
+            "format": "double",
+            "default": 0
+          },
+          "rateFactor": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "description": "One intervention, already rasterised into cells by the browser."
+      },
+      "JsonElement": { },
+      "ModelWind": {
+        "required": [
+          "directionDeg",
+          "speedMs",
+          "gustMs",
+          "humidityPct",
+          "temperatureC",
+          "observedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "directionDeg": {
+            "type": "number",
+            "format": "double"
+          },
+          "speedMs": {
+            "type": "number",
+            "format": "double"
+          },
+          "gustMs": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "humidityPct": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "temperatureC": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "cloudPct": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "Current wind from the Open-Meteo model at the nearest lattice point; cloud cover in % (fuel moisture)."
+      },
+      "ObservedAir": {
+        "required": [
+          "humidityPct",
+          "temperatureC",
+          "observedAt",
+          "station"
+        ],
+        "type": "object",
+        "properties": {
+          "humidityPct": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "temperatureC": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "station": {
+            "$ref": "#/components/schemas/WeatherStation"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Humidity and temperature at the nearest IPMA station that measured either in the last 2 h. Often a closer station\nthan the wind's: many stations have no anemometer."
+      },
+      "ObservedWind": {
+        "required": [
+          "directionDeg",
+          "speedMs",
+          "observedAt",
+          "station"
+        ],
+        "type": "object",
+        "properties": {
+          "directionDeg": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "speedMs": {
+            "type": "number",
+            "format": "double"
+          },
+          "observedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "station": {
+            "$ref": "#/components/schemas/WeatherStation"
+          }
+        },
+        "additionalProperties": false,
+        "description": "Wind observed at the nearest IPMA station that measured wind in the last 2 h. `directionDeg` is where it blows\nfrom; null when calm."
+      },
+      "RunAccepted": {
+        "required": [
+          "runId"
+        ],
+        "type": "object",
+        "properties": {
+          "runId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The 202 body of POST /api/v1/runs: the id generated for the run."
+      },
+      "RunEvent": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "nullable": true
+          },
+          "done": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "total": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The run-event contract (contracts/examples/run-event-*.json): \"progress\" with status, done and total; \"done\"; or\n\"failed\" with error. Nulls are not written, so \"done\" is `{\"type\":\"done\"}`."
+      },
+      "RunRequest": {
+        "required": [
+          "grid",
+          "ignition",
+          "wind",
+          "durationMin",
+          "ensemble",
+          "decisions"
+        ],
+        "type": "object",
+        "properties": {
+          "grid": {
+            "type": "string"
+          },
+          "ignition": {
+            "$ref": "#/components/schemas/Cell"
+          },
+          "wind": {
+            "$ref": "#/components/schemas/Wind"
+          },
+          "durationMin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "ensemble": {
+            "$ref": "#/components/schemas/Ensemble"
+          },
+          "decisions": {
+            "$ref": "#/components/schemas/Decisions"
+          },
+          "weather": { }
+        },
+        "description": "The POST /api/v1/runs body (contracts/examples/run-request.json). Fields the API does not read, such as\n`variants`, are passed to the worker unchanged."
+      },
+      "RunStatusResponse": {
+        "required": [
+          "id",
+          "status",
+          "progress",
+          "error",
+          "result",
+          "createdAt",
+          "startedAt",
+          "finishedAt",
+          "worker"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "progress": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "result": {
+            "oneOf": [
+              {
+                "enum": [
+                  null
+                ],
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/JsonElement"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "startedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "worker": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The GET /api/v1/runs/{id} body: one row of the runs table. `status` is queued, running, done or failed;\n`progress` is the number of decisions done (0–2); `result` is the run-result contract once done."
+      },
+      "SourceStatus": {
+        "required": [
+          "name",
+          "fetchedAt",
+          "stale",
+          "error"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "fetchedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "stale": {
+            "type": "boolean"
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "How fresh one data source is, as shown next to the data: when it was fetched, whether it is stale, and the last error."
+      },
+      "Stream": {
+        "type": "string",
+        "format": "binary"
+      },
+      "WeatherLocation": {
+        "required": [
+          "lat",
+          "lon"
+        ],
+        "type": "object",
+        "properties": {
+          "lat": {
+            "type": "number",
+            "format": "double"
+          },
+          "lon": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The point that was asked for."
+      },
+      "WeatherResponse": {
+        "required": [
+          "location",
+          "use",
+          "observed",
+          "air",
+          "model",
+          "forecast",
+          "fireRisk",
+          "warnings",
+          "warningArea",
+          "sources",
+          "windSource"
+        ],
+        "type": "object",
+        "properties": {
+          "location": {
+            "$ref": "#/components/schemas/WeatherLocation"
+          },
+          "use": {
+            "type": "string",
+            "nullable": true
+          },
+          "observed": {
+            "oneOf": [
+              {
+                "enum": [
+                  null
+                ],
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/ObservedWind"
+              }
+            ]
+          },
+          "air": {
+            "oneOf": [
+              {
+                "enum": [
+                  null
+                ],
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/ObservedAir"
+              }
+            ]
+          },
+          "model": {
+            "oneOf": [
+              {
+                "enum": [
+                  null
+                ],
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/ModelWind"
+              }
+            ]
+          },
+          "forecast": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ForecastHour"
+            }
+          },
+          "fireRisk": {
+            "oneOf": [
+              {
+                "enum": [
+                  null
+                ],
+                "nullable": true
+              },
+              {
+                "$ref": "#/components/schemas/FireRisk"
+              }
+            ]
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WeatherWarning"
+            }
+          },
+          "warningArea": {
+            "type": "string",
+            "nullable": true
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceStatus"
+            }
+          },
+          "windSource": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The GET /api/v1/weather body (contracts/examples/weather.json). `use` says which wind fills the form,\n\"observed\" or \"model\"; it is null when neither source has a wind (the endpoint answers 503). `air` is the\nhumidity and temperature of the nearest station, whichever wind is used."
+      },
+      "WeatherStation": {
+        "required": [
+          "id",
+          "name",
+          "distanceKm"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "name": {
+            "type": "string"
+          },
+          "distanceKm": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The IPMA station whose observation is used, and how far it is from the point."
+      },
+      "WeatherUnavailableResponse": {
+        "required": [
+          "error",
+          "sources"
+        ],
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          },
+          "sources": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SourceStatus"
+            }
+          }
+        },
+        "additionalProperties": false,
+        "description": "The 503 body of GET /api/v1/weather when no source has a wind, with the state of each source."
+      },
+      "WeatherWarning": {
+        "required": [
+          "type",
+          "level",
+          "start",
+          "end",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "start": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "end": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "text": {
+            "type": "string"
+          }
+        },
+        "additionalProperties": false,
+        "description": "An IPMA yellow, orange or red warning for the point's warning area."
+      },
+      "Wind": {
+        "required": [
+          "directionDeg",
+          "speedMs"
+        ],
+        "type": "object",
+        "properties": {
+          "directionDeg": {
+            "type": "number",
+            "format": "double"
+          },
+          "speedMs": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The wind: `directionDeg` 0–359 is where it blows from; `speedMs` 0–20."
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Health"
+    },
+    {
+      "name": "Incidents"
+    },
+    {
+      "name": "Runs"
+    },
+    {
+      "name": "Weather"
+    }
+  ]
+}

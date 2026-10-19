@@ -1,0 +1,40 @@
+{
+  "grid": "guimaraes",
+  "ignition": { "row": 103, "col": 92 },
+  "wind": { "directionDeg": 45, "speedMs": 2.5 },
+  "durationMin": 240,
+  "ensemble": { "runs": 200, "windDirJitterDeg": 20, "windSpeedJitterPct": 25, "seed": 2035 },
+  "decisions": {
+    "A": [
+      {
+        "kind": "containmentLine",
+        "startMin": 60,
+        "cells": [
+          { "row": 106, "col": 88 },
+          { "row": 106, "col": 89 },
+          { "row": 106, "col": 90 },
+          { "row": 106, "col": 91 },
+          { "row": 106, "col": 92 },
+          { "row": 106, "col": 93 },
+          { "row": 106, "col": 94 },
+          { "row": 106, "col": 95 }
+        ]
+      },
+      {
+        "kind": "suppression",
+        "startMin": 30,
+        "rateFactor": 0.2,
+        "cells": [
+          { "row": 104, "col": 91 },
+          { "row": 104, "col": 92 },
+          { "row": 104, "col": 93 },
+          { "row": 105, "col": 91 },
+          { "row": 105, "col": 92 },
+          { "row": 105, "col": 93 }
+        ]
+      }
+    ],
+    "B": []
+  },
+  "weather": { "source": "ipma", "station": "Braga, Merelim", "observedAt": "2026-10-17T12:00:00Z", "fetchedAt": "2026-10-17T12:44:44Z" }
+}

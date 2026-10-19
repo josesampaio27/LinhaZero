@@ -1,0 +1,40 @@
+{
+  "location": { "lat": 41.45, "lon": -8.29 },
+  "use": "observed",
+  "observed": {
+    "directionDeg": 90,
+    "speedMs": 3.1,
+    "observedAt": "2026-10-17T11:00:00Z",
+    "station": { "id": 6212124, "name": "Braga (CIM)", "distanceKm": 14.8 }
+  },
+  "air": {
+    "humidityPct": 54,
+    "temperatureC": 22.4,
+    "observedAt": "2026-10-17T12:00:00Z",
+    "station": { "id": 1210625, "name": "Guimarães", "distanceKm": 3.3 }
+  },
+  "model": {
+    "directionDeg": 92,
+    "speedMs": 4.7,
+    "gustMs": 9.8,
+    "humidityPct": 57,
+    "temperatureC": 22.3,
+    "observedAt": "2026-10-17T12:15:00Z",
+    "cloudPct": 35
+  },
+  "forecast": [{ "time": "2026-10-17T13:00:00Z", "directionDeg": 91, "speedMs": 4.6, "humidityPct": 56, "temperatureC": 22.8, "cloudPct": 40 }],
+  "fireRisk": { "level": 2, "label": "Moderado", "municipality": "0308", "date": "2026-10-17" },
+  "warnings": [
+    { "type": "Tempo Quente", "level": "yellow", "start": "2026-10-17T09:00:00Z", "end": "2026-10-17T21:00:00Z", "text": "Persistência de valores elevados da temperatura máxima." }
+  ],
+  "warningArea": "BRG",
+  "sources": [
+    { "name": "IPMA estações", "fetchedAt": "2026-10-17T12:44:44Z", "stale": false, "error": null },
+    { "name": "IPMA observações", "fetchedAt": "2026-10-17T12:44:44Z", "stale": false, "error": null },
+    { "name": "Open-Meteo", "fetchedAt": "2026-10-17T12:45:01Z", "stale": false, "error": null },
+    { "name": "IPMA risco de incêndio", "fetchedAt": "2026-10-17T12:44:44Z", "stale": false, "error": null },
+    { "name": "IPMA avisos", "fetchedAt": "2026-10-17T12:44:44Z", "stale": false, "error": null },
+    { "name": "IPMA distritos", "fetchedAt": "2026-10-17T12:44:44Z", "stale": false, "error": null }
+  ],
+  "windSource": "IPMA observações"
+}

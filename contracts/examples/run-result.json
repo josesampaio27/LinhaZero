@@ -1,0 +1,34 @@
+{
+  "durationMin": 240,
+  "rows": 157,
+  "cols": 152,
+  "A": {
+    "metrics": {
+      "burnedHaByHour": [12, 41, 88, 150],
+      "buildingsReached": 7,
+      "villages": [
+        { "id": 1, "name": "Abação (São Tomé)", "firstArrivalMin": null },
+        { "id": 2, "name": "Aldeias", "firstArrivalMin": 187.5 }
+      ]
+    },
+    "runs": [
+      { "buildingsReached": 7, "burnedHa": 150 },
+      { "buildingsReached": 9, "burnedHa": 162 }
+    ]
+  },
+  "B": {
+    "metrics": {
+      "burnedHaByHour": [12, 44, 97, 171],
+      "buildingsReached": 11,
+      "villages": [
+        { "id": 1, "name": "Abação (São Tomé)", "firstArrivalMin": null },
+        { "id": 2, "name": "Aldeias", "firstArrivalMin": 171 }
+      ]
+    },
+    "runs": [
+      { "buildingsReached": 11, "burnedHa": 171 },
+      { "buildingsReached": 12, "burnedHa": 180 }
+    ]
+  },
+  "elapsedMs": 8123
+}

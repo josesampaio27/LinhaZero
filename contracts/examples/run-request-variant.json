@@ -1,0 +1,69 @@
+{
+  "grid": "sintetica",
+  "ignition": {
+    "row": 48,
+    "col": 125
+  },
+  "wind": {
+    "directionDeg": 225,
+    "speedMs": 7
+  },
+  "durationMin": 240,
+  "ensemble": {
+    "runs": 200,
+    "windDirJitterDeg": 20,
+    "windSpeedJitterPct": 25,
+    "seed": 2035
+  },
+  "decisions": {
+    "A": [],
+    "B": []
+  },
+  "variants": {
+    "A": null,
+    "B": {
+      "version": 1,
+      "id": "faixa-souto-do-monte",
+      "name": "Faixa de gestão a sul de Souto do Monte",
+      "description": "Faixa de 200 m sem combustível, no traçado da linha de contenção do cenário de demonstração",
+      "base": {
+        "grid": "sintetica",
+        "sha256": "664932e5bd22a8995511a0f8f8aa039cc5e7c620d213319bbbdbbd132d5b36e8"
+      },
+      "fuelRates": {},
+      "params": {},
+      "edits": [
+        {
+          "kind": "setFuel",
+          "fuel": 0,
+          "polygon": [
+            [
+              -7020,
+              204060
+            ],
+            [
+              -4850,
+              203700
+            ],
+            [
+              -2450,
+              203300
+            ],
+            [
+              -2450,
+              203100
+            ],
+            [
+              -4850,
+              203500
+            ],
+            [
+              -7020,
+              203860
+            ]
+          ]
+        }
+      ]
+    }
+  }
+}

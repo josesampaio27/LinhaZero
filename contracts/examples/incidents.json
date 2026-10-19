@@ -1,0 +1,15 @@
+{
+  "incidents": [
+    {
+      "id": "20261476150",
+      "lat": 41.4,
+      "lon": -8.2,
+      "place": "Guimarães, Selho S. Jorge",
+      "status": "Em Curso",
+      "startedAt": "2026-10-17T10:31:00Z",
+      "nature": "Mato",
+      "resources": { "people": 12, "vehicles": 3, "aerial": 0 }
+    }
+  ],
+  "source": { "name": "fogos.pt", "fetchedAt": "2026-10-17T13:26:30Z", "stale": false, "error": null }
+}
