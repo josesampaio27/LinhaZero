@@ -138,11 +138,6 @@ export function GridEditor() {
     return renderMask(mask, base.header.cols, base.header.rows, EDITED_CELLS);
   }, [base, edited, showEdited]);
   const shapes = useMemo(() => (variant ? variant.edits.map(shapeOf) : []), [variant]);
-  const fuelCounts = useMemo(() => {
-    const counts = new Map<number, number>();
-    if (base) for (const f of base.fuel) counts.set(f, (counts.get(f) ?? 0) + 1);
-    return counts;
-  }, [base]);
 
   const savedHere = saved.filter((v) => bundle && v.base.grid === bundle.name);
   const stored = variant ? variantStore.get(variant.id) : null;
@@ -201,15 +196,6 @@ export function GridEditor() {
   };
 
   // --- Values ---
-  const setRate = (code: number, value: string) => {
-    if (!variant) return;
-    const fuelRates = { ...variant.fuelRates };
-    const n = Number(value);
-    if (value === "" || !Number.isFinite(n) || n === base?.header.fuelTable[code]?.baseRate) delete fuelRates[code];
-    else fuelRates[code] = Math.min(200, Math.max(0, n));
-    update({ fuelRates });
-  };
-
   const setParam = (key: keyof ModelParams, value: string) => {
     if (!variant) return;
     const params = { ...variant.params };
