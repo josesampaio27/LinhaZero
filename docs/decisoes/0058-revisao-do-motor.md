@@ -6,7 +6,7 @@
 
 ## Contexto
 
-Uma revisão independente do motor, feita a partir do documento [O motor explicado](../o-motor-explicado.md), confirmou a física (Rothermel, elipse, fogo de copas, humidade, focos) e o emparelhamento. Encontrou também falhas que mudavam resultados.
+Uma revisão independente do motor, feita a partir do documento [O motor explicado](../modelo/o-motor-explicado.md), confirmou a física (Rothermel, elipse, fogo de copas, humidade, focos) e o emparelhamento. Encontrou também falhas que mudavam resultados.
 
 ## Decisão
 
@@ -66,4 +66,4 @@ Nos fogos de teste (5 partes):
 
 - O motor é mais lento (cerca de 4 vezes), mas continua abaixo de um segundo por comparação no dispositivo.
 - As linhas desenhadas seguram menos do que no modelo simples, porque agora dependem da chama. A ferramenta diz-o.
-- Os números da validação e o documento [O motor explicado](../o-motor-explicado.md) foram atualizados.
+- Os números da validação e o documento [O motor explicado](../modelo/o-motor-explicado.md) foram atualizados.

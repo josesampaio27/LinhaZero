@@ -24,4 +24,4 @@ Os dados que mudam devagar (combustível, relevo, OSM, população) entram nas g
 
 Confirmar as condições de uso comercial do Open-Meteo para produção (é gratuito para uso não comercial) e o uso do fogos.pt e do FUMOD. Num piloto institucional, preferir acordos de dados diretamente com o IPMA, a ANEPC e o ICNF. O fogos.pt não tem garantia de serviço: para uso operacional, o feed oficial da ANEPC, por acordo.
 
-As ligações para cada fonte estão em [Referências](../referencias.md).
+As ligações para cada fonte estão em [Referências](../bibliografia.md).

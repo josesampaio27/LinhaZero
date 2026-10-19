@@ -332,7 +332,7 @@ Várias ideias foram testadas e **rejeitadas** por esta regra:
 
 ### 7.3 Resultados
 
-![Sobreposição entre simulado e observado em cada um dos 34 incêndios de 2018–2021](modelo/validacao-tier-a.png)
+![Sobreposição entre simulado e observado em cada um dos 34 incêndios de 2018–2021](validacao-tier-a.png)
 
 | | Modelo simples | Rothermel sem ajuste | **Rothermel ajustado** |
 | --- | --- | --- | --- |
@@ -347,7 +347,7 @@ Várias ideias foram testadas e **rejeitadas** por esta regra:
 
 ### 7.4 O que vale o mapa de cenários?
 
-![Fração dos cenários em que arde contra a fração que ardeu de facto, nos fogos de teste](modelo/fiabilidade.png)
+![Fração dos cenários em que arde contra a fração que ardeu de facto, nos fogos de teste](fiabilidade.png)
 
 Um mapa que diz "30%" seria perfeito se, das células com 30%, arderem de facto 3 em cada 10. Isso mediu-se nos fogos de teste, onde o fogo real menos foi travado: nos intervalos em que corria livre e até à primeira observação.
 

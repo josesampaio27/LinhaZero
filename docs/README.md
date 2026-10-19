@@ -30,9 +30,10 @@ docs/
   README.md                  esta página
   proposta-desafio.md        a proposta para o júri do Hack4Guimarães
   estado-da-arte.md          simuladores existentes e o que nos distingue
-  referencias.md             bibliografia e fontes
+  investigacao-propagacao.md a investigação de base: modelos, algoritmos e dados (em inglês)
+  bibliografia.md            bibliografia e fontes
   arquitetura/               a arquitetura, em arc42 (uma página por secção)
-  modelo/                    o modelo do fogo: propagação, incerteza, calibração
+  modelo/                    o modelo do fogo: propagação, incerteza, calibração, o motor explicado
   referencia/                formatos, API, base de dados, fontes de dados
   plano/                     semana do hackathon, caminho para produção, roteiro
   decisoes/                  uma página por decisão técnica (ADR)
@@ -47,8 +48,8 @@ docs/
 - [Modelo de propagação](modelo/propagacao.md): como o motor calcula o tempo de chegada do fogo, e como vai evoluir.
 - [Incerteza](modelo/incerteza.md): o ensemble emparelhado e o que mais se vai perturbar.
 - [Calibração e validação](modelo/calibracao-e-validacao.md): testes atuais, casos de referência e calibração com incêndios reais.
-- [O motor explicado](o-motor-explicado.md): o motor de ponta a ponta para o júri, os mentores e a comunidade científica: a grelha de Guimarães, a física, todos os parâmetros e a validação.
-- [O motor contra incêndios reais](validacao-resumo.md): resumo de uma página da validação em 80 incêndios e da probabilidade calibrada.
+- [O motor explicado](modelo/o-motor-explicado.md): o motor de ponta a ponta para o júri, os mentores e a comunidade científica: a grelha de Guimarães, a física, todos os parâmetros e a validação.
+- [O motor contra incêndios reais](modelo/validacao-resumo.md): resumo de uma página da validação em 80 incêndios e da probabilidade calibrada.
 
 ### Referência
 

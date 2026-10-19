@@ -1,6 +1,6 @@
 # O motor contra incêndios reais: resumo
 
-Uma página sobre quanto se pode confiar nas simulações, medido em incêndios que aconteceram em Portugal. Os detalhes estão em [Calibração e validação](modelo/calibracao-e-validacao.md) e [Incerteza](modelo/incerteza.md).
+Uma página sobre quanto se pode confiar nas simulações, medido em incêndios que aconteceram em Portugal. Os detalhes estão em [Calibração e validação](calibracao-e-validacao.md) e [Incerteza](incerteza.md).
 
 ## O que comparámos
 
@@ -12,7 +12,7 @@ Uma página sobre quanto se pode confiar nas simulações, medido em incêndios 
 
 ## Resultados
 
-![Sørensen por incêndio, tier A](modelo/validacao-tier-a.png)
+![Sørensen por incêndio, tier A](validacao-tier-a.png)
 
 Sobreposição entre a área simulada e a área que ardeu de facto (Sørensen médio nas horas observadas; 1 = perfeito). Os fogos reais foram combatidos e a simulação não, por isso o acerto máximo possível fica abaixo de 1:
 
@@ -28,7 +28,7 @@ Sobreposição entre a área simulada e a área que ardeu de facto (Sørensen m�
 
 ## Fogo sem combate, e um mapa de cenários verificado
 
-![Cenários em que arde contra o que ardeu nos incêndios reais](modelo/fiabilidade.png)
+![Cenários em que arde contra o que ardeu nos incêndios reais](fiabilidade.png)
 
 - **O motor simula o fogo sem combate.** Só há combate onde se desenha (Ataque, Linha, Proteger zona), e esse combate perde efeito em fogos intensos. Assim, comparar a decisão A com a B mede só o efeito do que se desenhou.
 - **Cada uma das 30 simulações** sorteia o vento, a humidade do combustível, a velocidade por tipo de combustível e o ponto de ignição. O mapa mostra em quantas das simulações cada célula arde, sem combate além do desenhado.
@@ -44,7 +44,7 @@ Sobreposição entre a área simulada e a área que ardeu de facto (Sørensen m�
 - **Intensidade:** comprimento de chama e intensidade. Os ataques perdem efeito acima de 4000 kW/m, e as estradas e as linhas cedem conforme a largura.
 - **Focos secundários:** distâncias de Sardoy, como no ELMFIRE.
 - **Fogo de copas:** Van Wagner (1977) e Cruz et al. (2005) nos povoamentos de pinheiro, eucalipto e resinosas.
-- **32 direções de propagação:** a velocidade da cabeça não depende do ângulo entre o vento e a grelha ([ADR 0058](decisoes/0058-revisao-do-motor.md)).
+- **32 direções de propagação:** a velocidade da cabeça não depende do ângulo entre o vento e a grelha ([ADR 0058](../decisoes/0058-revisao-do-motor.md)).
 
 ## Ver na aplicação
 
@@ -52,8 +52,8 @@ Os cenários **"Incêndio real: Alijó, 24 jul 2019"** e **"Incêndio real: Viei
 
 ## Limites conhecidos
 
-- **Picos subestimados:** nas corridas rápidas, o motor faz cerca de 0,67 da velocidade observada. Era 0,6 antes de corrigir as direções de propagação ([ADR 0058](decisoes/0058-revisao-do-motor.md)).
-  - Testámos também recalibrar só no fogo livre, usar as rajadas e mudar o limite do vento ([ADR 0057](decisoes/0057-fogo-sem-combate-e-corridas-rapidas.md)); nenhum passou a regra.
+- **Picos subestimados:** nas corridas rápidas, o motor faz cerca de 0,67 da velocidade observada. Era 0,6 antes de corrigir as direções de propagação ([ADR 0058](../decisoes/0058-revisao-do-motor.md)).
+  - Testámos também recalibrar só no fogo livre, usar as rajadas e mudar o limite do vento ([ADR 0057](../decisoes/0057-fogo-sem-combate-e-corridas-rapidas.md)); nenhum passou a regra.
   - Os fogos reais pedem uma cabeça mais rápida e flancos mais lentos, e tudo o que acelera a cabeça acelera também o resto.
 - **Fogos de 2015–2017:** acertam pouco (0,12), porque o mapa de combustível é de depois do fogo.
 - **Dados aproximados:** as copas (altura, densidade) são valores típicos por modelo, e as horas do PT-FireSprd são aproximadas.

@@ -1,6 +1,6 @@
 # Estado da arte
 
-Os simuladores de incêndio que já existem, o que a investigação diz, e onde o LinhaZero se distingue tecnicamente. As fontes estão em [Referências](referencias.md).
+Os simuladores de incêndio que já existem, o que a investigação diz, e onde o LinhaZero se distingue tecnicamente. As fontes estão em [Referências](bibliografia.md).
 
 ## Simuladores existentes
 

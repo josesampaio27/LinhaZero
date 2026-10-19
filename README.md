@@ -5,7 +5,7 @@ Ferramenta web para o Hack4Guimarães 2035 (desafio "Resposta a emergências e i
 Responde a uma pergunta de quem coordena um incêndio rural nos primeiros minutos:
 **"Se eu tomar a decisão A ou a decisão B, o que acontece ao fogo nas próximas horas?"**
 
-O motor simula o fogo sem combate, exceto o que se desenha, e foi validado em 80 incêndios reais do PT-FireSprd: ver [o motor explicado](docs/o-motor-explicado.md) e [o motor contra incêndios reais](docs/validacao-resumo.md).
+O motor simula o fogo sem combate, exceto o que se desenha, e foi validado em 80 incêndios reais do PT-FireSprd: ver [o motor explicado](docs/modelo/o-motor-explicado.md) e [o motor contra incêndios reais](docs/modelo/validacao-resumo.md).
 
 ## Como correr
 
