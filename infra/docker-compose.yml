@@ -1,0 +1,142 @@
+# Local run of the whole stack: interface (web), api, ingest, engine workers, postgres and nats (see infra/README.md).
+# Started from the repo root with `docker compose up` (compose.yaml includes this file) or `npm run up`.
+# Every service reads PGHOST/PGUSER/PGPASSWORD/PGDATABASE (the libpq names, which node-postgres and psql also read).
+x-pg: &pg
+  PGHOST: postgres
+  PGUSER: dois
+  PGPASSWORD: ${POSTGRES_PASSWORD:-dois}
+  PGDATABASE: dois
+
+services:
+  postgres:
+    image: postgres:16.12-alpine
+    environment:
+      POSTGRES_USER: dois
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dois}
+      POSTGRES_DB: dois
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  nats:
+    image: nats:2.10.29-alpine
+    command: ["-js", "-sd", "/data", "-m", "8222"]
+    ports:
+      - "127.0.0.1:4222:4222"
+      - "127.0.0.1:8222:8222"
+    volumes:
+      - natsdata:/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- 'http://localhost:8222/healthz?js-enabled-only=true'"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  ingest:
+    build:
+      context: ../services
+      dockerfile: Ingest/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *pg
+      ASPNETCORE_URLS: http://+:8081
+      GRIDS_DIR: /grids
+      FOGOS_API_KEY: ${FOGOS_API_KEY:-}
+      INGEST_OFFLINE: ${INGEST_OFFLINE:-}
+      INGEST_INTERVAL_IPMA_OBSERVATIONS: ${INGEST_INTERVAL_IPMA_OBSERVATIONS:-10}
+      INGEST_INTERVAL_IPMA_WARNINGS: ${INGEST_INTERVAL_IPMA_WARNINGS:-10}
+      INGEST_INTERVAL_IPMA_RCM_D0: ${INGEST_INTERVAL_IPMA_RCM_D0:-60}
+      INGEST_INTERVAL_IPMA_STATIONS: ${INGEST_INTERVAL_IPMA_STATIONS:-1440}
+      INGEST_INTERVAL_IPMA_DISTRICTS: ${INGEST_INTERVAL_IPMA_DISTRICTS:-1440}
+      INGEST_INTERVAL_OPEN_METEO: ${INGEST_INTERVAL_OPEN_METEO:-15}
+      INGEST_INTERVAL_FOGOS_ACTIVE: ${INGEST_INTERVAL_FOGOS_ACTIVE:-2}
+    ports:
+      # Loopback only, so smoke.sh can curl /health/ready (the image has no curl). Remove when scaling ingest.
+      - "127.0.0.1:8081:8081"
+    volumes:
+      - ../web/public/grids:/grids:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  api:
+    build:
+      context: ../services
+      dockerfile: Api/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *pg
+      NATS_URL: nats://nats:4222
+      GRIDS_DIR: /grids
+    ports:
+      - "8080:8080"
+    volumes:
+      - ../web/public/grids:/grids:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+
+  engine-worker:
+    build:
+      context: ..
+      dockerfile: engine-worker/Dockerfile
+    restart: unless-stopped
+    environment:
+      <<: *pg
+      NATS_URL: nats://nats:4222
+      GRIDS_DIR: /grids
+    volumes:
+      - ../web/public/grids:/grids:ro
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:9090/healthz').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"]
+      interval: 30s
+      timeout: 15s
+      retries: 3
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nats:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ..
+      dockerfile: web/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3000:8080"
+    volumes:
+      - ../web/public/grids:/usr/share/nginx/html/grids:ro
+    depends_on:
+      - api
+
+  geo-pipeline:
+    build: ../data-prep
+    profiles: ["batch"]
+    volumes:
+      - ../web/public/grids:/out
+
+  demo-seed:
+    image: postgres:16.12-alpine
+    profiles: ["demo"]
+    environment: *pg
+    volumes:
+      - ./demo:/demo:ro
+    command: ["psql", "-h", "postgres", "-v", "ON_ERROR_STOP=1", "-f", "/demo/load.sql"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  natsdata:

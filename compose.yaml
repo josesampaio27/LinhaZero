@@ -1,0 +1,4 @@
+# Lets `docker compose up` run from the repo root. The services are defined in infra/docker-compose.yml.
+name: linha-zero
+include:
+  - infra/docker-compose.yml
