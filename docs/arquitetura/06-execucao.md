@@ -14,8 +14,7 @@ sequenceDiagram
   participant M as Motor (Web Worker)
 
   U->>I: marca a ignição (ou clica numa ocorrência ativa)
-  U->>I: "Usar o tempo de agora" (opcional)
-  I->>A: GET /api/v1/weather?lat&lon
+  I->>A: GET /api/v1/weather?lat&lon (automático)
   A-->>I: vento, humidade, risco, avisos, próximas horas, idade dos dados
   U->>I: desenha as decisões A e B e carrega em "Simular"
   I->>M: simula A e B (com incerteza, se ligada; cada uma na sua grelha ou variante)
@@ -24,9 +23,9 @@ sequenceDiagram
 ```
 
 1. O utilizador marca a ignição. Com as ocorrências ativas ligadas, clicar numa delas põe lá a ignição.
-2. "Usar o tempo de agora" pede à API o vento para aquele ponto: a estação IPMA mais próxima com observação válida até 25 km e 3 h, senão o modelo Open-Meteo ([ADR 0027](../decisoes/0027-estacao-ipma-antes-do-modelo-ate-25-km-e-3-h.md)). O cartão mostra a fonte, a idade, a humidade, o risco de incêndio, os avisos e as próximas 8 horas. No modelo de Rothermel, "Do tempo" calcula a humidade do combustível a partir do ar e da nebulosidade. "Seguir a previsão hora a hora" passa as próximas horas ao motor como passos de tempo ([ADR 0050](../decisoes/0050-humidade-do-combustivel-e-tempo-hora-a-hora-no-motor.md)). Sem a API, o cartão diz "indisponível" e o vento introduz-se à mão.
+2. A interface pede logo à API o tempo para aquele ponto (ao abrir a zona, para o centro; [ADR 0060](../decisoes/0060-tempo-em-direto-por-omissao.md)): a estação IPMA mais próxima com observação válida até 25 km e 3 h, senão o modelo Open-Meteo ([ADR 0027](../decisoes/0027-estacao-ipma-antes-do-modelo-ate-25-km-e-3-h.md)). O cartão mostra a fonte, a idade, a humidade, o risco de incêndio, os avisos e as próximas 8 horas. No modelo de Rothermel, "Do tempo" calcula a humidade do combustível a partir do ar e da nebulosidade. "Seguir a previsão hora a hora" passa as próximas horas ao motor como passos de tempo ([ADR 0050](../decisoes/0050-humidade-do-combustivel-e-tempo-hora-a-hora-no-motor.md)). Cada valor (vento, temperatura, humidade, nuvens, secura do combustível) pode ser mudado à mão e mantém-se quando o tempo se atualiza. Sem a API, o painel diz "sem tempo em direto" e os valores introduzem-se à mão.
 3. O utilizador desenha as decisões A e B e carrega em "Simular". O motor corre as duas decisões no browser, com incerteza (30 corridas) se estiver ligada.
-4. A interface mostra os mapas e a comparação. Um cenário guardado leva a proveniência do vento enquanto este não for mexido à mão.
+4. A interface mostra os mapas e a comparação. Um cenário guardado leva a proveniência do vento enquanto este não for mexido à mão; ao abrir um cenário, o tempo é o do ficheiro até se pedir o de agora.
 
 ## Ensemble no servidor
 

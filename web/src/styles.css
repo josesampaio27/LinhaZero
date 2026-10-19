@@ -238,9 +238,17 @@ input[type="range"] { width: 100%; min-height: 32px; margin: 0; }
 .compass-head { fill: var(--ink); }
 .wind-sliders { flex: 1; min-width: 0; display: grid; gap: 4px; }
 .wind-sliders label { display: grid; font-size: 15px; }
-.weather { display: grid; gap: 8px; margin-top: 12px; }
-.weather > button { width: 100%; }
-.weather .hint { margin: 0; }
+.conditions { display: grid; gap: 8px; }
+.conditions .field-label { margin: 6px 0 0; }
+.conditions .hint, .conditions-source p { margin: 0; }
+.conditions-source { display: grid; gap: 4px; }
+.num-fields { display: grid; grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 8px; margin-top: 8px; }
+.num-field { display: grid; gap: 2px; align-content: start; }
+.num-field label { display: grid; gap: 2px; font-size: 14px; color: var(--muted); }
+.num-input { display: flex; align-items: center; gap: 6px; color: var(--ink); font-size: 15px; }
+.num-input input { width: 100%; min-width: 0; min-height: 40px; padding: 4px 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+.num-field.manual input { border-color: var(--ink); border-width: 2px; }
+.num-field button.link { min-height: 24px; font-size: 13px; }
 .weather-card { display: grid; gap: 4px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--sunk); font-size: 14px; }
 .warn-text { color: var(--warn); font-weight: 600; }
 .risk { font-weight: 700; padding: 1px 6px; border-radius: 4px; color: #fff; }

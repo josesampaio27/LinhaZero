@@ -93,3 +93,4 @@ O que se pôs de lado, e porquê.
 | [0057](0057-fogo-sem-combate-e-corridas-rapidas.md) | Fogo sem combate por omissão, e o que se testou para as corridas rápidas | aceite; limite do vento revisto pela 0058 | 2026-10-19 |
 | [0058](0058-revisao-do-motor.md) | Revisão do motor: direções do fogo, modelo único e correções | aceite | 2026-10-19 |
 | [0059](0059-pasta-backend-com-projetos-linhazero.md) | Pasta `backend/` com projetos `LinhaZero.*` | aceite | 2026-10-19 |
+| [0060](0060-tempo-em-direto-por-omissao.md) | Tempo em direto por omissão, com cada valor ajustável à mão | aceite | 2026-10-20 |

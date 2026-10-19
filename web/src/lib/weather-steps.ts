@@ -1,4 +1,4 @@
-// Fuel moisture and hourly weather steps from a weather snapshot (GET /api/v1/weather).
+// Hourly weather steps from a weather snapshot (GET /api/v1/weather). The current moisture is in conditions.ts.
 import { fuelMoistureFromWeather, isDaylight, type FuelMoisture, type WeatherStep, type Wind } from "@linha-zero/engine";
 import type { WeatherResponse } from "../api/client";
 
@@ -6,18 +6,6 @@ import type { WeatherResponse } from "../api/client";
 export function snapshotTime(s: WeatherResponse): Date {
   const v = s.use === "observed" ? s.observed : s.model;
   return new Date(v?.observedAt ?? Date.now());
-}
-
-/** Fuel moisture now, from the station's air (else the model's), the model's cloud cover and the sun. Null without temperature and humidity. */
-export function moistureNow(s: WeatherResponse): FuelMoisture | null {
-  const tempC = s.air?.temperatureC ?? s.model?.temperatureC ?? null;
-  const rhPct = s.air?.humidityPct ?? s.model?.humidityPct ?? null;
-  if (tempC === null || rhPct === null) return null;
-  const at = snapshotTime(s);
-  return fuelMoistureFromWeather(
-    { tempC, rhPct, cloudPct: s.model?.cloudPct ?? undefined, daylight: isDaylight(at, s.location.lat, s.location.lon) },
-    at.getUTCMonth() + 1,
-  );
 }
 
 /**

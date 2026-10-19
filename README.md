@@ -30,7 +30,7 @@ Este comando arranca tudo:
 | `postgres` | Base de dados: snapshots das fontes e corridas | 127.0.0.1:5432 |
 | `nats` | Fila de trabalho entre a API e os workers | 127.0.0.1:4222 |
 
-Com tudo a correr, "Usar o tempo de agora" preenche o vento com dados reais, as ocorrências do fogos.pt aparecem nos mapas e a incerteza pode correr "no servidor (200)" em vez de "no browser (30)". Se o servidor falhar a meio, a interface volta ao browser sozinha.
+Com tudo a correr, o tempo vem em direto do IPMA e do Open-Meteo, as ocorrências do fogos.pt aparecem nos mapas e a incerteza pode correr "no servidor (200)" em vez de "no browser (30)". Se o servidor falhar a meio, a interface volta ao browser sozinha.
 
 Para parar:
 
@@ -49,7 +49,7 @@ npm install
 npm run dev     # http://localhost:5173
 ```
 
-O `npm run dev` corre só a interface. Se os serviços estiverem a correr (`docker compose up -d`), encaminha `/api` para a API em http://localhost:8080. Sem eles, tudo corre no browser (corridas únicas e o ensemble de 30 corridas), sem internet nem Docker; "Usar o tempo de agora" mostra "indisponível" e "no servidor" fica desativado. Para desenvolver os serviços fora dos contentores: .NET 10 SDK e Node 24.
+O `npm run dev` corre só a interface. Se os serviços estiverem a correr (`docker compose up -d`), encaminha `/api` para a API em http://localhost:8080. Sem eles, tudo corre no browser (corridas únicas e o ensemble de 30 corridas), sem internet nem Docker; o painel do tempo diz "sem tempo em direto" e os valores introduzem-se à mão, e "no servidor" fica desativado. Para desenvolver os serviços fora dos contentores: .NET 10 SDK e Node 24.
 
 ### Outros comandos
 
@@ -74,10 +74,12 @@ A CI (`.github/workflows/ci.yml`) corre o typecheck, o lint, os testes (motor e 
 
 1. A grelha é "Guimarães (dados reais)"; também podes carregar um cenário guardado.
 2. **Acender fogo** e clica num dos mapas.
-3. Define o vento (de onde sopra) e a duração, ou carrega em **Usar o tempo de agora** para o preencher com a
-   estação IPMA mais próxima com vento nas últimas 2 h (ou o modelo Open-Meteo), com a fonte, a idade, a humidade e a
-   temperatura da estação mais próxima que as mede, o risco de incêndio e as
-   próximas horas ao lado. "Ocorrências ativas (fogos.pt)" mostra os fogos em curso na zona; clicar num põe lá a ignição.
+3. O tempo é o de agora, por omissão: ao abrir, no centro da zona; ao acender o fogo, no ponto de ignição. Vem da
+   estação IPMA mais próxima com vento nas últimas 2 h (ou do modelo Open-Meteo), com a temperatura e a humidade da
+   estação mais próxima que as mede, a nebulosidade, o risco de incêndio, os avisos e as próximas horas. Cada valor
+   (direção e velocidade do vento, temperatura, humidade, nuvens, secura do combustível) pode ser mudado à mão; fica
+   marcado e mantém-se quando o tempo se atualiza, até carregares em "repor". Escolhe também a duração.
+   "Ocorrências ativas (fogos.pt)" mostra os fogos em curso na zona; clicar num põe lá a ignição.
 4. Para cada decisão, desenha ações no mapa respetivo: **Linha de contenção**, **Ataque** ou **Proteger zona**,
    com o minuto de início. Para terminar, faz duplo clique ou carrega em Enter; Esc cancela.
 5. **Simular**. Para ver a incerteza, liga "Incerteza" e escolhe "no browser (30)" ou, com os serviços a correr, "no servidor (200)": o painel diz em quantos cenários de vento cada decisão é melhor. As variantes de grelha também correm no servidor.

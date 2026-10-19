@@ -14,7 +14,6 @@ import {
   variantHash,
   type DecisionId,
   type DrawnIntervention,
-  type FuelMoisture,
   type GridData,
   type GridVariant,
   type InterventionKind,
@@ -25,7 +24,6 @@ import {
   type SimulationResult,
   type SpreadModel,
   type WeatherStep,
-  type Wind,
 } from "@linha-zero/engine";
 import { CellInspector, cellUnder } from "./components/CellInspector";
 import { ComparisonPanel } from "./components/ComparisonPanel";
@@ -35,8 +33,7 @@ import { MapView, type Draft, type MapShape } from "./components/MapView";
 import { Icon } from "./components/Icon";
 import { Popover, Segmented, Shell, Toggle } from "./components/Shell";
 import { formatMinutes, TimeBar } from "./components/TimeBar";
-import { WeatherPanel } from "./components/WeatherPanel";
-import { WindControl } from "./components/WindControl";
+import { ConditionsPanel, MoistureControl } from "./components/ConditionsPanel";
 import {
   fetchGrid,
   fetchGridIndex,
@@ -48,19 +45,19 @@ import {
   fetchObservedFire,
   type ObservedFire,
 } from "./lib/load-grid";
-import { gridBounds, lngLatToProjected, type LngLat } from "./lib/projection";
+import { gridBounds, gridToLngLat, lngLatToProjected, projectedToLngLat, type LngLat } from "./lib/projection";
 import { FireRenderer, renderTerrain } from "./lib/render";
 import { clearRouteParams, navigate, useRoute } from "./lib/route";
 import { describeCell, placeStats } from "./lib/places";
 import { isLineKind, KIND_LABEL, newId } from "./lib/scenario";
 import { ApiError } from "./lib/api";
-import { DRYNESS, drynessOf, moistureText, sameMoisture } from "./lib/moisture";
-import { forecastSteps, moistureNow } from "./lib/weather-steps";
+import { forecastSteps } from "./lib/weather-steps";
 import { runOnServer, SERVER_ENSEMBLE, workersAvailable } from "./lib/server-run";
 import { SimClient } from "./lib/sim-client";
 import { syncMaps } from "./lib/sync-maps";
 import { newVariantId, useVariants, variantStore } from "./lib/variants";
-import { ageText, fetchIncidents, sameWind, type AppliedWeather } from "./lib/weather";
+import { useLiveWeather } from "./lib/useLiveWeather";
+import { ageText, fetchIncidents } from "./lib/weather";
 import type { IncidentsResponse } from "./api/client";
 
 type Tool = { type: "none" } | { type: "ignite" } | { type: "draw"; decision: DecisionId; kind: InterventionKind } | { type: "burned" };
@@ -152,12 +149,15 @@ export function App() {
   const [gridName, setGridName] = useState("guimaraes");
   const [bundle, setBundle] = useState<GridBundle | null>(null);
   const [ignition, setIgnition] = useState<ProjectedPoint | null>(null); // EPSG:3763, so it survives a grid change
-  const [wind, setWind] = useState<Wind>({ directionDeg: 225, speedMs: 6 });
+  // Wind, air and fuel moisture: live where the ignition is (or at the zone's centre), each value overridable (ADR 0060).
+  const weather = useLiveWeather();
+  const { autoFetchAt, fetchAt, loadFromScenario, provenance } = weather;
+  const wind = weather.conditions.wind;
+  const moisture = weather.moisture;
   const [durationMin, setDurationMin] = useState(240);
   // The only spread model since the simple one was retired (ADR 0058).
   const spreadModel: SpreadModel = "rothermel";
-  const [moisture, setMoisture] = useState<FuelMoisture>(DEFAULT_MOISTURE);
-  // Follow the forecast hour by hour: steps from the applied weather, or the ones a loaded scenario brought.
+  // Follow the forecast hour by hour: steps from the live weather, or the ones a loaded scenario brought.
   const [followForecast, setFollowForecast] = useState(false);
   const [fileSteps, setFileSteps] = useState<WeatherStep[] | null>(null);
   // Area already burned when the simulation starts (an observed perimeter), drawn on the map.
@@ -197,8 +197,6 @@ export function App() {
   /** How the last run went (time, runs), shown under the result; warnings go to `message`. */
   const [runNote, setRunNote] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  // Cleared only when the grid changes or the ignition moves (igniteAt), never in an effect: applyScenario sets it together with the grid and ignition.
-  const [applied, setApplied] = useState<AppliedWeather | null>(null);
   const [showIncidents, setShowIncidents] = useState(false);
   const [incidents, setIncidents] = useState<IncidentsResponse | null>(null);
   const [incidentsError, setIncidentsError] = useState<string | null>(null);
@@ -235,6 +233,25 @@ export function App() {
   }, [gridName, sim]);
 
   const grid = bundle?.data ?? null;
+
+  // A zone loaded: live weather at the ignition when it is inside, else at the centre. Never over a loaded scenario's values.
+  const ignitionRef = useRef(ignition);
+  ignitionRef.current = ignition;
+  useEffect(() => {
+    if (!bundle) return;
+    const h = bundle.data.header;
+    const p = ignitionRef.current;
+    if (p && cellAt(h, p[0], p[1])) autoFetchAt(projectedToLngLat(p[0], p[1]), "ignition");
+    else autoFetchAt(gridToLngLat(h, h.cols / 2, h.rows / 2), "centre");
+  }, [bundle, autoFetchAt]);
+
+  // Live weather with a forecast follows it hour by hour, from the first live answer on (the toggle stays the user's after that).
+  const liveSnapshot = weather.live?.snapshot ?? null;
+  const hadLive = useRef(false);
+  useEffect(() => {
+    if (liveSnapshot && !hadLive.current) setFollowForecast(true);
+    hadLive.current = !!liveSnapshot;
+  }, [liveSnapshot]);
   const observedUpTo = results && viewMode !== "probability" ? t : Infinity;
   const observedOverlay = useMemo(
     () => (observedFire && showObserved ? { features: observedFire.features, upToMin: observedUpTo } : null),
@@ -400,7 +417,7 @@ export function App() {
         : null,
     );
     setIgnition(point);
-    setApplied(null);
+    fetchAt(projectedToLngLat(point[0], point[1]), "ignition");
     setTool({ type: "none" });
   };
 
@@ -461,9 +478,8 @@ export function App() {
   const ensembleRuns = where === "server" ? SERVER_ENSEMBLE.runs : DEFAULT_ENSEMBLE.runs;
 
   // --- Weather over time and fuel moisture from the weather ---
-  const snapshot = applied?.snapshot;
-  const weatherMoisture = useMemo(() => (snapshot ? moistureNow(snapshot) : null), [snapshot]);
-  const moistureFromWeather = weatherMoisture !== null && sameMoisture(moisture, weatherMoisture);
+  const snapshot = liveSnapshot;
+  const moistureFromWeather = weather.conditions.moistureMode === "tempo";
   const weatherSteps = useMemo(() => {
     if (!followForecast) return undefined;
     if (!snapshot) return fileSteps ?? undefined;
@@ -513,7 +529,7 @@ export function App() {
                 ensemble: SERVER_ENSEMBLE,
                 decisions: { A: scenarios.A.interventions, B: scenarios.B.interventions },
                 variants: inputs.variants.A || inputs.variants.B ? inputs.variants : undefined,
-                weather: applied && sameWind(inputs.wind, applied.wind) ? applied.weather : undefined,
+                weather: provenance,
                 ...(inputs.spreadModel === "rothermel" && { spreadModel: "rothermel" as const, moisture: inputs.moisture }),
                 ...(inputs.weatherSteps?.length && { weatherSteps: inputs.weatherSteps }),
                 ...(scenarios.A.ignitions && { ignitions: scenarios.A.ignitions }),
@@ -576,7 +592,7 @@ export function App() {
         if (current()) setBusy(false);
       }
     },
-    [bundle, sim, applied],
+    [bundle, sim, provenance],
   );
 
   // --- Scenarios ---
@@ -589,9 +605,8 @@ export function App() {
     setResults(null);
     setGridName(saved.grid);
     setIgnition(saved.ignition);
-    setWind(saved.wind);
+    loadFromScenario(saved);
     setDurationMin(saved.durationMin);
-    setMoisture(saved.moisture ?? DEFAULT_MOISTURE);
     setFileSteps(saved.weatherSteps ?? null);
     setBurnedArea(saved.burnedArea ?? null);
     setFollowForecast(!!saved.weatherSteps?.length);
@@ -600,9 +615,8 @@ export function App() {
     setVariantIds({ A: variants.A?.id ?? null, B: variants.B?.id ?? null });
     setScenarioTitle(saved.title ?? null);
     setStep("situacao");
-    setApplied(saved.weather ? { wind: saved.wind, weather: saved.weather } : null);
     setPending({ ...saved, variants });
-  }, []);
+  }, [loadFromScenario]);
 
   // --- Active incidents (fogos.pt) ---
   useEffect(() => {
@@ -674,8 +688,8 @@ export function App() {
       ...(spreadModel === "rothermel" && { spreadModel, moisture }),
       ...(weatherSteps?.length && { weatherSteps }),
       ...(burnedArea && { burnedArea }),
-      // Provenance only while the wind is still the one that was applied.
-      weather: applied && sameWind(wind, applied.wind) ? applied.weather : undefined,
+      // Where the wind came from, only while nobody changed it by hand.
+      weather: provenance,
     };
     const blob = new Blob([JSON.stringify(saved, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
@@ -715,14 +729,21 @@ export function App() {
     return rows;
   };
 
+  /** "Atualizar" / "Usar o tempo de agora": live weather at the ignition, else at the zone's centre. */
+  const fetchHere = () => {
+    if (!grid) return;
+    const h = grid.header;
+    if (ignition && ignitionCell) fetchAt(projectedToLngLat(ignition[0], ignition[1]), "ignition");
+    else fetchAt(gridToLngLat(h, h.cols / 2, h.rows / 2), "centre");
+  };
+
   const changeGrid = (name: string) => {
     if (name === gridName) return;
-    const lost = variantIds.A || variantIds.B || applied;
+    const lost = variantIds.A || variantIds.B;
     setGridName(name);
     setVariantIds(NO_VARIANTS);
-    setApplied(null);
     setScenarioTitle(null); // the app bar then names the zone
-    setMessage(lost ? "Zona mudada: as variantes e o tempo aplicado deixaram de se aplicar." : null);
+    setMessage(lost ? "Zona mudada: as variantes deixaram de se aplicar." : null);
   };
 
   const places = useMemo(() => (grid ? placeStats(grid) : []), [grid]);
@@ -1136,18 +1157,8 @@ export function App() {
           </div>
         </div>
         <div>
-          <p className="field-label">Vento</p>
-          <WindControl wind={wind} onChange={setWind} />
-          <WeatherPanel
-            grid={grid}
-            ignition={ignition}
-            wind={wind}
-            applied={applied}
-            onApply={(a) => {
-              setWind(a.wind);
-              setApplied(a);
-            }}
-          />
+          <p className="field-label">Tempo</p>
+          <ConditionsPanel weather={weather} onRefresh={fetchHere} canRefresh={!!grid} />
         </div>
         <div>
           <p className="field-label">Horizonte</p>
@@ -1168,38 +1179,12 @@ export function App() {
                 : "A previsão não muda dentro do horizonte"
               : fileSteps
                 ? `Tempo hora a hora guardado no cenário (${fileSteps.length} passos)`
-                : "Use primeiro o tempo de agora"}
+                : "Sem previsão (tempo manual)"}
           </small>
         </Toggle>
         <div>
           <p className="field-label">Secura do combustível</p>
-          <>
-              <Segmented<string>
-                label="Secura do combustível"
-                value={moistureFromWeather ? "tempo" : (drynessOf(moisture) ?? "ficheiro")}
-                onChange={(id) => {
-                  if (id === "tempo" && weatherMoisture) setMoisture(weatherMoisture);
-                  const preset = DRYNESS.find((p) => p.id === id);
-                  if (preset) setMoisture(preset.moisture);
-                }}
-                options={[
-                  {
-                    value: "tempo",
-                    label: "Do tempo",
-                    disabled: !weatherMoisture,
-                    title: weatherMoisture ? "Da temperatura e humidade do ar, das nuvens e da hora" : "Use primeiro o tempo de agora",
-                  },
-                  ...DRYNESS.map((p) => ({ value: p.id, label: p.label, title: p.hint })),
-                  ...(moistureFromWeather || drynessOf(moisture) ? [] : [{ value: "ficheiro", label: "Do cenário", title: "Humidade guardada no cenário" }]),
-                ]}
-              />
-              <p className="hint">
-                {moistureFromWeather
-                  ? `Do tempo: ${moistureText(moisture)}`
-                  : (DRYNESS.find((p) => p.id === drynessOf(moisture))?.hint ?? `Do cenário: ${moistureText(moisture)}`)}
-                . Modelo de Rothermel com os combustíveis portugueses, validado em 80 incêndios reais do PT-FireSprd.
-              </p>
-          </>
+          <MoistureControl weather={weather} />
         </div>
         <p className="hint">Toca e segura no mapa (ou passa o rato) para ver o terreno e a chegada do fogo num ponto.</p>
       </div>

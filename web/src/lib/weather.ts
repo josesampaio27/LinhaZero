@@ -4,7 +4,7 @@ import type { IncidentsResponse, WeatherResponse } from "../api/client";
 import { ApiError, ApiUnreachable, incidentsApi, weatherApi } from "./api";
 
 export const UNAVAILABLE =
-  "Serviço de meteorologia indisponível. Está a correr? `npm run up`. O vento manual continua a funcionar.";
+  "Serviço de meteorologia indisponível. Está a correr? `npm run up`. Os valores à mão continuam a funcionar.";
 
 /** The service is down or not the API: "indisponível". An error from the API carries its own message. */
 async function weatherCall<T>(call: Promise<T>): Promise<T> {
@@ -40,16 +40,6 @@ export function provenanceOf(s: WeatherResponse): WeatherProvenance {
     ? { source: "ipma", station: s.observed!.station.name, observedAt: s.observed!.observedAt, fetchedAt: src?.fetchedAt ?? "" }
     : { source: "open-meteo", observedAt: s.model!.observedAt, fetchedAt: src?.fetchedAt ?? "" };
 }
-
-/** What "Usar o tempo de agora" (or a loaded scenario) put in the sliders, to show provenance while the wind is unchanged. */
-export interface AppliedWeather {
-  wind: Wind;
-  weather?: WeatherProvenance;
-  snapshot?: WeatherResponse;
-  at?: "ignition" | "centre";
-}
-
-export const sameWind = (a: Wind, b: Wind) => a.directionDeg === b.directionDeg && a.speedMs === b.speedMs;
 
 const LISBON = "Europe/Lisbon";
 
