@@ -1,0 +1,24 @@
+code,label,baseRate,notes
+0,Sem dados,0,Fora do mapa FUMOD
+4,Mato alto denso / regeneração de pinheiro-bravo (NFFL 4),9,PROVISÓRIO: calibrar
+11,Resíduos de exploração florestal (NFFL 11),2,PROVISÓRIO: calibrar
+98,Não ardível,0,
+211,Folhada de eucalipto (F-EUC),2,PROVISÓRIO: calibrar
+212,Folhada de folhosas (F-FOL),1.5,PROVISÓRIO: calibrar (modelo legado)
+213,Folhada de pinhal (F-PIN),3,PROVISÓRIO: calibrar (modelo legado)
+214,Folhada de resinosas de agulha curta (F-RAC),1,PROVISÓRIO: calibrar (modelo legado)
+221,Mato sob folhosas caducifólias (M-CAD),3,PROVISÓRIO: calibrar
+222,Mato sob esclerófilas (M-ESC),4,PROVISÓRIO: calibrar
+223,Mato sob eucaliptal (M-EUC),5,PROVISÓRIO: calibrar
+224,Mato sob eucaliptal descontínuo (M-EUCd),4,PROVISÓRIO: calibrar; confirmar significado de "d" na documentação FUMOD
+225,Folhada com fetos (M-F),5,PROVISÓRIO: calibrar (modelo legado)
+226,Folhada com herbáceas (M-H),6,PROVISÓRIO: calibrar (modelo legado)
+227,Mato sob pinhal (M-PIN),6,PROVISÓRIO: calibrar
+231,Herbáceo alto (V-Ha),15,PROVISÓRIO: calibrar
+232,Herbáceo baixo (V-Hb),10,PROVISÓRIO: calibrar
+233,Mato atlântico alto (V-MAa),9,PROVISÓRIO: calibrar
+234,Mato atlântico baixo (V-MAb),7,PROVISÓRIO: calibrar
+235,Mato (V-MH; confirmar designação na documentação FUMOD),8,PROVISÓRIO: calibrar; código presente no mapa mas ausente da legenda .lyr
+236,Mato mediterrâneo alto (V-MMa),8,PROVISÓRIO: calibrar
+237,Mato mediterrâneo baixo (V-MMb),6,PROVISÓRIO: calibrar
+238,Resíduos de exploração (ADAI),3,PROVISÓRIO: calibrar
