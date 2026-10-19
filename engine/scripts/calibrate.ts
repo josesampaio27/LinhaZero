@@ -10,7 +10,7 @@
 //   - tier B fires (2015-2017, fuel map of 2018);
 //   - each against the uncalibrated model, the current calibration (PT_CALIBRATION) and "Simples".
 // Uncertainty: refits on bootstrap resamples of the fires; the parameter sets are the samples the
-// ensemble draws. Writes engine/src/calibration-reports/pt-firesprd-<date>.json.
+// ensemble draws. Writes engine/reports/pt-firesprd-<date>.json.
 import { execSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -368,7 +368,7 @@ const out = {
 };
 // Experiments (--quick, or a --label) go to data-prep/out; only a full default run is a calibration.
 const experiment = quick || LABEL !== "";
-const outDir = join(import.meta.dirname, experiment ? "../../data-prep/out/calibration" : "../src/calibration-reports");
+const outDir = join(import.meta.dirname, experiment ? "../../data-prep/out/calibration" : "../reports");
 mkdirSync(outDir, { recursive: true });
 const outPath = join(outDir, `${id}${quick ? "-quick" : ""}${LABEL ? `-${LABEL}` : ""}.json`);
 writeFileSync(outPath, JSON.stringify(out, null, 1) + "\n");

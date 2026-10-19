@@ -7,7 +7,7 @@
 // so it is judged where the real fire was least held: the free-running intervals and the first
 // observation from the ignition. The perturbation scale (moisture, fuel, ignition; and the wind jitter)
 // is chosen by Brier on the training fires of a 5-fold split and judged on the held-out ones, against
-// the wind-only ensemble. Writes engine/src/calibration-reports/reliability-<date>.json.
+// the wind-only ensemble. Writes engine/reports/reliability-<date>.json.
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { PT_CALIBRATION } from "../src/calibration";
@@ -151,7 +151,7 @@ heldOut.unfoughtTuned.reliability.forEach((b, k) => {
   console.log(`  ${(k / TALLY_BINS).toFixed(2)}–${((k + 1) / TALLY_BINS).toFixed(2)}  ${o(w)} | ${o(b)}   ${b.n}`);
 });
 console.log(adopt ? "\nADOTAR as perturbações." : "\nNÃO ADOTAR: ficam só as do vento.");
-const dir = join(import.meta.dirname, "../src/calibration-reports");
+const dir = join(import.meta.dirname, "../reports");
 mkdirSync(dir, { recursive: true });
 const path = join(dir, `reliability-${out.created}.json`);
 writeFileSync(path, JSON.stringify(out, null, 1) + "\n");

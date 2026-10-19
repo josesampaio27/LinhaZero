@@ -1,4 +1,4 @@
-"""Reliability diagram from engine/src/calibration-reports/reliability-<date>.json (npm run reliability).
+"""Reliability diagram from engine/reports/reliability-<date>.json (npm run reliability).
 
   python engine/scripts/plot_reliability.py <report.json> docs/modelo/fiabilidade.png   (needs matplotlib)
 """

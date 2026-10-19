@@ -159,8 +159,8 @@ describe("interval scoring", () => {
   });
 });
 
-describe("calibration report (engine/src/calibration-reports)", () => {
-  const dir = join(import.meta.dirname, "../src/calibration-reports");
+describe("calibration report (engine/reports)", () => {
+  const dir = join(import.meta.dirname, "../reports");
   const reports = readdirSync(dir).filter((f) => f.startsWith("pt-firesprd-") && f.endsWith(".json")).sort();
   const latest = JSON.parse(readFileSync(join(dir, reports[reports.length - 1]), "utf8"));
 
@@ -229,7 +229,7 @@ describe("ensemble perturbations (moisture, fuel, ignition)", () => {
 });
 
 describe("probability without firefighting (ADR 0057)", () => {
-  const report = JSON.parse(readFileSync(join(import.meta.dirname, "../src/calibration-reports/reliability-2026-10-19.json"), "utf8"));
+  const report = JSON.parse(readFileSync(join(import.meta.dirname, "../reports/reliability-2026-10-19.json"), "utf8"));
 
   it("the perturbations were adopted because they beat the wind-only ensemble on unfought held-out fire", () => {
     expect(report.adopt).toBe(true);

@@ -34,7 +34,7 @@ Cada corrida sorteia também a humidade do combustível morto, a velocidade por 
   - A escala escolhida ficou no máximo testado, o teto do que se considerou fisicamente plausível.
 - **Como se lê:** não é uma probabilidade calibrada. Das células em que todos os cenários ardem, arderam de facto cerca de 47%, e a área com mais de metade dos cenários é 1,3 vezes a real. O motor simula um fogo sem combate, e os fogos reais foram combatidos, mesmo nas primeiras horas.
 - **Comparar decisões:** usa as corridas emparelhadas e não muda.
-- **Reproduzir:** `npm run reliability -w engine` (cerca de 20 min) escreve `engine/src/calibration-reports/reliability-<data>.json`, e `engine/scripts/plot_reliability.py` desenha a figura.
+- **Reproduzir:** `npm run reliability -w engine` (cerca de 20 min) escreve `engine/reports/reliability-<data>.json`, e `engine/scripts/plot_reliability.py` desenha a figura.
 
 ## Evolução (planeado)
 

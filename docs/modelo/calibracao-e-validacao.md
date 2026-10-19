@@ -91,7 +91,7 @@ O objetivo é o custo médio por intervalo, com uma prior fraca para os valores 
 
 - **Fogos de teste:** 5 partições por fogo, um ano de fora de cada vez e o Norte de fora. Nada disto entra no ajuste.
 - **Incerteza:** 30 reajustes em amostras bootstrap dos fogos.
-- **Relatório:** `engine/src/calibration-reports/pt-firesprd-2026-10-19.json`.
+- **Relatório:** `engine/reports/pt-firesprd-2026-10-19.json`.
 
 ### Resultado: a calibração atual fica
 
