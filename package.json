@@ -1,0 +1,35 @@
+{
+  "name": "linha-zero",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "engine",
+    "engine-worker",
+    "web"
+  ],
+  "scripts": {
+    "dev": "npm run dev -w web",
+    "build": "npm run build -w web",
+    "test": "npm run test -w engine",
+    "bench": "npm run bench -w engine",
+    "grid:synthetic": "npm run grid:synthetic -w engine",
+    "typecheck": "npm run typecheck -w engine && npm run typecheck -w web && npm run typecheck -w engine-worker",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "test:worker": "npm run test -w engine-worker",
+    "test:services": "dotnet test services",
+    "api:client": "dotnet build services/Api",
+    "up": "docker compose up -d --build",
+    "up:offline": "docker compose up -d --no-build",
+    "down": "docker compose down",
+    "logs": "docker compose logs -f"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.14.0",
+    "eslint": "^9.14.0",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.13.0"
+  }
+}

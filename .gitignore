@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.DS_Store
+data-prep/cache/
+data-prep/.venv/
+__pycache__/
+*.pyc
+services/**/bin/
+services/**/obj/
+infra/.env
+.vs/
+data-prep/out/

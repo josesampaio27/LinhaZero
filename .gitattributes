@@ -1,0 +1,2 @@
+# The contract examples are read byte for byte by the .NET and Node tests: keep LF on every platform.
+contracts/examples/*.json text eol=lf
