@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { activeCrownRate, criticalSurfaceIntensity, crownFire } from "../src/crown";
-import { ANDERSON_13 } from "../src/fuelModels";
+import { ANDERSON_13 } from "../src/fuel-models";
 import { comparePaired } from "../src/metrics";
 import { simulate } from "../src/simulate";
 import { makeGrid, scenario } from "./helpers";

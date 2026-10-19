@@ -47,7 +47,7 @@ import {
   type GridIndexEntry,
   fetchObservedFire,
   type ObservedFire,
-} from "./lib/loadGrid";
+} from "./lib/load-grid";
 import { gridBounds, lngLatToProjected, type LngLat } from "./lib/projection";
 import { FireRenderer, renderTerrain } from "./lib/render";
 import { clearRouteParams, navigate, useRoute } from "./lib/route";
@@ -55,10 +55,10 @@ import { describeCell, placeStats } from "./lib/places";
 import { isLineKind, KIND_LABEL, newId } from "./lib/scenario";
 import { ApiError } from "./lib/api";
 import { DRYNESS, drynessOf, moistureText, sameMoisture } from "./lib/moisture";
-import { forecastSteps, moistureNow } from "./lib/weatherSteps";
-import { runOnServer, SERVER_ENSEMBLE, workersAvailable } from "./lib/serverRun";
-import { SimClient } from "./lib/simClient";
-import { syncMaps } from "./lib/syncMaps";
+import { forecastSteps, moistureNow } from "./lib/weather-steps";
+import { runOnServer, SERVER_ENSEMBLE, workersAvailable } from "./lib/server-run";
+import { SimClient } from "./lib/sim-client";
+import { syncMaps } from "./lib/sync-maps";
 import { newVariantId, useVariants, variantStore } from "./lib/variants";
 import { ageText, fetchIncidents, sameWind, type AppliedWeather } from "./lib/weather";
 import type { IncidentsResponse } from "./api/client";

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ANDERSON_13 } from "../src/fuelModels";
+import { ANDERSON_13 } from "../src/fuel-models";
 import { rasterizePolyline } from "../src/geometry";
 import { nearestBurnable, prepareGrid } from "../src/grid";
 import {
@@ -8,7 +8,7 @@ import {
   surfaceBase,
 } from "../src/rothermel";
 import { simulate } from "../src/simulate";
-import { computeArrivalRothermel, crossedCells, STENCIL_16 } from "../src/spreadRothermel";
+import { computeArrivalRothermel, crossedCells, STENCIL_16 } from "../src/spread-rothermel";
 import { buildInterventionLayers } from "../src/interventions";
 import { MinHeap } from "../src/heap";
 import { DEFAULT_PARAMS } from "../src/params";

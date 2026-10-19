@@ -29,7 +29,7 @@ Com `Scenario.spreadModel = "rothermel"`, a velocidade vem do modelo de Rotherme
 
 - **Combustível:** cargas por classe (1 h, 10 h, 100 h, herbáceo vivo, lenhoso vivo), razão superfície/volume, profundidade, humidade de extinção e poder calorífico, em `fuelTable[código].rothermel`.
   - Os 18 modelos portugueses vêm da tabela de Fernandes e Loureiro (2021), transcrita sem alterações em `data-prep/fuel_params.csv`.
-  - O NFFL 4 e o NFFL 11 vêm de Anderson (1982). Os 13 modelos de Anderson também estão em `engine/src/fuelModels.ts`.
+  - O NFFL 4 e o NFFL 11 vêm de Anderson (1982). Os 13 modelos de Anderson também estão em `engine/src/fuel-models.ts`.
 - **Erva que seca (modelos dinâmicos):** nos modelos com carga herbácea (M-H, M-F, V-MH, V-Hb, V-Ha), a erva passa de viva a morta conforme a humidade do herbáceo vivo, como no BehavePlus. Totalmente curada a 30% ou menos; totalmente verde a 120% ou mais. A tabela de 2021 não diz que estes modelos são dinâmicos, mas a Figura 1 de Fernandes et al. (2009) só se reproduz assim.
 - **Verificação contra a Figura 1 de Fernandes et al. (2009):** nas condições do gráfico, os 18 modelos dão a velocidade e o calor por unidade de área do gráfico (`fuel-models-pt.test.ts`). A exceção é o V-Ha, cerca de 15% abaixo na velocidade: o modelo terá sido revisto entre 2009 e 2021.
 - **Humidade:** `Scenario.moisture`, em frações. Por omissão: 6/7/8% no combustível morto, 60% no herbáceo vivo e 90% no lenhoso vivo.

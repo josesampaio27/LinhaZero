@@ -2,7 +2,7 @@ import { MinHeap } from "./heap";
 import type { InterventionLayers } from "./interventions";
 import { DEFAULT_PARAMS, type ModelParams } from "./params";
 import type { SurfaceBase } from "./rothermel";
-import { computeArrivalRothermel } from "./spreadRothermel";
+import { computeArrivalRothermel } from "./spread-rothermel";
 import type { RothermelRates } from "./surface";
 import type { CellRef, PreparedGrid } from "./types";
 

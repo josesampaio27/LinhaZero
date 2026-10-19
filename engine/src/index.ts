@@ -10,7 +10,7 @@ export * from "./rothermel";
 export * from "./crown";
 export * from "./moisture";
 export * from "./validation";
-export * from "./fuelModels";
+export * from "./fuel-models";
 export * from "./surface";
 export * from "./metrics";
 export * from "./simulate";

@@ -1,4 +1,4 @@
-import { ANDERSON_13 } from "../src/fuelModels";
+import { ANDERSON_13 } from "../src/fuel-models";
 import { describe, expect, it } from "vitest";
 import { prepareGrid } from "../src/grid";
 import { canonicalJson, hashGrid, sha256Hex } from "../src/hash";

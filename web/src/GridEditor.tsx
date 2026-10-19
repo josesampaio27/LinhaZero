@@ -16,7 +16,7 @@ import { CellInspector, cellUnder } from "./components/CellInspector";
 import { Icon } from "./components/Icon";
 import { Segmented, Shell, Toggle } from "./components/Shell";
 import { MapView, type Draft, type MapShape } from "./components/MapView";
-import { fetchGrid, fetchGridHeader, fetchGridIndex, type GridBundle, type GridIndexEntry } from "./lib/loadGrid";
+import { fetchGrid, fetchGridHeader, fetchGridIndex, type GridBundle, type GridIndexEntry } from "./lib/load-grid";
 import { lngLatToProjected, type LngLat } from "./lib/projection";
 import { fuelSwatch, renderLayer, renderMask, SLOPE_CLASSES, TRANSPARENT_PNG, type LayerView } from "./lib/render";
 import { navigate, useRoute } from "./lib/route";

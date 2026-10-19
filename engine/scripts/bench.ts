@@ -1,7 +1,7 @@
 // Measures single-run and ensemble times on the synthetic grid and on a 200x200 grid.
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import { ANDERSON_13 } from "../src/fuelModels";
+import { ANDERSON_13 } from "../src/fuel-models";
 import { prepareGrid } from "../src/grid";
 import { simulate } from "../src/simulate";
 import { rothermelEnsemble, rothermelParams } from "../src/scenario";

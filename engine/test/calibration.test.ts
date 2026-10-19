@@ -11,7 +11,7 @@ import { cmaes } from "../scripts/cmaes";
 import { fromGlobal, fromParams, penalty, toParams } from "../scripts/calibration-space";
 import { distanceFrom, intervalCost, scoreIntervals } from "../scripts/intervals";
 import { scenarioOf, type ReferenceCase } from "../scripts/reference";
-import { ANDERSON_13 } from "../src/fuelModels";
+import { ANDERSON_13 } from "../src/fuel-models";
 import { comparePaired } from "../src/metrics";
 import { DEFAULT_PARAMS, groupRosAdj } from "../src/params";
 import { simulate } from "../src/simulate";
