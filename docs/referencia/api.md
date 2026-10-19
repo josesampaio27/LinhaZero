@@ -1,6 +1,6 @@
 # API
 
-Os endpoints da API do LinhaZero (`services/Api`, .NET 10). A API serve a meteorologia e as ocorrências a partir dos snapshots que a ingestão guarda, e põe na fila as corridas que os workers do motor simulam; ela própria não simula nem contacta fontes externas ([Blocos](../arquitetura/05-blocos.md#serviços-net-services)).
+Os endpoints da API do LinhaZero (`backend/src/LinhaZero.Api`, .NET 10). A API serve a meteorologia e as ocorrências a partir dos snapshots que a ingestão guarda, e põe na fila as corridas que os workers do motor simulam; ela própria não simula nem contacta fontes externas ([Blocos](../arquitetura/05-blocos.md#serviços-net-backend)).
 
 **Documentação interativa:** com o compose a correr, o Swagger UI está em http://localhost:3000/api/docs (ou http://localhost:8080/api/docs, direto na API) e o documento OpenAPI em `/api/openapi/v1.json`. Ambos são gerados a partir do código (controladores, modelos e comentários `///`), por isso estão sempre de acordo com a API. Os formatos de referência continuam a ser os exemplos em [`contracts/`](../../contracts/README.md).
 

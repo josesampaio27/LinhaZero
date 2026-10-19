@@ -32,13 +32,13 @@
     <Using Include="LinhaZero.Ingest.Clients" />
     <Using Include="LinhaZero.Ingest.Services" />
     <None Include="fixtures/**" CopyToOutputDirectory="PreserveNewest" LinkBase="fixtures" />
-    <None Include="../../contracts/examples/*.json" CopyToOutputDirectory="PreserveNewest" LinkBase="contracts" />
+    <None Include="../../../contracts/examples/*.json" CopyToOutputDirectory="PreserveNewest" LinkBase="contracts" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" />
-    <ProjectReference Include="..\Ingest\Ingest.csproj" />
-    <ProjectReference Include="..\Api\Api.csproj" />
+    <ProjectReference Include="..\..\src\LinhaZero.Core\LinhaZero.Core.csproj" />
+    <ProjectReference Include="..\..\src\LinhaZero.Ingest\LinhaZero.Ingest.csproj" />
+    <ProjectReference Include="..\..\src\LinhaZero.Api\LinhaZero.Api.csproj" />
   </ItemGroup>
 
 </Project>

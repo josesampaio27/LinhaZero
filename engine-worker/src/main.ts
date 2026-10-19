@@ -23,7 +23,7 @@ for (const sig of ["SIGTERM", "SIGINT"] as const) {
 
 const nc = await connect({ servers: process.env.NATS_URL ?? "nats://localhost:4222", name: `engine-worker-${host}`, waitOnFirstConnect: true, maxReconnectAttempts: -1 });
 const jsm = await nc.jetstreamManager();
-// Same config as the API (services/Api/Runs.cs); whoever starts first creates it.
+// Same config as the API (backend/src/LinhaZero.Api/Messaging/NatsStreamSetup.cs); whoever starts first creates it.
 try {
   await jsm.streams.info("RUNS");
 } catch {

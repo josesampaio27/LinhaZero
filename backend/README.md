@@ -1,19 +1,22 @@
-# Serviços .NET (`services/`)
+# Serviços .NET (`backend/`)
 
-A API e a ingestão, em .NET 10. Como correm e onde encaixam: [`README.md`](../README.md) e [arquitetura, blocos](../docs/arquitetura/05-blocos.md#serviços-net-services).
+A API e a ingestão, em .NET 10. Como correm e onde encaixam: [`README.md`](../README.md) e [arquitetura, blocos](../docs/arquitetura/05-blocos.md#serviços-net-backend).
 
 ```
-Core/     biblioteca partilhada: base de dados (Dapper), fontes, meteorologia, ocorrências, grelhas, geografia
-Api/      Controllers/ → Services/ → Repositories/ (SQL) e Messaging/ (NATS); Models/ são os corpos JSON
-Ingest/   Workers/ (os ciclos) → Services/Puller (uma recolha) → Clients/ (HTTP para IPMA, Open-Meteo, fogos.pt)
-Tests/    xUnit, com as mesmas pastas; Integration/ precisa do compose (TEST_PG=1)
+LinhaZero.slnx              a solução; Directory.Build.props e .editorconfig valem para todos os projetos
+src/LinhaZero.Core/         biblioteca partilhada: base de dados (Dapper), fontes, meteorologia, ocorrências, grelhas, geografia
+src/LinhaZero.Api/          Controllers/ → Services/ → Repositories/ (SQL) e Messaging/ (NATS); Models/ são os corpos JSON
+src/LinhaZero.Ingest/       Workers/ (os ciclos) → Services/Puller (uma recolha) → Clients/ (HTTP para IPMA, Open-Meteo, fogos.pt)
+tests/LinhaZero.Tests/      xUnit, com as mesmas pastas; Integration/ precisa do compose (TEST_PG=1)
 ```
+
+Cada pasta tem o nome do projeto, do assembly e do namespace raiz ([ADR 0059](../docs/decisoes/0059-pasta-backend-com-projetos-linhazero.md)).
 
 ```bash
-dotnet build services
-dotnet test services                    # TEST_PG=1 também corre os testes de PostgreSQL e NATS contra o compose
-dotnet format services                  # aplica as regras de .editorconfig (a CI corre --verify-no-changes)
-dotnet run --project services/Api       # http://localhost:8080/api/docs, contra o PostgreSQL e o NATS do compose
+dotnet build backend
+dotnet test backend                                  # TEST_PG=1 também corre os testes de PostgreSQL e NATS contra o compose
+dotnet format backend                                # aplica as regras de .editorconfig (a CI corre --verify-no-changes)
+dotnet run --project backend/src/LinhaZero.Api      # http://localhost:8080/api/docs, contra o PostgreSQL e o NATS do compose
 ```
 
 ## Como se escreve aqui

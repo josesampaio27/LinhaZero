@@ -1,6 +1,6 @@
 <Project>
 
-  <!-- Settings shared by every project under services/. -->
+  <!-- Settings shared by every project under backend/. -->
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>

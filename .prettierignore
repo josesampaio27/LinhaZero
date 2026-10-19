@@ -1,6 +1,6 @@
 dist/
 data-prep/cache/
-services/
+backend/
 infra/demo/
 web/public/grids/
 contracts/openapi.json

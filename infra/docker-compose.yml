@@ -41,8 +41,8 @@ services:
 
   ingest:
     build:
-      context: ../services
-      dockerfile: Ingest/Dockerfile
+      context: ../backend
+      dockerfile: src/LinhaZero.Ingest/Dockerfile
     restart: unless-stopped
     environment:
       <<: *pg
@@ -68,8 +68,8 @@ services:
 
   api:
     build:
-      context: ../services
-      dockerfile: Api/Dockerfile
+      context: ../backend
+      dockerfile: src/LinhaZero.Api/Dockerfile
     restart: unless-stopped
     environment:
       <<: *pg

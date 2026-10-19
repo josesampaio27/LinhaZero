@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LinhaZero.Api/LinhaZero.Api.csproj" />
+    <Project Path="src/LinhaZero.Core/LinhaZero.Core.csproj" />
+    <Project Path="src/LinhaZero.Ingest/LinhaZero.Ingest.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LinhaZero.Tests/LinhaZero.Tests.csproj" />
+  </Folder>
+</Solution>

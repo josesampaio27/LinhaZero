@@ -60,7 +60,7 @@ O `npm run dev` corre só a interface. Se os serviços estiverem a correr (`dock
 | `npm run up:offline` | Arranca sem build nem pull (demo sem rede, ver `infra/README.md`) |
 | `npm run test` | Testes do motor (Vitest) |
 | `npm run test:worker` | Testes do worker do motor (Vitest) |
-| `npm run test:services` | Testes dos serviços .NET (xUnit; com `TEST_PG=1` também os de Postgres e NATS, contra o compose a correr) |
+| `npm run test:backend` | Testes dos serviços .NET (xUnit; com `TEST_PG=1` também os de Postgres e NATS, contra o compose a correr) |
 | `npm run bench` | Mede o tempo de uma simulação e de um ensemble |
 | `npm run grid:synthetic` | Volta a gerar a grelha sintética de teste em `web/public/grids/sintetica/` (só para os testes, o bench e o smoke; a interface não a mostra) |
 | `npm run typecheck` | Verifica os tipos do motor, da interface e do worker |
@@ -103,7 +103,7 @@ Ver `data-prep/README.md`. A grelha de Guimarães já está gerada em `web/publi
 engine/         motor de propagação (TypeScript puro), tipos, ficheiros de cenário, variantes de grelha e contratos partilhados, testes
 web/            interface React + MapLibre (Simulação e Editor de grelha); o motor corre num Web Worker; Dockerfile + nginx.conf servem-na em contentor
 engine-worker/  worker Node que corre o mesmo motor a partir da fila NATS (um job de cada vez)
-services/       .NET 10: Core (parsers, snapshots, lock de líder, grelhas), Api (controladores, OpenAPI), Ingest, Tests
+backend/        .NET 10: src/LinhaZero.Core (parsers, snapshots, lock de líder, grelhas), LinhaZero.Api (controladores, OpenAPI), LinhaZero.Ingest; tests/LinhaZero.Tests
 contracts/      exemplos JSON dos contratos entre interface, API e worker (fonte de verdade dos tipos)
 infra/          docker-compose (incluído pelo compose.yaml da raiz), esquema SQL, seed da demo, smoke.sh
 data-prep/      scripts Python que geram web/public/grids/<zona>/ a partir de dados reais (também em contentor)

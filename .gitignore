@@ -5,8 +5,8 @@ data-prep/cache/
 data-prep/.venv/
 __pycache__/
 *.pyc
-services/**/bin/
-services/**/obj/
+backend/**/bin/
+backend/**/obj/
 infra/.env
 .vs/
 data-prep/out/

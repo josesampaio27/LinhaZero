@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <RootNamespace>LinhaZero.Api</RootNamespace>
-    <!-- `dotnet run` would otherwise run from services/Api; the default grids directory is relative to the repo root. -->
-    <RunWorkingDirectory>$(MSBuildProjectDirectory)/../..</RunWorkingDirectory>
+    <!-- `dotnet run` would otherwise run from backend/src/LinhaZero.Api; the default grids directory is relative to the repo root. -->
+    <RunWorkingDirectory>$(MSBuildProjectDirectory)/../../..</RunWorkingDirectory>
     <!-- The /// comments become descriptions in the OpenAPI document (/api/openapi/v1.json). -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
@@ -17,7 +17,7 @@
     -p:OpenApiGenerateDocuments=false: the repo's contracts/ and web/ are not in its context.
   -->
   <PropertyGroup>
-    <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)/../../contracts</OpenApiDocumentsDirectory>
+    <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)/../../../contracts</OpenApiDocumentsDirectory>
     <OpenApiGenerateDocumentsOptions>--file-name openapi --openapi-version OpenApi3_0</OpenApiGenerateDocumentsOptions>
   </PropertyGroup>
 
@@ -34,7 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Core\Core.csproj" />
+    <ProjectReference Include="..\LinhaZero.Core\LinhaZero.Core.csproj" />
   </ItemGroup>
 
 </Project>

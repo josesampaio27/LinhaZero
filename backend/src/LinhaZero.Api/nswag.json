@@ -2,12 +2,12 @@
   "runtime": "Net100",
   "documentGenerator": {
     "fromDocument": {
-      "url": "../../contracts/openapi.json"
+      "url": "../../../contracts/openapi.json"
     }
   },
   "codeGenerators": {
     "openApiToTypeScriptClient": {
-      "output": "../../web/src/api/client.ts",
+      "output": "../../../web/src/api/client.ts",
       "template": "Fetch",
       "className": "{controller}Client",
       "operationGenerationMode": "MultipleClientsFromOperationId",

@@ -1,5 +1,5 @@
-# C# style for services/, following Microsoft's C# coding conventions.
-# `dotnet format services` applies it; CI runs `dotnet format services --verify-no-changes`.
+# C# style for backend/, following Microsoft's C# coding conventions.
+# `dotnet format backend` applies it; CI runs `dotnet format backend --verify-no-changes`.
 root = true
 
 [*]
@@ -70,9 +70,9 @@ dotnet_naming_rule.async_methods_end_in_async.style = async_suffix
 dotnet_naming_rule.async_methods_end_in_async.severity = warning
 
 # Tests: xUnit method names are sentences, and test methods are async without the suffix.
-[Tests/**.cs]
+[tests/**.cs]
 dotnet_naming_rule.async_methods_end_in_async.severity = none
 
 # Controller actions are named for the HTTP operation (Get, Create), as in the ASP.NET Core docs.
-[Api/Controllers/**.cs]
+[src/LinhaZero.Api/Controllers/**.cs]
 dotnet_naming_rule.async_methods_end_in_async.severity = none

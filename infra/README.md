@@ -11,7 +11,7 @@ docker compose up -d --build       # build + arranque de tudo (precisa de rede n
 docker compose logs -f             # logs JSON de todos os serviços (`npm run logs`)
 docker compose down                # pára e mantém os volumes; `-v` apaga-os (obrigatório depois de mudar infra/db/*.sql)
 infra/smoke.sh --fresh             # teste ponta a ponta, incluindo escalar e matar um worker
-TEST_PG=1 npm run test:services    # os testes de Postgres e NATS correm contra este compose (sem TEST_PG são saltados)
+TEST_PG=1 npm run test:backend    # os testes de Postgres e NATS correm contra este compose (sem TEST_PG são saltados)
 ```
 
 Requisitos: Docker com Docker Compose 2.20 ou mais recente (por causa do `include`). Para desenvolver fora dos contentores: .NET 10 SDK e Node 24; `npm run dev` corre a interface com recarregamento automático em http://localhost:5173, ao lado dos serviços.
@@ -25,8 +25,8 @@ O nome do projeto é `linha-zero`, por isso os volumes chamam-se `linha-zero_pgd
 | `web` | `web/` (build Node 24, servida por `nginx-unprivileged:1.28.0-alpine`) | 3000 | A interface compilada; encaminha `/api` para a API (SSE sem buffering) e serve as grelhas de `web/public/grids` |
 | `postgres` | `postgres:16.12-alpine` | 5432 | `snapshots`, `source_status`, `runs`, `run_rasters` (`infra/db/001_init.sql`, aplicado quando o volume `pgdata` está vazio) |
 | `nats` | `nats:2.10.29-alpine` (JetStream) | 4222, 8222 (monitor) | Stream `RUNS` = `runs.jobs` (fila de trabalho); eventos `runs.<id>.events` em NATS core |
-| `ingest` | `services/Ingest` (.NET 10) | 127.0.0.1:8081 | Recolhe IPMA, Open-Meteo e fogos.pt em intervalos fixos; um líder por advisory lock; `GET /health/ready` |
-| `api` | `services/Api` (.NET 10) | 8080 | REST + SSE em `/api/v1`: `weather`, `incidents/active`, `runs`, `runs/{id}`, `runs/{id}/events`, `runs/{id}/rasters/{A\|B}/{arrival\|probability}`, `health`; OpenAPI em `/api/openapi/v1.json` e Swagger UI em `/api/docs` |
+| `ingest` | `backend/src/LinhaZero.Ingest` (.NET 10) | 127.0.0.1:8081 | Recolhe IPMA, Open-Meteo e fogos.pt em intervalos fixos; um líder por advisory lock; `GET /health/ready` |
+| `api` | `backend/src/LinhaZero.Api` (.NET 10) | 8080 | REST + SSE em `/api/v1`: `weather`, `incidents/active`, `runs`, `runs/{id}`, `runs/{id}/events`, `runs/{id}/rasters/{A\|B}/{arrival\|probability}`, `health`; OpenAPI em `/api/openapi/v1.json` e Swagger UI em `/api/docs` |
 | `engine-worker` | `engine-worker/` (Node 24 + `@linha-zero/engine`) | — | Tira um job de cada vez da fila, corre A e B, grava resultado e rasters; `/healthz` em 9090 |
 | `geo-pipeline` | `data-prep/` (Python 3.12), perfil `batch` | — | `build_grid.py` em lote; escreve em `web/public/grids/<nome>/` |
 | `demo-seed` | `postgres:16.12-alpine`, perfil `demo` | — | Carrega `infra/demo/snapshots.csv` |

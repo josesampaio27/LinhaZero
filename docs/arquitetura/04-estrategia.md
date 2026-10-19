@@ -14,7 +14,7 @@ As ideias centrais da solução, a tecnologia escolhida, e o que deixámos de fo
 
 ### Monorepo, não microsserviços
 
-São coisas diferentes. O monorepo é a forma de guardar o código: um repositório com `engine/`, `web/`, `engine-worker/`, `services/`, `contracts/`, `infra/` e `data-prep/`. Microsserviços seria dezenas de serviços, um por funcionalidade. Temos poucos serviços, cada um com uma razão para correr à parte (ver a tabela de [blocos](05-blocos.md#contentores-c4-nível-2)), e um repositório onde uma mudança de contrato se faz numa só alteração, com os testes dos dois lados.
+São coisas diferentes. O monorepo é a forma de guardar o código: um repositório com `engine/`, `web/`, `engine-worker/`, `backend/`, `contracts/`, `infra/` e `data-prep/`. Microsserviços seria dezenas de serviços, um por funcionalidade. Temos poucos serviços, cada um com uma razão para correr à parte (ver a tabela de [blocos](05-blocos.md#contentores-c4-nível-2)), e um repositório onde uma mudança de contrato se faz numa só alteração, com os testes dos dois lados.
 
 ### Porque o motor continua em TypeScript, e quando mudar
 

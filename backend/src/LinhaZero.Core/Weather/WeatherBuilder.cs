@@ -6,7 +6,7 @@ using LinhaZero.Core.Weather.OpenMeteo;
 
 namespace LinhaZero.Core.Weather;
 
-// Confirmed on the fixtures recorded 2026-10-17 12:44 UTC (services/Tests/fixtures):
+// Confirmed on the fixtures recorded 2026-10-17 12:44 UTC (backend/tests/LinhaZero.Tests/fixtures):
 // - observations.json keys are UTC hours ("2026-10-17T12:00" was the newest at 12:44 UTC; Merelim read 24.5 °C,
 //   consistent with Open-Meteo's 20.3 °C at 576 m for the same UTC hour). Whole station-hour entries can be null
 //   (721 of them) and any field can be -99.0 (missing).

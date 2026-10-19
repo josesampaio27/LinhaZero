@@ -27,7 +27,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 10.0.x
-      # The style rules in services/.editorconfig.
-      - run: dotnet format services --verify-no-changes
+      # The style rules in backend/.editorconfig.
+      - run: dotnet format backend --verify-no-changes
       # Postgres/NATS tests skip without TEST_PG; the HTTP and OpenAPI tests start the API in memory.
-      - run: dotnet test services
+      - run: dotnet test backend
