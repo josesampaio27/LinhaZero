@@ -1,0 +1,18 @@
+[
+  {
+    "name": "guimaraes",
+    "label": "Guimarães (dados reais)"
+  },
+  {
+    "name": "guimaraes-30m",
+    "label": "Guimarães 30 m (dados reais)"
+  },
+  {
+    "name": "replay-alijo-24072019",
+    "label": "Incêndio real: Alijó, 24 jul 2019"
+  },
+  {
+    "name": "replay-vieiradominho-10082016",
+    "label": "Incêndio real: Vieira do Minho, 10 ago 2016"
+  }
+]

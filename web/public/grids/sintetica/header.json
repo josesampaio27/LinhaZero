@@ -1,0 +1,137 @@
+{
+  "name": "sintetica",
+  "crs": "EPSG:3763",
+  "originX": -17500,
+  "originY": 207500,
+  "cellSize": 100,
+  "rows": 150,
+  "cols": 150,
+  "layers": {
+    "fuel": "fuel.u8",
+    "elevation": "elevation.f32",
+    "barrier": "barrier.u8",
+    "buildings": "buildings.u16",
+    "village": "village.u16"
+  },
+  "villages": [
+    {
+      "id": 1,
+      "name": "Souto do Monte"
+    },
+    {
+      "id": 2,
+      "name": "Vila Fria"
+    }
+  ],
+  "fuelTable": {
+    "0": {
+      "label": "Não ardível",
+      "baseRate": 0
+    },
+    "1": {
+      "label": "Herbáceo",
+      "baseRate": 15,
+      "rothermel": {
+        "depthM": 0.6,
+        "deadMoistExt": 0.24,
+        "heatKjKg": 19000,
+        "load": [
+          0.065,
+          0.015,
+          0,
+          0.235,
+          0.04
+        ],
+        "sav": [
+          4000,
+          357.61,
+          98.43,
+          5500,
+          4000
+        ],
+        "dynamic": true,
+        "group": "H"
+      }
+    },
+    "2": {
+      "label": "Mato",
+      "baseRate": 8,
+      "rothermel": {
+        "depthM": 1.05,
+        "deadMoistExt": 0.35,
+        "heatKjKg": 21000,
+        "load": [
+          0.95,
+          0.25,
+          0,
+          0,
+          1.45
+        ],
+        "sav": [
+          3500,
+          357.61,
+          98.43,
+          0,
+          4000
+        ],
+        "group": "V"
+      }
+    },
+    "3": {
+      "label": "Floresta (folhada)",
+      "baseRate": 3,
+      "rothermel": {
+        "depthM": 0.32,
+        "deadMoistExt": 0.26,
+        "heatKjKg": 21000,
+        "load": [
+          0.463,
+          0.296,
+          0.127,
+          0,
+          0.112
+        ],
+        "sav": [
+          4200,
+          357.61,
+          98.43,
+          0,
+          5000
+        ],
+        "group": "F",
+        "crown": {
+          "cbhM": 6,
+          "cbdKgM3": 0.07,
+          "cflKgM2": 0.6
+        },
+        "underCanopy": true,
+        "waf": 0.114
+      }
+    },
+    "4": {
+      "label": "Agrícola",
+      "baseRate": 4,
+      "rothermel": {
+        "depthM": 0.35,
+        "deadMoistExt": 0.24,
+        "heatKjKg": 19000,
+        "load": [
+          0.03,
+          0,
+          0,
+          0.12,
+          0
+        ],
+        "sav": [
+          6000,
+          357.61,
+          98.43,
+          6000,
+          0
+        ],
+        "dynamic": true,
+        "group": "H"
+      }
+    }
+  }
+}

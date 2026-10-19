@@ -1,0 +1,406 @@
+{
+  "version": 3,
+  "title": "Incêndio real: Vieira do Minho, 10 ago 2016",
+  "grid": "replay-vieiradominho-10082016",
+  "ignition": [
+    1513.1833333333332,
+    209764.42500000002
+  ],
+  "burnedArea": [
+    [
+      1567.7,
+      209880.5
+    ],
+    [
+      1617.2,
+      209853.6
+    ],
+    [
+      1660,
+      209821.8
+    ],
+    [
+      1636.2,
+      209732.9
+    ],
+    [
+      1567.9,
+      209677.7
+    ],
+    [
+      1527,
+      209638.6
+    ],
+    [
+      1472.9,
+      209618.8
+    ],
+    [
+      1400.8,
+      209638
+    ],
+    [
+      1320.3,
+      209719.1
+    ],
+    [
+      1342.8,
+      209817.7
+    ],
+    [
+      1477.7,
+      209893.9
+    ],
+    [
+      1567.7,
+      209880.5
+    ]
+  ],
+  "wind": {
+    "directionDeg": 82,
+    "speedMs": 6.46,
+    "gustMs": 14.5
+  },
+  "durationMin": 1350,
+  "ensemble": true,
+  "decisions": {
+    "A": [],
+    "B": []
+  },
+  "variants": {
+    "A": null,
+    "B": null
+  },
+  "spreadModel": "rothermel",
+  "moisture": {
+    "d1": 0.05237198842100001,
+    "d10": 0.06508363609600001,
+    "d100": 0.08508363609600002,
+    "liveHerb": 0.3,
+    "liveWoody": 0.85
+  },
+  "weatherSteps": [
+    {
+      "fromMin": 0,
+      "wind": {
+        "directionDeg": 82,
+        "speedMs": 6.46
+      },
+      "moisture": {
+        "d1": 0.0524,
+        "d10": 0.0651,
+        "d100": 0.0851,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 60,
+      "wind": {
+        "directionDeg": 82,
+        "speedMs": 5.85
+      },
+      "moisture": {
+        "d1": 0.047,
+        "d10": 0.0584,
+        "d100": 0.0784,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 120,
+      "wind": {
+        "directionDeg": 81,
+        "speedMs": 5.77
+      },
+      "moisture": {
+        "d1": 0.0415,
+        "d10": 0.0516,
+        "d100": 0.0716,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 180,
+      "wind": {
+        "directionDeg": 83,
+        "speedMs": 5.45
+      },
+      "moisture": {
+        "d1": 0.0373,
+        "d10": 0.0464,
+        "d100": 0.0664,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 240,
+      "wind": {
+        "directionDeg": 83,
+        "speedMs": 4.94
+      },
+      "moisture": {
+        "d1": 0.0345,
+        "d10": 0.0429,
+        "d100": 0.0629,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 300,
+      "wind": {
+        "directionDeg": 85,
+        "speedMs": 4.52
+      },
+      "moisture": {
+        "d1": 0.0317,
+        "d10": 0.0394,
+        "d100": 0.0594,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 360,
+      "wind": {
+        "directionDeg": 89,
+        "speedMs": 4.2
+      },
+      "moisture": {
+        "d1": 0.0291,
+        "d10": 0.0362,
+        "d100": 0.0562,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 420,
+      "wind": {
+        "directionDeg": 95,
+        "speedMs": 3.81
+      },
+      "moisture": {
+        "d1": 0.029,
+        "d10": 0.0361,
+        "d100": 0.0561,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 480,
+      "wind": {
+        "directionDeg": 100,
+        "speedMs": 3.55
+      },
+      "moisture": {
+        "d1": 0.0278,
+        "d10": 0.0346,
+        "d100": 0.0546,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 540,
+      "wind": {
+        "directionDeg": 105,
+        "speedMs": 2.69
+      },
+      "moisture": {
+        "d1": 0.0292,
+        "d10": 0.0363,
+        "d100": 0.0563,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 600,
+      "wind": {
+        "directionDeg": 111,
+        "speedMs": 2.47
+      },
+      "moisture": {
+        "d1": 0.0441,
+        "d10": 0.0548,
+        "d100": 0.0748,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 660,
+      "wind": {
+        "directionDeg": 102,
+        "speedMs": 2.45
+      },
+      "moisture": {
+        "d1": 0.0512,
+        "d10": 0.0636,
+        "d100": 0.0836,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 720,
+      "wind": {
+        "directionDeg": 82,
+        "speedMs": 3.03
+      },
+      "moisture": {
+        "d1": 0.0584,
+        "d10": 0.0725,
+        "d100": 0.0925,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 780,
+      "wind": {
+        "directionDeg": 84,
+        "speedMs": 3.01
+      },
+      "moisture": {
+        "d1": 0.0571,
+        "d10": 0.0709,
+        "d100": 0.0909,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 840,
+      "wind": {
+        "directionDeg": 85,
+        "speedMs": 4.32
+      },
+      "moisture": {
+        "d1": 0.0605,
+        "d10": 0.0752,
+        "d100": 0.0952,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 900,
+      "wind": {
+        "directionDeg": 84,
+        "speedMs": 5.02
+      },
+      "moisture": {
+        "d1": 0.069,
+        "d10": 0.0857,
+        "d100": 0.1057,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 960,
+      "wind": {
+        "directionDeg": 83,
+        "speedMs": 5.14
+      },
+      "moisture": {
+        "d1": 0.0792,
+        "d10": 0.0985,
+        "d100": 0.1185,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 1020,
+      "wind": {
+        "directionDeg": 82,
+        "speedMs": 4.95
+      },
+      "moisture": {
+        "d1": 0.0828,
+        "d10": 0.1029,
+        "d100": 0.1229,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 1080,
+      "wind": {
+        "directionDeg": 82,
+        "speedMs": 4.95
+      },
+      "moisture": {
+        "d1": 0.0847,
+        "d10": 0.1052,
+        "d100": 0.1252,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 1140,
+      "wind": {
+        "directionDeg": 83,
+        "speedMs": 4.94
+      },
+      "moisture": {
+        "d1": 0.0865,
+        "d10": 0.1075,
+        "d100": 0.1275,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 1200,
+      "wind": {
+        "directionDeg": 82,
+        "speedMs": 4.95
+      },
+      "moisture": {
+        "d1": 0.0866,
+        "d10": 0.1077,
+        "d100": 0.1277,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 1260,
+      "wind": {
+        "directionDeg": 83,
+        "speedMs": 5.04
+      },
+      "moisture": {
+        "d1": 0.0673,
+        "d10": 0.0836,
+        "d100": 0.1036,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    },
+    {
+      "fromMin": 1320,
+      "wind": {
+        "directionDeg": 86,
+        "speedMs": 5.22
+      },
+      "moisture": {
+        "d1": 0.0696,
+        "d10": 0.0865,
+        "d100": 0.1065,
+        "liveHerb": 0.3,
+        "liveWoody": 0.85
+      }
+    }
+  ]
+}

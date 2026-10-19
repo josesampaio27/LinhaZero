@@ -1,0 +1,268 @@
+{
+  "name": "replay-vieiradominho-10082016",
+  "crs": "EPSG:3763",
+  "originX": -9200.0,
+  "originY": 213900.0,
+  "cellSize": 100.0,
+  "rows": 102,
+  "cols": 151,
+  "layers": {
+    "fuel": "fuel.u8",
+    "elevation": "elevation.f32",
+    "barrier": "barrier.u8",
+    "buildings": "buildings.u16",
+    "village": "village.u16",
+    "canopy": "canopy.u8"
+  },
+  "villages": [],
+  "fuelTable": {
+    "0": {
+      "label": "Sem dados",
+      "baseRate": 0.0
+    },
+    "4": {
+      "label": "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4)",
+      "baseRate": 9.0,
+      "rothermel": {
+        "depthM": 1.829,
+        "deadMoistExt": 0.2,
+        "heatKjKg": 18608.0,
+        "load": [
+          1.1231,
+          0.8989,
+          0.4483,
+          0.0,
+          1.1231
+        ],
+        "sav": [
+          6561.7,
+          357.61,
+          98.43,
+          0.0,
+          4921.3
+        ],
+        "group": "V"
+      }
+    },
+    "98": {
+      "label": "Não ardível",
+      "baseRate": 0.0
+    },
+    "221": {
+      "label": "Mato sob folhosas caducifólias (M-CAD)",
+      "baseRate": 3.0,
+      "rothermel": {
+        "depthM": 0.63,
+        "deadMoistExt": 0.3,
+        "heatKjKg": 20000.0,
+        "load": [
+          0.454,
+          0.187,
+          0.061,
+          0.0,
+          0.908
+        ],
+        "sav": [
+          6000.0,
+          357.61,
+          98.43,
+          0.0,
+          5000.0
+        ],
+        "group": "M",
+        "underCanopy": true,
+        "waf": 0.114
+      }
+    },
+    "223": {
+      "label": "Mato sob eucaliptal (M-EUC)",
+      "baseRate": 5.0,
+      "rothermel": {
+        "depthM": 0.64,
+        "deadMoistExt": 0.32,
+        "heatKjKg": 21000.0,
+        "load": [
+          0.837,
+          0.381,
+          0.0,
+          0.0,
+          0.451
+        ],
+        "sav": [
+          4700.0,
+          357.61,
+          98.43,
+          0.0,
+          5000.0
+        ],
+        "group": "M",
+        "crown": {
+          "cbhM": 6.0,
+          "cbdKgM3": 0.07,
+          "cflKgM2": 0.6
+        },
+        "underCanopy": true,
+        "waf": 0.114
+      }
+    },
+    "227": {
+      "label": "Mato sob pinhal (M-PIN)",
+      "baseRate": 6.0,
+      "rothermel": {
+        "depthM": 0.5,
+        "deadMoistExt": 0.4,
+        "heatKjKg": 21000.0,
+        "load": [
+          0.721,
+          0.3,
+          0.0,
+          0.0,
+          0.689
+        ],
+        "sav": [
+          5500.0,
+          357.61,
+          98.43,
+          0.0,
+          6000.0
+        ],
+        "group": "M",
+        "crown": {
+          "cbhM": 4.0,
+          "cbdKgM3": 0.12,
+          "cflKgM2": 1.0
+        },
+        "underCanopy": true,
+        "waf": 0.114
+      }
+    },
+    "231": {
+      "label": "Herbáceo alto (V-Ha)",
+      "baseRate": 15.0,
+      "rothermel": {
+        "depthM": 0.6,
+        "deadMoistExt": 0.24,
+        "heatKjKg": 19000.0,
+        "load": [
+          0.065,
+          0.015,
+          0.0,
+          0.235,
+          0.04
+        ],
+        "sav": [
+          4000.0,
+          357.61,
+          98.43,
+          5500.0,
+          4000.0
+        ],
+        "dynamic": true,
+        "group": "H"
+      }
+    },
+    "233": {
+      "label": "Mato atlântico alto (V-MAa)",
+      "baseRate": 9.0,
+      "rothermel": {
+        "depthM": 1.05,
+        "deadMoistExt": 0.35,
+        "heatKjKg": 21000.0,
+        "load": [
+          0.95,
+          0.25,
+          0.0,
+          0.0,
+          1.45
+        ],
+        "sav": [
+          3500.0,
+          357.61,
+          98.43,
+          0.0,
+          4000.0
+        ],
+        "group": "V"
+      }
+    },
+    "234": {
+      "label": "Mato atlântico baixo (V-MAb)",
+      "baseRate": 7.0,
+      "rothermel": {
+        "depthM": 0.5,
+        "deadMoistExt": 0.35,
+        "heatKjKg": 21000.0,
+        "load": [
+          0.6,
+          0.05,
+          0.0,
+          0.0,
+          0.75
+        ],
+        "sav": [
+          4500.0,
+          357.61,
+          98.43,
+          0.0,
+          4500.0
+        ],
+        "group": "V"
+      }
+    },
+    "235": {
+      "label": "Mato (V-MH; confirmar designação na documentação FUMOD)",
+      "baseRate": 8.0,
+      "rothermel": {
+        "depthM": 0.55,
+        "deadMoistExt": 0.25,
+        "heatKjKg": 19500.0,
+        "load": [
+          0.1,
+          0.1,
+          0.0,
+          0.15,
+          0.55
+        ],
+        "sav": [
+          4500.0,
+          357.61,
+          98.43,
+          8500.0,
+          4000.0
+        ],
+        "dynamic": true,
+        "group": "H"
+      }
+    },
+    "237": {
+      "label": "Mato mediterrâneo baixo (V-MMb)",
+      "baseRate": 6.0,
+      "rothermel": {
+        "depthM": 0.9,
+        "deadMoistExt": 0.2,
+        "heatKjKg": 20500.0,
+        "load": [
+          0.4,
+          0.05,
+          0.0,
+          0.0,
+          0.7
+        ],
+        "sav": [
+          3000.0,
+          357.61,
+          98.43,
+          0.0,
+          3000.0
+        ],
+        "group": "V"
+      }
+    }
+  },
+  "observed": {
+    "file": "observed.geojson",
+    "fire": "Vieira do Minho, 10 ago 2016",
+    "t0Utc": "2016-08-10T09:00:00Z",
+    "source": "PT-FireSprd v0.08 (Benali et al., doi:10.5281/zenodo.7495506), CC BY 4.0"
+  }
+}

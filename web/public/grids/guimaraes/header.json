@@ -1,0 +1,757 @@
+{
+  "name": "guimaraes",
+  "crs": "EPSG:3763",
+  "originX": -20700.0,
+  "originY": 205700.0,
+  "cellSize": 100.0,
+  "rows": 157,
+  "cols": 152,
+  "layers": {
+    "fuel": "fuel.u8",
+    "elevation": "elevation.f32",
+    "barrier": "barrier.u8",
+    "buildings": "buildings.u16",
+    "village": "village.u16",
+    "canopy": "canopy.u8"
+  },
+  "villages": [
+    {
+      "id": 1,
+      "name": "Abação (São Tomé)"
+    },
+    {
+      "id": 2,
+      "name": "Aldeias"
+    },
+    {
+      "id": 3,
+      "name": "Aldão"
+    },
+    {
+      "id": 4,
+      "name": "Além"
+    },
+    {
+      "id": 5,
+      "name": "Arões (Santa Cristina)"
+    },
+    {
+      "id": 6,
+      "name": "Arões (São Romão)"
+    },
+    {
+      "id": 7,
+      "name": "Atães"
+    },
+    {
+      "id": 8,
+      "name": "Azurém"
+    },
+    {
+      "id": 9,
+      "name": "Bacelos"
+    },
+    {
+      "id": 10,
+      "name": "Barco"
+    },
+    {
+      "id": 11,
+      "name": "Briteiros (Santo Estêvão)"
+    },
+    {
+      "id": 12,
+      "name": "Brito"
+    },
+    {
+      "id": 13,
+      "name": "Cachada"
+    },
+    {
+      "id": 14,
+      "name": "Caldas das Taipas"
+    },
+    {
+      "id": 15,
+      "name": "Caldelas"
+    },
+    {
+      "id": 16,
+      "name": "Calvos"
+    },
+    {
+      "id": 17,
+      "name": "Candoso"
+    },
+    {
+      "id": 18,
+      "name": "Candoso (Santiago)"
+    },
+    {
+      "id": 19,
+      "name": "Candoso (São Martinho)"
+    },
+    {
+      "id": 20,
+      "name": "Casas Novas"
+    },
+    {
+      "id": 21,
+      "name": "Casinhas"
+    },
+    {
+      "id": 22,
+      "name": "Castelo"
+    },
+    {
+      "id": 23,
+      "name": "Cepães"
+    },
+    {
+      "id": 24,
+      "name": "Conde"
+    },
+    {
+      "id": 25,
+      "name": "Corredoura"
+    },
+    {
+      "id": 26,
+      "name": "Corvite"
+    },
+    {
+      "id": 27,
+      "name": "Crasto"
+    },
+    {
+      "id": 28,
+      "name": "Creixomil"
+    },
+    {
+      "id": 29,
+      "name": "Cruz da Argola"
+    },
+    {
+      "id": 30,
+      "name": "Cuvinho"
+    },
+    {
+      "id": 31,
+      "name": "Devezinha"
+    },
+    {
+      "id": 32,
+      "name": "Fareja"
+    },
+    {
+      "id": 33,
+      "name": "Fermentões"
+    },
+    {
+      "id": 34,
+      "name": "Fontela"
+    },
+    {
+      "id": 35,
+      "name": "Gaias"
+    },
+    {
+      "id": 36,
+      "name": "Gandarela"
+    },
+    {
+      "id": 37,
+      "name": "Gondar"
+    },
+    {
+      "id": 38,
+      "name": "Gonça"
+    },
+    {
+      "id": 39,
+      "name": "Guardizela"
+    },
+    {
+      "id": 40,
+      "name": "Gémeos"
+    },
+    {
+      "id": 41,
+      "name": "Infantas"
+    },
+    {
+      "id": 42,
+      "name": "Infias"
+    },
+    {
+      "id": 43,
+      "name": "Jugueiros"
+    },
+    {
+      "id": 44,
+      "name": "Lapinha"
+    },
+    {
+      "id": 45,
+      "name": "Linhares"
+    },
+    {
+      "id": 46,
+      "name": "Listoso"
+    },
+    {
+      "id": 47,
+      "name": "Louredo"
+    },
+    {
+      "id": 48,
+      "name": "Mascotelos"
+    },
+    {
+      "id": 49,
+      "name": "Mesão Frio"
+    },
+    {
+      "id": 50,
+      "name": "Moreira de Cónegos"
+    },
+    {
+      "id": 51,
+      "name": "Nespereira"
+    },
+    {
+      "id": 52,
+      "name": "Pencelo"
+    },
+    {
+      "id": 53,
+      "name": "Penha"
+    },
+    {
+      "id": 54,
+      "name": "Pevidém"
+    },
+    {
+      "id": 55,
+      "name": "Pinheiro"
+    },
+    {
+      "id": 56,
+      "name": "Polvoreira"
+    },
+    {
+      "id": 57,
+      "name": "Pombeiro de Ribavizela"
+    },
+    {
+      "id": 58,
+      "name": "Ponta do Campo"
+    },
+    {
+      "id": 59,
+      "name": "Ponte"
+    },
+    {
+      "id": 60,
+      "name": "Prazins (Santa Eufémia)"
+    },
+    {
+      "id": 61,
+      "name": "Prazins (Santo Tirso)"
+    },
+    {
+      "id": 62,
+      "name": "Quintãs"
+    },
+    {
+      "id": 63,
+      "name": "Rendufe"
+    },
+    {
+      "id": 64,
+      "name": "Ribeira"
+    },
+    {
+      "id": 65,
+      "name": "Sabugosa"
+    },
+    {
+      "id": 66,
+      "name": "Sande (São Clemente)"
+    },
+    {
+      "id": 67,
+      "name": "Sande (São Lourenço)"
+    },
+    {
+      "id": 68,
+      "name": "Sande (São Martinho)"
+    },
+    {
+      "id": 69,
+      "name": "Sande (Vila Nova)"
+    },
+    {
+      "id": 70,
+      "name": "Selho (São Cristóvão)"
+    },
+    {
+      "id": 71,
+      "name": "Selho (São Lourenço)"
+    },
+    {
+      "id": 72,
+      "name": "Serzedelo"
+    },
+    {
+      "id": 73,
+      "name": "Serzedo"
+    },
+    {
+      "id": 74,
+      "name": "Silvares"
+    },
+    {
+      "id": 75,
+      "name": "Sobreiro"
+    },
+    {
+      "id": 76,
+      "name": "Sorrego"
+    },
+    {
+      "id": 77,
+      "name": "Souto (Santa Maria)"
+    },
+    {
+      "id": 78,
+      "name": "Souto (São Salvador)"
+    },
+    {
+      "id": 79,
+      "name": "Soutolinho"
+    },
+    {
+      "id": 80,
+      "name": "São Faustino"
+    },
+    {
+      "id": 81,
+      "name": "São Torcato"
+    },
+    {
+      "id": 82,
+      "name": "Tabuadelo"
+    },
+    {
+      "id": 83,
+      "name": "Urgezes"
+    },
+    {
+      "id": 84,
+      "name": "Varziela"
+    },
+    {
+      "id": 85,
+      "name": "Vila Fria"
+    },
+    {
+      "id": 86,
+      "name": "Vila Nova das Infantas"
+    },
+    {
+      "id": 87,
+      "name": "Vizela (São Jorge)"
+    },
+    {
+      "id": 88,
+      "name": "Vizela (São Paio)"
+    }
+  ],
+  "fuelTable": {
+    "0": {
+      "label": "Sem dados",
+      "baseRate": 0.0
+    },
+    "4": {
+      "label": "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4)",
+      "baseRate": 9.0,
+      "rothermel": {
+        "depthM": 1.829,
+        "deadMoistExt": 0.2,
+        "heatKjKg": 18608.0,
+        "load": [
+          1.1231,
+          0.8989,
+          0.4483,
+          0.0,
+          1.1231
+        ],
+        "sav": [
+          6561.7,
+          357.61,
+          98.43,
+          0.0,
+          4921.3
+        ],
+        "group": "V"
+      }
+    },
+    "11": {
+      "label": "Resíduos de exploração florestal (NFFL 11)",
+      "baseRate": 2.0,
+      "rothermel": {
+        "depthM": 0.305,
+        "deadMoistExt": 0.15,
+        "heatKjKg": 18608.0,
+        "load": [
+          0.3363,
+          1.011,
+          1.2352,
+          0.0,
+          0.0
+        ],
+        "sav": [
+          4921.3,
+          357.61,
+          98.43,
+          0.0,
+          0.0
+        ],
+        "group": "F"
+      }
+    },
+    "98": {
+      "label": "Não ardível",
+      "baseRate": 0.0
+    },
+    "211": {
+      "label": "Folhada de eucalipto (F-EUC)",
+      "baseRate": 2.0,
+      "rothermel": {
+        "depthM": 0.32,
+        "deadMoistExt": 0.26,
+        "heatKjKg": 21000.0,
+        "load": [
+          0.463,
+          0.296,
+          0.127,
+          0.0,
+          0.112
+        ],
+        "sav": [
+          4200.0,
+          357.61,
+          98.43,
+          0.0,
+          5000.0
+        ],
+        "group": "F",
+        "crown": {
+          "cbhM": 6.0,
+          "cbdKgM3": 0.07,
+          "cflKgM2": 0.6
+        },
+        "underCanopy": true,
+        "waf": 0.114
+      }
+    },
+    "221": {
+      "label": "Mato sob folhosas caducifólias (M-CAD)",
+      "baseRate": 3.0,
+      "rothermel": {
+        "depthM": 0.63,
+        "deadMoistExt": 0.3,
+        "heatKjKg": 20000.0,
+        "load": [
+          0.454,
+          0.187,
+          0.061,
+          0.0,
+          0.908
+        ],
+        "sav": [
+          6000.0,
+          357.61,
+          98.43,
+          0.0,
+          5000.0
+        ],
+        "group": "M",
+        "underCanopy": true,
+        "waf": 0.114
+      }
+    },
+    "222": {
+      "label": "Mato sob esclerófilas (M-ESC)",
+      "baseRate": 4.0,
+      "rothermel": {
+        "depthM": 0.5,
+        "deadMoistExt": 0.25,
+        "heatKjKg": 20500.0,
+        "load": [
+          0.565,
+          0.15,
+          0.048,
+          0.0,
+          0.789
+        ],
+        "sav": [
+          5000.0,
+          357.61,
+          98.43,
+          0.0,
+          5500.0
+        ],
+        "group": "M",
+        "crown": {
+          "cbhM": 3.0,
+          "cbdKgM3": 0.08,
+          "cflKgM2": 0.8
+        },
+        "underCanopy": true,
+        "waf": 0.114
+      }
+    },
+    "223": {
+      "label": "Mato sob eucaliptal (M-EUC)",
+      "baseRate": 5.0,
+      "rothermel": {
+        "depthM": 0.64,
+        "deadMoistExt": 0.32,
+        "heatKjKg": 21000.0,
+        "load": [
+          0.837,
+          0.381,
+          0.0,
+          0.0,
+          0.451
+        ],
+        "sav": [
+          4700.0,
+          357.61,
+          98.43,
+          0.0,
+          5000.0
+        ],
+        "group": "M",
+        "crown": {
+          "cbhM": 6.0,
+          "cbdKgM3": 0.07,
+          "cflKgM2": 0.6
+        },
+        "underCanopy": true,
+        "waf": 0.114
+      }
+    },
+    "224": {
+      "label": "Mato sob eucaliptal descontínuo (M-EUCd)",
+      "baseRate": 4.0,
+      "rothermel": {
+        "depthM": 0.4,
+        "deadMoistExt": 0.26,
+        "heatKjKg": 21000.0,
+        "load": [
+          0.137,
+          0.289,
+          0.159,
+          0.0,
+          0.184
+        ],
+        "sav": [
+          4500.0,
+          357.61,
+          98.43,
+          0.0,
+          5000.0
+        ],
+        "group": "M",
+        "crown": {
+          "cbhM": 4.0,
+          "cbdKgM3": 0.07,
+          "cflKgM2": 0.6
+        },
+        "underCanopy": true,
+        "waf": 0.114
+      }
+    },
+    "227": {
+      "label": "Mato sob pinhal (M-PIN)",
+      "baseRate": 6.0,
+      "rothermel": {
+        "depthM": 0.5,
+        "deadMoistExt": 0.4,
+        "heatKjKg": 21000.0,
+        "load": [
+          0.721,
+          0.3,
+          0.0,
+          0.0,
+          0.689
+        ],
+        "sav": [
+          5500.0,
+          357.61,
+          98.43,
+          0.0,
+          6000.0
+        ],
+        "group": "M",
+        "crown": {
+          "cbhM": 4.0,
+          "cbdKgM3": 0.12,
+          "cflKgM2": 1.0
+        },
+        "underCanopy": true,
+        "waf": 0.114
+      }
+    },
+    "231": {
+      "label": "Herbáceo alto (V-Ha)",
+      "baseRate": 15.0,
+      "rothermel": {
+        "depthM": 0.6,
+        "deadMoistExt": 0.24,
+        "heatKjKg": 19000.0,
+        "load": [
+          0.065,
+          0.015,
+          0.0,
+          0.235,
+          0.04
+        ],
+        "sav": [
+          4000.0,
+          357.61,
+          98.43,
+          5500.0,
+          4000.0
+        ],
+        "dynamic": true,
+        "group": "H"
+      }
+    },
+    "232": {
+      "label": "Herbáceo baixo (V-Hb)",
+      "baseRate": 10.0,
+      "rothermel": {
+        "depthM": 0.35,
+        "deadMoistExt": 0.24,
+        "heatKjKg": 19000.0,
+        "load": [
+          0.03,
+          0.0,
+          0.0,
+          0.12,
+          0.0
+        ],
+        "sav": [
+          6000.0,
+          357.61,
+          98.43,
+          6000.0,
+          0.0
+        ],
+        "dynamic": true,
+        "group": "H"
+      }
+    },
+    "233": {
+      "label": "Mato atlântico alto (V-MAa)",
+      "baseRate": 9.0,
+      "rothermel": {
+        "depthM": 1.05,
+        "deadMoistExt": 0.35,
+        "heatKjKg": 21000.0,
+        "load": [
+          0.95,
+          0.25,
+          0.0,
+          0.0,
+          1.45
+        ],
+        "sav": [
+          3500.0,
+          357.61,
+          98.43,
+          0.0,
+          4000.0
+        ],
+        "group": "V"
+      }
+    },
+    "234": {
+      "label": "Mato atlântico baixo (V-MAb)",
+      "baseRate": 7.0,
+      "rothermel": {
+        "depthM": 0.5,
+        "deadMoistExt": 0.35,
+        "heatKjKg": 21000.0,
+        "load": [
+          0.6,
+          0.05,
+          0.0,
+          0.0,
+          0.75
+        ],
+        "sav": [
+          4500.0,
+          357.61,
+          98.43,
+          0.0,
+          4500.0
+        ],
+        "group": "V"
+      }
+    },
+    "235": {
+      "label": "Mato (V-MH; confirmar designação na documentação FUMOD)",
+      "baseRate": 8.0,
+      "rothermel": {
+        "depthM": 0.55,
+        "deadMoistExt": 0.25,
+        "heatKjKg": 19500.0,
+        "load": [
+          0.1,
+          0.1,
+          0.0,
+          0.15,
+          0.55
+        ],
+        "sav": [
+          4500.0,
+          357.61,
+          98.43,
+          8500.0,
+          4000.0
+        ],
+        "dynamic": true,
+        "group": "H"
+      }
+    },
+    "237": {
+      "label": "Mato mediterrâneo baixo (V-MMb)",
+      "baseRate": 6.0,
+      "rothermel": {
+        "depthM": 0.9,
+        "deadMoistExt": 0.2,
+        "heatKjKg": 20500.0,
+        "load": [
+          0.4,
+          0.05,
+          0.0,
+          0.0,
+          0.7
+        ],
+        "sav": [
+          3000.0,
+          357.61,
+          98.43,
+          0.0,
+          3000.0
+        ],
+        "group": "V"
+      }
+    }
+  }
+}

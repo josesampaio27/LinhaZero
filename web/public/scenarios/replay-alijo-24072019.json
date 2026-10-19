@@ -1,0 +1,190 @@
+{
+  "version": 3,
+  "title": "Incêndio real: Alijó, 24 jul 2019",
+  "grid": "replay-alijo-24072019",
+  "ignition": [
+    51980.77857142857,
+    188224.93571428576
+  ],
+  "burnedArea": [
+    [
+      52044.9,
+      188123.7
+    ],
+    [
+      51986.1,
+      188099.6
+    ],
+    [
+      51905.2,
+      188095.9
+    ],
+    [
+      51854.3,
+      188159.1
+    ],
+    [
+      51849.3,
+      188220.4
+    ],
+    [
+      51880.4,
+      188281.3
+    ],
+    [
+      51902.1,
+      188308.9
+    ],
+    [
+      51938,
+      188329
+    ],
+    [
+      51977.9,
+      188340.1
+    ],
+    [
+      52023.8,
+      188349.5
+    ],
+    [
+      52082.3,
+      188326.5
+    ],
+    [
+      52145.1,
+      188246.2
+    ],
+    [
+      52096.6,
+      188145.2
+    ],
+    [
+      52044.9,
+      188123.7
+    ]
+  ],
+  "wind": {
+    "directionDeg": 224,
+    "speedMs": 5.3,
+    "gustMs": 13.3
+  },
+  "durationMin": 390,
+  "ensemble": true,
+  "decisions": {
+    "A": [],
+    "B": []
+  },
+  "variants": {
+    "A": null,
+    "B": null
+  },
+  "spreadModel": "rothermel",
+  "moisture": {
+    "d1": 0.04012355318,
+    "d10": 0.049862279679999996,
+    "d100": 0.06986227968,
+    "liveHerb": 0.5,
+    "liveWoody": 0.95
+  },
+  "weatherSteps": [
+    {
+      "fromMin": 0,
+      "wind": {
+        "directionDeg": 224,
+        "speedMs": 5.3
+      },
+      "moisture": {
+        "d1": 0.0401,
+        "d10": 0.0499,
+        "d100": 0.0699,
+        "liveHerb": 0.5,
+        "liveWoody": 0.95
+      }
+    },
+    {
+      "fromMin": 60,
+      "wind": {
+        "directionDeg": 235,
+        "speedMs": 4.88
+      },
+      "moisture": {
+        "d1": 0.0427,
+        "d10": 0.0531,
+        "d100": 0.0731,
+        "liveHerb": 0.5,
+        "liveWoody": 0.95
+      }
+    },
+    {
+      "fromMin": 120,
+      "wind": {
+        "directionDeg": 247,
+        "speedMs": 4.79
+      },
+      "moisture": {
+        "d1": 0.0442,
+        "d10": 0.0549,
+        "d100": 0.0749,
+        "liveHerb": 0.5,
+        "liveWoody": 0.95
+      }
+    },
+    {
+      "fromMin": 180,
+      "wind": {
+        "directionDeg": 251,
+        "speedMs": 5.19
+      },
+      "moisture": {
+        "d1": 0.0444,
+        "d10": 0.0552,
+        "d100": 0.0752,
+        "liveHerb": 0.5,
+        "liveWoody": 0.95
+      }
+    },
+    {
+      "fromMin": 240,
+      "wind": {
+        "directionDeg": 257,
+        "speedMs": 4.51
+      },
+      "moisture": {
+        "d1": 0.0436,
+        "d10": 0.0542,
+        "d100": 0.0742,
+        "liveHerb": 0.5,
+        "liveWoody": 0.95
+      }
+    },
+    {
+      "fromMin": 300,
+      "wind": {
+        "directionDeg": 266,
+        "speedMs": 3.91
+      },
+      "moisture": {
+        "d1": 0.0492,
+        "d10": 0.0612,
+        "d100": 0.0812,
+        "liveHerb": 0.5,
+        "liveWoody": 0.95
+      }
+    },
+    {
+      "fromMin": 360,
+      "wind": {
+        "directionDeg": 263,
+        "speedMs": 3.42
+      },
+      "moisture": {
+        "d1": 0.081,
+        "d10": 0.1007,
+        "d100": 0.1207,
+        "liveHerb": 0.5,
+        "liveWoody": 0.95
+      }
+    }
+  ]
+}
