@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>LinhaZero.Ingest</RootNamespace>
+    <!-- `dotnet run` would otherwise run from services/Ingest; the default grids directory is relative to the repo root. -->
+    <RunWorkingDirectory>$(MSBuildProjectDirectory)/../..</RunWorkingDirectory>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>LinhaZero.Core</RootNamespace>
+    <!-- The /// comments on the response records become descriptions in the API's OpenAPI document. -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Options, logging and hosting abstractions: Core is used only by the two ASP.NET Core programs and the tests. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Dapper" Version="2.1.89" />
+    <PackageReference Include="Npgsql" Version="10.0.3" />
+    <PackageReference Include="ProjNET" Version="2.1.0" />
+  </ItemGroup>
+
+</Project>

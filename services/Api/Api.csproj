@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>LinhaZero.Api</RootNamespace>
+    <!-- `dotnet run` would otherwise run from services/Api; the default grids directory is relative to the repo root. -->
+    <RunWorkingDirectory>$(MSBuildProjectDirectory)/../..</RunWorkingDirectory>
+    <!-- The /// comments become descriptions in the OpenAPI document (/api/openapi/v1.json). -->
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+  </PropertyGroup>
+
+  <!--
+    On every build, save the OpenAPI document to contracts/openapi.json (Microsoft.Extensions.ApiDescription.Server
+    starts the app without a server and asks it for the document), then let NSwag turn it into the typed client the
+    web imports (web/src/api/client.ts, settings in nswag.json). Both files are committed, so the web build needs no
+    .NET. OpenAPI 3.0 because NSwag does not read 3.1 fully. The Docker build turns this off with
+    -p:OpenApiGenerateDocuments=false: the repo's contracts/ and web/ are not in its context.
+  -->
+  <PropertyGroup>
+    <OpenApiDocumentsDirectory>$(MSBuildProjectDirectory)/../../contracts</OpenApiDocumentsDirectory>
+    <OpenApiGenerateDocumentsOptions>--file-name openapi --openapi-version OpenApi3_0</OpenApiGenerateDocumentsOptions>
+  </PropertyGroup>
+
+  <Target Name="GenerateWebClient" AfterTargets="GenerateOpenApiDocuments" Condition="'$(OpenApiGenerateDocuments)' != 'false'">
+    <Exec Command="$(NSwagExe_Net100) run nswag.json" WorkingDirectory="$(MSBuildProjectDirectory)" />
+  </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.13" />
+    <PackageReference Include="Microsoft.Extensions.ApiDescription.Server" Version="10.0.13" PrivateAssets="all" />
+    <PackageReference Include="NSwag.MSBuild" Version="14.7.1" PrivateAssets="all" />
+    <PackageReference Include="NATS.Net" Version="3.3.1" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="10.2.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Core\Core.csproj" />
+  </ItemGroup>
+
+</Project>
