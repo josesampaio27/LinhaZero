@@ -1,0 +1,3290 @@
+{
+ "fire": "VieiradoMinho_10082016",
+ "source": "PT-FireSprd v0.08 (Benali et al., doi:10.5281/zenodo.7495506)",
+ "weatherSource": "Open-Meteo historical archive (ERA5), hourly, at the fire centroid",
+ "fuelYear": 2018,
+ "fuelYearMatches": false,
+ "t0Utc": "2016-08-10T09:00:00Z",
+ "ignitionArea": [
+  [
+   1567.7,
+   209880.5
+  ],
+  [
+   1617.2,
+   209853.6
+  ],
+  [
+   1660.0,
+   209821.8
+  ],
+  [
+   1636.2,
+   209732.9
+  ],
+  [
+   1567.9,
+   209677.7
+  ],
+  [
+   1527.0,
+   209638.6
+  ],
+  [
+   1472.9,
+   209618.8
+  ],
+  [
+   1400.8,
+   209638.0
+  ],
+  [
+   1320.3,
+   209719.1
+  ],
+  [
+   1342.8,
+   209817.7
+  ],
+  [
+   1477.7,
+   209893.9
+  ],
+  [
+   1567.7,
+   209880.5
+  ]
+ ],
+ "observationMinutes": [
+  300.0,
+  1050.0,
+  1350.0
+ ],
+ "observedTimedHa": 1617.0,
+ "centroid": [
+  41.54815,
+  -8.14902
+ ],
+ "intervals": [
+  {
+   "startMin": 0.0,
+   "endMin": 300.0,
+   "areaHa": 703.5,
+   "growthHaH": 140.7,
+   "rosMH": 874.4,
+   "rosPerimeterMH": 874.4,
+   "dirDeg": 248.12,
+   "dirPerimeterDeg": 248.12,
+   "qc": 2,
+   "source": "sat"
+  },
+  {
+   "startMin": 300.0,
+   "endMin": 1050.0,
+   "areaHa": 868.0,
+   "growthHaH": 69.44,
+   "rosMH": 250.74,
+   "rosPerimeterMH": 252.32,
+   "dirDeg": 261.73,
+   "dirPerimeterDeg": 261.16,
+   "qc": 2,
+   "source": "sat"
+  }
+ ],
+ "weather": [
+  {
+   "timeUtc": "2016-08-06T00:00:00Z",
+   "tempC": 17.3,
+   "rhPct": 61,
+   "windSpeedMs": 2.72,
+   "windFromDeg": 54,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.3
+  },
+  {
+   "timeUtc": "2016-08-06T01:00:00Z",
+   "tempC": 16.9,
+   "rhPct": 63,
+   "windSpeedMs": 2.42,
+   "windFromDeg": 60,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.7
+  },
+  {
+   "timeUtc": "2016-08-06T02:00:00Z",
+   "tempC": 16.7,
+   "rhPct": 65,
+   "windSpeedMs": 2.64,
+   "windFromDeg": 65,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.4
+  },
+  {
+   "timeUtc": "2016-08-06T03:00:00Z",
+   "tempC": 16.5,
+   "rhPct": 65,
+   "windSpeedMs": 2.75,
+   "windFromDeg": 71,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.7
+  },
+  {
+   "timeUtc": "2016-08-06T04:00:00Z",
+   "tempC": 16.1,
+   "rhPct": 65,
+   "windSpeedMs": 2.91,
+   "windFromDeg": 74,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.9
+  },
+  {
+   "timeUtc": "2016-08-06T05:00:00Z",
+   "tempC": 15.7,
+   "rhPct": 65,
+   "windSpeedMs": 2.89,
+   "windFromDeg": 76,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.1
+  },
+  {
+   "timeUtc": "2016-08-06T06:00:00Z",
+   "tempC": 15.5,
+   "rhPct": 67,
+   "windSpeedMs": 2.96,
+   "windFromDeg": 78,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.2
+  },
+  {
+   "timeUtc": "2016-08-06T07:00:00Z",
+   "tempC": 17.5,
+   "rhPct": 62,
+   "windSpeedMs": 3.55,
+   "windFromDeg": 80,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.1
+  },
+  {
+   "timeUtc": "2016-08-06T08:00:00Z",
+   "tempC": 20.6,
+   "rhPct": 47,
+   "windSpeedMs": 4.02,
+   "windFromDeg": 84,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 9.3
+  },
+  {
+   "timeUtc": "2016-08-06T09:00:00Z",
+   "tempC": 22.5,
+   "rhPct": 39,
+   "windSpeedMs": 4.7,
+   "windFromDeg": 88,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 10.8
+  },
+  {
+   "timeUtc": "2016-08-06T10:00:00Z",
+   "tempC": 24.4,
+   "rhPct": 34,
+   "windSpeedMs": 4.8,
+   "windFromDeg": 89,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 11.0
+  },
+  {
+   "timeUtc": "2016-08-06T11:00:00Z",
+   "tempC": 26.1,
+   "rhPct": 31,
+   "windSpeedMs": 4.7,
+   "windFromDeg": 91,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 11.1
+  },
+  {
+   "timeUtc": "2016-08-06T12:00:00Z",
+   "tempC": 27.8,
+   "rhPct": 27,
+   "windSpeedMs": 4.11,
+   "windFromDeg": 94,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 10.7
+  },
+  {
+   "timeUtc": "2016-08-06T13:00:00Z",
+   "tempC": 29.2,
+   "rhPct": 24,
+   "windSpeedMs": 3.31,
+   "windFromDeg": 95,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 9.6
+  },
+  {
+   "timeUtc": "2016-08-06T14:00:00Z",
+   "tempC": 30.3,
+   "rhPct": 23,
+   "windSpeedMs": 2.4,
+   "windFromDeg": 92,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.2
+  },
+  {
+   "timeUtc": "2016-08-06T15:00:00Z",
+   "tempC": 31.0,
+   "rhPct": 21,
+   "windSpeedMs": 1.53,
+   "windFromDeg": 79,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.4
+  },
+  {
+   "timeUtc": "2016-08-06T16:00:00Z",
+   "tempC": 31.3,
+   "rhPct": 21,
+   "windSpeedMs": 1.14,
+   "windFromDeg": 52,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 4.9
+  },
+  {
+   "timeUtc": "2016-08-06T17:00:00Z",
+   "tempC": 31.4,
+   "rhPct": 20,
+   "windSpeedMs": 1.12,
+   "windFromDeg": 27,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 3.7
+  },
+  {
+   "timeUtc": "2016-08-06T18:00:00Z",
+   "tempC": 31.0,
+   "rhPct": 22,
+   "windSpeedMs": 0.91,
+   "windFromDeg": 354,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 3.1
+  },
+  {
+   "timeUtc": "2016-08-06T19:00:00Z",
+   "tempC": 29.7,
+   "rhPct": 33,
+   "windSpeedMs": 1.35,
+   "windFromDeg": 318,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 2.9
+  },
+  {
+   "timeUtc": "2016-08-06T20:00:00Z",
+   "tempC": 28.8,
+   "rhPct": 24,
+   "windSpeedMs": 1.25,
+   "windFromDeg": 331,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 3.1
+  },
+  {
+   "timeUtc": "2016-08-06T21:00:00Z",
+   "tempC": 25.6,
+   "rhPct": 34,
+   "windSpeedMs": 1.61,
+   "windFromDeg": 30,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 3.1
+  },
+  {
+   "timeUtc": "2016-08-06T22:00:00Z",
+   "tempC": 21.8,
+   "rhPct": 45,
+   "windSpeedMs": 2.7,
+   "windFromDeg": 51,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 4.4
+  },
+  {
+   "timeUtc": "2016-08-06T23:00:00Z",
+   "tempC": 19.8,
+   "rhPct": 49,
+   "windSpeedMs": 3.08,
+   "windFromDeg": 54,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.1
+  },
+  {
+   "timeUtc": "2016-08-07T00:00:00Z",
+   "tempC": 18.8,
+   "rhPct": 49,
+   "windSpeedMs": 2.47,
+   "windFromDeg": 58,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.7
+  },
+  {
+   "timeUtc": "2016-08-07T01:00:00Z",
+   "tempC": 18.7,
+   "rhPct": 46,
+   "windSpeedMs": 2.6,
+   "windFromDeg": 67,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.8
+  },
+  {
+   "timeUtc": "2016-08-07T02:00:00Z",
+   "tempC": 18.5,
+   "rhPct": 43,
+   "windSpeedMs": 2.62,
+   "windFromDeg": 72,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.7
+  },
+  {
+   "timeUtc": "2016-08-07T03:00:00Z",
+   "tempC": 18.0,
+   "rhPct": 43,
+   "windSpeedMs": 2.6,
+   "windFromDeg": 74,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.8
+  },
+  {
+   "timeUtc": "2016-08-07T04:00:00Z",
+   "tempC": 17.7,
+   "rhPct": 42,
+   "windSpeedMs": 2.82,
+   "windFromDeg": 73,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.4
+  },
+  {
+   "timeUtc": "2016-08-07T05:00:00Z",
+   "tempC": 17.6,
+   "rhPct": 41,
+   "windSpeedMs": 3.01,
+   "windFromDeg": 75,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 9.3
+  },
+  {
+   "timeUtc": "2016-08-07T06:00:00Z",
+   "tempC": 17.6,
+   "rhPct": 42,
+   "windSpeedMs": 3.23,
+   "windFromDeg": 74,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 9.8
+  },
+  {
+   "timeUtc": "2016-08-07T07:00:00Z",
+   "tempC": 19.1,
+   "rhPct": 45,
+   "windSpeedMs": 3.81,
+   "windFromDeg": 76,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 9.2
+  },
+  {
+   "timeUtc": "2016-08-07T08:00:00Z",
+   "tempC": 22.4,
+   "rhPct": 37,
+   "windSpeedMs": 4.28,
+   "windFromDeg": 79,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 10.3
+  },
+  {
+   "timeUtc": "2016-08-07T09:00:00Z",
+   "tempC": 24.7,
+   "rhPct": 31,
+   "windSpeedMs": 5.16,
+   "windFromDeg": 81,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 11.9
+  },
+  {
+   "timeUtc": "2016-08-07T10:00:00Z",
+   "tempC": 26.6,
+   "rhPct": 28,
+   "windSpeedMs": 5.64,
+   "windFromDeg": 83,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 13.0
+  },
+  {
+   "timeUtc": "2016-08-07T11:00:00Z",
+   "tempC": 28.5,
+   "rhPct": 26,
+   "windSpeedMs": 5.15,
+   "windFromDeg": 82,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 13.0
+  },
+  {
+   "timeUtc": "2016-08-07T12:00:00Z",
+   "tempC": 30.2,
+   "rhPct": 23,
+   "windSpeedMs": 4.54,
+   "windFromDeg": 82,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.1
+  },
+  {
+   "timeUtc": "2016-08-07T13:00:00Z",
+   "tempC": 31.7,
+   "rhPct": 21,
+   "windSpeedMs": 4.04,
+   "windFromDeg": 81,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 11.1
+  },
+  {
+   "timeUtc": "2016-08-07T14:00:00Z",
+   "tempC": 32.8,
+   "rhPct": 19,
+   "windSpeedMs": 3.63,
+   "windFromDeg": 82,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 10.1
+  },
+  {
+   "timeUtc": "2016-08-07T15:00:00Z",
+   "tempC": 33.6,
+   "rhPct": 18,
+   "windSpeedMs": 3.24,
+   "windFromDeg": 81,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 9.2
+  },
+  {
+   "timeUtc": "2016-08-07T16:00:00Z",
+   "tempC": 33.9,
+   "rhPct": 17,
+   "windSpeedMs": 2.65,
+   "windFromDeg": 79,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.2
+  },
+  {
+   "timeUtc": "2016-08-07T17:00:00Z",
+   "tempC": 33.9,
+   "rhPct": 18,
+   "windSpeedMs": 2.06,
+   "windFromDeg": 76,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.7
+  },
+  {
+   "timeUtc": "2016-08-07T18:00:00Z",
+   "tempC": 33.4,
+   "rhPct": 22,
+   "windSpeedMs": 1.12,
+   "windFromDeg": 80,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 4.5
+  },
+  {
+   "timeUtc": "2016-08-07T19:00:00Z",
+   "tempC": 33.1,
+   "rhPct": 19,
+   "windSpeedMs": 0.58,
+   "windFromDeg": 329,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 3.0
+  },
+  {
+   "timeUtc": "2016-08-07T20:00:00Z",
+   "tempC": 31.6,
+   "rhPct": 19,
+   "windSpeedMs": 1.43,
+   "windFromDeg": 335,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 3.2
+  },
+  {
+   "timeUtc": "2016-08-07T21:00:00Z",
+   "tempC": 26.9,
+   "rhPct": 32,
+   "windSpeedMs": 2.21,
+   "windFromDeg": 18,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 3.9
+  },
+  {
+   "timeUtc": "2016-08-07T22:00:00Z",
+   "tempC": 23.4,
+   "rhPct": 42,
+   "windSpeedMs": 3.08,
+   "windFromDeg": 36,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.4
+  },
+  {
+   "timeUtc": "2016-08-07T23:00:00Z",
+   "tempC": 21.8,
+   "rhPct": 45,
+   "windSpeedMs": 3.36,
+   "windFromDeg": 53,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.6
+  },
+  {
+   "timeUtc": "2016-08-08T00:00:00Z",
+   "tempC": 20.9,
+   "rhPct": 47,
+   "windSpeedMs": 2.6,
+   "windFromDeg": 67,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.5
+  },
+  {
+   "timeUtc": "2016-08-08T01:00:00Z",
+   "tempC": 20.4,
+   "rhPct": 46,
+   "windSpeedMs": 2.57,
+   "windFromDeg": 77,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.0
+  },
+  {
+   "timeUtc": "2016-08-08T02:00:00Z",
+   "tempC": 19.6,
+   "rhPct": 46,
+   "windSpeedMs": 2.55,
+   "windFromDeg": 79,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.1
+  },
+  {
+   "timeUtc": "2016-08-08T03:00:00Z",
+   "tempC": 18.9,
+   "rhPct": 46,
+   "windSpeedMs": 2.57,
+   "windFromDeg": 77,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.3
+  },
+  {
+   "timeUtc": "2016-08-08T04:00:00Z",
+   "tempC": 18.5,
+   "rhPct": 45,
+   "windSpeedMs": 2.72,
+   "windFromDeg": 73,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.0
+  },
+  {
+   "timeUtc": "2016-08-08T05:00:00Z",
+   "tempC": 18.1,
+   "rhPct": 46,
+   "windSpeedMs": 2.91,
+   "windFromDeg": 74,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.5
+  },
+  {
+   "timeUtc": "2016-08-08T06:00:00Z",
+   "tempC": 17.9,
+   "rhPct": 51,
+   "windSpeedMs": 3.08,
+   "windFromDeg": 77,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.8
+  },
+  {
+   "timeUtc": "2016-08-08T07:00:00Z",
+   "tempC": 19.7,
+   "rhPct": 52,
+   "windSpeedMs": 3.35,
+   "windFromDeg": 80,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.4
+  },
+  {
+   "timeUtc": "2016-08-08T08:00:00Z",
+   "tempC": 24.3,
+   "rhPct": 38,
+   "windSpeedMs": 3.72,
+   "windFromDeg": 84,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.6
+  },
+  {
+   "timeUtc": "2016-08-08T09:00:00Z",
+   "tempC": 26.5,
+   "rhPct": 31,
+   "windSpeedMs": 4.42,
+   "windFromDeg": 85,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 10.0
+  },
+  {
+   "timeUtc": "2016-08-08T10:00:00Z",
+   "tempC": 28.1,
+   "rhPct": 28,
+   "windSpeedMs": 4.02,
+   "windFromDeg": 84,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 10.1
+  },
+  {
+   "timeUtc": "2016-08-08T11:00:00Z",
+   "tempC": 29.8,
+   "rhPct": 26,
+   "windSpeedMs": 3.41,
+   "windFromDeg": 87,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 9.7
+  },
+  {
+   "timeUtc": "2016-08-08T12:00:00Z",
+   "tempC": 31.3,
+   "rhPct": 24,
+   "windSpeedMs": 2.6,
+   "windFromDeg": 92,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.6
+  },
+  {
+   "timeUtc": "2016-08-08T13:00:00Z",
+   "tempC": 32.5,
+   "rhPct": 23,
+   "windSpeedMs": 1.0,
+   "windFromDeg": 96,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.0
+  },
+  {
+   "timeUtc": "2016-08-08T14:00:00Z",
+   "tempC": 33.3,
+   "rhPct": 21,
+   "windSpeedMs": 0.51,
+   "windFromDeg": 281,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 4.7
+  },
+  {
+   "timeUtc": "2016-08-08T15:00:00Z",
+   "tempC": 33.7,
+   "rhPct": 21,
+   "windSpeedMs": 1.77,
+   "windFromDeg": 286,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.0
+  },
+  {
+   "timeUtc": "2016-08-08T16:00:00Z",
+   "tempC": 33.6,
+   "rhPct": 21,
+   "windSpeedMs": 2.56,
+   "windFromDeg": 291,
+   "cloudPct": 1,
+   "precipMm": 0.0,
+   "gustMs": 6.0
+  },
+  {
+   "timeUtc": "2016-08-08T17:00:00Z",
+   "tempC": 32.9,
+   "rhPct": 23,
+   "windSpeedMs": 2.91,
+   "windFromDeg": 297,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.8
+  },
+  {
+   "timeUtc": "2016-08-08T18:00:00Z",
+   "tempC": 31.7,
+   "rhPct": 27,
+   "windSpeedMs": 2.42,
+   "windFromDeg": 308,
+   "cloudPct": 1,
+   "precipMm": 0.0,
+   "gustMs": 7.0
+  },
+  {
+   "timeUtc": "2016-08-08T19:00:00Z",
+   "tempC": 30.4,
+   "rhPct": 32,
+   "windSpeedMs": 2.22,
+   "windFromDeg": 324,
+   "cloudPct": 2,
+   "precipMm": 0.0,
+   "gustMs": 6.1
+  },
+  {
+   "timeUtc": "2016-08-08T20:00:00Z",
+   "tempC": 27.8,
+   "rhPct": 41,
+   "windSpeedMs": 2.82,
+   "windFromDeg": 343,
+   "cloudPct": 2,
+   "precipMm": 0.0,
+   "gustMs": 5.4
+  },
+  {
+   "timeUtc": "2016-08-08T21:00:00Z",
+   "tempC": 25.4,
+   "rhPct": 45,
+   "windSpeedMs": 3.14,
+   "windFromDeg": 9,
+   "cloudPct": 1,
+   "precipMm": 0.0,
+   "gustMs": 5.6
+  },
+  {
+   "timeUtc": "2016-08-08T22:00:00Z",
+   "tempC": 23.6,
+   "rhPct": 49,
+   "windSpeedMs": 2.44,
+   "windFromDeg": 35,
+   "cloudPct": 20,
+   "precipMm": 0.0,
+   "gustMs": 6.0
+  },
+  {
+   "timeUtc": "2016-08-08T23:00:00Z",
+   "tempC": 22.1,
+   "rhPct": 53,
+   "windSpeedMs": 2.56,
+   "windFromDeg": 39,
+   "cloudPct": 9,
+   "precipMm": 0.0,
+   "gustMs": 6.5
+  },
+  {
+   "timeUtc": "2016-08-09T00:00:00Z",
+   "tempC": 21.2,
+   "rhPct": 55,
+   "windSpeedMs": 2.34,
+   "windFromDeg": 40,
+   "cloudPct": 6,
+   "precipMm": 0.0,
+   "gustMs": 6.8
+  },
+  {
+   "timeUtc": "2016-08-09T01:00:00Z",
+   "tempC": 20.6,
+   "rhPct": 55,
+   "windSpeedMs": 2.27,
+   "windFromDeg": 41,
+   "cloudPct": 2,
+   "precipMm": 0.0,
+   "gustMs": 7.2
+  },
+  {
+   "timeUtc": "2016-08-09T02:00:00Z",
+   "tempC": 20.3,
+   "rhPct": 55,
+   "windSpeedMs": 2.4,
+   "windFromDeg": 45,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.2
+  },
+  {
+   "timeUtc": "2016-08-09T03:00:00Z",
+   "tempC": 19.8,
+   "rhPct": 57,
+   "windSpeedMs": 2.5,
+   "windFromDeg": 53,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.1
+  },
+  {
+   "timeUtc": "2016-08-09T04:00:00Z",
+   "tempC": 19.0,
+   "rhPct": 62,
+   "windSpeedMs": 2.39,
+   "windFromDeg": 57,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.4
+  },
+  {
+   "timeUtc": "2016-08-09T05:00:00Z",
+   "tempC": 18.1,
+   "rhPct": 67,
+   "windSpeedMs": 2.28,
+   "windFromDeg": 61,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.3
+  },
+  {
+   "timeUtc": "2016-08-09T06:00:00Z",
+   "tempC": 17.3,
+   "rhPct": 73,
+   "windSpeedMs": 2.28,
+   "windFromDeg": 61,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.8
+  },
+  {
+   "timeUtc": "2016-08-09T07:00:00Z",
+   "tempC": 18.7,
+   "rhPct": 74,
+   "windSpeedMs": 2.77,
+   "windFromDeg": 64,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.4
+  },
+  {
+   "timeUtc": "2016-08-09T08:00:00Z",
+   "tempC": 22.6,
+   "rhPct": 56,
+   "windSpeedMs": 1.87,
+   "windFromDeg": 74,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.3
+  },
+  {
+   "timeUtc": "2016-08-09T09:00:00Z",
+   "tempC": 24.6,
+   "rhPct": 47,
+   "windSpeedMs": 1.8,
+   "windFromDeg": 93,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 4.6
+  },
+  {
+   "timeUtc": "2016-08-09T10:00:00Z",
+   "tempC": 26.0,
+   "rhPct": 42,
+   "windSpeedMs": 0.71,
+   "windFromDeg": 98,
+   "cloudPct": 3,
+   "precipMm": 0.0,
+   "gustMs": 4.5
+  },
+  {
+   "timeUtc": "2016-08-09T11:00:00Z",
+   "tempC": 27.3,
+   "rhPct": 39,
+   "windSpeedMs": 0.45,
+   "windFromDeg": 333,
+   "cloudPct": 37,
+   "precipMm": 0.0,
+   "gustMs": 4.2
+  },
+  {
+   "timeUtc": "2016-08-09T12:00:00Z",
+   "tempC": 28.3,
+   "rhPct": 36,
+   "windSpeedMs": 1.3,
+   "windFromDeg": 328,
+   "cloudPct": 29,
+   "precipMm": 0.0,
+   "gustMs": 4.9
+  },
+  {
+   "timeUtc": "2016-08-09T13:00:00Z",
+   "tempC": 29.0,
+   "rhPct": 33,
+   "windSpeedMs": 1.66,
+   "windFromDeg": 335,
+   "cloudPct": 17,
+   "precipMm": 0.0,
+   "gustMs": 5.7
+  },
+  {
+   "timeUtc": "2016-08-09T14:00:00Z",
+   "tempC": 29.3,
+   "rhPct": 32,
+   "windSpeedMs": 1.97,
+   "windFromDeg": 336,
+   "cloudPct": 24,
+   "precipMm": 0.0,
+   "gustMs": 6.1
+  },
+  {
+   "timeUtc": "2016-08-09T15:00:00Z",
+   "tempC": 29.2,
+   "rhPct": 32,
+   "windSpeedMs": 2.56,
+   "windFromDeg": 339,
+   "cloudPct": 57,
+   "precipMm": 0.0,
+   "gustMs": 6.6
+  },
+  {
+   "timeUtc": "2016-08-09T16:00:00Z",
+   "tempC": 29.0,
+   "rhPct": 30,
+   "windSpeedMs": 3.24,
+   "windFromDeg": 351,
+   "cloudPct": 68,
+   "precipMm": 0.0,
+   "gustMs": 7.6
+  },
+  {
+   "timeUtc": "2016-08-09T17:00:00Z",
+   "tempC": 28.4,
+   "rhPct": 30,
+   "windSpeedMs": 4.01,
+   "windFromDeg": 4,
+   "cloudPct": 42,
+   "precipMm": 0.0,
+   "gustMs": 8.4
+  },
+  {
+   "timeUtc": "2016-08-09T18:00:00Z",
+   "tempC": 27.1,
+   "rhPct": 35,
+   "windSpeedMs": 4.49,
+   "windFromDeg": 21,
+   "cloudPct": 10,
+   "precipMm": 0.0,
+   "gustMs": 9.2
+  },
+  {
+   "timeUtc": "2016-08-09T19:00:00Z",
+   "tempC": 25.8,
+   "rhPct": 38,
+   "windSpeedMs": 4.34,
+   "windFromDeg": 26,
+   "cloudPct": 3,
+   "precipMm": 0.0,
+   "gustMs": 10.4
+  },
+  {
+   "timeUtc": "2016-08-09T20:00:00Z",
+   "tempC": 24.5,
+   "rhPct": 39,
+   "windSpeedMs": 4.19,
+   "windFromDeg": 33,
+   "cloudPct": 1,
+   "precipMm": 0.0,
+   "gustMs": 10.3
+  },
+  {
+   "timeUtc": "2016-08-09T21:00:00Z",
+   "tempC": 23.4,
+   "rhPct": 40,
+   "windSpeedMs": 4.26,
+   "windFromDeg": 51,
+   "cloudPct": 2,
+   "precipMm": 0.0,
+   "gustMs": 10.6
+  },
+  {
+   "timeUtc": "2016-08-09T22:00:00Z",
+   "tempC": 22.6,
+   "rhPct": 40,
+   "windSpeedMs": 4.31,
+   "windFromDeg": 68,
+   "cloudPct": 3,
+   "precipMm": 0.0,
+   "gustMs": 11.0
+  },
+  {
+   "timeUtc": "2016-08-09T23:00:00Z",
+   "tempC": 21.7,
+   "rhPct": 41,
+   "windSpeedMs": 4.81,
+   "windFromDeg": 78,
+   "cloudPct": 3,
+   "precipMm": 0.0,
+   "gustMs": 11.5
+  },
+  {
+   "timeUtc": "2016-08-10T00:00:00Z",
+   "tempC": 20.7,
+   "rhPct": 43,
+   "windSpeedMs": 5.38,
+   "windFromDeg": 80,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.0
+  },
+  {
+   "timeUtc": "2016-08-10T01:00:00Z",
+   "tempC": 19.6,
+   "rhPct": 45,
+   "windSpeedMs": 5.36,
+   "windFromDeg": 81,
+   "cloudPct": 1,
+   "precipMm": 0.0,
+   "gustMs": 12.5
+  },
+  {
+   "timeUtc": "2016-08-10T02:00:00Z",
+   "tempC": 18.7,
+   "rhPct": 47,
+   "windSpeedMs": 5.25,
+   "windFromDeg": 82,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.5
+  },
+  {
+   "timeUtc": "2016-08-10T03:00:00Z",
+   "tempC": 17.8,
+   "rhPct": 49,
+   "windSpeedMs": 4.95,
+   "windFromDeg": 82,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.3
+  },
+  {
+   "timeUtc": "2016-08-10T04:00:00Z",
+   "tempC": 17.1,
+   "rhPct": 51,
+   "windSpeedMs": 4.96,
+   "windFromDeg": 81,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 11.8
+  },
+  {
+   "timeUtc": "2016-08-10T05:00:00Z",
+   "tempC": 16.4,
+   "rhPct": 52,
+   "windSpeedMs": 4.96,
+   "windFromDeg": 81,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 11.4
+  },
+  {
+   "timeUtc": "2016-08-10T06:00:00Z",
+   "tempC": 15.9,
+   "rhPct": 52,
+   "windSpeedMs": 4.96,
+   "windFromDeg": 81,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 11.6
+  },
+  {
+   "timeUtc": "2016-08-10T07:00:00Z",
+   "tempC": 16.1,
+   "rhPct": 50,
+   "windSpeedMs": 5.28,
+   "windFromDeg": 80,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.4
+  },
+  {
+   "timeUtc": "2016-08-10T08:00:00Z",
+   "tempC": 17.2,
+   "rhPct": 42,
+   "windSpeedMs": 6.07,
+   "windFromDeg": 81,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 13.7
+  },
+  {
+   "timeUtc": "2016-08-10T09:00:00Z",
+   "tempC": 18.9,
+   "rhPct": 35,
+   "windSpeedMs": 6.46,
+   "windFromDeg": 82,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 14.5
+  },
+  {
+   "timeUtc": "2016-08-10T10:00:00Z",
+   "tempC": 20.6,
+   "rhPct": 31,
+   "windSpeedMs": 5.85,
+   "windFromDeg": 82,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 14.7
+  },
+  {
+   "timeUtc": "2016-08-10T11:00:00Z",
+   "tempC": 22.5,
+   "rhPct": 27,
+   "windSpeedMs": 5.77,
+   "windFromDeg": 81,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 14.4
+  },
+  {
+   "timeUtc": "2016-08-10T12:00:00Z",
+   "tempC": 24.1,
+   "rhPct": 24,
+   "windSpeedMs": 5.45,
+   "windFromDeg": 83,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 13.9
+  },
+  {
+   "timeUtc": "2016-08-10T13:00:00Z",
+   "tempC": 25.5,
+   "rhPct": 22,
+   "windSpeedMs": 4.94,
+   "windFromDeg": 83,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 13.2
+  },
+  {
+   "timeUtc": "2016-08-10T14:00:00Z",
+   "tempC": 26.5,
+   "rhPct": 20,
+   "windSpeedMs": 4.52,
+   "windFromDeg": 85,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.1
+  },
+  {
+   "timeUtc": "2016-08-10T15:00:00Z",
+   "tempC": 27.1,
+   "rhPct": 18,
+   "windSpeedMs": 4.2,
+   "windFromDeg": 89,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 11.1
+  },
+  {
+   "timeUtc": "2016-08-10T16:00:00Z",
+   "tempC": 27.4,
+   "rhPct": 18,
+   "windSpeedMs": 3.81,
+   "windFromDeg": 95,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 10.2
+  },
+  {
+   "timeUtc": "2016-08-10T17:00:00Z",
+   "tempC": 27.3,
+   "rhPct": 17,
+   "windSpeedMs": 3.55,
+   "windFromDeg": 100,
+   "cloudPct": 4,
+   "precipMm": 0.0,
+   "gustMs": 9.2
+  },
+  {
+   "timeUtc": "2016-08-10T18:00:00Z",
+   "tempC": 26.8,
+   "rhPct": 18,
+   "windSpeedMs": 2.69,
+   "windFromDeg": 105,
+   "cloudPct": 2,
+   "precipMm": 0.0,
+   "gustMs": 8.0
+  },
+  {
+   "timeUtc": "2016-08-10T19:00:00Z",
+   "tempC": 25.4,
+   "rhPct": 20,
+   "windSpeedMs": 2.47,
+   "windFromDeg": 111,
+   "cloudPct": 12,
+   "precipMm": 0.0,
+   "gustMs": 6.4
+  },
+  {
+   "timeUtc": "2016-08-10T20:00:00Z",
+   "tempC": 23.5,
+   "rhPct": 24,
+   "windSpeedMs": 2.45,
+   "windFromDeg": 102,
+   "cloudPct": 10,
+   "precipMm": 0.0,
+   "gustMs": 5.7
+  },
+  {
+   "timeUtc": "2016-08-10T21:00:00Z",
+   "tempC": 21.4,
+   "rhPct": 28,
+   "windSpeedMs": 3.03,
+   "windFromDeg": 82,
+   "cloudPct": 1,
+   "precipMm": 0.0,
+   "gustMs": 6.1
+  },
+  {
+   "timeUtc": "2016-08-10T22:00:00Z",
+   "tempC": 20.2,
+   "rhPct": 27,
+   "windSpeedMs": 3.01,
+   "windFromDeg": 84,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.8
+  },
+  {
+   "timeUtc": "2016-08-10T23:00:00Z",
+   "tempC": 19.7,
+   "rhPct": 29,
+   "windSpeedMs": 4.32,
+   "windFromDeg": 85,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 9.4
+  },
+  {
+   "timeUtc": "2016-08-11T00:00:00Z",
+   "tempC": 18.8,
+   "rhPct": 34,
+   "windSpeedMs": 5.02,
+   "windFromDeg": 84,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 11.7
+  },
+  {
+   "timeUtc": "2016-08-11T01:00:00Z",
+   "tempC": 17.5,
+   "rhPct": 40,
+   "windSpeedMs": 5.14,
+   "windFromDeg": 83,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.7
+  },
+  {
+   "timeUtc": "2016-08-11T02:00:00Z",
+   "tempC": 16.6,
+   "rhPct": 42,
+   "windSpeedMs": 4.95,
+   "windFromDeg": 82,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.7
+  },
+  {
+   "timeUtc": "2016-08-11T03:00:00Z",
+   "tempC": 15.7,
+   "rhPct": 43,
+   "windSpeedMs": 4.95,
+   "windFromDeg": 82,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.6
+  },
+  {
+   "timeUtc": "2016-08-11T04:00:00Z",
+   "tempC": 15.1,
+   "rhPct": 44,
+   "windSpeedMs": 4.94,
+   "windFromDeg": 83,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.2
+  },
+  {
+   "timeUtc": "2016-08-11T05:00:00Z",
+   "tempC": 14.6,
+   "rhPct": 44,
+   "windSpeedMs": 4.95,
+   "windFromDeg": 82,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.0
+  },
+  {
+   "timeUtc": "2016-08-11T06:00:00Z",
+   "tempC": 14.2,
+   "rhPct": 46,
+   "windSpeedMs": 5.04,
+   "windFromDeg": 83,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 11.8
+  },
+  {
+   "timeUtc": "2016-08-11T07:00:00Z",
+   "tempC": 14.8,
+   "rhPct": 48,
+   "windSpeedMs": 5.22,
+   "windFromDeg": 86,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.4
+  },
+  {
+   "timeUtc": "2016-08-11T08:00:00Z",
+   "tempC": 16.4,
+   "rhPct": 41,
+   "windSpeedMs": 6.1,
+   "windFromDeg": 89,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 13.5
+  },
+  {
+   "timeUtc": "2016-08-11T09:00:00Z",
+   "tempC": 18.3,
+   "rhPct": 36,
+   "windSpeedMs": 6.1,
+   "windFromDeg": 91,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 14.1
+  },
+  {
+   "timeUtc": "2016-08-11T10:00:00Z",
+   "tempC": 20.3,
+   "rhPct": 31,
+   "windSpeedMs": 6.0,
+   "windFromDeg": 90,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 14.0
+  },
+  {
+   "timeUtc": "2016-08-11T11:00:00Z",
+   "tempC": 22.3,
+   "rhPct": 28,
+   "windSpeedMs": 6.02,
+   "windFromDeg": 95,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 14.2
+  },
+  {
+   "timeUtc": "2016-08-11T12:00:00Z",
+   "tempC": 24.2,
+   "rhPct": 25,
+   "windSpeedMs": 5.49,
+   "windFromDeg": 100,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 13.8
+  },
+  {
+   "timeUtc": "2016-08-11T13:00:00Z",
+   "tempC": 25.7,
+   "rhPct": 24,
+   "windSpeedMs": 4.68,
+   "windFromDeg": 110,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 12.6
+  },
+  {
+   "timeUtc": "2016-08-11T14:00:00Z",
+   "tempC": 26.9,
+   "rhPct": 23,
+   "windSpeedMs": 3.5,
+   "windFromDeg": 121,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 10.8
+  },
+  {
+   "timeUtc": "2016-08-11T15:00:00Z",
+   "tempC": 27.5,
+   "rhPct": 23,
+   "windSpeedMs": 2.62,
+   "windFromDeg": 130,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.5
+  },
+  {
+   "timeUtc": "2016-08-11T16:00:00Z",
+   "tempC": 27.8,
+   "rhPct": 22,
+   "windSpeedMs": 2.06,
+   "windFromDeg": 129,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.7
+  },
+  {
+   "timeUtc": "2016-08-11T17:00:00Z",
+   "tempC": 27.8,
+   "rhPct": 21,
+   "windSpeedMs": 1.44,
+   "windFromDeg": 124,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.4
+  },
+  {
+   "timeUtc": "2016-08-11T18:00:00Z",
+   "tempC": 27.5,
+   "rhPct": 20,
+   "windSpeedMs": 0.94,
+   "windFromDeg": 122,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 3.9
+  },
+  {
+   "timeUtc": "2016-08-11T19:00:00Z",
+   "tempC": 26.3,
+   "rhPct": 37,
+   "windSpeedMs": 0.71,
+   "windFromDeg": 98,
+   "cloudPct": 4,
+   "precipMm": 0.0,
+   "gustMs": 2.5
+  },
+  {
+   "timeUtc": "2016-08-11T20:00:00Z",
+   "tempC": 24.9,
+   "rhPct": 31,
+   "windSpeedMs": 1.06,
+   "windFromDeg": 49,
+   "cloudPct": 4,
+   "precipMm": 0.0,
+   "gustMs": 2.5
+  },
+  {
+   "timeUtc": "2016-08-11T21:00:00Z",
+   "tempC": 21.8,
+   "rhPct": 37,
+   "windSpeedMs": 2.24,
+   "windFromDeg": 63,
+   "cloudPct": 3,
+   "precipMm": 0.0,
+   "gustMs": 4.4
+  },
+  {
+   "timeUtc": "2016-08-11T22:00:00Z",
+   "tempC": 19.9,
+   "rhPct": 37,
+   "windSpeedMs": 3.35,
+   "windFromDeg": 80,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.6
+  },
+  {
+   "timeUtc": "2016-08-11T23:00:00Z",
+   "tempC": 18.4,
+   "rhPct": 36,
+   "windSpeedMs": 2.89,
+   "windFromDeg": 76,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.9
+  },
+  {
+   "timeUtc": "2016-08-12T00:00:00Z",
+   "tempC": 17.4,
+   "rhPct": 35,
+   "windSpeedMs": 2.55,
+   "windFromDeg": 79,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.5
+  },
+  {
+   "timeUtc": "2016-08-12T01:00:00Z",
+   "tempC": 16.7,
+   "rhPct": 36,
+   "windSpeedMs": 2.84,
+   "windFromDeg": 80,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.1
+  },
+  {
+   "timeUtc": "2016-08-12T02:00:00Z",
+   "tempC": 16.2,
+   "rhPct": 40,
+   "windSpeedMs": 3.03,
+   "windFromDeg": 82,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.4
+  },
+  {
+   "timeUtc": "2016-08-12T03:00:00Z",
+   "tempC": 15.7,
+   "rhPct": 44,
+   "windSpeedMs": 3.22,
+   "windFromDeg": 83,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.7
+  },
+  {
+   "timeUtc": "2016-08-12T04:00:00Z",
+   "tempC": 15.3,
+   "rhPct": 49,
+   "windSpeedMs": 3.44,
+   "windFromDeg": 82,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.9
+  },
+  {
+   "timeUtc": "2016-08-12T05:00:00Z",
+   "tempC": 15.0,
+   "rhPct": 52,
+   "windSpeedMs": 3.34,
+   "windFromDeg": 81,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.0
+  },
+  {
+   "timeUtc": "2016-08-12T06:00:00Z",
+   "tempC": 14.7,
+   "rhPct": 56,
+   "windSpeedMs": 3.42,
+   "windFromDeg": 83,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.0
+  },
+  {
+   "timeUtc": "2016-08-12T07:00:00Z",
+   "tempC": 16.2,
+   "rhPct": 55,
+   "windSpeedMs": 4.02,
+   "windFromDeg": 84,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.4
+  },
+  {
+   "timeUtc": "2016-08-12T08:00:00Z",
+   "tempC": 19.2,
+   "rhPct": 43,
+   "windSpeedMs": 4.4,
+   "windFromDeg": 89,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 9.4
+  },
+  {
+   "timeUtc": "2016-08-12T09:00:00Z",
+   "tempC": 21.3,
+   "rhPct": 37,
+   "windSpeedMs": 4.3,
+   "windFromDeg": 93,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 9.8
+  },
+  {
+   "timeUtc": "2016-08-12T10:00:00Z",
+   "tempC": 23.4,
+   "rhPct": 33,
+   "windSpeedMs": 3.71,
+   "windFromDeg": 93,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 9.6
+  },
+  {
+   "timeUtc": "2016-08-12T11:00:00Z",
+   "tempC": 25.3,
+   "rhPct": 30,
+   "windSpeedMs": 2.67,
+   "windFromDeg": 103,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.7
+  },
+  {
+   "timeUtc": "2016-08-12T12:00:00Z",
+   "tempC": 27.0,
+   "rhPct": 28,
+   "windSpeedMs": 1.56,
+   "windFromDeg": 130,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.3
+  },
+  {
+   "timeUtc": "2016-08-12T13:00:00Z",
+   "tempC": 28.3,
+   "rhPct": 26,
+   "windSpeedMs": 1.28,
+   "windFromDeg": 219,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.6
+  },
+  {
+   "timeUtc": "2016-08-12T14:00:00Z",
+   "tempC": 29.2,
+   "rhPct": 25,
+   "windSpeedMs": 2.5,
+   "windFromDeg": 254,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 5.5
+  },
+  {
+   "timeUtc": "2016-08-12T15:00:00Z",
+   "tempC": 29.5,
+   "rhPct": 25,
+   "windSpeedMs": 3.31,
+   "windFromDeg": 265,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.1
+  },
+  {
+   "timeUtc": "2016-08-12T16:00:00Z",
+   "tempC": 29.3,
+   "rhPct": 25,
+   "windSpeedMs": 3.5,
+   "windFromDeg": 272,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 7.9
+  },
+  {
+   "timeUtc": "2016-08-12T17:00:00Z",
+   "tempC": 28.5,
+   "rhPct": 26,
+   "windSpeedMs": 3.44,
+   "windFromDeg": 278,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.3
+  },
+  {
+   "timeUtc": "2016-08-12T18:00:00Z",
+   "tempC": 27.2,
+   "rhPct": 29,
+   "windSpeedMs": 2.96,
+   "windFromDeg": 282,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 8.2
+  },
+  {
+   "timeUtc": "2016-08-12T19:00:00Z",
+   "tempC": 25.5,
+   "rhPct": 34,
+   "windSpeedMs": 1.65,
+   "windFromDeg": 284,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 6.5
+  },
+  {
+   "timeUtc": "2016-08-12T20:00:00Z",
+   "tempC": 23.5,
+   "rhPct": 45,
+   "windSpeedMs": 1.41,
+   "windFromDeg": 278,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 3.5
+  },
+  {
+   "timeUtc": "2016-08-12T21:00:00Z",
+   "tempC": 23.0,
+   "rhPct": 40,
+   "windSpeedMs": 0.86,
+   "windFromDeg": 306,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 2.5
+  },
+  {
+   "timeUtc": "2016-08-12T22:00:00Z",
+   "tempC": 22.1,
+   "rhPct": 43,
+   "windSpeedMs": 0.45,
+   "windFromDeg": 63,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 1.8
+  },
+  {
+   "timeUtc": "2016-08-12T23:00:00Z",
+   "tempC": 21.2,
+   "rhPct": 46,
+   "windSpeedMs": 1.0,
+   "windFromDeg": 53,
+   "cloudPct": 0,
+   "precipMm": 0.0,
+   "gustMs": 1.7
+  }
+ ],
+ "weatherEra5Land": [
+  {
+   "timeUtc": "2016-08-06T00:00:00Z",
+   "tempC": 17.3,
+   "rhPct": 61,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T01:00:00Z",
+   "tempC": 16.9,
+   "rhPct": 63,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T02:00:00Z",
+   "tempC": 16.7,
+   "rhPct": 65,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T03:00:00Z",
+   "tempC": 16.5,
+   "rhPct": 65,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T04:00:00Z",
+   "tempC": 16.1,
+   "rhPct": 65,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T05:00:00Z",
+   "tempC": 15.7,
+   "rhPct": 65,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T06:00:00Z",
+   "tempC": 15.5,
+   "rhPct": 67,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T07:00:00Z",
+   "tempC": 17.5,
+   "rhPct": 62,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T08:00:00Z",
+   "tempC": 20.6,
+   "rhPct": 47,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T09:00:00Z",
+   "tempC": 22.5,
+   "rhPct": 39,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T10:00:00Z",
+   "tempC": 24.4,
+   "rhPct": 34,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T11:00:00Z",
+   "tempC": 26.1,
+   "rhPct": 31,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T12:00:00Z",
+   "tempC": 27.8,
+   "rhPct": 27,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T13:00:00Z",
+   "tempC": 29.2,
+   "rhPct": 24,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T14:00:00Z",
+   "tempC": 30.3,
+   "rhPct": 23,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T15:00:00Z",
+   "tempC": 31.0,
+   "rhPct": 21,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T16:00:00Z",
+   "tempC": 31.3,
+   "rhPct": 21,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T17:00:00Z",
+   "tempC": 31.4,
+   "rhPct": 20,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T18:00:00Z",
+   "tempC": 31.0,
+   "rhPct": 22,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T19:00:00Z",
+   "tempC": 29.7,
+   "rhPct": 33,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T20:00:00Z",
+   "tempC": 28.8,
+   "rhPct": 24,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T21:00:00Z",
+   "tempC": 25.6,
+   "rhPct": 34,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T22:00:00Z",
+   "tempC": 21.8,
+   "rhPct": 45,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-06T23:00:00Z",
+   "tempC": 19.8,
+   "rhPct": 49,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T00:00:00Z",
+   "tempC": 18.8,
+   "rhPct": 49,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T01:00:00Z",
+   "tempC": 18.7,
+   "rhPct": 46,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T02:00:00Z",
+   "tempC": 18.5,
+   "rhPct": 43,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T03:00:00Z",
+   "tempC": 18.0,
+   "rhPct": 43,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T04:00:00Z",
+   "tempC": 17.7,
+   "rhPct": 42,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T05:00:00Z",
+   "tempC": 17.6,
+   "rhPct": 41,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T06:00:00Z",
+   "tempC": 17.6,
+   "rhPct": 42,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T07:00:00Z",
+   "tempC": 19.1,
+   "rhPct": 45,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T08:00:00Z",
+   "tempC": 22.4,
+   "rhPct": 37,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T09:00:00Z",
+   "tempC": 24.7,
+   "rhPct": 31,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T10:00:00Z",
+   "tempC": 26.6,
+   "rhPct": 28,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T11:00:00Z",
+   "tempC": 28.5,
+   "rhPct": 26,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T12:00:00Z",
+   "tempC": 30.2,
+   "rhPct": 23,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T13:00:00Z",
+   "tempC": 31.7,
+   "rhPct": 21,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T14:00:00Z",
+   "tempC": 32.8,
+   "rhPct": 19,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T15:00:00Z",
+   "tempC": 33.6,
+   "rhPct": 18,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T16:00:00Z",
+   "tempC": 33.9,
+   "rhPct": 17,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T17:00:00Z",
+   "tempC": 33.9,
+   "rhPct": 18,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T18:00:00Z",
+   "tempC": 33.4,
+   "rhPct": 22,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T19:00:00Z",
+   "tempC": 33.1,
+   "rhPct": 19,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T20:00:00Z",
+   "tempC": 31.6,
+   "rhPct": 19,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T21:00:00Z",
+   "tempC": 26.9,
+   "rhPct": 32,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T22:00:00Z",
+   "tempC": 23.4,
+   "rhPct": 42,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-07T23:00:00Z",
+   "tempC": 21.8,
+   "rhPct": 45,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T00:00:00Z",
+   "tempC": 20.9,
+   "rhPct": 47,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T01:00:00Z",
+   "tempC": 20.4,
+   "rhPct": 46,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T02:00:00Z",
+   "tempC": 19.6,
+   "rhPct": 46,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T03:00:00Z",
+   "tempC": 18.9,
+   "rhPct": 46,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T04:00:00Z",
+   "tempC": 18.5,
+   "rhPct": 45,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T05:00:00Z",
+   "tempC": 18.1,
+   "rhPct": 46,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T06:00:00Z",
+   "tempC": 17.9,
+   "rhPct": 51,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T07:00:00Z",
+   "tempC": 19.7,
+   "rhPct": 52,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T08:00:00Z",
+   "tempC": 24.3,
+   "rhPct": 38,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T09:00:00Z",
+   "tempC": 26.5,
+   "rhPct": 31,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T10:00:00Z",
+   "tempC": 28.1,
+   "rhPct": 28,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T11:00:00Z",
+   "tempC": 29.8,
+   "rhPct": 26,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T12:00:00Z",
+   "tempC": 31.3,
+   "rhPct": 24,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T13:00:00Z",
+   "tempC": 32.5,
+   "rhPct": 23,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T14:00:00Z",
+   "tempC": 33.3,
+   "rhPct": 21,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T15:00:00Z",
+   "tempC": 33.7,
+   "rhPct": 21,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T16:00:00Z",
+   "tempC": 33.6,
+   "rhPct": 21,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T17:00:00Z",
+   "tempC": 32.9,
+   "rhPct": 23,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T18:00:00Z",
+   "tempC": 31.7,
+   "rhPct": 27,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T19:00:00Z",
+   "tempC": 30.4,
+   "rhPct": 32,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T20:00:00Z",
+   "tempC": 27.8,
+   "rhPct": 41,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T21:00:00Z",
+   "tempC": 25.4,
+   "rhPct": 45,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T22:00:00Z",
+   "tempC": 23.6,
+   "rhPct": 49,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-08T23:00:00Z",
+   "tempC": 22.1,
+   "rhPct": 53,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T00:00:00Z",
+   "tempC": 21.2,
+   "rhPct": 55,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T01:00:00Z",
+   "tempC": 20.6,
+   "rhPct": 55,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T02:00:00Z",
+   "tempC": 20.3,
+   "rhPct": 55,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T03:00:00Z",
+   "tempC": 19.8,
+   "rhPct": 57,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T04:00:00Z",
+   "tempC": 19.0,
+   "rhPct": 62,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T05:00:00Z",
+   "tempC": 18.1,
+   "rhPct": 67,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T06:00:00Z",
+   "tempC": 17.3,
+   "rhPct": 73,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T07:00:00Z",
+   "tempC": 18.7,
+   "rhPct": 74,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T08:00:00Z",
+   "tempC": 22.6,
+   "rhPct": 56,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T09:00:00Z",
+   "tempC": 24.6,
+   "rhPct": 47,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T10:00:00Z",
+   "tempC": 26.0,
+   "rhPct": 42,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T11:00:00Z",
+   "tempC": 27.3,
+   "rhPct": 39,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T12:00:00Z",
+   "tempC": 28.3,
+   "rhPct": 36,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T13:00:00Z",
+   "tempC": 29.0,
+   "rhPct": 33,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T14:00:00Z",
+   "tempC": 29.3,
+   "rhPct": 32,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T15:00:00Z",
+   "tempC": 29.2,
+   "rhPct": 32,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T16:00:00Z",
+   "tempC": 29.0,
+   "rhPct": 30,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T17:00:00Z",
+   "tempC": 28.4,
+   "rhPct": 30,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T18:00:00Z",
+   "tempC": 27.1,
+   "rhPct": 35,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T19:00:00Z",
+   "tempC": 25.8,
+   "rhPct": 38,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T20:00:00Z",
+   "tempC": 24.5,
+   "rhPct": 39,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T21:00:00Z",
+   "tempC": 23.4,
+   "rhPct": 40,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T22:00:00Z",
+   "tempC": 22.6,
+   "rhPct": 40,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-09T23:00:00Z",
+   "tempC": 21.7,
+   "rhPct": 41,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T00:00:00Z",
+   "tempC": 20.7,
+   "rhPct": 43,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T01:00:00Z",
+   "tempC": 19.6,
+   "rhPct": 45,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T02:00:00Z",
+   "tempC": 18.7,
+   "rhPct": 47,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T03:00:00Z",
+   "tempC": 17.8,
+   "rhPct": 49,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T04:00:00Z",
+   "tempC": 17.1,
+   "rhPct": 51,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T05:00:00Z",
+   "tempC": 16.4,
+   "rhPct": 52,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T06:00:00Z",
+   "tempC": 15.9,
+   "rhPct": 52,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T07:00:00Z",
+   "tempC": 16.1,
+   "rhPct": 50,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T08:00:00Z",
+   "tempC": 17.2,
+   "rhPct": 42,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T09:00:00Z",
+   "tempC": 18.9,
+   "rhPct": 35,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T10:00:00Z",
+   "tempC": 20.6,
+   "rhPct": 31,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T11:00:00Z",
+   "tempC": 22.5,
+   "rhPct": 27,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T12:00:00Z",
+   "tempC": 24.1,
+   "rhPct": 24,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T13:00:00Z",
+   "tempC": 25.5,
+   "rhPct": 22,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T14:00:00Z",
+   "tempC": 26.5,
+   "rhPct": 20,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T15:00:00Z",
+   "tempC": 27.1,
+   "rhPct": 18,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T16:00:00Z",
+   "tempC": 27.4,
+   "rhPct": 18,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T17:00:00Z",
+   "tempC": 27.3,
+   "rhPct": 17,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T18:00:00Z",
+   "tempC": 26.8,
+   "rhPct": 18,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T19:00:00Z",
+   "tempC": 25.4,
+   "rhPct": 20,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T20:00:00Z",
+   "tempC": 23.5,
+   "rhPct": 24,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T21:00:00Z",
+   "tempC": 21.4,
+   "rhPct": 28,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T22:00:00Z",
+   "tempC": 20.2,
+   "rhPct": 27,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-10T23:00:00Z",
+   "tempC": 19.7,
+   "rhPct": 29,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T00:00:00Z",
+   "tempC": 18.8,
+   "rhPct": 34,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T01:00:00Z",
+   "tempC": 17.5,
+   "rhPct": 40,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T02:00:00Z",
+   "tempC": 16.6,
+   "rhPct": 42,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T03:00:00Z",
+   "tempC": 15.7,
+   "rhPct": 43,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T04:00:00Z",
+   "tempC": 15.1,
+   "rhPct": 44,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T05:00:00Z",
+   "tempC": 14.6,
+   "rhPct": 44,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T06:00:00Z",
+   "tempC": 14.2,
+   "rhPct": 46,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T07:00:00Z",
+   "tempC": 14.8,
+   "rhPct": 48,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T08:00:00Z",
+   "tempC": 16.4,
+   "rhPct": 41,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T09:00:00Z",
+   "tempC": 18.3,
+   "rhPct": 36,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T10:00:00Z",
+   "tempC": 20.3,
+   "rhPct": 31,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T11:00:00Z",
+   "tempC": 22.3,
+   "rhPct": 28,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T12:00:00Z",
+   "tempC": 24.2,
+   "rhPct": 25,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T13:00:00Z",
+   "tempC": 25.7,
+   "rhPct": 24,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T14:00:00Z",
+   "tempC": 26.9,
+   "rhPct": 23,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T15:00:00Z",
+   "tempC": 27.5,
+   "rhPct": 23,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T16:00:00Z",
+   "tempC": 27.8,
+   "rhPct": 22,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T17:00:00Z",
+   "tempC": 27.8,
+   "rhPct": 21,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T18:00:00Z",
+   "tempC": 27.5,
+   "rhPct": 20,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T19:00:00Z",
+   "tempC": 26.3,
+   "rhPct": 37,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T20:00:00Z",
+   "tempC": 24.9,
+   "rhPct": 31,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T21:00:00Z",
+   "tempC": 21.8,
+   "rhPct": 37,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T22:00:00Z",
+   "tempC": 19.9,
+   "rhPct": 37,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-11T23:00:00Z",
+   "tempC": 18.4,
+   "rhPct": 36,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T00:00:00Z",
+   "tempC": 17.4,
+   "rhPct": 35,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T01:00:00Z",
+   "tempC": 16.7,
+   "rhPct": 36,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T02:00:00Z",
+   "tempC": 16.2,
+   "rhPct": 40,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T03:00:00Z",
+   "tempC": 15.7,
+   "rhPct": 44,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T04:00:00Z",
+   "tempC": 15.3,
+   "rhPct": 49,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T05:00:00Z",
+   "tempC": 15.0,
+   "rhPct": 52,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T06:00:00Z",
+   "tempC": 14.7,
+   "rhPct": 56,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T07:00:00Z",
+   "tempC": 16.2,
+   "rhPct": 55,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T08:00:00Z",
+   "tempC": 19.2,
+   "rhPct": 43,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T09:00:00Z",
+   "tempC": 21.3,
+   "rhPct": 37,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T10:00:00Z",
+   "tempC": 23.4,
+   "rhPct": 33,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T11:00:00Z",
+   "tempC": 25.3,
+   "rhPct": 30,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T12:00:00Z",
+   "tempC": 27.0,
+   "rhPct": 28,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T13:00:00Z",
+   "tempC": 28.3,
+   "rhPct": 26,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T14:00:00Z",
+   "tempC": 29.2,
+   "rhPct": 25,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T15:00:00Z",
+   "tempC": 29.5,
+   "rhPct": 25,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T16:00:00Z",
+   "tempC": 29.3,
+   "rhPct": 25,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T17:00:00Z",
+   "tempC": 28.5,
+   "rhPct": 26,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T18:00:00Z",
+   "tempC": 27.2,
+   "rhPct": 29,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T19:00:00Z",
+   "tempC": 25.5,
+   "rhPct": 34,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T20:00:00Z",
+   "tempC": 23.5,
+   "rhPct": 45,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T21:00:00Z",
+   "tempC": 23.0,
+   "rhPct": 40,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T22:00:00Z",
+   "tempC": 22.1,
+   "rhPct": 43,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  },
+  {
+   "timeUtc": "2016-08-12T23:00:00Z",
+   "tempC": 21.2,
+   "rhPct": 46,
+   "windSpeedMs": null,
+   "windFromDeg": null,
+   "cloudPct": null,
+   "precipMm": null
+  }
+ ]
+}

@@ -1,0 +1,2127 @@
+{
+ "id": "pt-firesprd-2026-10-19",
+ "created": "2026-10-19",
+ "git": "5ecbf6a",
+ "adopt": false,
+ "objective": "mean over fires of the weighted interval cost (1 − Sørensen of new cells + 0.5 |log growth ratio|), plus 0.01 Σ x² prior",
+ "settings": {
+  "generations": 60,
+  "foldGenerations": 40,
+  "bootstrap": 30,
+  "bootGenerations": 20,
+  "seed": 1,
+  "weather": "era5",
+  "moisture": "nfdrs"
+ },
+ "best": {
+  "rosAdjLitter": 0.9686,
+  "rosAdjUnderstory": 1.0002,
+  "rosAdjShrub": 0.5606,
+  "rosAdjGrass": 0.4607,
+  "windAdj": 2.7041,
+  "holdWidthPerFlame": 1.9878,
+  "deadMoistureOffset": 0.0011
+ },
+ "bestObjective": 1.149127416963902,
+ "samples": [
+  {
+   "rosAdjLitter": 0.602,
+   "rosAdjUnderstory": 0.891,
+   "rosAdjShrub": 0.561,
+   "rosAdjGrass": 0.2902,
+   "windAdj": 2.7927,
+   "holdWidthPerFlame": 1.9675,
+   "deadMoistureOffset": 0.0005
+  },
+  {
+   "rosAdjLitter": 1.2056,
+   "rosAdjUnderstory": 0.9996,
+   "rosAdjShrub": 0.6188,
+   "rosAdjGrass": 0.4821,
+   "windAdj": 2.5902,
+   "holdWidthPerFlame": 1.5752,
+   "deadMoistureOffset": 0.004
+  },
+  {
+   "rosAdjLitter": 1.307,
+   "rosAdjUnderstory": 0.8752,
+   "rosAdjShrub": 0.6969,
+   "rosAdjGrass": 0.5521,
+   "windAdj": 2.4733,
+   "holdWidthPerFlame": 1.7417,
+   "deadMoistureOffset": 0.0077
+  },
+  {
+   "rosAdjLitter": 1.0938,
+   "rosAdjUnderstory": 1.2263,
+   "rosAdjShrub": 0.5355,
+   "rosAdjGrass": 0.4596,
+   "windAdj": 2.4845,
+   "holdWidthPerFlame": 1.1647,
+   "deadMoistureOffset": 0.0029
+  },
+  {
+   "rosAdjLitter": 0.8823,
+   "rosAdjUnderstory": 0.931,
+   "rosAdjShrub": 0.5707,
+   "rosAdjGrass": 0.4815,
+   "windAdj": 2.9875,
+   "holdWidthPerFlame": 1.9763,
+   "deadMoistureOffset": 0.0052
+  },
+  {
+   "rosAdjLitter": 0.8272,
+   "rosAdjUnderstory": 0.7549,
+   "rosAdjShrub": 0.6302,
+   "rosAdjGrass": 0.5071,
+   "windAdj": 1.28,
+   "holdWidthPerFlame": 0.7536,
+   "deadMoistureOffset": -0.0022
+  },
+  {
+   "rosAdjLitter": 1.2543,
+   "rosAdjUnderstory": 1.1043,
+   "rosAdjShrub": 0.7015,
+   "rosAdjGrass": 0.5379,
+   "windAdj": 2.489,
+   "holdWidthPerFlame": 1.9225,
+   "deadMoistureOffset": 0.0006
+  },
+  {
+   "rosAdjLitter": 0.9016,
+   "rosAdjUnderstory": 0.7188,
+   "rosAdjShrub": 0.4961,
+   "rosAdjGrass": 0.3868,
+   "windAdj": 3.1054,
+   "holdWidthPerFlame": 1.9366,
+   "deadMoistureOffset": 0.0063
+  },
+  {
+   "rosAdjLitter": 0.8062,
+   "rosAdjUnderstory": 0.8365,
+   "rosAdjShrub": 0.6085,
+   "rosAdjGrass": 0.2814,
+   "windAdj": 3.2062,
+   "holdWidthPerFlame": 1.4465,
+   "deadMoistureOffset": -0.0013
+  },
+  {
+   "rosAdjLitter": 1.1914,
+   "rosAdjUnderstory": 1.2396,
+   "rosAdjShrub": 0.6566,
+   "rosAdjGrass": 0.5079,
+   "windAdj": 2.1949,
+   "holdWidthPerFlame": 1.5172,
+   "deadMoistureOffset": 0.0021
+  },
+  {
+   "rosAdjLitter": 0.7882,
+   "rosAdjUnderstory": 0.9115,
+   "rosAdjShrub": 0.5231,
+   "rosAdjGrass": 0.5187,
+   "windAdj": 2.8394,
+   "holdWidthPerFlame": 2.2185,
+   "deadMoistureOffset": 0.0026
+  },
+  {
+   "rosAdjLitter": 1.0529,
+   "rosAdjUnderstory": 1.1085,
+   "rosAdjShrub": 0.5888,
+   "rosAdjGrass": 0.5308,
+   "windAdj": 3.1735,
+   "holdWidthPerFlame": 1.8953,
+   "deadMoistureOffset": 0.0006
+  },
+  {
+   "rosAdjLitter": 1.0803,
+   "rosAdjUnderstory": 1.1002,
+   "rosAdjShrub": 0.5602,
+   "rosAdjGrass": 0.5268,
+   "windAdj": 2.4822,
+   "holdWidthPerFlame": 2.1621,
+   "deadMoistureOffset": 0.0025
+  },
+  {
+   "rosAdjLitter": 0.8339,
+   "rosAdjUnderstory": 1.033,
+   "rosAdjShrub": 0.4784,
+   "rosAdjGrass": 0.4915,
+   "windAdj": 2.7387,
+   "holdWidthPerFlame": 2.147,
+   "deadMoistureOffset": 0.0013
+  },
+  {
+   "rosAdjLitter": 1.1318,
+   "rosAdjUnderstory": 1.0001,
+   "rosAdjShrub": 0.6553,
+   "rosAdjGrass": 0.5411,
+   "windAdj": 2.1,
+   "holdWidthPerFlame": 2.2565,
+   "deadMoistureOffset": 0.0041
+  },
+  {
+   "rosAdjLitter": 0.8702,
+   "rosAdjUnderstory": 1.1668,
+   "rosAdjShrub": 0.583,
+   "rosAdjGrass": 0.5665,
+   "windAdj": 2.2,
+   "holdWidthPerFlame": 1.2522,
+   "deadMoistureOffset": 0.0006
+  },
+  {
+   "rosAdjLitter": 0.7299,
+   "rosAdjUnderstory": 1.0676,
+   "rosAdjShrub": 0.6908,
+   "rosAdjGrass": 0.5239,
+   "windAdj": 3.0994,
+   "holdWidthPerFlame": 1.2813,
+   "deadMoistureOffset": 0.0038
+  },
+  {
+   "rosAdjLitter": 1.0089,
+   "rosAdjUnderstory": 1.0482,
+   "rosAdjShrub": 0.5076,
+   "rosAdjGrass": 0.5211,
+   "windAdj": 2.6148,
+   "holdWidthPerFlame": 1.2778,
+   "deadMoistureOffset": 0.0018
+  },
+  {
+   "rosAdjLitter": 0.8284,
+   "rosAdjUnderstory": 1.0268,
+   "rosAdjShrub": 0.505,
+   "rosAdjGrass": 0.5192,
+   "windAdj": 2.6662,
+   "holdWidthPerFlame": 2.1729,
+   "deadMoistureOffset": 0.0056
+  },
+  {
+   "rosAdjLitter": 1.0195,
+   "rosAdjUnderstory": 1.1451,
+   "rosAdjShrub": 0.6968,
+   "rosAdjGrass": 0.6082,
+   "windAdj": 2.3258,
+   "holdWidthPerFlame": 1.2352,
+   "deadMoistureOffset": 0.0051
+  },
+  {
+   "rosAdjLitter": 0.9509,
+   "rosAdjUnderstory": 1.0381,
+   "rosAdjShrub": 0.5944,
+   "rosAdjGrass": 0.6132,
+   "windAdj": 2.9389,
+   "holdWidthPerFlame": 2.0394,
+   "deadMoistureOffset": -0.0014
+  },
+  {
+   "rosAdjLitter": 0.9784,
+   "rosAdjUnderstory": 1.1879,
+   "rosAdjShrub": 0.5928,
+   "rosAdjGrass": 0.5293,
+   "windAdj": 3.1502,
+   "holdWidthPerFlame": 1.855,
+   "deadMoistureOffset": 0.0024
+  },
+  {
+   "rosAdjLitter": 0.9259,
+   "rosAdjUnderstory": 0.6023,
+   "rosAdjShrub": 0.5813,
+   "rosAdjGrass": 0.6949,
+   "windAdj": 2.8852,
+   "holdWidthPerFlame": 1.9124,
+   "deadMoistureOffset": 0.0047
+  },
+  {
+   "rosAdjLitter": 0.814,
+   "rosAdjUnderstory": 1.1638,
+   "rosAdjShrub": 0.6496,
+   "rosAdjGrass": 0.5296,
+   "windAdj": 2.845,
+   "holdWidthPerFlame": 1.4268,
+   "deadMoistureOffset": -0.0012
+  },
+  {
+   "rosAdjLitter": 1.2921,
+   "rosAdjUnderstory": 1.1479,
+   "rosAdjShrub": 0.701,
+   "rosAdjGrass": 0.4524,
+   "windAdj": 2.3157,
+   "holdWidthPerFlame": 1.0355,
+   "deadMoistureOffset": 0.0029
+  },
+  {
+   "rosAdjLitter": 1.6567,
+   "rosAdjUnderstory": 1.2175,
+   "rosAdjShrub": 0.6897,
+   "rosAdjGrass": 0.6422,
+   "windAdj": 1.5948,
+   "holdWidthPerFlame": 1.733,
+   "deadMoistureOffset": 0.0081
+  },
+  {
+   "rosAdjLitter": 1.0592,
+   "rosAdjUnderstory": 1.3146,
+   "rosAdjShrub": 0.6246,
+   "rosAdjGrass": 0.5402,
+   "windAdj": 1.9856,
+   "holdWidthPerFlame": 1.5896,
+   "deadMoistureOffset": 0.0009
+  },
+  {
+   "rosAdjLitter": 0.9934,
+   "rosAdjUnderstory": 0.6047,
+   "rosAdjShrub": 0.5468,
+   "rosAdjGrass": 0.3256,
+   "windAdj": 2.9167,
+   "holdWidthPerFlame": 1.6333,
+   "deadMoistureOffset": 0.0051
+  },
+  {
+   "rosAdjLitter": 0.8283,
+   "rosAdjUnderstory": 0.9584,
+   "rosAdjShrub": 0.6321,
+   "rosAdjGrass": 0.2778,
+   "windAdj": 3.0626,
+   "holdWidthPerFlame": 1.8336,
+   "deadMoistureOffset": -0.0014
+  },
+  {
+   "rosAdjLitter": 1.2475,
+   "rosAdjUnderstory": 0.9147,
+   "rosAdjShrub": 0.5873,
+   "rosAdjGrass": 0.511,
+   "windAdj": 2.025,
+   "holdWidthPerFlame": 2.5734,
+   "deadMoistureOffset": 0.0031
+  }
+ ],
+ "quantiles": {
+  "rosAdjLitter": {
+   "p05": 0.7298715241266676,
+   "p50": 0.9934175887195387,
+   "p95": 1.3069794117104179
+  },
+  "rosAdjUnderstory": {
+   "p05": 0.6046743450534202,
+   "p50": 1.0380657868674459,
+   "p95": 1.2395538458351556
+  },
+  "rosAdjShrub": {
+   "p05": 0.4960612931727801,
+   "p50": 0.5944159432513032,
+   "p95": 0.7009673195256183
+  },
+  "rosAdjGrass": {
+   "p05": 0.28144597099378454,
+   "p50": 0.5210640401659066,
+   "p95": 0.642228729377645
+  },
+  "windAdj": {
+   "p05": 1.5948204795770937,
+   "p50": 2.666150209246782,
+   "p95": 3.1734766185124146
+  },
+  "holdWidthPerFlame": {
+   "p05": 1.0354930981063168,
+   "p50": 1.8336190458225665,
+   "p95": 2.256455402039166
+  },
+  "deadMoistureOffset": {
+   "p05": -0.0013919936951694064,
+   "p50": 0.002630754132715385,
+   "p95": 0.0076812712243095336
+  }
+ },
+ "heldOut": {
+  "cost": {
+   "fitted": 1.1475112674622312,
+   "uncalibrated": 1.187971113826093,
+   "current": 1.150034140084344,
+   "legacy": 1.3561578888677206
+  },
+  "sorensen": {
+   "fitted": 0.37000901142085946,
+   "uncalibrated": 0.3397696660529296,
+   "current": 0.39042273725028137,
+   "legacy": 0.2463831344073278
+  },
+  "newFires": {
+   "fires": 26,
+   "cost": {
+    "fitted": 1.139508579236489,
+    "uncalibrated": 1.180243284424504,
+    "current": 1.1572149132612377,
+    "legacy": 1.3200658269874408
+   },
+   "sorensen": {
+    "fitted": 0.37572802675622496,
+    "uncalibrated": 0.3494592549494812,
+    "current": 0.3771281352860901,
+    "legacy": 0.26312740284417613
+   }
+  }
+ },
+ "splits": [
+  {
+   "name": "5-fold 1",
+   "fires": [
+    "Fundao_06082020",
+    "Oleiros_25072020",
+    "Avis_21072020",
+    "Chaves_30072020",
+    "Tomar_03082019",
+    "Mogadouro_20072021",
+    "Ourique_10062019"
+   ],
+   "fitted": {
+    "rosAdjLitter": 1.0068,
+    "rosAdjUnderstory": 0.9943,
+    "rosAdjShrub": 0.5664,
+    "rosAdjGrass": 0.5078,
+    "windAdj": 2.5699,
+    "holdWidthPerFlame": 1.061,
+    "deadMoistureOffset": -0.0012
+   },
+   "cost": {
+    "fitted": 1.133999451116106,
+    "uncalibrated": 1.1608531672920965,
+    "current": 1.1290463587961874,
+    "legacy": 1.3257845243281359
+   },
+   "sorensen": {
+    "fitted": 0.3625286480631793,
+    "uncalibrated": 0.3338709440010183,
+    "current": 0.37056703166888233,
+    "legacy": 0.21294300597002708
+   }
+  },
+  {
+   "name": "5-fold 2",
+   "fires": [
+    "Monchique_17072021",
+    "Agueda_05092019",
+    "Valenca_04092019",
+    "Odemira_18082021",
+    "MirandadoCorvo_13092019",
+    "Silves_06072020",
+    "Baiao_04092019"
+   ],
+   "fitted": {
+    "rosAdjLitter": 1.2188,
+    "rosAdjUnderstory": 1.079,
+    "rosAdjShrub": 0.5303,
+    "rosAdjGrass": 0.5141,
+    "windAdj": 2.5646,
+    "holdWidthPerFlame": 2.144,
+    "deadMoistureOffset": 0.0049
+   },
+   "cost": {
+    "fitted": 1.1895926853145078,
+    "uncalibrated": 1.281414977419956,
+    "current": 1.225910657599897,
+    "legacy": 1.3899992913089445
+   },
+   "sorensen": {
+    "fitted": 0.3465909150924991,
+    "uncalibrated": 0.3316941313919078,
+    "current": 0.3830307251708706,
+    "legacy": 0.24025731758581084
+   }
+  },
+  {
+   "name": "5-fold 3",
+   "fires": [
+    "Nisa_01082019",
+    "IdanhaaNova_30062020",
+    "Sabugal_29082019",
+    "Fundao_07082020",
+    "SaoJoaoPesqueira_10072020",
+    "PortoMos_06092020"
+   ],
+   "fitted": {
+    "rosAdjLitter": 0.8879,
+    "rosAdjUnderstory": 1.0019,
+    "rosAdjShrub": 0.5783,
+    "rosAdjGrass": 0.5362,
+    "windAdj": 2.6545,
+    "holdWidthPerFlame": 2.0325,
+    "deadMoistureOffset": 0.0039
+   },
+   "cost": {
+    "fitted": 1.0351204510582594,
+    "uncalibrated": 1.0855479470565943,
+    "current": 1.047747699257453,
+    "legacy": 1.3740464121210934
+   },
+   "sorensen": {
+    "fitted": 0.42957592046078674,
+    "uncalibrated": 0.37532108744001724,
+    "current": 0.429260037572975,
+    "legacy": 0.27049157698355913
+   }
+  },
+  {
+   "name": "5-fold 4",
+   "fires": [
+    "OliveiraFrades_07092020",
+    "CastroMarim_16082021",
+    "ProencaaNova_13092020",
+    "ViladeRei_20072019",
+    "CasteloBranco_29082020",
+    "Aljezur_19062020"
+   ],
+   "fitted": {
+    "rosAdjLitter": 0.8566,
+    "rosAdjUnderstory": 1.0276,
+    "rosAdjShrub": 0.5198,
+    "rosAdjGrass": 0.4728,
+    "windAdj": 2.9251,
+    "holdWidthPerFlame": 2.0458,
+    "deadMoistureOffset": 0.0052
+   },
+   "cost": {
+    "fitted": 1.19558205578124,
+    "uncalibrated": 1.1899011840631408,
+    "current": 1.2241686103457807,
+    "legacy": 1.2841229368860927
+   },
+   "sorensen": {
+    "fitted": 0.39302829881121815,
+    "uncalibrated": 0.36835979750255166,
+    "current": 0.3736497247741724,
+    "legacy": 0.2836071629779863
+   }
+  },
+  {
+   "name": "5-fold 5",
+   "fires": [
+    "Alijo_24072019",
+    "Monchique_03082018",
+    "Penedono_21072019",
+    "Valpacos_13092019",
+    "Serta_13092019",
+    "Sernancelhe_06082020"
+   ],
+   "fitted": {
+    "rosAdjLitter": 1.0502,
+    "rosAdjUnderstory": 0.9875,
+    "rosAdjShrub": 0.6494,
+    "rosAdjGrass": 0.5294,
+    "windAdj": 2.4393,
+    "holdWidthPerFlame": 1.4539,
+    "deadMoistureOffset": -0.0002
+   },
+   "cost": {
+    "fitted": 1.1785000937900176,
+    "uncalibrated": 1.2110839737886991,
+    "current": 1.1141492517178342,
+    "legacy": 1.4062582733773965
+   },
+   "sorensen": {
+    "fitted": 0.3234710179576205,
+    "uncalibrated": 0.2919314127146418,
+    "current": 0.40014745334130813,
+    "legacy": 0.23121093272905857
+   }
+  },
+  {
+   "name": "sem 2018",
+   "fires": [
+    "Monchique_03082018"
+   ],
+   "fitted": {
+    "rosAdjLitter": 0.9397,
+    "rosAdjUnderstory": 1.1824,
+    "rosAdjShrub": 0.5315,
+    "rosAdjGrass": 0.4887,
+    "windAdj": 2.5304,
+    "holdWidthPerFlame": 0.9972,
+    "deadMoistureOffset": 0.0083
+   },
+   "cost": {
+    "fitted": 1.5261006344514538,
+    "uncalibrated": 1.5325089976522348,
+    "current": 1.4590629123186607,
+    "legacy": 1.599013512992534
+   },
+   "sorensen": {
+    "fitted": 0.2699280753083027,
+    "uncalibrated": 0.2927267741354422,
+    "current": 0.2363977363365359,
+    "legacy": 0.3281398643410686
+   }
+  },
+  {
+   "name": "sem 2019",
+   "fires": [
+    "Agueda_05092019",
+    "Alijo_24072019",
+    "Baiao_04092019",
+    "MirandadoCorvo_13092019",
+    "Nisa_01082019",
+    "Ourique_10062019",
+    "Penedono_21072019",
+    "Sabugal_29082019",
+    "Serta_13092019",
+    "Tomar_03082019",
+    "Valenca_04092019",
+    "Valpacos_13092019",
+    "ViladeRei_20072019"
+   ],
+   "fitted": {
+    "rosAdjLitter": 1.182,
+    "rosAdjUnderstory": 1.2032,
+    "rosAdjShrub": 0.6015,
+    "rosAdjGrass": 0.5366,
+    "windAdj": 2.7259,
+    "holdWidthPerFlame": 1.7675,
+    "deadMoistureOffset": -0.0057
+   },
+   "cost": {
+    "fitted": 1.1801638872967728,
+    "uncalibrated": 1.1893349283915557,
+    "current": 1.1220793418109118,
+    "legacy": 1.4392221314790241
+   },
+   "sorensen": {
+    "fitted": 0.3744785733776137,
+    "uncalibrated": 0.35480150874686867,
+    "current": 0.43881532518928423,
+    "legacy": 0.2270310583230572
+   }
+  },
+  {
+   "name": "sem 2020",
+   "fires": [
+    "Aljezur_19062020",
+    "Avis_21072020",
+    "CasteloBranco_29082020",
+    "Chaves_30072020",
+    "Fundao_06082020",
+    "Fundao_07082020",
+    "IdanhaaNova_30062020",
+    "Oleiros_25072020",
+    "OliveiraFrades_07092020",
+    "PortoMos_06092020",
+    "ProencaaNova_13092020",
+    "SaoJoaoPesqueira_10072020",
+    "Sernancelhe_06082020",
+    "Silves_06072020"
+   ],
+   "fitted": {
+    "rosAdjLitter": 0.897,
+    "rosAdjUnderstory": 0.9307,
+    "rosAdjShrub": 0.3461,
+    "rosAdjGrass": 0.5554,
+    "windAdj": 1.8386,
+    "holdWidthPerFlame": 0.8817,
+    "deadMoistureOffset": 0.0051
+   },
+   "cost": {
+    "fitted": 1.2458420734377744,
+    "uncalibrated": 1.1452759383892894,
+    "current": 1.1443139910056195,
+    "legacy": 1.240121512265856
+   },
+   "sorensen": {
+    "fitted": 0.3170066272737722,
+    "uncalibrated": 0.33911441477378274,
+    "current": 0.359971811940522,
+    "legacy": 0.26850647177590636
+   }
+  },
+  {
+   "name": "sem 2021",
+   "fires": [
+    "CastroMarim_16082021",
+    "Mogadouro_20072021",
+    "Monchique_17072021",
+    "Odemira_18082021"
+   ],
+   "fitted": {
+    "rosAdjLitter": 1.0586,
+    "rosAdjUnderstory": 0.9712,
+    "rosAdjShrub": 0.5499,
+    "rosAdjGrass": 0.5091,
+    "windAdj": 2.694,
+    "holdWidthPerFlame": 2.0058,
+    "deadMoistureOffset": -0.003
+   },
+   "cost": {
+    "fitted": 1.1816369058274714,
+    "uncalibrated": 1.2468373595606153,
+    "current": 1.183650563189952,
+    "legacy": 1.4316125124563082
+   },
+   "sorensen": {
+    "fitted": 0.4051803996370354,
+    "uncalibrated": 0.3049702797540138,
+    "current": 0.3782313152611166,
+    "legacy": 0.21140651840774707
+   }
+  },
+  {
+   "name": "sem Norte",
+   "fires": [
+    "Alijo_24072019",
+    "Baiao_04092019",
+    "Chaves_30072020",
+    "Mogadouro_20072021",
+    "SaoJoaoPesqueira_10072020",
+    "Valenca_04092019",
+    "Valpacos_13092019"
+   ],
+   "fitted": {
+    "rosAdjLitter": 1.0144,
+    "rosAdjUnderstory": 1.0313,
+    "rosAdjShrub": 0.6067,
+    "rosAdjGrass": 0.5241,
+    "windAdj": 2.8557,
+    "holdWidthPerFlame": 1.0875,
+    "deadMoistureOffset": 0.0033
+   },
+   "cost": {
+    "fitted": 1.1854902102787235,
+    "uncalibrated": 1.2273146572970604,
+    "current": 1.1380916284214184,
+    "legacy": 1.4748398132985479
+   },
+   "sorensen": {
+    "fitted": 0.3560915516664533,
+    "uncalibrated": 0.2755606818809137,
+    "current": 0.45489580883828495,
+    "legacy": 0.1563834081095352
+   }
+  }
+ ],
+ "tierB": {
+  "fires": [
+   "Abrantes_09082017",
+   "Agueda_08082016",
+   "Agueda_15102017",
+   "Alcobaca_15102017",
+   "Alvaiazere_11082017",
+   "Anadia_10082016",
+   "ArcosdeValdevez_08082016",
+   "Arganil_15102017",
+   "Arouca_08082016",
+   "Boticas_05092016",
+   "CabeceirasdeBasto_06092016",
+   "Caminha_09082016",
+   "CasteloBranco_13082017",
+   "CasteloBranco_23072017",
+   "CastroDaire_05102017",
+   "Cinfaes_07082016",
+   "Cinfaes_08082016",
+   "FigueiradaFoz_15102017",
+   "FreixodeEspadaaCinta_06092016",
+   "Gois_17062017",
+   "Gouveia_10082015",
+   "Guarda_17072017",
+   "Guarda_23082017",
+   "Lousa_15102017",
+   "Mirandela_16072017",
+   "Moncao_06092016",
+   "Moncao_09082016",
+   "Mortagua_07102017",
+   "Oleiros_03082015",
+   "Oleiros_23082017",
+   "OliveiraFrades_15102017",
+   "PampilhosadaSerra_06102017",
+   "ParedesdeCoura_07082016",
+   "PedrogaoGrande_17062017",
+   "Pombal_06102017",
+   "PontedeLima_08082016",
+   "Resende_17082017",
+   "RibeiradePena_15082017",
+   "Serta_08092017",
+   "Serta_15102017",
+   "Serta_15102017_2",
+   "Serta_23072017",
+   "SeverdoVouga_09082016",
+   "TorredeMoncorvo_18072017",
+   "VieiradoMinho_10082016",
+   "VilaNovadeCerveira_08082015"
+  ],
+  "cost": {
+   "fitted": 1.4549692364273723,
+   "uncalibrated": 1.4569443287454416,
+   "current": 1.459481866341489,
+   "legacy": 1.5699985546738844
+  },
+  "sorensen": {
+   "fitted": 0.12551179942031598,
+   "uncalibrated": 0.13506266616287343,
+   "current": 0.13567590640790553,
+   "legacy": 0.09988432510035432
+  }
+ },
+ "brier": {
+  "runs": 20,
+  "best": 0.08588303329660713,
+  "samples": 0.08036783022278933,
+  "current": 0.07715973781035615
+ },
+ "perFire": [
+  {
+   "fire": "Abrantes_09082017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.2751652909998419,
+    "uncalibrated": 1.2820573652444336,
+    "current": 1.3935041330065996,
+    "legacy": 1.4844911523734083
+   },
+   "sorensen": {
+    "best": 0.00685527621145067,
+    "uncalibrated": 0.008105179563745363,
+    "current": 0.007272786865056292,
+    "legacy": 0.008105179563745363
+   }
+  },
+  {
+   "fire": "Agueda_05092019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.278280038808018,
+    "uncalibrated": 1.3039033586422835,
+    "current": 1.2570947298510513,
+    "legacy": 1.3818637706795516
+   },
+   "sorensen": {
+    "best": 0.23767854893141305,
+    "uncalibrated": 0.23380250254258558,
+    "current": 0.27024910154888215,
+    "legacy": 0.2384324136845338
+   }
+  },
+  {
+   "fire": "Agueda_08082016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.3630701636216978,
+    "uncalibrated": 1.2936182148374438,
+    "current": 1.2840090379392237,
+    "legacy": 1.612407156847024
+   },
+   "sorensen": {
+    "best": 0.3805380431593546,
+    "uncalibrated": 0.3884651999677473,
+    "current": 0.4173344637401394,
+    "legacy": 0.3671826895789375
+   }
+  },
+  {
+   "fire": "Agueda_15102017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.6709521809131849,
+    "uncalibrated": 1.7540820554372922,
+    "current": 1.765491241371291,
+    "legacy": 1.5039055787215236
+   },
+   "sorensen": {
+    "best": 0.0005329815164343764,
+    "uncalibrated": 0.0006852299453068371,
+    "current": 0.00048486599177407044,
+    "legacy": 0.0014881994823881114
+   }
+  },
+  {
+   "fire": "Alcobaca_15102017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.7880861244249677,
+    "uncalibrated": 1.7798896478265112,
+    "current": 1.7776486304121923,
+    "legacy": 1.787794096305665
+   },
+   "sorensen": {
+    "best": 0.0007510567068302825,
+    "uncalibrated": 0.00034423552396309315,
+    "current": 0.0005340587029840079,
+    "legacy": 0.0010077353659848239
+   }
+  },
+  {
+   "fire": "Alijo_24072019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.7264081037643867,
+    "uncalibrated": 0.9254946500302861,
+    "current": 0.6972101498948663,
+    "legacy": 1.2118937111850574
+   },
+   "sorensen": {
+    "best": 0.6069825354797957,
+    "uncalibrated": 0.2898910143546086,
+    "current": 0.6441666061121718,
+    "legacy": 0.15140648798968434
+   }
+  },
+  {
+   "fire": "Aljezur_19062020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.198002102424405,
+    "uncalibrated": 1.1178840934507555,
+    "current": 1.3525280023499264,
+    "legacy": 1.0813242794966247
+   },
+   "sorensen": {
+    "best": 0.48948819702710566,
+    "uncalibrated": 0.4663562360507753,
+    "current": 0.40071030348089076,
+    "legacy": 0.2886889140027922
+   }
+  },
+  {
+   "fire": "Alvaiazere_11082017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.5867051781543369,
+    "uncalibrated": 1.6560440696689955,
+    "current": 1.618460903834146,
+    "legacy": 1.6532334918861264
+   },
+   "sorensen": {
+    "best": 0.001519897232004503,
+    "uncalibrated": 0.001526159855680567,
+    "current": 0.0017322154949574804,
+    "legacy": 0.0010900870705714157
+   }
+  },
+  {
+   "fire": "Anadia_10082016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.059527964118385,
+    "uncalibrated": 1.06462277526121,
+    "current": 0.9592863611063835,
+    "legacy": 1.6343528415751138
+   },
+   "sorensen": {
+    "best": 0.4857858897573176,
+    "uncalibrated": 0.47485512631307175,
+    "current": 0.5457459403774034,
+    "legacy": 0.2538100709434493
+   }
+  },
+  {
+   "fire": "ArcosdeValdevez_08082016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.4666165309882668,
+    "uncalibrated": 1.4435769824637734,
+    "current": 1.4294061378370395,
+    "legacy": 1.6670366585673493
+   },
+   "sorensen": {
+    "best": 0.1940295236230562,
+    "uncalibrated": 0.22864502323100913,
+    "current": 0.210770550787099,
+    "legacy": 0.173405959917799
+   }
+  },
+  {
+   "fire": "Arganil_15102017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.8022359116251556,
+    "uncalibrated": 1.801077393737104,
+    "current": 1.8025363390333369,
+    "legacy": 1.7687262542500823
+   },
+   "sorensen": {
+    "best": 0,
+    "uncalibrated": 0,
+    "current": 0,
+    "legacy": 0
+   }
+  },
+  {
+   "fire": "Arouca_08082016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.3757484522511207,
+    "uncalibrated": 1.3170253489186396,
+    "current": 1.312287797019102,
+    "legacy": 1.5438121005120589
+   },
+   "sorensen": {
+    "best": 0.12212343725283105,
+    "uncalibrated": 0.11560922684651374,
+    "current": 0.15170779058834336,
+    "legacy": 0.1163000279259553
+   }
+  },
+  {
+   "fire": "Avis_21072020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.1780716280744725,
+    "uncalibrated": 1.2578035390025197,
+    "current": 1.2742525879178899,
+    "legacy": 1.0111687648626764
+   },
+   "sorensen": {
+    "best": 0.08057315031410937,
+    "uncalibrated": 0.07847223982998638,
+    "current": 0.25265567765567765,
+    "legacy": 0.05361758650410718
+   }
+  },
+  {
+   "fire": "Baiao_04092019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.4127069818896703,
+    "uncalibrated": 1.3877882261773669,
+    "current": 1.4421066962952367,
+    "legacy": 1.64077164723609
+   },
+   "sorensen": {
+    "best": 0.12122673535463939,
+    "uncalibrated": 0.11530402860151348,
+    "current": 0.36742180085900966,
+    "legacy": 0.05773760600896309
+   }
+  },
+  {
+   "fire": "Boticas_05092016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 0.9090353562522279,
+    "uncalibrated": 0.9646118815552472,
+    "current": 1.0284925226635513,
+    "legacy": 1.242566312490711
+   },
+   "sorensen": {
+    "best": 0.22957931330509798,
+    "uncalibrated": 0.24372242904013378,
+    "current": 0.1743278559256709,
+    "legacy": 0.27901241754238876
+   }
+  },
+  {
+   "fire": "CabeceirasdeBasto_06092016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.0782485607017087,
+    "uncalibrated": 0.8033094814990256,
+    "current": 0.9856979776489107,
+    "legacy": 1.6262793148773371
+   },
+   "sorensen": {
+    "best": 0.34161865865882685,
+    "uncalibrated": 0.5789021229364955,
+    "current": 0.3983397167121619,
+    "legacy": 0.2878269040102381
+   }
+  },
+  {
+   "fire": "Caminha_09082016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.3637052628765416,
+    "uncalibrated": 1.458240978107422,
+    "current": 1.321439947612756,
+    "legacy": 1.696737135092145
+   },
+   "sorensen": {
+    "best": 0.1411903644115827,
+    "uncalibrated": 0.221274148778107,
+    "current": 0.17158986669176518,
+    "legacy": 0.19910225859339034
+   }
+  },
+  {
+   "fire": "CasteloBranco_13082017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.4335157213756666,
+    "uncalibrated": 1.4569387227647421,
+    "current": 1.487104084452015,
+    "legacy": 1.451657331252899
+   },
+   "sorensen": {
+    "best": 0.0009752478933547587,
+    "uncalibrated": 0.0009752478933547587,
+    "current": 0.0009752478933547587,
+    "legacy": 0.0009752478933547587
+   }
+  },
+  {
+   "fire": "CasteloBranco_23072017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.6501379764910464,
+    "uncalibrated": 1.6805849181255224,
+    "current": 1.6601199054532458,
+    "legacy": 1.692885478088621
+   },
+   "sorensen": {
+    "best": 0.015610587109631471,
+    "uncalibrated": 0.016025645300866708,
+    "current": 0.009216801202433563,
+    "legacy": 0.016150886774094937
+   }
+  },
+  {
+   "fire": "CasteloBranco_29082020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.9005395106928913,
+    "uncalibrated": 0.8719723620175364,
+    "current": 1.1403333125137014,
+    "legacy": 0.8485578067012541
+   },
+   "sorensen": {
+    "best": 0.5409633955494484,
+    "uncalibrated": 0.46953427179434765,
+    "current": 0.4315601170900943,
+    "legacy": 0.40986529554849654
+   }
+  },
+  {
+   "fire": "CastroDaire_05102017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.6316926391551279,
+    "uncalibrated": 1.6434986203029727,
+    "current": 1.658236829881379,
+    "legacy": 1.3739772993442674
+   },
+   "sorensen": {
+    "best": 0.0905374552206179,
+    "uncalibrated": 0.06606295722272829,
+    "current": 0.07751821932856416,
+    "legacy": 0.041822823409899866
+   }
+  },
+  {
+   "fire": "CastroDaire_07092020",
+   "tier": "A",
+   "fitted": false,
+   "cost": {
+    "best": 0.8204611964108239,
+    "uncalibrated": 0.8345903440522886,
+    "current": 0.9812665619823941,
+    "legacy": 1.165692442694729
+   },
+   "sorensen": {
+    "best": 0.5708582834331337,
+    "uncalibrated": 0.5,
+    "current": 0.5010526315789474,
+    "legacy": 0.39714285714285713
+   }
+  },
+  {
+   "fire": "CastroMarim_16082021",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.3369011553746026,
+    "uncalibrated": 1.393410337828988,
+    "current": 1.3357634022060634,
+    "legacy": 1.489776852509571
+   },
+   "sorensen": {
+    "best": 0.34429900535477015,
+    "uncalibrated": 0.20911750197919052,
+    "current": 0.34361303960806405,
+    "legacy": 0.17517995122358132
+   }
+  },
+  {
+   "fire": "Chaves_30072020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.3643693387552764,
+    "uncalibrated": 1.4602751816381916,
+    "current": 1.414791047313085,
+    "legacy": 1.3290096320905795
+   },
+   "sorensen": {
+    "best": 0.448099493986928,
+    "uncalibrated": 0.15684800420956208,
+    "current": 0.40868533540706176,
+    "legacy": 0.10829996457159827
+   }
+  },
+  {
+   "fire": "Cinfaes_07082016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.6606523674578835,
+    "uncalibrated": 1.6262458515804852,
+    "current": 1.613156527950295,
+    "legacy": 1.743098928171841
+   },
+   "sorensen": {
+    "best": 0.06742474349250707,
+    "uncalibrated": 0.0982381403592674,
+    "current": 0.07794043517681344,
+    "legacy": 0.06964164348455489
+   }
+  },
+  {
+   "fire": "Cinfaes_08082016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.213194280713005,
+    "uncalibrated": 1.230561186052644,
+    "current": 1.1700430688834107,
+    "legacy": 1.5871446446552646
+   },
+   "sorensen": {
+    "best": 0.312059363412233,
+    "uncalibrated": 0.2819230326991624,
+    "current": 0.32385678727912287,
+    "legacy": 0.17495509946501195
+   }
+  },
+  {
+   "fire": "FigueiradaFoz_15102017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.7061401052015426,
+    "uncalibrated": 1.710366680887174,
+    "current": 1.7356244160027743,
+    "legacy": 1.7495542331191856
+   },
+   "sorensen": {
+    "best": 0,
+    "uncalibrated": 0,
+    "current": 0,
+    "legacy": 0
+   }
+  },
+  {
+   "fire": "FreixoEspadaaCinta_20082021",
+   "tier": "A",
+   "fitted": false,
+   "cost": {
+    "best": 1.6308059127387893,
+    "uncalibrated": 1.6432282729872365,
+    "current": 1.62971895621705,
+    "legacy": 0.896780286009635
+   },
+   "sorensen": {
+    "best": 0.1834862385321101,
+    "uncalibrated": 0.1712538226299694,
+    "current": 0.18461538461538463,
+    "legacy": 0.36673773987206826
+   }
+  },
+  {
+   "fire": "FreixodeEspadaaCinta_06092016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.14501633646115,
+    "uncalibrated": 1.1386443914438653,
+    "current": 1.1283293327863786,
+    "legacy": 1.234739965160882
+   },
+   "sorensen": {
+    "best": 0.5136988129821992,
+    "uncalibrated": 0.4344085377829176,
+    "current": 0.5274066345793397,
+    "legacy": 0.3022814010392605
+   }
+  },
+  {
+   "fire": "Fundao_06082020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.784496995435791,
+    "uncalibrated": 0.9296001712247256,
+    "current": 0.8131758868620813,
+    "legacy": 1.1212367163468795
+   },
+   "sorensen": {
+    "best": 0.4656274538349304,
+    "uncalibrated": 0.5523757896005976,
+    "current": 0.47464271230309335,
+    "legacy": 0.337511659359783
+   }
+  },
+  {
+   "fire": "Fundao_07082020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.8147649958047011,
+    "uncalibrated": 0.9519203211628748,
+    "current": 0.9212784403828302,
+    "legacy": 1.2241906271355059
+   },
+   "sorensen": {
+    "best": 0.4803244536101992,
+    "uncalibrated": 0.45520340452602515,
+    "current": 0.4833461549847239,
+    "legacy": 0.31009314202102317
+   }
+  },
+  {
+   "fire": "Gois_17062017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.6718258640402894,
+    "uncalibrated": 1.6911877073036528,
+    "current": 1.6893915089516038,
+    "legacy": 1.5995489589360758
+   },
+   "sorensen": {
+    "best": 0,
+    "uncalibrated": 0,
+    "current": 0,
+    "legacy": 0
+   }
+  },
+  {
+   "fire": "Gouveia_10082015",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.0967253875970662,
+    "uncalibrated": 1.031367516216642,
+    "current": 1.0628309250096857,
+    "legacy": 1.544271164478625
+   },
+   "sorensen": {
+    "best": 0.22325435103017913,
+    "uncalibrated": 0.28948243894214226,
+    "current": 0.2314026937020504,
+    "legacy": 0.3531997339297476
+   }
+  },
+  {
+   "fire": "Guarda_17072017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.5025352102496095,
+    "uncalibrated": 1.4800792654607546,
+    "current": 1.5592731435275287,
+    "legacy": 1.5233069952969438
+   },
+   "sorensen": {
+    "best": 0.0011064113168027237,
+    "uncalibrated": 0.0018598019100534559,
+    "current": 0.0012653380583562148,
+    "legacy": 0.0018575908588880738
+   }
+  },
+  {
+   "fire": "Guarda_23082017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.2049499769360617,
+    "uncalibrated": 1.2804230188004604,
+    "current": 1.1711923346797009,
+    "legacy": 1.6801717650806547
+   },
+   "sorensen": {
+    "best": 0.02951204587443538,
+    "uncalibrated": 0.03692381177726861,
+    "current": 0.031334990836323386,
+    "legacy": 0.027930093198682504
+   }
+  },
+  {
+   "fire": "IdanhaaNova_30062020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.1993206343233784,
+    "uncalibrated": 1.2360840612529587,
+    "current": 1.2339933081402723,
+    "legacy": 1.3862773986655446
+   },
+   "sorensen": {
+    "best": 0.25195331269620624,
+    "uncalibrated": 0.23433911721728773,
+    "current": 0.26123045035114184,
+    "legacy": 0.27349458187139375
+   }
+  },
+  {
+   "fire": "Lousa_15102017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.7025007030650858,
+    "uncalibrated": 1.7018027801842361,
+    "current": 1.693300010053369,
+    "legacy": 1.7735795065237077
+   },
+   "sorensen": {
+    "best": 0,
+    "uncalibrated": 0,
+    "current": 0,
+    "legacy": 0
+   }
+  },
+  {
+   "fire": "MirandadoCorvo_13092019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.1079474225460126,
+    "uncalibrated": 1.0965213855950626,
+    "current": 1.0704406925043635,
+    "legacy": 1.3904283237208193
+   },
+   "sorensen": {
+    "best": 0.3781080165052691,
+    "uncalibrated": 0.45416904238585304,
+    "current": 0.5460749658572158,
+    "legacy": 0.269962963649012
+   }
+  },
+  {
+   "fire": "Mirandela_16072017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.804285668920492,
+    "uncalibrated": 1.8041705602751803,
+    "current": 1.8041212275858487,
+    "legacy": 1.2388774494296855
+   },
+   "sorensen": {
+    "best": 0.00236679406016062,
+    "uncalibrated": 0.0030298794233882495,
+    "current": 0.002015101575226772,
+    "legacy": 0.007962699869209187
+   }
+  },
+  {
+   "fire": "Mogadouro_20072021",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.1484132615041616,
+    "uncalibrated": 1.2493822701934303,
+    "current": 1.167485787253344,
+    "legacy": 1.6003238290444322
+   },
+   "sorensen": {
+    "best": 0.49121419097589064,
+    "uncalibrated": 0.237730831593801,
+    "current": 0.4160323083600307,
+    "legacy": 0.1390857861377034
+   }
+  },
+  {
+   "fire": "Moncao_06092016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.5978976972296846,
+    "uncalibrated": 1.5786851895387974,
+    "current": 1.5094611664001034,
+    "legacy": 1.7169439976890857
+   },
+   "sorensen": {
+    "best": 0.238442908596831,
+    "uncalibrated": 0.19402536122912495,
+    "current": 0.30090346771960536,
+    "legacy": 0.07008722364235499
+   }
+  },
+  {
+   "fire": "Moncao_09082016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.2844993585617301,
+    "uncalibrated": 1.2008209605305282,
+    "current": 1.1374063270480939,
+    "legacy": 1.660272650255291
+   },
+   "sorensen": {
+    "best": 0.06425676622042271,
+    "uncalibrated": 0.09099952790082806,
+    "current": 0.07144553553910107,
+    "legacy": 0.08304601198735931
+   }
+  },
+  {
+   "fire": "Monchique_03082018",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.4831926760918457,
+    "uncalibrated": 1.5325089976522348,
+    "current": 1.4590629123186607,
+    "legacy": 1.599013512992534
+   },
+   "sorensen": {
+    "best": 0.26153977779411086,
+    "uncalibrated": 0.2927267741354422,
+    "current": 0.2363977363365359,
+    "legacy": 0.3281398643410686
+   }
+  },
+  {
+   "fire": "Monchique_17072021",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.8572232763486293,
+    "uncalibrated": 0.9683294814307221,
+    "current": 0.9582779089376976,
+    "legacy": 1.044027026701033
+   },
+   "sorensen": {
+    "best": 0.5448242322954332,
+    "uncalibrated": 0.4959823179965377,
+    "current": 0.48004316044890905,
+    "legacy": 0.36023027711574923
+   }
+  },
+  {
+   "fire": "Mortagua_07102017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.1714946612795742,
+    "uncalibrated": 1.6335049744025496,
+    "current": 1.792438254462664,
+    "legacy": 1.4731501996126861
+   },
+   "sorensen": {
+    "best": 0.01727328809376928,
+    "uncalibrated": 0.013050570962479609,
+    "current": 0.013973799126637555,
+    "legacy": 0.025295109612141653
+   }
+  },
+  {
+   "fire": "Nisa_01082019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.0693180765577854,
+    "uncalibrated": 1.20256017914849,
+    "current": 1.1287025592900461,
+    "legacy": 1.3617723038282223
+   },
+   "sorensen": {
+    "best": 0.5705790276569865,
+    "uncalibrated": 0.43309566239209607,
+    "current": 0.5459936968369945,
+    "legacy": 0.352383008682291
+   }
+  },
+  {
+   "fire": "Odemira_18082021",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.3006869579280007,
+    "uncalibrated": 1.3762273487893204,
+    "current": 1.2730751543627032,
+    "legacy": 1.5923223415701961
+   },
+   "sorensen": {
+    "best": 0.28937586826313083,
+    "uncalibrated": 0.2770504674465259,
+    "current": 0.2732367526274626,
+    "legacy": 0.1711300591539543
+   }
+  },
+  {
+   "fire": "Oleiros_03082015",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.0014330695503881,
+    "uncalibrated": 0.9431647902542686,
+    "current": 0.9105463024694986,
+    "legacy": 0.9353608723327188
+   },
+   "sorensen": {
+    "best": 0.3676431343837631,
+    "uncalibrated": 0.5352585709958867,
+    "current": 0.48061854801331483,
+    "legacy": 0.5436516191664933
+   }
+  },
+  {
+   "fire": "Oleiros_23082017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.5738679887989295,
+    "uncalibrated": 1.6193959339712078,
+    "current": 1.5249377269061377,
+    "legacy": 1.411582759798279
+   },
+   "sorensen": {
+    "best": 0,
+    "uncalibrated": 0,
+    "current": 0,
+    "legacy": 0
+   }
+  },
+  {
+   "fire": "Oleiros_25072020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.2253027680461777,
+    "uncalibrated": 1.2089495390091494,
+    "current": 1.236901708999139,
+    "legacy": 1.3917919531256344
+   },
+   "sorensen": {
+    "best": 0.19691931399354654,
+    "uncalibrated": 0.32542638733690055,
+    "current": 0.19075313285381074,
+    "legacy": 0.31418856850646204
+   }
+  },
+  {
+   "fire": "OliveiraFrades_07092020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.4464037413385535,
+    "uncalibrated": 1.447205098150074,
+    "current": 1.3291401735233155,
+    "legacy": 1.6807957101387727
+   },
+   "sorensen": {
+    "best": 0.2605778982583388,
+    "uncalibrated": 0.2523427476442013,
+    "current": 0.3286430564697583,
+    "legacy": 0.19564972102846617
+   }
+  },
+  {
+   "fire": "OliveiraFrades_15102017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.7893817809358903,
+    "uncalibrated": 1.7863152425317517,
+    "current": 1.7899559094337405,
+    "legacy": 1.5432379373201528
+   },
+   "sorensen": {
+    "best": 0.02730234827171911,
+    "uncalibrated": 0.025197945437683063,
+    "current": 0.025387431518868145,
+    "legacy": 0.03404023824072822
+   }
+  },
+  {
+   "fire": "Ourique_10062019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.8221377787323672,
+    "uncalibrated": 0.8716746535709714,
+    "current": 0.8892614366495017,
+    "legacy": 1.371001196747229
+   },
+   "sorensen": {
+    "best": 0.509201120192106,
+    "uncalibrated": 0.5340834626976718,
+    "current": 0.5048789604716838,
+    "legacy": 0.2323746871069094
+   }
+  },
+  {
+   "fire": "PampilhosadaSerra_06102017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.6379863578891485,
+    "uncalibrated": 1.653165767756894,
+    "current": 1.6528890013355828,
+    "legacy": 1.6328560091514048
+   },
+   "sorensen": {
+    "best": 0.01607946079403608,
+    "uncalibrated": 0.016078853756651683,
+    "current": 0.016080068579925267,
+    "legacy": 0.01607222535394609
+   }
+  },
+  {
+   "fire": "ParedesdeCoura_07082016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.4722139949301587,
+    "uncalibrated": 1.497783844456902,
+    "current": 1.4493747214297752,
+    "legacy": 1.6716880759809831
+   },
+   "sorensen": {
+    "best": 0.37590000836062676,
+    "uncalibrated": 0.33545534487807666,
+    "current": 0.4026128790548209,
+    "legacy": 0.25009685280819643
+   }
+  },
+  {
+   "fire": "PedrogaoGrande_17062017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.75820111168399,
+    "uncalibrated": 1.7738162890526787,
+    "current": 1.778725633686102,
+    "legacy": 1.3910876886048793
+   },
+   "sorensen": {
+    "best": 0.001245733362376475,
+    "uncalibrated": 0.0012454024768949344,
+    "current": 0.0017402213711811337,
+    "legacy": 0.0012452813732705364
+   }
+  },
+  {
+   "fire": "Penedono_21072019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.3376977000450574,
+    "uncalibrated": 1.2945866019929422,
+    "current": 1.2595657167135472,
+    "legacy": 1.6514544919789187
+   },
+   "sorensen": {
+    "best": 0.09388471231051183,
+    "uncalibrated": 0.1123745201225193,
+    "current": 0.11517058869124691,
+    "legacy": 0.0915466531295216
+   }
+  },
+  {
+   "fire": "Pombal_06102017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.8014104367794985,
+    "uncalibrated": 1.8014104367794985,
+    "current": 1.8014104367794985,
+    "legacy": 1.8014104367794985
+   },
+   "sorensen": {
+    "best": 0.004862236628849271,
+    "uncalibrated": 0.004862236628849271,
+    "current": 0.004862236628849271,
+    "legacy": 0.004862236628849271
+   }
+  },
+  {
+   "fire": "PontedeLima_08082016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 0.6389017660243932,
+    "uncalibrated": 0.7720367741863804,
+    "current": 0.6814120644756648,
+    "legacy": 1.6027109194512543
+   },
+   "sorensen": {
+    "best": 0.48235618273377723,
+    "uncalibrated": 0.5010813058847994,
+    "current": 0.5199130434782608,
+    "legacy": 0.17978014175446694
+   }
+  },
+  {
+   "fire": "PortoMos_06092020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.1697454828710043,
+    "uncalibrated": 1.1596423132316818,
+    "current": 1.1389745274988026,
+    "legacy": 1.5469632653603156
+   },
+   "sorensen": {
+    "best": 0.1604033552629927,
+    "uncalibrated": 0.1470261166685809,
+    "current": 0.17228482805748452,
+    "legacy": 0.09473666881312373
+   }
+  },
+  {
+   "fire": "ProencaaNova_13092020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.7918654138771636,
+    "uncalibrated": 0.8537044925757197,
+    "current": 0.7810855262914093,
+    "legacy": 1.0472461155058257
+   },
+   "sorensen": {
+    "best": 0.5547280738458489,
+    "uncalibrated": 0.5172796651853483,
+    "current": 0.5444491678205022,
+    "legacy": 0.4185707526845817
+   }
+  },
+  {
+   "fire": "Resende_17082017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.3570003937356327,
+    "uncalibrated": 1.282779185116726,
+    "current": 1.2972299364192676,
+    "legacy": 1.6933216773726083
+   },
+   "sorensen": {
+    "best": 0.11363729799272643,
+    "uncalibrated": 0.10630466518795831,
+    "current": 0.046028338535180374,
+    "legacy": 0.04509117567706417
+   }
+  },
+  {
+   "fire": "RibeiradePena_15082017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.8047189562170503,
+    "uncalibrated": 1.8047189562170503,
+    "current": 1.8047189562170503,
+    "legacy": 1.8047189562170503
+   },
+   "sorensen": {
+    "best": 0,
+    "uncalibrated": 0,
+    "current": 0,
+    "legacy": 0
+   }
+  },
+  {
+   "fire": "Sabugal_29082019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.8407625927186219,
+    "uncalibrated": 0.8820042675783552,
+    "current": 0.8554267363265857,
+    "legacy": 1.2085726808021449
+   },
+   "sorensen": {
+    "best": 0.7028736536843218,
+    "uncalibrated": 0.636351534851293,
+    "current": 0.7076499156747813,
+    "legacy": 0.3880502762132241
+   }
+  },
+  {
+   "fire": "SaoJoaoPesqueira_10072020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.063403979744987,
+    "uncalibrated": 1.081076539965206,
+    "current": 1.0081106239061806,
+    "legacy": 1.516502196934826
+   },
+   "sorensen": {
+    "best": 0.40147260622943204,
+    "uncalibrated": 0.34591068898482064,
+    "current": 0.4050551795327239,
+    "legacy": 0.20419178430029936
+   }
+  },
+  {
+   "fire": "Sernancelhe_06082020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.8775517465946041,
+    "uncalibrated": 0.9512131474257356,
+    "current": 0.8989962891591414,
+    "legacy": 1.1526215802845319
+   },
+   "sorensen": {
+    "best": 0.4471733179040811,
+    "uncalibrated": 0.44521056709618867,
+    "current": 0.4584695606598132,
+    "legacy": 0.3558697397721836
+   }
+  },
+  {
+   "fire": "Serta_08092017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.4377904403122548,
+    "uncalibrated": 1.371560143979948,
+    "current": 1.581914415648798,
+    "legacy": 1.5023942408686302
+   },
+   "sorensen": {
+    "best": 0.0010458868447545408,
+    "uncalibrated": 0.002381588904374147,
+    "current": 0.0010458868447545408,
+    "legacy": 0.002665072048462877
+   }
+  },
+  {
+   "fire": "Serta_13092019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.2623849676901773,
+    "uncalibrated": 1.406117476518067,
+    "current": 1.2366683299609027,
+    "legacy": 1.4537554714064
+   },
+   "sorensen": {
+    "best": 0.4644999323256751,
+    "uncalibrated": 0.2724193852390052,
+    "current": 0.5208404010051679,
+    "legacy": 0.21633630099348006
+   }
+  },
+  {
+   "fire": "Serta_15102017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.7617239665806632,
+    "uncalibrated": 1.77699520749009,
+    "current": 1.7774505570216679,
+    "legacy": 1.6738701646395169
+   },
+   "sorensen": {
+    "best": 0,
+    "uncalibrated": 0,
+    "current": 0,
+    "legacy": 0
+   }
+  },
+  {
+   "fire": "Serta_15102017_2",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.595512420455356,
+    "uncalibrated": 1.6804431730289517,
+    "current": 1.7385629354279821,
+    "legacy": 1.3673136299886357
+   },
+   "sorensen": {
+    "best": 0.00863673922721868,
+    "uncalibrated": 0.008686162123126015,
+    "current": 0.008700538284642102,
+    "legacy": 0.008628294315489119
+   }
+  },
+  {
+   "fire": "Serta_23072017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.6128731817068023,
+    "uncalibrated": 1.57106247440164,
+    "current": 1.6104428488422806,
+    "legacy": 1.6206679748966526
+   },
+   "sorensen": {
+    "best": 0.001111919792503337,
+    "uncalibrated": 0.001111919792503337,
+    "current": 0.001111919792503337,
+    "legacy": 0.001111919792503337
+   }
+  },
+  {
+   "fire": "SeverdoVouga_09082016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.616072119290787,
+    "uncalibrated": 1.5648112511634509,
+    "current": 1.502826301398532,
+    "legacy": 1.7210520942284415
+   },
+   "sorensen": {
+    "best": 0.18653572489240744,
+    "uncalibrated": 0.15877146932511377,
+    "current": 0.22366858431254755,
+    "legacy": 0.11478060355133811
+   }
+  },
+  {
+   "fire": "Silves_06072020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.1453179090921906,
+    "uncalibrated": 1.5065322773429257,
+    "current": 1.476834439220899,
+    "legacy": 1.024015125073009
+   },
+   "sorensen": {
+    "best": 0.31059095083672655,
+    "uncalibrated": 0.3012765706883354,
+    "current": 0.22711969050053119,
+    "legacy": 0.3943122258783786
+   }
+  },
+  {
+   "fire": "Tomar_03082019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.1989896782652563,
+    "uncalibrated": 1.1482868164056883,
+    "current": 1.1074560565782698,
+    "legacy": 1.4559595780795205
+   },
+   "sorensen": {
+    "best": 0.5187737093665893,
+    "uncalibrated": 0.45215989273860835,
+    "current": 0.3463210946308181,
+    "legacy": 0.3055227896036264
+   }
+  },
+  {
+   "fire": "TorredeMoncorvo_18072017",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.7141209176697887,
+    "uncalibrated": 1.5387867334034198,
+    "current": 1.750042051513105,
+    "legacy": 1.6674541652777117
+   },
+   "sorensen": {
+    "best": 0.01466043067329241,
+    "uncalibrated": 0.01717698262504326,
+    "current": 0.01412160302274784,
+    "legacy": 0.020511821884685914
+   }
+  },
+  {
+   "fire": "Valenca_04092019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.2107147224961416,
+    "uncalibrated": 1.33060276396201,
+    "current": 1.103544982027328,
+    "legacy": 1.6565668041819137
+   },
+   "sorensen": {
+    "best": 0.5350364408854951,
+    "uncalibrated": 0.44427399008200325,
+    "current": 0.5170696043540839,
+    "legacy": 0.18999567761008476
+   }
+  },
+  {
+   "fire": "Valpacos_13092019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.0284056857919202,
+    "uncalibrated": 1.1565829691129301,
+    "current": 1.133392112259887,
+    "legacy": 1.3688108724169372
+   },
+   "sorensen": {
+    "best": 0.4498851625820576,
+    "uncalibrated": 0.338966215340087,
+    "current": 0.42583982724291314,
+    "legacy": 0.24396655014841315
+   }
+  },
+  {
+   "fire": "VieiradoMinho_10082016",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.0722104517371778,
+    "uncalibrated": 0.9270087545790601,
+    "current": 0.976959933166089,
+    "legacy": 1.3327137174883261
+   },
+   "sorensen": {
+    "best": 0.6136518378763762,
+    "uncalibrated": 0.6177658675471739,
+    "current": 0.6415172010342874,
+    "legacy": 0.40232326434736637
+   }
+  },
+  {
+   "fire": "VilaNovadeCerveira_08082015",
+   "tier": "B",
+   "fitted": false,
+   "cost": {
+    "best": 1.0670045896987645,
+    "uncalibrated": 1.1471456254930974,
+    "current": 0.9564760269251044,
+    "legacy": 1.5819695340076794
+   },
+   "sorensen": {
+    "best": 0.07783061436217739,
+    "uncalibrated": 0.09236529252268637,
+    "current": 0.10458803039748903,
+    "legacy": 0.10628111251403127
+   }
+  },
+  {
+   "fire": "ViladeRei_20072019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.422854425685489,
+    "uncalibrated": 1.4552307203557722,
+    "current": 1.406161245190269,
+    "legacy": 1.5570368569645083
+   },
+   "sorensen": {
+    "best": 0.20653402400749235,
+    "uncalibrated": 0.2955283623614471,
+    "current": 0.19292266417572512,
+    "legacy": 0.2136883433800002
+   }
+  }
+ ]
+}
