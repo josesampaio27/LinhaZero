@@ -11,6 +11,10 @@ const GRID = "guimaraes";
 /** The city centre: the camera looks at Guimarães, with the fire on the Penha hill to the east. */
 const GUIMARAES: [number, number] = [-8.2918, 41.4425];
 const ZOOM = 11.9;
+/** The posters are this scene captured 800 px wide and shown scaled to the hero's width (object-cover): the live map
+ *  zooms by the same factor, so it fades in over the poster with the same framing. */
+const POSTER_W = 800;
+const zoomFor = (el: HTMLElement) => ZOOM + Math.log2(Math.max(el.clientWidth, 1) / POSTER_W);
 const DEM_TILE = 256;
 const PITCH = 58;
 /** How far the camera swings with the pointer: bearing left/right, pitch up/down. */
@@ -111,7 +115,7 @@ export default function HeroMap({ follow, onReady, readable = false, split, hold
             ],
           },
           center: GUIMARAES,
-          zoom: ZOOM,
+          zoom: zoomFor(container.current!),
           pitch: PITCH,
           interactive: false,
           attributionControl: false,
@@ -119,6 +123,7 @@ export default function HeroMap({ follow, onReady, readable = false, split, hold
           canvasContextAttributes: { preserveDrawingBuffer: readable },
         });
         maps.push(map);
+        map.on("resize", () => map.setZoom(zoomFor(container.current!)));
         map.on("load", () => {
           map.addSource("dem", { type: "raster-dem", tiles: ["herodem://{z}/{x}/{y}"], tileSize: DEM_TILE, encoding: "terrarium", maxzoom: 13 });
           map.addSource("fire", { type: "geojson", data: fire });

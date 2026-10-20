@@ -199,9 +199,17 @@ function Scene({ follow, className = "" }: { follow: React.RefObject<HTMLElement
   );
 }
 
-function Nav() {
+/**
+ * The bar stays at the top while the page scrolls (sticky on the page root, var(--nav) tall). Over the hero it sits on the
+ * page ground; once the page scrolls it turns translucent and blurs what passes under it.
+ * Once the hero's top has left the screen it steps one tone up, so it reads as a bar over the content.
+ */
+function Nav({ stuck }: { stuck: boolean }) {
   return (
-    <nav aria-label="Principal" className="relative z-10 flex items-center justify-between gap-6 bg-background px-margin py-4">
+    <nav
+      aria-label="Principal"
+      className={`sticky top-0 z-30 flex h-(--nav) items-center justify-between gap-6 px-margin transition-[background-color,backdrop-filter] duration-200 ${stuck ? "nav-glass" : "bg-background"}`}
+    >
       <a href="#conteudo" className="skip btn btn-solid">Saltar para o conteúdo</a>
       <a href="#" className="flex min-h-11 items-center gap-2.5" aria-label="LinhaZero, início">
         <img src="/logo-outline.png" alt="" width={85} height={99} className="h-8 w-auto" />
@@ -213,7 +221,8 @@ function Nav() {
         ))}
       </ul>
       <div className="flex items-center gap-3 sm:gap-5">
-        <a href={SIGNIN_URL} className="link px-1 py-3 text-small font-medium">Entrar</a>
+        {/* Phones keep one compact row: the wordmark and the request; "Entrar" is in the footer too. */}
+        <a href={SIGNIN_URL} className="link px-1 py-3 text-small font-medium max-sm:hidden">Entrar</a>
         <a href={SIGNUP_URL} className="btn btn-line min-h-11 px-4 text-small">Pedir acesso</a>
       </div>
     </nav>
@@ -313,7 +322,7 @@ const Lead = ({ className = "" }: { className?: string }) => (
   <div className={className} data-load style={{ "--d": "420ms" } as React.CSSProperties}>
     <p className="max-w-[48ch]">
       O LinhaZero simula um incêndio rural com a decisão A e com a B, lado a lado, e diz em português claro qual
-      protege mais edifícios e aldeias. Feito em Guimarães, com dados e incêndios de Portugal.
+      protege mais edifícios e aldeias. Feito em Portugal, com dados e incêndios portugueses.
     </p>
     <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2">
       <a href={DEMO_URL} className="btn btn-solid">Cenário de demonstração</a>
@@ -329,15 +338,26 @@ const Lead = ({ className = "" }: { className?: string }) => (
 export function Hero() {
   // The camera follows the pointer across the whole window, not just the hero.
   const page = useRef<HTMLElement | null>(document.body);
+  const top = useRef<HTMLSpanElement>(null);
+  const [stuck, setStuck] = useState(false);
+  useEffect(() => {
+    const io = new IntersectionObserver(([e]) => setStuck(!e.isIntersecting));
+    io.observe(top.current!);
+    return () => io.disconnect();
+  }, []);
   return (
-    <header className="relative flex h-svh flex-col">
-      <Nav />
+    <>
+      <Nav stuck={stuck} />
+      {/* One screen under the bar. */}
+      <header className="relative flex h-[calc(100svh-var(--nav))] flex-col">
+      <span ref={top} aria-hidden="true" className="pointer-events-none absolute top-0 size-0.5" />
       <div className="grid gap-x-6 gap-y-[clamp(0.75rem,2.5svh,1.75rem)] px-margin py-[clamp(1rem,3.5svh,2.5rem)] md:grid-cols-12 lg:items-end">
         <Title className="md:col-span-12 lg:col-span-7" />
         <Lead className="md:col-span-12 lg:col-span-5 lg:col-start-8 lg:pb-3" />
       </div>
       <Scene follow={page} className="min-h-[200px] flex-1" />
-    </header>
+      </header>
+    </>
   );
 }
 

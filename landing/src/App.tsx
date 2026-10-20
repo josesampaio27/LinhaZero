@@ -48,7 +48,7 @@ function HowItWorks() {
         </div>
         <div className="md:col-span-6 lg:col-start-7">
           <h2 id="como-funciona-h" className="text-heading" data-reveal>Como funciona</h2>
-          <ol className="mt-[clamp(1rem,3svh,2rem)] grid gap-1">
+          <ol className="mt-[clamp(0.75rem,2.5svh,2rem)] grid gap-1">
             {STEPS.map(([step, detail], i) => (
               <li key={step} data-reveal="row" style={css({ "--i": i + 1 })}>
                 {wide ? (
@@ -57,13 +57,13 @@ function HowItWorks() {
                     aria-pressed={stage === i + 1}
                     onClick={() => setStage((i + 1) as Stage)}
                     onMouseEnter={() => setStage((i + 1) as Stage)}
-                    className={`block w-full border-l-[5px] py-[clamp(0.4rem,1.2svh,0.9rem)] pl-5 text-left transition-colors duration-200 hover:bg-panel ${stage === i + 1 ? "border-ink bg-panel" : "border-raised"}`}
+                    className={`block w-full border-l-[5px] py-[clamp(0.35rem,1svh,0.9rem)] pl-5 text-left transition-colors duration-200 hover:bg-panel ${stage === i + 1 ? "border-ink bg-panel" : "border-raised"}`}
                   >
                     <span className="block text-statement font-medium">{step}</span>
                     <span className="mt-1 block max-w-[52ch] text-muted">{detail}</span>
                   </button>
                 ) : (
-                  <div className="border-l-[5px] border-raised py-[clamp(0.4rem,1.2svh,0.9rem)] pl-5">
+                  <div className="border-l-[5px] border-raised py-[clamp(0.35rem,1svh,0.9rem)] pl-5">
                     <span className="block text-statement font-medium">{step}</span>
                     <span className="mt-1 block max-w-[52ch] text-muted">{detail}</span>
                   </div>
@@ -83,7 +83,7 @@ const Slot = ({ children }: { children: React.ReactNode }) => <span className="s
 
 function Answer() {
   return (
-    <section id="resposta" aria-labelledby="resposta-h" className="tex tex-isocronas fit flex flex-col bg-deep px-margin lg:min-h-svh">
+    <section id="resposta" aria-labelledby="resposta-h" className="tex tex-isocronas fit flex flex-col bg-deep px-margin lg:min-h-[calc(100svh-var(--nav))]">
       <div className="grid flex-1 gap-x-6 gap-y-10 md:grid-cols-12">
         <div className="self-center md:col-span-12 lg:col-span-7">
           <h2 id="resposta-h" className="text-heading" data-reveal>A resposta, por palavras</h2>
@@ -178,10 +178,10 @@ function Proof() {
             <tbody>
               {VALIDATION.map(([set, a, b, c], i) => (
                 <tr key={set} className={i % 2 ? "" : "bg-panel"}>
-                  <td className="py-2 pr-3 pl-3 sm:py-3">{set}</td>
-                  <td className="py-2 pr-3 text-right sm:py-3">{a}</td>
-                  <td className="py-2 pr-3 text-right sm:py-3">{b}</td>
-                  <td className="py-2 pr-3 text-right font-medium sm:py-3">{c}</td>
+                  <td className="py-1.5 pr-3 pl-3 sm:py-3">{set}</td>
+                  <td className="py-1.5 pr-3 text-right sm:py-3">{a}</td>
+                  <td className="py-1.5 pr-3 text-right sm:py-3">{b}</td>
+                  <td className="py-1.5 pr-3 text-right font-medium sm:py-3">{c}</td>
                 </tr>
               ))}
             </tbody>
@@ -300,14 +300,14 @@ function Audience() {
       <div className="grid gap-x-6 lg:grid-cols-12">
         <h2 id="para-quem-h" className="text-heading lg:col-span-5" data-reveal>Para quem decide</h2>
         <p className="mt-4 max-w-[52ch] lg:col-span-6 lg:col-start-7 lg:mt-0 lg:self-end" data-reveal style={css({ "--i": 1 })}>
-          Feito em Guimarães, por quem conhece os incêndios do país: a mesma imagem para todas as entidades, antes,
+          Feito por quem conhece os incêndios do país: a mesma imagem para todas as entidades, antes,
           durante e depois de um incêndio.
         </p>
         <dl className="mt-[clamp(1rem,3svh,3.5rem)] lg:col-span-12">
           {ROLES.map(([who, why], i) => (
             <div
               key={who}
-              className={`grid px-3 py-[clamp(0.4rem,1.2svh,1rem)] sm:grid-cols-12 sm:items-baseline sm:gap-6 ${i % 2 ? "" : "bg-panel"}`}
+              className={`grid px-3 py-[clamp(0.35rem,1svh,1rem)] sm:grid-cols-12 sm:items-baseline sm:gap-6 ${i % 2 ? "" : "bg-panel"}`}
               data-reveal="row"
               style={css({ "--i": i })}
             >
@@ -421,7 +421,8 @@ function AccessRequest() {
 
   return (
     <form data-ui className="dialog" onSubmit={(e) => void send(e)}>
-      <p className="font-display text-[clamp(1.25rem,3.2svh,1.625rem)] leading-tight">Pedir acesso ao LinhaZero</p>
+      {/* On phones the section's heading already names the form: the title stays for screen readers only. */}
+      <p className="font-display text-[clamp(1.25rem,3.2svh,1.625rem)] leading-tight max-sm:sr-only">Pedir acesso ao LinhaZero</p>
       {/* Name and email share a row where there is width for both. */}
       <div className="pair">
       <label>
@@ -482,7 +483,7 @@ function AccessRequest() {
 function Close() {
   return (
     <section id="pedir-acesso" aria-labelledby="pedir-acesso-h" className="tex tex-penha screen bg-decision-a px-margin text-white">
-      <div className="grid items-center gap-x-6 gap-y-[clamp(1rem,3svh,2rem)] lg:grid-cols-12">
+      <div className="grid items-center gap-x-6 gap-y-[clamp(0.75rem,3svh,2rem)] lg:grid-cols-12">
         <div className="lg:col-span-6" data-reveal>
           <h2 id="pedir-acesso-h" className="text-heading">
             Simular, comparar
@@ -548,7 +549,7 @@ function Footer() {
         </div>
         <div className="lg:col-span-4 lg:col-start-9">
           <p className="font-medium">Imagens</p>
-          <p className="mt-2 text-small text-muted">
+          <p className="mt-2 max-w-[70ch] text-small text-muted">
             {CREDITS.map(([title, page, who, lic, licUrl], i) => (
               <span key={title}>
                 <a href={page} className="link">“{title}”</a>, {who}, <a href={licUrl} className="link">{lic}</a>

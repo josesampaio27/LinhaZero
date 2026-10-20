@@ -42,6 +42,8 @@
 
   /* One pair of margins for the whole page, and the motion tokens. */
   --margin: clamp(1rem, 2.2vw, 2rem);
+  /* The sticky bar's height: every screen is the viewport less this (scripts/fit-check.ts measures the same). */
+  --nav: 60px;
   --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in-out: cubic-bezier(0.76, 0, 0.24, 1);
@@ -90,7 +92,7 @@
 
 @layer base {
   * { border-color: var(--line); }
-  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 24px; scrollbar-color: var(--raised) var(--bg); accent-color: var(--a-light); }
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: var(--nav); scrollbar-color: var(--raised) var(--bg); accent-color: var(--a-light); }
   input { caret-color: var(--a-light); }
   body { background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: 1.125rem; line-height: 1.55; -webkit-font-smoothing: antialiased; }
   h1, h2, h3 { font-family: var(--font-display); font-weight: 700; text-wrap: balance; }
@@ -104,9 +106,12 @@
 }
 
 /* ---------- One screen per section: every section fits one viewport on its own (scripts/fit-check.ts). ---------- */
-.screen, .fit { padding-block: clamp(2rem, 7svh, 6rem); }
+.screen, .fit { padding-block: clamp(1.25rem, 4.5svh, 5rem); }
 /* A screen holds a picture or a colour field that fills the viewport; a fit section is as tall as its content. */
-.screen { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; }
+/* The sticky bar once the page has scrolled: translucent ground, what passes under it blurred. Solid where blur is unsupported. */
+.nav-glass { background-color: color-mix(in oklab, var(--bg) 62%, transparent); -webkit-backdrop-filter: blur(14px) saturate(1.2); backdrop-filter: blur(14px) saturate(1.2); } /* taste-skill-ignore: the user asked for a blurred bar */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) { .nav-glass { background-color: var(--panel); } }
+.screen { min-height: calc(100svh - var(--nav)); display: flex; flex-direction: column; justify-content: center; }
 
 /* ---------- Links and controls: feedback under the hand. ---------- */
 /* The skip link: off screen until it takes the keyboard focus. */
@@ -199,7 +204,7 @@
 @media (min-width: 480px) { [data-ui].dialog .pair { grid-template-columns: 1fr 1fr; gap: 12px; } }
 /* The access section's own padding: it holds the tallest content of any screen. */
 #pedir-acesso { padding-block: clamp(1rem, 4svh, 4rem); }
-@media (max-width: 639px) { #pedir-acesso { padding-block: 1rem; } }
+@media (max-width: 639px) { #pedir-acesso { padding-block: 0.75rem; } }
 [data-ui].dialog :is(input[type="text"], input[type="email"], textarea) { min-height: 44px; min-width: 0; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); font: inherit; font-size: 17px; color: inherit; }
 [data-ui].dialog textarea { padding: 10px 12px; resize: vertical; }
 [data-ui].dialog :is(input[type="text"], input[type="email"], textarea):focus { outline: 2px solid var(--a-light); outline-offset: 1px; }
@@ -232,7 +237,7 @@
 .tex-isocronas::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url("/textures/isocronas.svg") no-repeat 96% 100% / auto 70%; opacity: .14; }
 /* The Penha's relief every 50 m, in dark ink on the teal field; its summit sits behind the form. */
 .tex-penha::before { background-image: url("/textures/penha-relevo.svg"); background-size: cover; background-position: 50% 50%; opacity: .2; }
-/* Every 100 m cell of the Guimarães grid that holds buildings, one dot each: the city the page is made in. */
+/* Every 100 m cell of the Guimarães grid that holds buildings, one dot each: the city of the grid. */
 .tex-edificios::before { background-image: url("/textures/edificios.svg"); background-size: auto 260%; background-position: 54% 38%; opacity: .12; }
 /* Narrower screens: the isochrones move under the sentences (whose panels are opaque), away from the intro, and
    the footer's dot field is left out where it would sit under the credits. */
