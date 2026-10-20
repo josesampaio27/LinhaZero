@@ -8,8 +8,8 @@ export const APP_URL = (import.meta.env.VITE_APP_URL as string | undefined) ?? "
 export const DEMO_URL = (import.meta.env.VITE_DEMO_URL as string | undefined) ?? `${APP_URL}?demo`;
 /** The login: the app's API sends the browser to Keycloak (account.<domain>) and back into the app. */
 export const SIGNIN_URL = (import.meta.env.VITE_SIGNIN_URL as string | undefined) ?? `${APP_URL}api/auth/login`;
-/** Not built yet: the request goes to the LinhaZero team (docs/plano/landing.md). */
-export const SIGNUP_URL = "/pedir-acesso";
+/** The request form at the end of the page; it posts to the app's API (docs/decisoes/0062). */
+export const SIGNUP_URL = "#pedir-acesso";
 /** Where the divider between A and B starts: just west of the ignition, so both fires are in view. */
 export const SPLIT_START = 0.62;
 /** The hero map's box on desktop, and the poster's (scripts/hero-poster.ts captures at 960 × 400, 2×). */

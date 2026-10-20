@@ -187,10 +187,15 @@
 /* The access request, as the product's own dialog. */
 [data-ui].dialog { width: min(100%, 460px); border-radius: 14px; background: var(--panel); color: var(--ink); box-shadow: var(--shadow); padding: 24px; display: grid; gap: 16px; }
 [data-ui].dialog label { display: grid; gap: 6px; font-size: 15px; font-weight: 500; }
-[data-ui].dialog input[type="text"] { height: 48px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); font: inherit; font-size: 17px; color: inherit; }
-[data-ui].dialog input[type="text"]:focus { outline: 2px solid var(--a-light); outline-offset: 1px; }
+[data-ui].dialog :is(input[type="text"], input[type="email"], textarea) { min-height: 48px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); font: inherit; font-size: 17px; color: inherit; }
+[data-ui].dialog textarea { padding: 10px 12px; resize: vertical; }
+[data-ui].dialog :is(input[type="text"], input[type="email"], textarea):focus { outline: 2px solid var(--a-light); outline-offset: 1px; }
+/* The trap field for bots: out of sight and out of the tab order, but still in the form. */
+[data-ui].dialog .trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
+[data-ui].dialog .error { margin: 0; color: #ffb4b0; font-weight: 500; }
+[data-ui].dialog button:disabled { opacity: .7; cursor: default; }
 [data-ui].dialog .seg { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 4px; border-radius: 10px; background: var(--bg); }
-@media (min-width: 480px) { [data-ui].dialog .seg { grid-template-columns: repeat(4, 1fr); } }
+@media (min-width: 480px) { [data-ui].dialog .seg { grid-template-columns: repeat(3, 1fr); } }
 [data-ui].dialog .seg label { display: block; }
 [data-ui].dialog .seg input { position: absolute; opacity: 0; pointer-events: none; }
 [data-ui].dialog .seg span { display: block; padding: 9px 4px; border-radius: 7px; text-align: center; font-size: 15px; font-weight: 500; cursor: pointer; transition: background-color 180ms ease; }

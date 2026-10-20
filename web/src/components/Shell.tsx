@@ -99,15 +99,20 @@ export function initials(name: string): string {
 function AccountMenu() {
   const session = useSession();
   if (session.state !== "signed-in") return null;
-  const { name, email } = session.me;
+  const { name, email, isAdmin } = session.me;
   return (
     <Popover label={`Conta de ${name}`} face={<span className="avatar">{initials(name)}</span>} className="account-menu">
-      {() => (
+      {(close) => (
         <div className="account">
           <p>
             <b>{name}</b>
             {email && email !== name && <span>{email}</span>}
           </p>
+          {isAdmin && (
+            <a className="button menu-item" href="#/pedidos" onClick={close}>
+              Pedidos de acesso
+            </a>
+          )}
           <a className="button menu-item" href={ACCOUNT_URL}>
             Conta
           </a>

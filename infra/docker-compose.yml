@@ -84,6 +84,13 @@ services:
       OIDC_CLIENT_ID: linhazero-app
       OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-dev-secret-change-me}
       LANDING_URL: https://landing.${LZ_DOMAIN:-linhazero.localhost}/
+      APP_URL: https://app.${LZ_DOMAIN:-linhazero.localhost}/
+      # The landing posts "Pedir acesso" from its own subdomain(s).
+      CORS_ORIGINS: https://landing.${LZ_DOMAIN:-linhazero.localhost},https://${LZ_DOMAIN:-linhazero.localhost}
+      # Access requests: the API creates approved accounts through Keycloak's admin API, with its own client.
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ADMIN_CLIENT_ID: linhazero-api-admin
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-dev-admin-secret-change-me}
     ports:
       # Loopback only: for `npm run dev` (Vite proxies /api here) and smoke.sh. The browser goes through proxy.
       - "127.0.0.1:8080:8080"
@@ -159,6 +166,16 @@ services:
       OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-dev-secret-change-me}
       OIDC_EXTRA_REDIRECT_URI: http://localhost:5173/api/auth/callback
       OIDC_EXTRA_POST_LOGOUT_URI: http://localhost:5173/
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-dev-admin-secret-change-me}
+      # Email (invites, forgotten passwords). Locally every message goes to Mailpit: http://localhost:8025
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_FROM: ${SMTP_FROM:-linhazero@linhazero.localhost}
+      SMTP_AUTH: ${SMTP_AUTH:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
+      SMTP_SSL: ${SMTP_SSL:-false}
     volumes:
       # The dev user (dev@linhazero.localhost), only in this compose file.
       - ./keycloak/dev/linhazero-users-0.json:/opt/keycloak/data/import/linhazero-users-0.json:ro
@@ -171,6 +188,13 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+
+  # A fake mailbox: catches every email Keycloak sends (invites, password resets); read them at http://localhost:8025.
+  mailpit:
+    image: axllent/mailpit:v1.31.3
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025"
 
   proxy:
     image: caddy:2.11.7-alpine

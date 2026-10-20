@@ -8,7 +8,16 @@
       "firstName": "Utilizador",
       "lastName": "de teste",
       "enabled": true,
-      "credentials": [{ "type": "password", "value": "linhazero-dev", "temporary": false }]
+      "credentials": [
+        {
+          "type": "password",
+          "value": "linhazero-dev",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "linhazero-admin"
+      ]
     }
   ]
 }

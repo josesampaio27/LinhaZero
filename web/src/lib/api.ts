@@ -1,4 +1,5 @@
 import {
+  AccessRequestsClient,
   HealthClient,
   IncidentsClient,
   MeClient,
@@ -61,6 +62,7 @@ async function apiFetch(
 
 const http = { fetch: apiFetch };
 
+export const accessRequestsApi = new AccessRequestsClient("", http);
 export const healthApi = new HealthClient("", http);
 export const incidentsApi = new IncidentsClient("", http);
 export const meApi = new MeClient("", http);

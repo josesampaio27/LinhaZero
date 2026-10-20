@@ -21,7 +21,7 @@ configMapGenerator:
   - name: linhazero-config
     envs: [k8s/config.env]
   - name: postgres-init
-    files: [db/000_keycloak.sh, db/001_init.sql, db/002_users.sql]
+    files: [db/000_keycloak.sh, db/001_init.sql, db/002_users.sql, db/003_access_requests.sql]
 
 secretGenerator:
   # Copy k8s/secrets.env.example to k8s/secrets.env (gitignored) and fill it in.

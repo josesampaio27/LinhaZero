@@ -54,6 +54,8 @@ cp infra/k8s/secrets.env.example infra/k8s/secrets.env  # fica fora do git
 $EDITOR infra/k8s/secrets.env                         # senhas (openssl rand -base64 24), o token do túnel
 ```
 
+**Email.** O Keycloak envia os convites dos pedidos de acesso e as ligações de recuperação de palavra-passe. É preciso um serviço de envio; o plano gratuito do [Brevo](https://www.brevo.com) (300 emails por dia) chega. No Brevo: verificar o domínio (ou um endereço) como remetente, e em SMTP & API criar uma chave SMTP. Depois, em `config.env`, `SMTP_FROM` = um endereço verificado e `SMTP_USER` = o login SMTP que o Brevo mostra; em `secrets.env`, `SMTP_PASSWORD` = a chave. Outros serviços (Resend, Gmail com palavra-passe de aplicação) funcionam da mesma forma.
+
 ## 5. Aplicar
 
 ```bash
@@ -72,7 +74,9 @@ kubectl -n linha-zero port-forward svc/keycloak 8080:8080
 # http://localhost:8080/admin  →  admin / KC_BOOTSTRAP_ADMIN_PASSWORD
 ```
 
-Realm `linhazero` → Users → Create user (email como nome de utilizador) → Credentials → Set password, com "Temporary" ligado. Não há registo público: cada pessoa entra depois de um "Pedir acesso".
+O primeiro administrador cria-se à mão: realm `linhazero` → Users → Create user (o teu email como nome de utilizador, "Email verified" ligado) → Credentials → Set password, com "Temporary" ligado → Role mapping → Assign role → `linhazero-admin`.
+
+A partir daí, as outras contas nascem dos pedidos: a pessoa usa "Pedir acesso" na landing, e o administrador aprova-o na aplicação (iniciais → "Pedidos de acesso"), o que cria a conta e envia o convite por email ([ADR 0062](../../docs/decisoes/0062-pedidos-de-acesso-e-convites-por-email.md)).
 
 ## Atualizar
 

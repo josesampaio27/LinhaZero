@@ -2,6 +2,7 @@ import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./styles.css";
+import { AccessRequests } from "./AccessRequests";
 import { App } from "./App";
 import { GridEditor } from "./GridEditor";
 import { ApiError, meApi } from "./lib/api";
@@ -23,6 +24,11 @@ function Root() {
       {visited.has("grelha") && (
         <div className="page" hidden={page !== "grelha"}>
           <GridEditor />
+        </div>
+      )}
+      {page === "pedidos" && (
+        <div className="page">
+          <AccessRequests />
         </div>
       )}
     </>

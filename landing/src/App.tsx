@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { DEMO_URL, Hero, SIGNIN_URL, SIGNUP_URL } from "@/components/Hero";
+import { useState, type FormEvent } from "react";
+import { APP_URL, DEMO_URL, Hero, SIGNIN_URL, SIGNUP_URL } from "@/components/Hero";
 import { ScenarioCard, type Stage } from "@/components/ScenarioCard";
 
 const REPO = "https://github.com/josesampaio27/LinhaZero";
@@ -298,31 +298,111 @@ function Audience() {
 
 /* ---------- Close: the slogan, and the first step already open ---------- */
 
-const KINDS = ["Bombeiros", "Proteção civil", "Câmara", "GNR"];
+/** The same list the API accepts (backend/src/LinhaZero.Api/Validation/AccessRequestValidator.cs). */
+const KINDS = ["Bombeiros", "Proteção civil", "Câmara", "GNR", "Outra"];
+
+/** The app's API, which keeps the requests: app.<domain>/api/v1/access-requests (docs/decisoes/0062). */
+const ACCESS_REQUESTS_URL = new URL("api/v1/access-requests", new URL(APP_URL, location.href)).toString();
+
+type Sent = "idle" | "sending" | "sent";
 
 function AccessRequest() {
-  const [entity, setEntity] = useState("Bombeiros Voluntários de Guimarães");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [entity, setEntity] = useState("");
   const [kind, setKind] = useState(KINDS[0]);
-  const href = `${SIGNUP_URL}?entidade=${encodeURIComponent(entity)}&tipo=${encodeURIComponent(kind)}`;
+  const [message, setMessage] = useState("");
+  const [website, setWebsite] = useState(""); // the trap: hidden from people, filled in by bots
+  const [state, setState] = useState<Sent>("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  async function send(e: FormEvent) {
+    e.preventDefault();
+    setState("sending");
+    setError(null);
+    try {
+      const res = await fetch(ACCESS_REQUESTS_URL, {
+        method: "POST",
+        headers: { "content-type": "application/json", "X-LinhaZero": "1" },
+        body: JSON.stringify({ name, email, organization: entity, organizationType: kind, message, website }),
+      });
+      if (res.ok) {
+        setState("sent");
+        return;
+      }
+      const body: { error?: string } | null = await res.json().catch(() => null);
+      setError(body?.error ?? `Não foi possível enviar o pedido (erro ${res.status}).`);
+    } catch {
+      setError("Não foi possível enviar o pedido. Verifique a ligação e tente de novo.");
+    }
+    setState("idle");
+  }
+
+  if (state === "sent") {
+    return (
+      <div data-ui className="dialog" role="status">
+        <p className="font-display text-[26px] leading-tight">Pedido enviado</p>
+        <p>
+          Obrigado, {name.split(" ")[0]}. A equipa do LinhaZero vai ver o pedido de {entity}. Quando for aprovado, recebe em{" "}
+          <b>{email}</b> um email para escolher a palavra-passe e entrar.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <form data-ui className="dialog" action={SIGNUP_URL} method="get" onSubmit={(e) => { e.preventDefault(); location.assign(href); }}>
+    <form data-ui className="dialog" onSubmit={(e) => void send(e)}>
       <p className="font-display text-[26px] leading-tight">Pedir acesso ao LinhaZero</p>
       <label>
+        Nome
+        <input type="text" name="name" required maxLength={200} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
+      </label>
+      <label>
+        Email
+        <input type="email" name="email" required maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
+      </label>
+      <label>
         Entidade
-        <input type="text" name="entidade" value={entity} onChange={(e) => setEntity(e.target.value)} autoComplete="organization" />
+        <input
+          type="text"
+          name="organization"
+          required
+          maxLength={200}
+          placeholder="Bombeiros Voluntários de Guimarães"
+          value={entity}
+          onChange={(e) => setEntity(e.target.value)}
+          autoComplete="organization"
+        />
       </label>
       <fieldset className="m-0 border-0 p-0">
         <legend className="mb-1.5 text-[15px] font-medium">Tipo de entidade</legend>
         <div className="seg">
           {KINDS.map((k) => (
             <label key={k} className="relative">
-              <input type="radio" name="tipo" value={k} checked={kind === k} onChange={() => setKind(k)} />
+              <input type="radio" name="organizationType" value={k} checked={kind === k} onChange={() => setKind(k)} />
               <span>{k}</span>
             </label>
           ))}
         </div>
       </fieldset>
-      <button type="submit">Pedir acesso</button>
+      <label>
+        <span>
+          Mensagem <span className="font-normal text-muted">(opcional)</span>
+        </span>
+        <textarea name="message" rows={3} maxLength={2000} value={message} onChange={(e) => setMessage(e.target.value)} />
+      </label>
+      <label className="trap" aria-hidden="true">
+        Website
+        <input type="text" name="website" tabIndex={-1} autoComplete="off" value={website} onChange={(e) => setWebsite(e.target.value)} />
+      </label>
+      {error && (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      )}
+      <button type="submit" disabled={state === "sending"}>
+        {state === "sending" ? "A enviar…" : "Pedir acesso"}
+      </button>
     </form>
   );
 }
