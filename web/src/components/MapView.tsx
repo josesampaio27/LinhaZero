@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
-import maplibregl, { type GeoJSONSource, type ImageSource, type StyleSpecification } from "maplibre-gl";
+import maplibregl, { type CanvasSource, type GeoJSONSource, type ImageSource, type StyleSpecification } from "maplibre-gl";
 import type { GridData, ProjectedPoint } from "@linha-zero/engine";
-import { gridBounds, gridCorners, gridToLngLat, lngLatToGrid, projectedToLngLat, type LngLat } from "../lib/projection";
+import { gridBounds, gridCorners, gridToLngLat, projectedToLngLat, type LngLat } from "../lib/projection";
+import { demTilePixels } from "../lib/dem-tile";
+import { pin } from "../lib/pins";
 import { placeStats } from "../lib/places";
 import { contourSegments, contourStep } from "../lib/contours";
 import type { Incident } from "../api/client";
@@ -27,8 +29,8 @@ interface Props {
   accent: string;
   grid: GridData | null;
   terrainUrl: string | null;
-  /** Image drawn over the terrain: the fire, or the edited cells in the grid editor. */
-  fireUrl: string | null;
+  /** Pixels drawn over the terrain, one per grid cell: the fire, or the edited cells in the grid editor. */
+  fire: ImageData | null;
   showOsm: boolean;
   /** A real fire's observed perimeters: those observed up to `upToMin` are drawn, the latest one bold. */
   observed?: { features: { type: "Feature"; properties: { minute: number }; geometry: unknown }[]; upToMin: number } | null;
@@ -89,36 +91,26 @@ const PRESS_SLOP = 10;
 const TOUCH_END = ["touchmove", "touchend", "touchcancel"] as const;
 
 // 3D relief from the grid's own elevation (works offline): a "griddem://<key>/z/x/y" protocol that
-// renders Terrarium-encoded DEM tiles. Points outside the grid take the nearest edge cell.
+// renders Terrarium-encoded DEM tiles (see dem-tile.ts). The elevation never changes for a grid key,
+// so tiles are cached and shared by both maps: the protocol runs on the main thread.
 const dems = new Map<string, GridData>();
 const DEM_TILE = 256;
+const demTiles = new Map<string, ArrayBuffer>();
+const DEM_TILES_MAX = 512; // ponytail: FIFO cap, ~20 MB of PNG; an LRU if a session ever thrashes it
 maplibregl.addProtocol("griddem", async ({ url }) => {
+  const hit = demTiles.get(url);
+  if (hit) return { data: hit.slice(0) }; // a copy: MapLibre transfers the buffer to its worker
   const [key, z, x, y] = url.slice("griddem://".length).split("/");
   const grid = dems.get(decodeURIComponent(key));
-  const img = new ImageData(DEM_TILE, DEM_TILE);
-  if (grid) {
-    const { rows, cols } = grid.header;
-    const n = 2 ** +z;
-    for (let py = 0; py < DEM_TILE; py++) {
-      const lat = (Math.atan(Math.sinh(Math.PI * (1 - (2 * (+y + (py + 0.5) / DEM_TILE)) / n))) * 180) / Math.PI;
-      for (let px = 0; px < DEM_TILE; px++) {
-        const lng = ((+x + (px + 0.5) / DEM_TILE) / n) * 360 - 180;
-        const g = lngLatToGrid(grid.header, lng, lat);
-        const c = Math.min(cols - 1, Math.max(0, Math.floor(g.x)));
-        const r = Math.min(rows - 1, Math.max(0, Math.floor(g.y)));
-        const v = grid.elevation[r * cols + c] + 32768;
-        const o = (py * DEM_TILE + px) * 4;
-        // ImageData rounds, Terrarium needs floor.
-        img.data[o] = Math.floor(v / 256);
-        img.data[o + 1] = Math.floor(v % 256);
-        img.data[o + 2] = Math.floor((v % 1) * 256);
-        img.data[o + 3] = 255;
-      }
-    }
-  }
+  const img = grid
+    ? new ImageData(demTilePixels(grid.header, grid.elevation, +z, +x, +y, DEM_TILE), DEM_TILE, DEM_TILE)
+    : new ImageData(DEM_TILE, DEM_TILE);
   const canvas = new OffscreenCanvas(DEM_TILE, DEM_TILE);
   canvas.getContext("2d")!.putImageData(img, 0, 0);
-  return { data: await (await canvas.convertToBlob()).arrayBuffer() };
+  const data = await (await canvas.convertToBlob()).arrayBuffer();
+  if (demTiles.size >= DEM_TILES_MAX) demTiles.delete(demTiles.keys().next().value!);
+  demTiles.set(url, data);
+  return { data: data.slice(0) };
 });
 
 const EMPTY: GeoJSON.FeatureCollection = { type: "FeatureCollection", features: [] };
@@ -240,13 +232,6 @@ export function MapView(props: Props) {
         filter: ["==", ["geometry-type"], "LineString"],
         paint: { "line-color": "#111827", "line-width": 2, "line-dasharray": [2, 2] },
       });
-      map.addLayer({
-        id: "draft-points",
-        type: "circle",
-        source: "draft",
-        filter: ["==", ["geometry-type"], "Point"],
-        paint: { "circle-radius": 4, "circle-color": "#fff", "circle-stroke-color": "#111827", "circle-stroke-width": 2 },
-      });
       // A real fire's observed perimeters, above the fire image and the drawings.
       map.addSource("observed", { type: "geojson", data: EMPTY });
       map.addLayer({
@@ -266,6 +251,15 @@ export function MapView(props: Props) {
           "line-opacity": ["case", ["==", ["get", "latest"], true], 1, 0.45],
           "line-dasharray": [3, 1.5],
         },
+      });
+      // Last: with 3D terrain, every background/fill/line/raster run is drawn to one texture per
+      // tile, and a circle layer in the middle would split that into two runs (twice the textures).
+      map.addLayer({
+        id: "draft-points",
+        type: "circle",
+        source: "draft",
+        filter: ["==", ["geometry-type"], "Point"],
+        paint: { "circle-radius": 4, "circle-color": "#fff", "circle-stroke-color": "#111827", "circle-stroke-width": 2 },
       });
       setLoaded(true);
       handlers.current.onReady?.(map);
@@ -295,7 +289,8 @@ export function MapView(props: Props) {
     map.on("touchend", () => (lastTouch = Date.now())); // a long tap also ends with emulated mouse events
     map.on("mousemove", (e) => {
       if (Date.now() - lastTouch < 1000) return;
-      handlers.current.onHover?.([e.lngLat.lng, e.lngLat.lat]);
+      // Not while dragging: the cell under the pointer changes every frame and each change re-renders the app.
+      if (!map.isMoving()) handlers.current.onHover?.([e.lngLat.lng, e.lngLat.lat]);
       if (!draftRef.current) return;
       hover.current = [e.lngLat.lng, e.lngLat.lat];
       (map.getSource("draft") as GeoJSONSource | undefined)?.setData(draftFeatures(draftRef.current, hover.current));
@@ -320,7 +315,11 @@ export function MapView(props: Props) {
       features: shown.map((f, i) => ({ ...f, properties: { ...f.properties, latest: i === shown.length - 1 } })),
     } as GeoJSON.FeatureCollection);
   }, [map, observed]);
-  const { grid, terrainUrl, fireUrl, showOsm, terrain3d, contours, ignition, shapes, draft, interactive, incidents } = props;
+  const { grid, terrainUrl, fire, showOsm, terrain3d, contours, ignition, shapes, draft, interactive, incidents } = props;
+  // The fire layer is a canvas source: drawing into the canvas and re-uploading it skips the PNG
+  // encode + fetch + decode an image source costs on every time step.
+  const fireCanvas = useRef<HTMLCanvasElement>(null!);
+  if (!fireCanvas.current) fireCanvas.current = document.createElement("canvas");
   // A grid variant gives a new grid object on every edit; the sources, the view and the labels only
   // depend on where the grid is, so they follow this key and read the latest grid from a ref.
   const gridRef = useRef(grid);
@@ -342,6 +341,9 @@ export function MapView(props: Props) {
         needsFit.current = false;
         map.fitBounds(gridBounds(g.header), { padding: 20, animate: false });
       }
+      // Resizing clears the canvas and resize() only schedules a frame: paint now, before the browser
+      // shows the blank canvas (a long one in 3D, where every terrain tile is drawn again).
+      map.redraw();
     });
     ro.observe(el);
     return () => ro.disconnect();
@@ -367,7 +369,9 @@ export function MapView(props: Props) {
     });
     const blank = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
     map.addSource("terrain", { type: "image", url: blank, coordinates });
-    map.addSource("fire", { type: "image", url: blank, coordinates });
+    fireCanvas.current.width = grid.header.cols; // resizing also clears it
+    fireCanvas.current.height = grid.header.rows;
+    map.addSource("fire", { type: "canvas", canvas: fireCanvas.current, coordinates, animate: false });
     map.addLayer({ id: "terrain", type: "raster", source: "terrain", paint: { "raster-fade-duration": 0 } }, "drawings-fill");
     map.addLayer(
       { id: "fire", type: "raster", source: "fire", paint: { "raster-fade-duration": 0, "raster-resampling": "nearest" } },
@@ -399,9 +403,17 @@ export function MapView(props: Props) {
   }, [map, gridKey, terrainUrl]);
 
   useEffect(() => {
-    if (!map || !gridKey || !fireUrl) return;
-    (map.getSource("fire") as ImageSource | undefined)?.updateImage({ url: fireUrl });
-  }, [map, gridKey, fireUrl]);
+    const src = map?.getSource("fire") as CanvasSource | undefined;
+    if (!map || !gridKey || !src) return;
+    const canvas = fireCanvas.current;
+    const ctx = canvas.getContext("2d")!;
+    if (fire) ctx.putImageData(fire, 0, 0);
+    else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // With animate off the texture is uploaded once; pause() re-uploads it while "playing".
+    src.play();
+    src.pause();
+    map.triggerRepaint();
+  }, [map, gridKey, fire]);
 
   useEffect(() => {
     if (!map || !map.getLayer("terrain")) return;
@@ -419,13 +431,23 @@ export function MapView(props: Props) {
     map.setLayoutProperty("contours", "visibility", contours ? "visible" : "none");
   }, [map, gridKey, contours]);
 
+  // Turning the relief on loads DEM tiles and tilts the view, which looks rough: a cover with a
+  // spinner hides it until the map is idle (tiles loaded, animation over).
+  const [loading3d, setLoading3d] = useState(false);
   useEffect(() => {
     if (!map || !gridKey) return;
     map.setTerrain(terrain3d ? { source: "dem", exaggeration: 3 } : null);
     if (terrain3d) {
       map.dragRotate.enable();
       map.touchPitch.enable();
-      map.easeTo({ pitch: 60 });
+      setLoading3d(true);
+      map.easeTo({ pitch: 60, animate: false });
+      const done = () => setLoading3d(false);
+      map.once("idle", done);
+      return () => {
+        map.off("idle", done);
+        setLoading3d(false);
+      };
     } else {
       map.dragRotate.disable();
       map.touchPitch.disable();
@@ -462,9 +484,9 @@ export function MapView(props: Props) {
         const el = document.createElement("div");
         el.className = "village-label";
         el.textContent = p.name;
-        return new maplibregl.Marker({ element: el }).setLngLat(gridToLngLat(grid.header, p.col, p.row)).addTo(map);
+        return pin(map, el, gridToLngLat(grid.header, p.col, p.row));
       });
-    return () => markers.forEach((m) => m.remove());
+    return () => markers.forEach((remove) => remove());
   }, [map, gridKey]);
 
   useEffect(() => {
@@ -472,10 +494,7 @@ export function MapView(props: Props) {
     const el = document.createElement("div");
     el.className = "ignition-marker";
     el.title = "Ponto de ignição";
-    const m = new maplibregl.Marker({ element: el }).setLngLat(projectedToLngLat(ignition[0], ignition[1])).addTo(map);
-    return () => {
-      m.remove();
-    };
+    return pin(map, el, projectedToLngLat(ignition[0], ignition[1]));
   }, [map, ignition]);
 
   // Active incidents (fogos.pt): clickable markers that set the ignition, whatever the current tool.
@@ -494,9 +513,9 @@ export function MapView(props: Props) {
         e.stopPropagation(); // otherwise the map click also fires and adds a vertex or ignites twice
         handlers.current.onIncidentClick?.([inc.lon, inc.lat]);
       });
-      return new maplibregl.Marker({ element: el }).setLngLat([inc.lon, inc.lat]).addTo(map);
+      return pin(map, el, [inc.lon, inc.lat]);
     });
-    return () => markers.forEach((m) => m.remove());
+    return () => markers.forEach((remove) => remove());
   }, [map, incidents]);
 
   return (
@@ -505,6 +524,11 @@ export function MapView(props: Props) {
         {props.title}
       </div>
       <div ref={container} className="map" />
+      {loading3d && (
+        <div className="map-loading" role="status">
+          <span className="spinner" aria-hidden />A preparar o relevo…
+        </div>
+      )}
       {props.children}
     </div>
   );

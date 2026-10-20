@@ -131,7 +131,7 @@ function hsl(h: number, s: number, l: number): [number, number, number] {
 }
 
 /** Cells where mask[i] is set, in one translucent colour (the edited cells in the grid editor). */
-export function renderMask(mask: Uint8Array, cols: number, rows: number, rgb: [number, number, number]): string {
+export function renderMask(mask: Uint8Array, cols: number, rows: number, rgb: [number, number, number]): ImageData {
   const img = new ImageData(cols, rows);
   for (let i = 0; i < mask.length; i++) {
     if (!mask[i]) continue;
@@ -140,7 +140,7 @@ export function renderMask(mask: Uint8Array, cols: number, rows: number, rgb: [n
     img.data[i * 4 + 2] = rgb[2];
     img.data[i * 4 + 3] = 150;
   }
-  return toDataUrl(makeCanvas(cols, rows), img);
+  return img;
 }
 
 // Arrival-time ramp: yellow (early) -> orange -> red -> dark red (late).
@@ -169,70 +169,52 @@ function ramp(stops: [number, [number, number, number]][], t: number): [number, 
   return stops[stops.length - 1][1];
 }
 
-/** Reusable renderer for the fire layer of one map. */
-export class FireRenderer {
-  private canvas: HTMLCanvasElement;
-  private img: ImageData;
+// The fire layer: one RGBA pixel per cell, drawn straight into the map's canvas source (MapView).
+// A fresh ImageData per call, so React sees a new value on every time step.
 
-  constructor(private cols: number, private rows: number) {
-    this.canvas = makeCanvas(cols, rows);
-    this.img = new ImageData(cols, rows);
-  }
-
-  /** Cells with arrival <= t (minutes), coloured by arrival time over durationMin. */
-  arrival(arrivalMin: Float32Array | null, t: number, durationMin: number): string {
-    const d = this.img.data;
-    d.fill(0);
-    if (arrivalMin) {
-      for (let i = 0; i < arrivalMin.length; i++) {
-        const a = arrivalMin[i];
-        if (!(a <= t)) continue;
-        const [r, g, b] = ramp(ARRIVAL_STOPS, Math.min(1, a / durationMin));
-        d[i * 4] = r; d[i * 4 + 1] = g; d[i * 4 + 2] = b;
-        d[i * 4 + 3] = 215;
-      }
+/** Cells with arrival <= t (minutes), coloured by arrival time over durationMin. */
+export function fireArrival(cols: number, rows: number, arrivalMin: Float32Array | null, t: number, durationMin: number): ImageData {
+  const img = new ImageData(cols, rows), d = img.data;
+  if (arrivalMin) {
+    for (let i = 0; i < arrivalMin.length; i++) {
+      const a = arrivalMin[i];
+      if (!(a <= t)) continue;
+      const [r, g, b] = ramp(ARRIVAL_STOPS, Math.min(1, a / durationMin));
+      d[i * 4] = r; d[i * 4 + 1] = g; d[i * 4 + 2] = b;
+      d[i * 4 + 3] = 215;
     }
-    return toDataUrl(this.canvas, this.img);
   }
-
-  /** Burn probability (0..1); cells below 2% stay transparent. */
-  probability(p: Float32Array | null): string {
-    const d = this.img.data;
-    d.fill(0);
-    if (p) {
-      for (let i = 0; i < p.length; i++) {
-        if (p[i] < 0.02) continue;
-        const [r, g, b] = ramp(PROB_STOPS, p[i]);
-        d[i * 4] = r; d[i * 4 + 1] = g; d[i * 4 + 2] = b;
-        d[i * 4 + 3] = 90 + 140 * p[i];
-      }
-    }
-    return toDataUrl(this.canvas, this.img);
-  }
-
-  /** Cells with arrival <= t, coloured by fireline intensity class (INTENSITY_CLASSES). */
-  intensity(intensityKwM: Float32Array | null, arrivalMin: Float32Array | null, t: number): string {
-    const d = this.img.data;
-    d.fill(0);
-    if (intensityKwM && arrivalMin) {
-      for (let i = 0; i < intensityKwM.length; i++) {
-        if (!(arrivalMin[i] <= t)) continue;
-        const k = INTENSITY_CLASSES.findIndex((c) => intensityKwM[i] < c.upToKwM);
-        const [r, g, b] = INTENSITY_CLASSES[k < 0 ? INTENSITY_CLASSES.length - 1 : k].rgb;
-        d[i * 4] = r; d[i * 4 + 1] = g; d[i * 4 + 2] = b;
-        d[i * 4 + 3] = 225;
-      }
-    }
-    return toDataUrl(this.canvas, this.img);
-  }
-
-  get size(): [number, number] {
-    return [this.cols, this.rows];
-  }
+  return img;
 }
 
-export const TRANSPARENT_PNG =
-  "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
+/** Burn probability (0..1); cells below 2% stay transparent. */
+export function fireProbability(cols: number, rows: number, p: Float32Array | null): ImageData {
+  const img = new ImageData(cols, rows), d = img.data;
+  if (p) {
+    for (let i = 0; i < p.length; i++) {
+      if (p[i] < 0.02) continue;
+      const [r, g, b] = ramp(PROB_STOPS, p[i]);
+      d[i * 4] = r; d[i * 4 + 1] = g; d[i * 4 + 2] = b;
+      d[i * 4 + 3] = 90 + 140 * p[i];
+    }
+  }
+  return img;
+}
+
+/** Cells with arrival <= t, coloured by fireline intensity class (INTENSITY_CLASSES). */
+export function fireIntensity(cols: number, rows: number, intensityKwM: Float32Array | null, arrivalMin: Float32Array | null, t: number): ImageData {
+  const img = new ImageData(cols, rows), d = img.data;
+  if (intensityKwM && arrivalMin) {
+    for (let i = 0; i < intensityKwM.length; i++) {
+      if (!(arrivalMin[i] <= t)) continue;
+      const k = INTENSITY_CLASSES.findIndex((c) => intensityKwM[i] < c.upToKwM);
+      const [r, g, b] = INTENSITY_CLASSES[k < 0 ? INTENSITY_CLASSES.length - 1 : k].rgb;
+      d[i * 4] = r; d[i * 4 + 1] = g; d[i * 4 + 2] = b;
+      d[i * 4 + 3] = 225;
+    }
+  }
+  return img;
+}
 
 /** Fireline intensity classes by what can work against the fire (Alexander; the thresholds of "Ataque" in the engine). */
 export const INTENSITY_CLASSES: { upToKwM: number; rgb: [number, number, number]; label: string }[] = [
