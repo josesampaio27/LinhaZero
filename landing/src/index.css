@@ -200,3 +200,23 @@
 [data-ui].dialog button { height: 52px; border: 0; border-radius: 10px; background: var(--ink); color: var(--bg); font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; transition: background-color 180ms ease, transform 140ms var(--ease-out); }
 [data-ui].dialog button:hover { background: #fff; }
 [data-ui].dialog button:active { transform: scale(0.97); }
+
+/* ---------- Textures from the subject's own data (scripts/hero-fire.ts writes them to public/textures).
+   One language: fine single-weight lines or dots at low contrast, one layer per section, never repeated.
+   Static CSS backgrounds on a layer behind the content, so text keeps its contrast. ---------- */
+.tex { position: relative; isolation: isolate; }
+.tex::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background-repeat: no-repeat; }
+/* The hero fire under decision A, every 30 minutes, rising behind the comparison sentences. */
+.tex-isocronas::before { background-image: url("/textures/isocronas.svg"); background-size: auto 118%; background-position: 4% 70%; opacity: .26; }
+/* The Penha's relief every 25 m, in dark ink on the teal field; its summit sits behind the form. */
+.tex-penha::before { background-image: url("/textures/penha-relevo.svg"); background-size: cover; background-position: 50% 50%; opacity: .32; }
+/* Every 100 m cell of the Guimarães grid that holds buildings, one dot each: the city the page is made in. */
+.tex-edificios::before { background-image: url("/textures/edificios.svg"); background-size: auto 260%; background-position: 54% 38%; opacity: .2; }
+/* Narrower screens: the isochrones move under the sentences (whose panels are opaque), away from the intro, and
+   the footer's dot field is left out where it would sit under the credits. */
+@media (max-width: 1023px) {
+  .tex-isocronas::before { background-size: auto 62%; background-position: 100% 92%; }
+}
+@media (max-width: 639px) {
+  .tex-edificios::before { content: none; }
+}

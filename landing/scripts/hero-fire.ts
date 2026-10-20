@@ -1,7 +1,7 @@
 // Generates the hero's fire once, as GeoJSON in WGS84: the same fire on the Guimarães grid under decision A and
 // decision B, the cells classed by the hour the fire arrives (h1..h4). Run from the repo root:
 //   npx tsx landing/scripts/hero-fire.ts
-import { readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import {
   comparePaired,
   decodeGrid,
@@ -101,16 +101,100 @@ for (const key of ["buildingsReached", "burnedHa"] as const) {
   console.log(`${key}: B melhor em ${c.bBetter}, A melhor em ${c.aBetter}, empate em ${c.ties} de ${c.runs}`);
 }
 
-// The relief's contour lines as a small SVG, used as a mask for faint backgrounds on the page.
+// ---------- Background textures, drawn from the same data (docs/plano/landing.md §8) ----------
+// One graphic language: fine single-weight lines or dots, in one colour, at low contrast, as small static SVGs
+// that the page uses as CSS backgrounds. Each section that has one gets its own layer, not a repeated tile.
 import { contourSegments } from "../../web/src/lib/contours";
-{
-  const step = 100;
-  const byLevel = new Map<number, string[]>();
-  for (const s of contourSegments(grid.elevation, rows, cols, step)) {
-    (byLevel.get(s.level) ?? byLevel.set(s.level, []).get(s.level)!).push(`M${s.a[0].toFixed(1)} ${s.a[1].toFixed(1)}L${s.b[0].toFixed(1)} ${s.b[1].toFixed(1)}`);
+
+/** Bilinear resample of a grid window [r0, r1) × [c0, c1) at k samples per cell, so the lines come out smooth. */
+function resample(z: ArrayLike<number>, r0: number, c0: number, r1: number, c1: number, k: number) {
+  const h = Math.round((r1 - r0) * k), w = Math.round((c1 - c0) * k), out = new Float32Array(h * w);
+  const at = (r: number, c: number) => z[Math.min(rows - 1, Math.max(0, r)) * cols + Math.min(cols - 1, Math.max(0, c))];
+  for (let y = 0; y < h; y++) {
+    for (let x = 0; x < w; x++) {
+      const fr = r0 + y / k, fc = c0 + x / k, r = Math.floor(fr), c = Math.floor(fc), tr = fr - r, tc = fc - c;
+      out[y * w + x] = (at(r, c) * (1 - tc) + at(r, c + 1) * tc) * (1 - tr) + (at(r + 1, c) * (1 - tc) + at(r + 1, c + 1) * tc) * tr;
+    }
   }
-  const paths = [...byLevel].map(([, d]) => `<path d="${d.join("")}"/>`).join("");
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${cols} ${rows}" fill="none" stroke="#000" stroke-width="0.18" stroke-linecap="round">${paths}</svg>`;
-  writeFileSync("landing/public/hero/contours.svg", svg);
-  console.log(`contours.svg: ${byLevel.size} níveis, ${Math.round(svg.length / 1024)} KB`);
+  return { z: out, h, w };
+}
+
+/** Marching-squares segments chained into polylines, as one SVG path string (0.1-unit precision). */
+function contourPath(z: Float32Array, h: number, w: number, step: number, keep: (level: number) => boolean): string {
+  const segs = contourSegments(z, h, w, step).filter((s) => keep(s.level));
+  const key = (p: [number, number]) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`;
+  const ends = new Map<string, number[]>();
+  segs.forEach((s, i) => {
+    for (const p of [s.a, s.b]) (ends.get(key(p)) ?? ends.set(key(p), []).get(key(p))!).push(i);
+  });
+  const used = new Uint8Array(segs.length);
+  let d = "";
+  for (let i = 0; i < segs.length; i++) {
+    if (used[i]) continue;
+    used[i] = 1;
+    const line = [segs[i].a, segs[i].b];
+    for (;;) {
+      const tail = key(line.at(-1)!);
+      const next = (ends.get(tail) ?? []).find((j) => !used[j]);
+      if (next === undefined) break;
+      used[next] = 1;
+      line.push(key(segs[next].a) === tail ? segs[next].b : segs[next].a);
+    }
+    d += "M" + line.map((p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join("L");
+  }
+  return d;
+}
+
+function svgFile(name: string, w: number, h: number, body: string) {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${body}</svg>`;
+  writeFileSync(`landing/public/textures/${name}`, svg);
+  console.log(`textures/${name}: ${Math.round(svg.length / 1024)} KB`);
+}
+mkdirSync("landing/public/textures", { recursive: true });
+
+// 1. The hero fire under decision A, as arrival lines every 30 minutes ("A resposta"). Cells the fire never
+// reaches sit just past the last line, so the four-hour line closes.
+{
+  const t = Float32Array.from(A.arrivalMin, (v) => (Number.isFinite(v) && v <= durationMin ? v : durationMin + 30));
+  let r0 = rows, r1 = 0, c0 = cols, c1 = 0;
+  for (let i = 0; i < t.length; i++) {
+    if (t[i] > durationMin) continue;
+    const r = Math.floor(i / cols), c = i % cols;
+    r0 = Math.min(r0, r); r1 = Math.max(r1, r); c0 = Math.min(c0, c); c1 = Math.max(c1, c);
+  }
+  const m = 10, k = 4;
+  const win = resample(t, r0 - m, c0 - m, r1 + m, c1 + m, k);
+  const d = contourPath(win.z, win.h, win.w, 30, (l) => l >= 30 && l <= durationMin);
+  svgFile("isocronas.svg", win.w, win.h, `<path d="${d}" fill="none" stroke="#e5ebe8" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
+}
+
+// 2. The relief of the Penha every 25 metres, around its summit ("Pedir acesso"), in a dark ink for the teal field.
+{
+  let best = ignition, top = -Infinity;
+  for (let r = ignition.row - 25; r <= ignition.row + 25; r++) {
+    for (let c = ignition.col - 25; c <= ignition.col + 25; c++) {
+      const v = grid.elevation[r * cols + c];
+      if (v > top) { top = v; best = { row: r, col: c }; }
+    }
+  }
+  const m = 17, k = 2; // 50 m samples: smooth enough at page scale, and under 40 KB gzipped
+  const win = resample(grid.elevation, best.row - m, best.col - m * 1.6, best.row + m, best.col + m * 1.6, k);
+  const d = contourPath(win.z, win.h, win.w, 25, () => true);
+  svgFile("penha-relevo.svg", win.w, win.h, `<path d="${d}" fill="none" stroke="#032a2e" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
+  console.log(`Penha: cume a ${Math.round(top)} m na célula ${best.row},${best.col}`);
+}
+
+// 3. Every 100 m cell of the grid that holds buildings, one dot sized by how many (the footer).
+{
+  const buckets: [number, number, number][] = [[1, 3, 0.2], [4, 15, 0.34], [16, Infinity, 0.5]];
+  const paths = buckets.map(() => "");
+  for (let r = 0; r < rows; r++) {
+    for (let c = 0; c < cols; c++) {
+      const n = grid.buildings[r * cols + c];
+      const b = n ? buckets.findIndex(([lo, hi]) => n >= lo && n <= hi) : -1;
+      if (b >= 0) paths[b] += `M${c + 0.5} ${r + 0.5}h0`;
+    }
+  }
+  const body = paths.map((d, i) => `<path d="${d}" stroke="#e5ebe8" stroke-width="${buckets[i][2]}" stroke-linecap="round"/>`).join("");
+  svgFile("edificios.svg", cols, rows, body);
 }

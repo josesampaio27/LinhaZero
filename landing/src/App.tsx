@@ -62,7 +62,7 @@ const Slot = ({ children }: { children: React.ReactNode }) => <span className="s
 
 function Answer() {
   return (
-    <section id="resposta" aria-labelledby="resposta-h" className="fit flex flex-col bg-deep px-margin lg:min-h-svh">
+    <section id="resposta" aria-labelledby="resposta-h" className="tex tex-isocronas fit flex flex-col bg-deep px-margin lg:min-h-svh">
       <div className="grid flex-1 gap-x-6 gap-y-10 md:grid-cols-12">
         <div className="self-center md:col-span-12 lg:col-span-7">
           <h2 id="resposta-h" className="text-heading" data-reveal>A resposta, por palavras</h2>
@@ -329,7 +329,7 @@ function AccessRequest() {
 
 function Close() {
   return (
-    <section id="pedir-acesso" aria-labelledby="pedir-acesso-h" className="screen bg-decision-a px-margin text-white">
+    <section id="pedir-acesso" aria-labelledby="pedir-acesso-h" className="tex tex-penha screen bg-decision-a px-margin text-white">
       <div className="grid items-center gap-x-6 gap-y-8 lg:grid-cols-12">
         <div className="lg:col-span-6" data-reveal>
           <h2 id="pedir-acesso-h" className="text-heading">
@@ -369,7 +369,7 @@ const DOC_LINKS: [string, string][] = [
 
 function Footer() {
   return (
-    <footer className="bg-deep px-margin pt-[clamp(3rem,8svh,6rem)] pb-6">
+    <footer className="tex tex-edificios bg-deep px-margin pt-[clamp(3rem,8svh,6rem)] pb-6">
       <div className="grid gap-x-6 gap-y-8 lg:grid-cols-12">
         <div className="lg:col-span-5">
           <a href="#" className="inline-flex items-center gap-2.5" aria-label="LinhaZero, voltar ao início">

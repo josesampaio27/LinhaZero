@@ -160,6 +160,16 @@ A primeira versão lia-se genérica ("feita por IA"). O redesenho seguiu as skil
 - **Pedir acesso:** o slogan, uma frase, e o diálogo da aplicação (entidade e tipo) que leva a `/pedir-acesso?entidade=…&tipo=…`.
 - **Rodapé:** sóbrio, nas margens da página: logótipo e nome em tamanho normal, "Por portugueses, para Portugal.", as três ações, a documentação, o código e os créditos das imagens.
 
+**Texturas** (outubro de 2026): vêm dos dados do próprio projeto, nunca de decoração. Uma linguagem só, linhas finas de espessura única ou pontos, num tom, com pouco contraste, uma camada própria por secção (`.tex` e um `::before` com `background-image`, sem JS, sem gradientes, sem animação). Geradas por `landing/scripts/hero-fire.ts` (que já faz o fogo do herói) para `landing/public/textures/`:
+
+| Ficheiro | Dados | Onde | gzip |
+| --- | --- | --- | --- |
+| `isocronas.svg` | o fogo do herói com a decisão A, linhas de chegada de 30 em 30 min (30 a 240) | "A resposta, por palavras"; abaixo do computador desce para trás das frases | 6,5 KB |
+| `penha-relevo.svg` | o relevo da Penha de 25 em 25 m, à volta do cume (602 m), em tinta escura | campo teal de "Pedir acesso" | 11,3 KB |
+| `edificios.svg` | cada célula de 100 m da grelha com edifícios, um ponto por célula, maior onde há mais | rodapé (fora no telemóvel, onde ficaria sob os créditos) | 7,9 KB |
+
+As outras secções ficam lisas, para as texturadas se lerem. O texto mantém 4,5:1: as linhas claras ficam a 20 a 26 % sobre o fundo escuro, e as do teal são escuras, o que só aumenta o contraste do texto branco. O antigo `hero/contours.svg`, que não era usado, foi retirado.
+
 **Imagens** (em `landing/public/photos`, créditos em `credits.json` e no rodapé; WebP feitos com `landing/scripts/to-webp.ts`): NASA MODIS, Portugal a 18 de junho de 2017 (domínio público); Halley Oliveira, Guimarães vista da Penha (CC BY-SA 2.0); Manuel_Rocha, caminho na Penha (CC BY-SA 3.0); Bextrel, Incêndio de Monchique 2018 (CC BY-SA 4.0).
 
 **Peso:** JS principal ~54 KB gz, CSS ~8 KB gz; o MapLibre continua num chunk à parte, só no computador, depois de `load` e de o browser ficar livre.
