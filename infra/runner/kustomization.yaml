@@ -9,3 +9,4 @@ resources:
   - rbac.yaml
   - controller.yaml
   - scale-set.yaml
+  - network-policies.yaml
