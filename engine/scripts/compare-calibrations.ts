@@ -1,4 +1,4 @@
-// Paired comparison of two calibration reports on the same held-out fires (ADR 0061): a structural
+// Paired comparison of two calibration reports on the same held-out fires (ADR 0064): a structural
 // hypothesis (crown fire off, one global factor, crown ratio, smoothed relief) against the base.
 //   tsx scripts/compare-calibrations.ts <base.json> <hypothesis.json>
 // Both must come from calibrate.ts with the same cases, selection and seed, so the 5 folds are the same

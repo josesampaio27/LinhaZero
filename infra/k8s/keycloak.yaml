@@ -1,0 +1,81 @@
+# Keycloak on account.<domain> (docs/decisoes/0061). The tunnel only routes /realms/ and /resources/ to it: the admin
+# console is reached with `kubectl -n linha-zero port-forward svc/keycloak 8080` (infra/k8s/README.md).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: keycloak }
+  template:
+    metadata:
+      labels: { app: keycloak }
+    spec:
+      containers:
+        - name: keycloak
+          image: linhazero-keycloak
+          imagePullPolicy: Always
+          env:
+            - name: LZ_DOMAIN
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: LZ_DOMAIN } }
+            - { name: KC_HOSTNAME, value: "https://account.$(LZ_DOMAIN)" }
+            - { name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC, value: "true" }
+            - { name: KC_PROXY_HEADERS, value: xforwarded }
+            - { name: KC_HTTP_ENABLED, value: "true" }
+            - { name: KC_DB_URL, value: "jdbc:postgresql://postgres:5432/keycloak" }
+            - { name: KC_DB_USERNAME, value: keycloak }
+            - name: KC_DB_PASSWORD
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: KEYCLOAK_DB_PASSWORD } }
+            - { name: KC_BOOTSTRAP_ADMIN_USERNAME, value: admin }
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: KC_BOOTSTRAP_ADMIN_PASSWORD } }
+            # Read by the realm import (infra/keycloak/linhazero-realm.json); no localhost addresses here.
+            - name: OIDC_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: OIDC_CLIENT_SECRET } }
+            - { name: OIDC_EXTRA_REDIRECT_URI, value: "https://app.$(LZ_DOMAIN)/api/auth/callback" }
+            - { name: OIDC_EXTRA_POST_LOGOUT_URI, value: "https://landing.$(LZ_DOMAIN)/" }
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: KEYCLOAK_ADMIN_CLIENT_SECRET } }
+            # Email (realm import): invites and forgotten passwords.
+            - name: SMTP_HOST
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_HOST } }
+            - name: SMTP_PORT
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_PORT } }
+            - name: SMTP_FROM
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_FROM } }
+            - name: SMTP_USER
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_USER } }
+            - name: SMTP_AUTH
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_AUTH } }
+            - name: SMTP_STARTTLS
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_STARTTLS } }
+            - name: SMTP_SSL
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_SSL } }
+            - name: SMTP_PASSWORD
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: SMTP_PASSWORD } }
+          ports:
+            - { name: http, containerPort: 8080 }
+            - { name: management, containerPort: 9000 }
+          startupProbe:
+            httpGet: { path: /health/started, port: management }
+            periodSeconds: 5
+            failureThreshold: 60
+          readinessProbe:
+            httpGet: { path: /health/ready, port: management }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /health/live, port: management }
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 200m, memory: 512Mi }
+            limits: { memory: 1Gi }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+spec:
+  selector: { app: keycloak }
+  ports:
+    - { name: http, port: 8080, targetPort: http }

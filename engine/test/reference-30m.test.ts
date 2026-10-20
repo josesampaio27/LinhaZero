@@ -3,7 +3,7 @@ import { PT_CALIBRATION_30M } from "../src/calibration";
 import { scoreIntervals, weightedCost } from "../scripts/intervals";
 import { listCases, loadCase, scoreCase } from "../scripts/reference";
 
-// Three of the 30 m fit fires closest to Guimarães (engine/test/reference-30m, ADR 0062), simulated with
+// Three of the 30 m fit fires closest to Guimarães (engine/test/reference-30m, ADR 0064), simulated with
 // the 30 m calibration (PT_CALIBRATION_30M) and the hourly ERA5 weather, starting from the observed fire.
 // Recorded on 2026-10-20:
 //   sorensen  mean Sørensen over the observation times, from the ignition (higher is better);

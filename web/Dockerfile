@@ -1,5 +1,5 @@
 # Build context: the repo root (npm ci needs the root lockfile). Builds the interface and serves it with nginx,
-# which also forwards /api to the API container. The grids are mounted at run time (see infra/docker-compose.yml).
+# (the proxy in front routes /api to the API). The grids are mounted at run time (see infra/docker-compose.yml).
 FROM node:24.13.0-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./

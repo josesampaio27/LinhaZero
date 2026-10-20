@@ -128,7 +128,7 @@ describe("cell corners", () => {
   });
 });
 
-describe("options for the structural hypotheses (ADR 0061)", () => {
+describe("options for the structural hypotheses (ADR 0063)", () => {
   it("a shallower crown ratio shelters less: the wind adjustment factor rises", async () => {
     const { windAdjustmentFactor } = await import("../src/rothermel");
     expect(windAdjustmentFactor(0.5, 0.5, 12, 0.5)).toBeGreaterThan(windAdjustmentFactor(0.5, 0.5, 12, 1));

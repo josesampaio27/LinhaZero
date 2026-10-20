@@ -2,9 +2,12 @@ import { StrictMode, useState } from "react";
 import { createRoot } from "react-dom/client";
 import "maplibre-gl/dist/maplibre-gl.css";
 import "./styles.css";
+import { AccessRequests } from "./AccessRequests";
 import { App } from "./App";
 import { GridEditor } from "./GridEditor";
+import { ApiError, meApi } from "./lib/api";
 import { useRoute, type Page } from "./lib/route";
+import { isDemo, setSession } from "./lib/session";
 
 /** Both pages stay mounted once visited, so switching keeps what was drawn on each. */
 function Root() {
@@ -21,6 +24,11 @@ function Root() {
       {visited.has("grelha") && (
         <div className="page" hidden={page !== "grelha"}>
           <GridEditor />
+        </div>
+      )}
+      {page === "pedidos" && (
+        <div className="page">
+          <AccessRequests />
         </div>
       )}
     </>
@@ -50,8 +58,26 @@ if (import.meta.env.PROD && "serviceWorker" in navigator) {
   navigator.serviceWorker.register(`/sw.js?v=${encodeURIComponent(build)}`).catch((e) => console.warn("service worker indisponível", e));
 }
 
-createRoot(document.getElementById("root")!).render(
-  <StrictMode>
-    <Root />
-  </StrictMode>,
-);
+/**
+ * Asks the API who is signed in before showing anything, so a visitor without a session goes to the login without
+ * first seeing the app. The demo opens anyway, and so does the app when the API does not answer (offline).
+ */
+async function start() {
+  try {
+    setSession({ state: "signed-in", me: await meApi.get() });
+  } catch (e) {
+    if (e instanceof ApiError && e.status === 401) {
+      if (!isDemo()) return; // apiFetch is already sending the browser to the login
+      setSession({ state: "anonymous" });
+    } else {
+      setSession({ state: "offline" });
+    }
+  }
+  createRoot(document.getElementById("root")!).render(
+    <StrictMode>
+      <Root />
+    </StrictMode>,
+  );
+}
+
+void start();

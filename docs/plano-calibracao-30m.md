@@ -5,7 +5,7 @@ Oct 20, 2026
 > **Status (Oct 20, 2026, evening):** done, with changes to this plan.
 >
 > - **Method:** the 30 m grid was calibrated standalone, from the physical values, with no matching against 100 m.
-> - **Results:** [ADR 0062](decisoes/0062-calibracao-da-grelha-de-30-m.md). The fit did not pass the rule.
+> - **Results:** [ADR 0064](decisoes/0064-calibracao-da-grelha-de-30-m.md). The fit did not pass the rule.
 > - **What ships:** the 100 m values, which beat physics on the 30 m fires they never saw.
 > - **Next refit:** [plano-refit-30m.md](plano-refit-30m.md).
 
@@ -204,7 +204,7 @@ Calibration must not absorb solver artefacts that vanish at 30 m. Every fix goes
 
 ### Phase 3 — Pre-register the protocol (before looking at any 30 m score)
 
-Write a short ADR (proposal: ADR 0061) with the following, frozen:
+Write a short ADR (proposal: ADR 0064) with the following, frozen:
 
 - **Objective:** the interval cost as in ADR 0054, with the Phase 1 changes: ha gates, +1 ha smoothing, area weight 0.5, slow weight 0.25, cap ln 5.
 - **Parameter space:** `groupCrown` (6 parameters), weak prior 0.01·Σ ln² towards 1, bounds as today.

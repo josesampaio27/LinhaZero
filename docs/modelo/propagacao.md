@@ -8,7 +8,7 @@ O território é uma grelha de células quadradas: 100 m na grelha de Guimarães
 
 - **Modelo de Rothermel (o único da aplicação):** passa em 32 direções. Cada direção representa também 0,6 do setor angular à sua volta, para a velocidade da cabeça não depender do ângulo entre o vento e a grelha ([ADR 0058](../decisoes/0058-revisao-do-motor.md)).
 - **Tempo de cada passo:** a soma, por cada célula que o passo atravessa (a de partida incluída), do comprimento nessa célula a dividir pela velocidade dela nessa direção (`engine/src/spread-rothermel.ts`).
-- **Tempo que muda:** quando o tempo meteorológico muda, ou quando começa um "Ataque" ou um "Proteger zona", os passos em curso recalculam-se. Guardam a parte já percorrida e fazem o resto à velocidade nova ([ADR 0061](../decisoes/0061-tempo-que-muda-cantos-e-estado-de-partida.md)). Assim, um fogo que começa em calmaria acelera quando o vento sobe, e o resultado não depende do tamanho da célula.
+- **Tempo que muda:** quando o tempo meteorológico muda, ou quando começa um "Ataque" ou um "Proteger zona", os passos em curso recalculam-se. Guardam a parte já percorrida e fazem o resto à velocidade nova ([ADR 0063](../decisoes/0063-tempo-que-muda-cantos-e-estado-de-partida.md)). Assim, um fogo que começa em calmaria acelera quando o vento sobe, e o resultado não depende do tamanho da célula.
 - **Barreiras:** um passo não salta uma barreira de uma célula, nem se esgueira pelo canto entre duas barreiras diagonais.
 - **Área já ardida:** as células cujo centro está dentro do perímetro contam como ardidas, com o fogo já a 0,65 do caminho até à borda delas.
 - **Duração:** o cálculo para quando o tempo passa a duração pedida (por exemplo 4 horas); células não alcançadas ficam com tempo infinito.
@@ -35,7 +35,7 @@ A velocidade vem do modelo de Rothermel (1972), tal como o BehavePlus o calcula 
 - **Vento e declive** somam-se como vetores. O resultado dá a velocidade e a direção da frente, com o limite de vento original de Rothermel (0,9 × intensidade de reação).
 - **Forma:** elipse de Anderson (forma do BehavePlus), com a ignição no foco de trás.
 - **Saídas por célula:** o tempo de chegada e a intensidade de Byram com que o fogo chega; a interface mostra-a na vista "Intensidade". O comprimento de chama deriva da intensidade.
-- **Fogo de copas:** Van Wagner (1977) e Cruz et al. (2005), com a intensidade física à velocidade de Cruz ([ADR 0056](../decisoes/0056-fogo-de-copas.md), [ADR 0061](../decisoes/0061-tempo-que-muda-cantos-e-estado-de-partida.md)).
+- **Fogo de copas:** Van Wagner (1977) e Cruz et al. (2005), com a intensidade física à velocidade de Cruz ([ADR 0056](../decisoes/0056-fogo-de-copas.md), [ADR 0063](../decisoes/0063-tempo-que-muda-cantos-e-estado-de-partida.md)).
 
 A grelha de Guimarães já tem os parâmetros (`fuelTable[código].rothermel`, de `data-prep/fuel_params.py`) e a camada de coberto (`data-prep/canopy.py`).
 
@@ -52,7 +52,7 @@ Na interface e no servidor, o modelo de Rothermel corre com `PT_CALIBRATION` (`e
 
 As autoestradas, as estradas e os rios cedem conforme a largura; só as superfícies de água são barreiras absolutas.
 
-Cada resolução tem a sua calibração (`calibrationFor(cellSize)`). A grelha de 30 m usa por agora os mesmos valores (`PT_CALIBRATION_30M`). Um ajuste próprio a 30 m, a partir dos valores físicos, não passou a regra de adoção, e estes valores ganham ao modelo físico nos fogos de 30 m que nunca viram ([ADR 0062](../decisoes/0062-calibracao-da-grelha-de-30-m.md), [plano de recalibração](../plano-refit-30m.md)).
+Cada resolução tem a sua calibração (`calibrationFor(cellSize)`). A grelha de 30 m usa por agora os mesmos valores (`PT_CALIBRATION_30M`). Um ajuste próprio a 30 m, a partir dos valores físicos, não passou a regra de adoção, e estes valores ganham ao modelo físico nos fogos de 30 m que nunca viram ([ADR 0064](../decisoes/0064-calibracao-da-grelha-de-30-m.md), [plano de recalibração](../plano-refit-30m.md)).
 
 ### Intensidade, linhas que cedem e focos secundários (Rothermel)
 
@@ -68,7 +68,7 @@ As regras estão na [ADR 0052](../decisoes/0052-intensidade-linhas-que-cedem-e-f
 `Scenario.weatherSteps` dá o vento (e, no Rothermel, a humidade do combustível) a partir de cada minuto.
 
 - O passo de uma célula usa o tempo no minuto em que o fogo parte dela.
-- O Dijkstra aplica cada mudança quando o relógio da pesquisa a passa, e recalcula nesse minuto os passos ainda em curso, com a parte já percorrida guardada ([ADR 0061](../decisoes/0061-tempo-que-muda-cantos-e-estado-de-partida.md)).
+- O Dijkstra aplica cada mudança quando o relógio da pesquisa a passa, e recalcula nesse minuto os passos ainda em curso, com a parte já percorrida guardada ([ADR 0063](../decisoes/0063-tempo-que-muda-cantos-e-estado-de-partida.md)).
 - Na interface, "Seguir a previsão hora a hora" cria um passo por hora da previsão do Open-Meteo. O primeiro passo usa o vento dos controlos.
 
 ### Intervenções

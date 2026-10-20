@@ -53,7 +53,7 @@ python3.11 -m venv .venv
 .venv/bin/python build_references.py --ptfs ~/PT-FireSprd_v0.08 --offline  # depois, só da cache
 ```
 
-A 30 m (a grelha `guimaraes-30m` tem a sua própria calibração, [ADR 0062](../docs/decisoes/0062-calibracao-da-grelha-de-30-m.md)), noutra pasta e com o manifesto ao lado, para não substituir o de 100 m que está no git:
+A 30 m (a grelha `guimaraes-30m` tem a sua própria calibração, [ADR 0064](../docs/decisoes/0064-calibracao-da-grelha-de-30-m.md)), noutra pasta e com o manifesto ao lado, para não substituir o de 100 m que está no git:
 
 ```bash
 .venv/bin/python build_references.py --ptfs ~/PT-FireSprd_v0.08 --cell 30 --out out/reference-30m --manifest out/reference-30m/manifest.json

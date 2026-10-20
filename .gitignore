@@ -10,3 +10,5 @@ backend/**/obj/
 infra/.env
 .vs/
 data-prep/out/
+.taste-skill/
+infra/k8s/secrets.env

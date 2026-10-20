@@ -1,12 +1,12 @@
-# ADR 0062: Calibração da grelha de 30 m
+# ADR 0064: Calibração da grelha de 30 m
 
 - Estado: aceite (o protocolo foi registado antes de pontuar qualquer modelo nos casos de 30 m; os resultados estão no fim, com um desvio declarado: a grelha de 30 m fica com os valores da de 100 m)
 - Data: 2026-10-20
-- Depende da [ADR 0061](0061-tempo-que-muda-cantos-e-estado-de-partida.md) (motor corrigido). Não muda a calibração da grelha de 100 m.
+- Depende da [ADR 0063](0063-tempo-que-muda-cantos-e-estado-de-partida.md) (motor corrigido). Não muda a calibração da grelha de 100 m.
 
 ## Contexto
 
-A grelha `guimaraes-30m` usava a calibração da grelha de 100 m (`PT_CALIBRATION`). Esta foi ajustada a 100 m, com um motor que entretanto mudou (ADRs 0058 e 0061), e absorve efeitos próprios dessa resolução:
+A grelha `guimaraes-30m` usava a calibração da grelha de 100 m (`PT_CALIBRATION`). Esta foi ajustada a 100 m, com um motor que entretanto mudou (ADRs 0058 e 0063), e absorve efeitos próprios dessa resolução:
 
 - estradas como faixas de 100 m sem combustível;
 - um caminho do fogo menos flexível em combustíveis misturados;
@@ -29,7 +29,7 @@ Decisão de partida: **a grelha de 30 m calibra-se à parte, como se a de 100 m 
 
 ### 2. Estado de partida
 
-Cada simulação, desde a ignição ou no recomeço de cada intervalo, parte das células que o perímetro observado cobre, como células já ardidas (ADR 0061, ponto 6).
+Cada simulação, desde a ignição ou no recomeço de cada intervalo, parte das células que o perímetro observado cobre, como células já ardidas (ADR 0063, ponto 6).
 
 ### 3. Que incêndios fazem sentido para o motor
 
@@ -47,7 +47,7 @@ Decidido só com os dados (`engine/scripts/fire-selection.ts`), sem pontuar nenh
 ### 4. Objetivo
 
 - O custo por intervalo da ADR 0054: (1 − Sørensen das células novas) + 0,5 × |ln(área simulada / observada)|, limitado a ln 5.
-- Mínimo de 5 ha de área nova por intervalo e suavização de +1 ha (ADR 0061, ponto 7).
+- Mínimo de 5 ha de área nova por intervalo e suavização de +1 ha (ADR 0063, ponto 7).
 - Intervalos lentos pesam 0,25. Média por fogo, depois média dos fogos.
 - Prior fraca para os valores físicos: 0,01 × Σ ln².
 

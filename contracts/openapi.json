@@ -6,6 +6,226 @@
     "version": "v1"
   },
   "paths": {
+    "/api/v1/access-requests": {
+      "post": {
+        "tags": [
+          "AccessRequests"
+        ],
+        "summary": "A request from the landing. 202 whatever happens next: the answer never says whether an email is known.",
+        "description": "Public, from the landing's address only (CORS), at most 5 per hour from one address.",
+        "operationId": "AccessRequests_Create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "enum": [
+                      null
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "$ref": "#/components/schemas/AccessRequestCreate"
+                  }
+                ]
+              }
+            },
+            "text/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "enum": [
+                      null
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "$ref": "#/components/schemas/AccessRequestCreate"
+                  }
+                ]
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "enum": [
+                      null
+                    ],
+                    "nullable": true
+                  },
+                  {
+                    "$ref": "#/components/schemas/AccessRequestCreate"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Accepted"
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "AccessRequests"
+        ],
+        "summary": "Every request, pending first. Admins only.",
+        "operationId": "AccessRequests_List",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AccessRequestResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/access-requests/{id}/approve": {
+      "post": {
+        "tags": [
+          "AccessRequests"
+        ],
+        "summary": "Creates the account in Keycloak and emails the invite (a link to set the password). Admins only.",
+        "operationId": "AccessRequests_Approve",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessRequestResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "Bad Gateway",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/access-requests/{id}/reject": {
+      "post": {
+        "tags": [
+          "AccessRequests"
+        ],
+        "summary": "Refuses the request; no account and no email (answer the person directly if needed). Admins only.",
+        "operationId": "AccessRequests_Reject",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccessRequestResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/health": {
       "get": {
         "tags": [
@@ -68,6 +288,37 @@
           },
           "400": {
             "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/me": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Who is signed in. 401 without a session: the web then sends the browser to the login.",
+        "operationId": "Me_Get",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
             "content": {
               "application/json": {
                 "schema": {
@@ -345,6 +596,95 @@
   },
   "components": {
     "schemas": {
+      "AccessRequestCreate": {
+        "required": [
+          "name",
+          "email",
+          "organization",
+          "organizationType",
+          "message",
+          "website"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "organization": {
+            "type": "string",
+            "nullable": true
+          },
+          "organizationType": {
+            "type": "string",
+            "nullable": true
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "website": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The POST /api/v1/access-requests body, from the landing's \"Pedir acesso\" form. `Website` is a trap: the form\nhides it, so only bots fill it in, and their request is accepted and dropped."
+      },
+      "AccessRequestResponse": {
+        "required": [
+          "id",
+          "name",
+          "email",
+          "organization",
+          "organizationType",
+          "message",
+          "status",
+          "createdAt",
+          "decidedAt"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "organization": {
+            "type": "string"
+          },
+          "organizationType": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "decidedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "An access request as the admin page shows it. Status: pending, approved or rejected."
+      },
       "Cell": {
         "required": [
           "row",
@@ -632,6 +972,28 @@
         "description": "One intervention, already rasterised into cells by the browser."
       },
       "JsonElement": { },
+      "MeResponse": {
+        "required": [
+          "name",
+          "email",
+          "isAdmin"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "isAdmin": {
+            "type": "boolean"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The GET /api/v1/me body: who is signed in, as Keycloak named them, and whether they answer access requests."
+      },
       "ModelWind": {
         "required": [
           "directionDeg",
@@ -1134,10 +1496,16 @@
   },
   "tags": [
     {
+      "name": "AccessRequests"
+    },
+    {
       "name": "Health"
     },
     {
       "name": "Incidents"
+    },
+    {
+      "name": "Me"
     },
     {
       "name": "Runs"

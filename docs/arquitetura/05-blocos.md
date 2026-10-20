@@ -111,7 +111,7 @@ Os projetos estão em `backend/src/` e os testes em `backend/tests/`; cada pasta
 | | `Services/` | Uma recolha (`Puller`): só guarda o corpo se ele se ler como a classe da fonte; backoff com `Retry-After` guardado em `source_status` |
 | `LinhaZero.Tests` | `Core/`, `Api/`, `Ingest/`, `Integration/` | xUnit: parsers e seleção, rede de pontos, URLs e cabeçalhos dos clientes, validação dos pedidos, contratos, respostas HTTP e documento OpenAPI; com `TEST_PG=1`, também PostgreSQL, NATS e failover do líder |
 
-A API publica o documento OpenAPI em `/api/openapi/v1.json` e o Swagger UI em `/api/docs` (http://localhost:3000/api/docs com o compose).
+A API publica o documento OpenAPI em `/api/openapi/v1.json` e o Swagger UI em `/api/docs` (https://app.linhazero.localhost/api/docs com o compose).
 
 ## Workers do motor (`engine-worker/`)
 

@@ -1,6 +1,6 @@
 # Plano: recalibrar a grelha de 30 m
 
-Para fazer mais tarde. Hoje (2026-10-20) a grelha de 30 m usa os mesmos valores da de 100 m (`PT_CALIBRATION_30M = PT_CALIBRATION`), mantidos com provas a 30 m ([ADR 0062](decisoes/0062-calibracao-da-grelha-de-30-m.md), Resultados). Este plano diz o que falta para a grelha de 30 m ter uma calibração própria.
+Para fazer mais tarde. Hoje (2026-10-20) a grelha de 30 m usa os mesmos valores da de 100 m (`PT_CALIBRATION_30M = PT_CALIBRATION`), mantidos com provas a 30 m ([ADR 0064](decisoes/0064-calibracao-da-grelha-de-30-m.md), Resultados). Este plano diz o que falta para a grelha de 30 m ter uma calibração própria.
 
 ## Porque é preciso
 
@@ -20,7 +20,7 @@ Para fazer mais tarde. Hoje (2026-10-20) a grelha de 30 m usa os mesmos valores 
 
 1. **Objetivo combinado** (`calibrate.ts`, nova opção `--objective mixed`): custo por intervalo + λ × (1 − Sørensen desde a ignição), com λ = 1 fixado antes de correr. O Sørensen desde a ignição já é calculado para os fogos de teste. Falta pô-lo no objetivo do ajuste, no `calibration-pool.ts`.
 2. **Vários pontos de partida:** cada ajuste (principal, 5 partes, bootstrap) parte dos valores físicos **e** de vento ×2,5 com velocidade ×0,5, e fica com o melhor. Com σ = 0,7 a partir do físico, o CMA-ES não chega à região de vento alto. Os dois pontos de partida decidem-se antes de pontuar.
-3. **Mesmos fogos, partes e semente** da ADR 0062 (`reports/selection-30m.json`, semente 1). Assim compara-se emparelhado com o relatório `pt-firesprd-30m-2026-10-20-base.json` e com os valores de 100 m (`prev30` abaixo).
+3. **Mesmos fogos, partes e semente** da ADR 0064 (`reports/selection-30m.json`, semente 1). Assim compara-se emparelhado com o relatório `pt-firesprd-30m-2026-10-20-base.json` e com os valores de 100 m (`prev30` abaixo).
 4. **Regra de adoção** (fixada agora, antes de correr): o novo ajuste substitui os valores de 100 m na grelha de 30 m se, nos fogos de teste emparelhados:
    - o custo por intervalo não subir mais de 0,01;
    - o Sørensen desde a ignição subir, com o intervalo de 90% acima de 0.

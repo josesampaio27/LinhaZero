@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="pt-PT" class="js" style="background:#111615">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#111615" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="description" content="Compara duas decisões de combate a um incêndio rural e mostra, em menos de um minuto, o que acontece ao fogo nas próximas horas com cada uma." />
+    <title>LinhaZero: comparar decisões antes de comprometer meios no terreno</title>
+    <link rel="icon" href="/favicon.png" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <!-- The hero's two posters are the LCP: fetched with the HTML, not after the script renders them (same set as Hero.tsx). -->
+    <link rel="preload" as="image" fetchpriority="high" href="/hero/hero-a.webp" imagesrcset="/hero/hero-a-800.webp 800w, /hero/hero-a-1200.webp 1200w, /hero/hero-a.webp 1600w" imagesizes="(max-width: 639px) 200vw, 100vw" />
+    <link rel="preload" as="image" fetchpriority="high" href="/hero/hero-b.webp" imagesrcset="/hero/hero-b-800.webp 800w, /hero/hero-b-1200.webp 1200w, /hero/hero-b.webp 1600w" imagesizes="(max-width: 639px) 200vw, 100vw" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

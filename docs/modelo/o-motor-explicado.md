@@ -245,7 +245,7 @@ Os valores usados na interface e no servidor estão em `engine/src/calibration.t
 | `crownFire` | ligado | — | Fogo de copas nos povoamentos florestais | Melhora um pouco o acerto em fogos não usados no ajuste. |
 | `crownAdj` | 0,35 | 1 | Multiplica a velocidade do fogo de copas | Escolhido por validação cruzada. |
 
-A grelha de 30 m usa por agora os mesmos valores. Uma calibração própria a 30 m, a partir dos valores físicos, não ganhou ao modelo físico com a margem pedida, e estes valores ganham-lhe nos fogos de 30 m que nunca viram ([ADR 0062](../decisoes/0062-calibracao-da-grelha-de-30-m.md)).
+A grelha de 30 m usa por agora os mesmos valores. Uma calibração própria a 30 m, a partir dos valores físicos, não ganhou ao modelo físico com a margem pedida, e estes valores ganham-lhe nos fogos de 30 m que nunca viram ([ADR 0064](../decisoes/0064-calibracao-da-grelha-de-30-m.md)).
 
 O par velocidade ×0,5 e vento ×2,5 faz fogos mais alongados: a cabeça corre mais e os flancos menos. É o que os incêndios reais pedem (secção 7).
 

@@ -1,4 +1,4 @@
-// Which PT-FireSprd fires make sense for calibrating the engine on a grid (ADR 0061). Decided from the data
+// Which PT-FireSprd fires make sense for calibrating the engine on a grid (ADR 0064). Decided from the data
 // alone, before any model is scored on them, so the choice cannot be tuned to the results:
 //   tsx scripts/fire-selection.ts --cases ../data-prep/out/reference-30m --grid ../web/public/grids/guimaraes-30m \
 //     --out ../engine/reports/selection-30m.json
@@ -16,7 +16,7 @@
 // MAX_NON_BURNABLE and targetFuels ≥ MIN_TARGET_FUELS. Locked (read once, at the end, as a paired check):
 // tier B fires within --locked-km of the target, under the same data rules; none by default, since their
 // fuel map (2018) shows the regrowth after the fire (2016 scars: ~95% V-MH) or no fuel at all (2017 scars),
-// not what burned (ADR 0062).
+// not what burned (ADR 0064).
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { prepareGrid } from "../src/grid";

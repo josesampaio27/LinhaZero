@@ -5,7 +5,7 @@ import { listCases, loadCase, scoreCase } from "../scripts/reference";
 // Real fires from PT-FireSprd (engine/test/reference, built by data-prep/build_reference.py), simulated
 // from the observed ignition with the hourly ERA5 weather of those days and no suppression. The scores
 // below are the mean Sørensen over each fire's observation times (deterministic runs), recorded on
-// 2026-10-20 after ADR 0061 (steps recomputed when the weather changes, the fire starting from the observed
+// 2026-10-20 after ADR 0063 (steps recomputed when the weather changes, the fire starting from the observed
 // ignition zone), with the 100 m calibration (PT_CALIBRATION). "legacy" is the retired simple
 // model, kept in the engine only as this reference. A change that lowers one by more than TOLERANCE, or the mean, fails here: it is
 // a change in how well the engine reproduces real fires and must be looked at, not waved through.

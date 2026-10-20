@@ -1,0 +1,23 @@
+{
+  "realm": "linhazero",
+  "users": [
+    {
+      "username": "dev@linhazero.localhost",
+      "email": "dev@linhazero.localhost",
+      "emailVerified": true,
+      "firstName": "Utilizador",
+      "lastName": "de teste",
+      "enabled": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "linhazero-dev",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "linhazero-admin"
+      ]
+    }
+  ]
+}

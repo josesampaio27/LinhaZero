@@ -360,7 +360,7 @@ describe("calibration report (engine/reports)", () => {
   });
 });
 
-describe("30 m calibration report (ADR 0062)", () => {
+describe("30 m calibration report (ADR 0064)", () => {
   const dir = join(import.meta.dirname, "../reports");
   const reports = readdirSync(dir)
     .filter((f) => f.startsWith("pt-firesprd-30m-") && f.endsWith(".json"))
@@ -382,7 +382,7 @@ describe("30 m calibration report (ADR 0062)", () => {
     expect(fine.params).toBe(PT_CALIBRATION_30M);
     expect(calibrationFor(100).params).toBe(PT_CALIBRATION);
     // Adopted: the fit. Not adopted (2026-10-20): the 100 m values, which beat the physical model on the
-    // 30 m fires they never saw (ADR 0062, Resultados); never the rejected fit.
+    // 30 m fires they never saw (ADR 0064, Resultados); never the rejected fit.
     if (latest.adopt) expect(PT_CALIBRATION_30M).toEqual(latest.best);
     else {
       expect(PT_CALIBRATION_30M).not.toEqual(latest.best);

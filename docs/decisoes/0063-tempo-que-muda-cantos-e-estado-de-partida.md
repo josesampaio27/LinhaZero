@@ -1,8 +1,8 @@
-# ADR 0061: Passos que se recalculam quando o tempo muda, cantos, intensidade das copas e estado de partida
+# ADR 0063: Passos que se recalculam quando o tempo muda, cantos, intensidade das copas e estado de partida
 
 - Estado: aceite
 - Data: 2026-10-20
-- Completa a [ADR 0058](0058-revisao-do-motor.md); prepara a calibração da grelha de 30 m ([ADR 0062](0062-calibracao-da-grelha-de-30-m.md))
+- Completa a [ADR 0058](0058-revisao-do-motor.md); prepara a calibração da grelha de 30 m ([ADR 0064](0064-calibracao-da-grelha-de-30-m.md))
 
 ## Contexto
 
@@ -35,6 +35,6 @@ Uma auditoria do motor, feita antes de calibrar a grelha de 30 m, encontrou falh
 ## Consequências
 
 - **A grelha de 100 m muda.** Os fogos de calmaria e as noites deixam de ficar presos, e os valores de referência dos 9 incêndios da CI foram registados de novo.
-- **A calibração de 100 m (`PT_CALIBRATION`) não foi refeita**, e absorvia parte destas falhas. A grelha de 30 m é calibrada à parte, na ADR 0062.
+- **A calibração de 100 m (`PT_CALIBRATION`) não foi refeita**, e absorvia parte destas falhas. A grelha de 30 m é calibrada à parte, na ADR 0064.
 - **O custo** de um passo recalculado é pequeno: só a frente ativa recomeça, uma vez por hora de tempo.
 - **Ficou de fora:** a contagem de edifícios em células que não ardem (ADR 0018) é uma decisão de produto, não de física.

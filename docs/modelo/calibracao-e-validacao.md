@@ -20,7 +20,7 @@ Como sabemos que o motor faz o que dizemos, e como o vamos aproximar dos incênd
 | `calibration.test.ts` | CMA-ES encontra o mínimo de uma função de teste; espaço de parâmetros; fator por grupo de combustível e correção da humidade; amostras de calibração no ensemble com emparelhamento; pontuação por intervalo num fogo sintético; o motor segue o veredicto do relatório de calibração |
 | `reference.test.ts` | Os nove incêndios reais da CI (ver abaixo) |
 | `reference-30m.test.ts` | Três incêndios reais a 30 m (Baião, Valença, Valpaços), com a calibração da grelha de 30 m: Sørensen desde a ignição e custo por intervalo |
-| `changing-conditions.test.ts` | Passos recalculados quando o tempo muda ou começa um ataque; cantos entre barreiras; opções `crownRatio` e `demSmoothM` ([ADR 0061](../decisoes/0061-tempo-que-muda-cantos-e-estado-de-partida.md)) |
+| `changing-conditions.test.ts` | Passos recalculados quando o tempo muda ou começa um ataque; cantos entre barreiras; opções `crownRatio` e `demSmoothM` ([ADR 0063](../decisoes/0063-tempo-que-muda-cantos-e-estado-de-partida.md)) |
 | `demo-scenario.test.ts` | Nos cenários de demonstração (incluindo `faixa`, com uma variante de grelha), a decisão B arde menos e atinge menos edifícios e, com incerteza, ganha na maioria dos cenários de vento; a grelha real de Guimarães carrega e simula em menos de 100 ms |
 
 `npm run bench` mede uma corrida e um ensemble (ver [Requisitos de qualidade](../arquitetura/10-qualidade.md#desempenho)).
@@ -157,7 +157,7 @@ Leitura e limites:
 - **Tier B:** o acerto é baixo (0,14) para todos os modelos. Junta o combustível de depois do fogo e os fogos extremos de 2017.
 - **Horas aproximadas:** as horas das progressões do PT-FireSprd são aproximadas, e as observações a cada 30 minutos de alguns fogos são ruidosas a 100 m.
 
-### Grelha de 30 m ([ADR 0062](../decisoes/0062-calibracao-da-grelha-de-30-m.md))
+### Grelha de 30 m ([ADR 0064](../decisoes/0064-calibracao-da-grelha-de-30-m.md))
 
 A grelha de 30 m foi calibrada à parte, como se a de 100 m não existisse:
 

@@ -1,0 +1,72 @@
+# The API: REST + SSE on app.<domain>/api, and the login (the OIDC client of Keycloak). No state of its own: the
+# session keys are in Postgres, so it scales.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: api }
+  template:
+    metadata:
+      labels: { app: api }
+    spec:
+      initContainers:
+        - name: grids
+          image: linhazero-grids
+          imagePullPolicy: Always
+          command: ["cp", "-r", "/grids/.", "/out/"]
+          volumeMounts:
+            - { name: grids, mountPath: /out }
+      containers:
+        - name: api
+          image: linhazero-api
+          imagePullPolicy: Always
+          env:
+            - name: LZ_DOMAIN
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: LZ_DOMAIN } }
+            - { name: PGHOST, value: postgres }
+            - { name: PGUSER, value: dois }
+            - { name: PGDATABASE, value: dois }
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: POSTGRES_PASSWORD } }
+            - { name: NATS_URL, value: "nats://nats:4222" }
+            - { name: GRIDS_DIR, value: /grids }
+            - { name: OIDC_AUTHORITY, value: "https://account.$(LZ_DOMAIN)/realms/linhazero" }
+            - { name: OIDC_METADATA_ADDRESS, value: "http://keycloak:8080/realms/linhazero/.well-known/openid-configuration" }
+            - { name: OIDC_CLIENT_ID, value: linhazero-app }
+            - name: OIDC_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: OIDC_CLIENT_SECRET } }
+            - { name: LANDING_URL, value: "https://landing.$(LZ_DOMAIN)/" }
+            - { name: APP_URL, value: "https://app.$(LZ_DOMAIN)/" }
+            # "Pedir acesso": the landing's origins, and the API's own Keycloak client that creates approved accounts.
+            - { name: CORS_ORIGINS, value: "https://landing.$(LZ_DOMAIN),https://$(LZ_DOMAIN)" }
+            - { name: KEYCLOAK_URL, value: "http://keycloak:8080" }
+            - { name: KEYCLOAK_ADMIN_CLIENT_ID, value: linhazero-api-admin }
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: KEYCLOAK_ADMIN_CLIENT_SECRET } }
+          ports:
+            - { name: http, containerPort: 8080 }
+          readinessProbe:
+            httpGet: { path: /api/v1/health, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 100m, memory: 128Mi }
+            limits: { memory: 512Mi }
+          volumeMounts:
+            - { name: grids, mountPath: /grids, readOnly: true }
+      volumes:
+        - { name: grids, emptyDir: {} }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api
+spec:
+  selector: { app: api }
+  ports:
+    - { name: http, port: 8080, targetPort: http }

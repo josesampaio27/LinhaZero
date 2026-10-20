@@ -3,8 +3,9 @@ import { useSyncExternalStore } from "react";
 // Two pages in one static page, chosen by the URL hash, so it works offline and needs no server rules:
 //   #/            simulation (optionally #/?variante=<id> to open a grid variant)
 //   #/grelha      grid editor
+//   #/pedidos     access requests (admins only)
 
-export type Page = "simulacao" | "grelha";
+export type Page = "simulacao" | "grelha" | "pedidos";
 
 export interface Route {
   page: Page;
@@ -13,7 +14,8 @@ export interface Route {
 
 function parse(hash: string): Route {
   const [path, query = ""] = hash.replace(/^#/, "").split("?");
-  return { page: path === "/grelha" ? "grelha" : "simulacao", params: new URLSearchParams(query) };
+  const page: Page = path === "/grelha" ? "grelha" : path === "/pedidos" ? "pedidos" : "simulacao";
+  return { page, params: new URLSearchParams(query) };
 }
 
 const subscribe = (cb: () => void) => {

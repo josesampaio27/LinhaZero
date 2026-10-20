@@ -57,7 +57,7 @@ export interface BurnChanceEnsemble {
 }
 
 /**
- * Calibration of the 30 m grid (ADR 0062): for now the same values as the 100 m grid, kept on 30 m
+ * Calibration of the 30 m grid (ADR 0064): for now the same values as the 100 m grid, kept on 30 m
  * evidence. A standalone 30 m fit from the physical values, on the 19 PT-FireSprd fires rebuilt at 30 m
  * that make sense for the engine (engine/reports/selection-30m.json), did not beat the physical model by
  * the pre-registered rule (report pt-firesprd-30m-2026-10-20-base.json). These values, never fitted on
@@ -80,7 +80,7 @@ export interface GridCalibration {
   ensemble: BurnChanceEnsemble;
 }
 
-/** The calibration of a grid with this cell size: each resolution has its own (ADRs 0053-0058 and 0062). */
+/** The calibration of a grid with this cell size: each resolution has its own (ADRs 0053-0058 and 0064). */
 export function calibrationFor(cellSize: number): GridCalibration {
   return cellSize <= FINE_GRID_MAX_CELL_M
     ? { id: PT_CALIBRATION_30M_ID, params: PT_CALIBRATION_30M, samples: [], ensemble: BURN_CHANCE_ENSEMBLE_30M }

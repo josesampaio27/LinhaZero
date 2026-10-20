@@ -1,5 +1,7 @@
 # Local run of the whole stack: interface (web), api, ingest, engine workers, postgres and nats (see infra/README.md).
 # Started from the repo root with `docker compose up` (compose.yaml includes this file) or `npm run up`.
+# The browser enters through `proxy` (https://{landing.,app.,account.}linhazero.localhost), as through the tunnel in the
+# cluster. Dev secrets have defaults here; set real ones in infra/.env (see infra/.env.example).
 # Every service reads PGHOST/PGUSER/PGPASSWORD/PGDATABASE (the libpq names, which node-postgres and psql also read).
 x-pg: &pg
   PGHOST: postgres
@@ -14,6 +16,7 @@ services:
       POSTGRES_USER: dois
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-dois}
       POSTGRES_DB: dois
+      KEYCLOAK_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
@@ -75,8 +78,22 @@ services:
       <<: *pg
       NATS_URL: nats://nats:4222
       GRIDS_DIR: /grids
+      # The login (infra/keycloak): the public issuer the browser sees, and the same document read inside the network.
+      OIDC_AUTHORITY: https://account.${LZ_DOMAIN:-linhazero.localhost}/realms/linhazero
+      OIDC_METADATA_ADDRESS: http://keycloak:8080/realms/linhazero/.well-known/openid-configuration
+      OIDC_CLIENT_ID: linhazero-app
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-dev-secret-change-me}
+      LANDING_URL: https://landing.${LZ_DOMAIN:-linhazero.localhost}/
+      APP_URL: https://app.${LZ_DOMAIN:-linhazero.localhost}/
+      # The landing posts "Pedir acesso" from its own subdomain(s).
+      CORS_ORIGINS: https://landing.${LZ_DOMAIN:-linhazero.localhost},https://${LZ_DOMAIN:-linhazero.localhost}
+      # Access requests: the API creates approved accounts through Keycloak's admin API, with its own client.
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_ADMIN_CLIENT_ID: linhazero-api-admin
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-dev-admin-secret-change-me}
     ports:
-      - "8080:8080"
+      # Loopback only: for `npm run dev` (Vite proxies /api here) and smoke.sh. The browser goes through proxy.
+      - "127.0.0.1:8080:8080"
     volumes:
       - ../web/public/grids:/grids:ro
     depends_on:
@@ -113,12 +130,83 @@ services:
       context: ..
       dockerfile: web/Dockerfile
     restart: unless-stopped
-    ports:
-      - "3000:8080"
     volumes:
       - ../web/public/grids:/usr/share/nginx/html/grids:ro
     depends_on:
       - api
+
+  landing:
+    build:
+      context: ..
+      dockerfile: landing/Dockerfile
+    restart: unless-stopped
+    volumes:
+      - ../web/public/grids:/usr/share/nginx/html/grids:ro
+
+  keycloak:
+    build: ./keycloak
+    restart: unless-stopped
+    environment:
+      KC_HOSTNAME: https://account.${LZ_DOMAIN:-linhazero.localhost}
+      # The API reads the discovery document and swaps codes at http://keycloak:8080, inside the network.
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_PROXY_HEADERS: xforwarded
+      KC_HTTP_ENABLED: "true"
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_DB_PASSWORD: ${KEYCLOAK_DB_PASSWORD:-keycloak}
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KC_BOOTSTRAP_ADMIN_PASSWORD:-admin}
+      # Read by the realm import (infra/keycloak/linhazero-realm.json).
+      LZ_DOMAIN: ${LZ_DOMAIN:-linhazero.localhost}
+      OIDC_CLIENT_SECRET: ${OIDC_CLIENT_SECRET:-dev-secret-change-me}
+      OIDC_EXTRA_REDIRECT_URI: http://localhost:5173/api/auth/callback
+      OIDC_EXTRA_POST_LOGOUT_URI: http://localhost:5173/
+      KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-dev-admin-secret-change-me}
+      # Email (invites, forgotten passwords). Locally every message goes to Mailpit: http://localhost:8025
+      SMTP_HOST: ${SMTP_HOST:-mailpit}
+      SMTP_PORT: ${SMTP_PORT:-1025}
+      SMTP_FROM: ${SMTP_FROM:-linhazero@linhazero.localhost}
+      SMTP_AUTH: ${SMTP_AUTH:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
+      SMTP_SSL: ${SMTP_SSL:-false}
+    volumes:
+      # The dev user (dev@linhazero.localhost), only in this compose file.
+      - ./keycloak/dev/linhazero-users-0.json:/opt/keycloak/data/import/linhazero-users-0.json:ro
+    healthcheck:
+      # No curl in the image: bash's /dev/tcp. Ready answers 200, not ready 503.
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/9000 && printf 'GET /health/ready HTTP/1.0\\r\\n\\r\\n' >&3 && head -1 <&3 | grep -q ' 200'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # A fake mailbox: catches every email Keycloak sends (invites, password resets); read them at http://localhost:8025.
+  mailpit:
+    image: axllent/mailpit:v1.31.3
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8025:8025"
+
+  proxy:
+    image: caddy:2.11.7-alpine
+    restart: unless-stopped
+    environment:
+      LZ_DOMAIN: ${LZ_DOMAIN:-linhazero.localhost}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+    depends_on:
+      - web
+      - landing
+      - keycloak
 
   geo-pipeline:
     build: ../data-prep
@@ -140,3 +228,4 @@ services:
 volumes:
   pgdata:
   natsdata:
+  caddydata:

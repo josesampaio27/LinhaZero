@@ -330,7 +330,7 @@ const physics = (() => {
 // free-running cost, fast runs closer to observed, and early-hours Sørensen not worse; whole-fire
 // Sørensen is reported but does not decide, since the real fires were fought.
 // Paired comparison on the held-out fires the incumbent has not seen: per fire, the fold fit minus the
-// incumbent, with a bootstrap over fires for a 90% interval (ADR 0061). Adopt when the cost falls by at
+// incumbent, with a bootstrap over fires for a 90% interval (ADR 0064). Adopt when the cost falls by at
 // least 0.02 with an interval below 0, the Sørensen from the ignition does not fall by more than 0.01, and
 // the locked fires (if any) do not get worse on average.
 const paired = (() => {
@@ -413,7 +413,7 @@ const out = {
   created: date,
   git,
   adopt,
-  adoption: { rule: "paired held-out cost ≤ −0.02, 90% bootstrap interval < 0, Sørensen ≥ −0.01, locked set not worse (ADR 0061)", incumbent: INCUMBENT, incumbentParams: CURRENT, paired, locked: lockedCost, oldRule: adoptOld },
+  adoption: { rule: "paired held-out cost ≤ −0.02, 90% bootstrap interval < 0, Sørensen ≥ −0.01, locked set not worse (ADR 0064)", incumbent: INCUMBENT, incumbentParams: CURRENT, paired, locked: lockedCost, oldRule: adoptOld },
   provenance: {
     cases: CASES,
     cellSizes,

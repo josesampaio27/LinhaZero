@@ -1,0 +1,161 @@
+/*
+ * LinhaZero on top of Keycloak's PatternFly 5 login (keycloak.v2), in the landing's language (landing/src/index.css):
+ * dark ground, Barlow Condensed headings, square controls. Wide screens: the photo and the headline on the left, the
+ * form on the right. Narrow screens: a band of photo, then the form. The header text is loginTitleHtml (messages/).
+ */
+@font-face { font-family: "Barlow"; font-weight: 400; font-display: swap; src: url("../fonts/barlow-400.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 500; font-display: swap; src: url("../fonts/barlow-500.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; font-display: swap; src: url("../fonts/barlow-condensed-700.woff2") format("woff2"); }
+
+:root {
+  --lz-bg: #111615;
+  --lz-panel: #192120;
+  --lz-raised: #1f2927;
+  --lz-ink: #e5ebe8;
+  --lz-muted: #a3afaa;
+  --lz-line: #2b3533;
+  --lz-a: #0b7782;
+  --lz-a-light: #3db6c1;
+  --lz-danger: #f0605f;
+  --lz-sans: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --lz-display: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --lz-margin: clamp(1.25rem, 4vw, 3.5rem);
+
+  color-scheme: dark;
+  --pf-v5-global--FontFamily--text: var(--lz-sans);
+  --pf-v5-global--FontFamily--heading: var(--lz-display);
+  --pf-v5-global--Color--100: var(--lz-ink);
+  --pf-v5-global--Color--200: var(--lz-muted);
+  --pf-v5-global--BackgroundColor--100: var(--lz-bg);
+  --pf-v5-global--BorderColor--100: var(--lz-line);
+  --pf-v5-global--primary-color--100: var(--lz-a-light);
+  --pf-v5-global--link--Color: var(--lz-ink);
+  --pf-v5-global--link--Color--hover: var(--lz-a-light);
+  --pf-v5-global--danger-color--100: var(--lz-danger);
+  --keycloak-card-top-color: transparent;
+}
+
+html, body, #keycloak-bg { background: var(--lz-bg); color: var(--lz-ink); }
+body { font-family: var(--lz-sans); font-size: 16px; }
+
+/* ---------- Layout: photo band on top, then the form; two columns from 900 px ---------- */
+.pf-v5-c-login { display: block; min-height: 100vh; padding: 0; background: var(--lz-bg); }
+.pf-v5-c-login__container {
+  display: grid; grid-template-columns: minmax(0, 1fr); grid-template-areas: "photo" "form";
+  width: 100%; max-width: none; min-height: 100vh; margin: 0; padding: 0; gap: 0;
+}
+
+#kc-header.pf-v5-c-login__header {
+  grid-area: photo; margin: 0; padding: var(--lz-margin); color: #fff;
+  background:
+    linear-gradient(to top, rgb(11 16 15 / .96) 0%, rgb(11 16 15 / .55) 45%, rgb(11 16 15 / .35) 75%, rgb(11 16 15 / .6) 100%),
+    url("../img/monchique-2018.webp") center 60% / cover no-repeat;
+}
+#kc-header-wrapper {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 0;
+  height: 100%; padding: 0; text-align: left; white-space: normal; font-size: inherit; text-transform: none; letter-spacing: 0;
+}
+
+.pf-v5-c-login__main {
+  grid-area: form; align-self: center; justify-self: center;
+  width: 100%; max-width: 30rem; margin: 0; padding: 2.5rem var(--lz-margin) 3rem;
+  background: transparent; border: 0; border-radius: 0; box-shadow: none;
+}
+.pf-v5-c-login__main-header, .pf-v5-c-login__main-body, .pf-v5-c-login__main-footer { padding-left: 0; padding-right: 0; background: transparent; }
+.pf-v5-c-login__main-header { border-top: 0; padding-top: 0; align-items: center; }
+
+@media (min-width: 900px) {
+  .pf-v5-c-login__container { grid-template-columns: minmax(0, 1.2fr) minmax(26rem, 1fr); grid-template-areas: "photo form"; }
+  #kc-header.pf-v5-c-login__header { min-height: 100vh; }
+  .pf-v5-c-login__main { padding-top: 3rem; }
+}
+
+/* ---------- The photo side ---------- */
+.lz-brand {
+  display: inline-flex; align-items: center; gap: .6rem;
+  font-family: var(--lz-display); font-weight: 700; font-size: 1.6rem; line-height: 1; color: #fff;
+}
+.lz-brand::before { content: ""; width: 28px; height: 33px; background: url("../img/logo.png") center / contain no-repeat; }
+.lz-headline {
+  margin-top: auto; padding-top: 6rem;
+  font-family: var(--lz-display); font-weight: 700; line-height: .92; letter-spacing: -.01em; color: #fff;
+  font-size: clamp(2.6rem, 6.2vw, 5.6rem); text-wrap: balance;
+}
+.lz-lede { max-width: 32rem; margin-top: 1.1rem; font-size: 1.05rem; line-height: 1.5; color: rgb(229 235 232 / .88); }
+.lz-credit { margin-top: 2rem; font-size: .75rem; color: rgb(229 235 232 / .6); }
+@media (max-width: 899px) {
+  .lz-headline { padding-top: 3.5rem; font-size: clamp(2.2rem, 11vw, 3.2rem); }
+  .lz-lede { display: none; }
+  .lz-credit { margin-top: 1rem; }
+}
+
+/* ---------- The form side ---------- */
+#kc-page-title, .pf-v5-c-login__main-header .pf-v5-c-title {
+  font-family: var(--lz-display); font-weight: 700; font-size: 2.5rem; line-height: 1; color: var(--lz-ink);
+}
+
+/* Language: a quiet text control, not a box. */
+.pf-v5-c-login__main-header-utilities .pf-v5-c-form-control {
+  --pf-v5-c-form-control--BackgroundColor: transparent;
+  background: transparent; border: 0; min-height: 0; width: auto; color: var(--lz-muted); font-size: .9rem;
+}
+.pf-v5-c-login__main-header-utilities .pf-v5-c-form-control::before,
+.pf-v5-c-login__main-header-utilities .pf-v5-c-form-control::after { border: 0; }
+.pf-v5-c-login__main-header-utilities select { background: transparent; color: var(--lz-muted); padding-right: 1.5rem; }
+
+.pf-v5-c-form__label-text { font-weight: 500; color: var(--lz-ink); }
+.pf-v5-c-form__group { margin-bottom: .25rem; }
+
+/* Fields: square, on the panel colour, a clear line on focus. */
+.pf-v5-c-login__main-body .pf-v5-c-form-control {
+  --pf-v5-c-form-control--BackgroundColor: var(--lz-panel);
+  --pf-v5-c-form-control--Color: var(--lz-ink);
+  background: var(--lz-panel); color: var(--lz-ink);
+  border: 1px solid var(--lz-line); border-radius: 0; min-height: 3rem;
+}
+.pf-v5-c-login__main-body .pf-v5-c-form-control::before,
+.pf-v5-c-login__main-body .pf-v5-c-form-control::after { border: 0; }
+.pf-v5-c-login__main-body .pf-v5-c-form-control:hover { border-color: #3d4a47; }
+.pf-v5-c-login__main-body .pf-v5-c-form-control:focus-within { border-color: var(--lz-a-light); box-shadow: inset 0 0 0 1px var(--lz-a-light); outline: 0; }
+.pf-v5-c-login__main-body .pf-v5-c-form-control > :is(input, select, textarea) { background: transparent; color: var(--lz-ink); padding: .7rem .85rem; }
+.pf-v5-c-form-control.pf-m-error { border-color: var(--lz-danger); }
+
+/* The eye that shows the password: part of the field. */
+.pf-v5-c-input-group .pf-v5-c-button.pf-m-control {
+  --pf-v5-c-button--BorderRadius: 0;
+  background: var(--lz-panel); color: var(--lz-muted); border: 1px solid var(--lz-line); border-left: 0;
+}
+.pf-v5-c-input-group .pf-v5-c-button.pf-m-control::after { border: 0; }
+.pf-v5-c-input-group .pf-v5-c-button.pf-m-control:hover { color: var(--lz-ink); }
+
+/* The action, as the landing's primary button: light, square, full width. */
+.pf-v5-c-button.pf-m-primary {
+  --pf-v5-c-button--BorderRadius: 0;
+  --pf-v5-c-button--m-primary--BackgroundColor: var(--lz-ink);
+  --pf-v5-c-button--m-primary--Color: var(--lz-bg);
+  --pf-v5-c-button--m-primary--hover--BackgroundColor: #fff;
+  --pf-v5-c-button--m-primary--hover--Color: var(--lz-bg);
+  --pf-v5-c-button--m-primary--focus--BackgroundColor: #fff;
+  --pf-v5-c-button--m-primary--focus--Color: var(--lz-bg);
+  min-height: 3.25rem; margin-top: .75rem; font-size: 1.05rem; font-weight: 500;
+}
+.pf-v5-c-button:focus-visible { outline: 2px solid var(--lz-a-light); outline-offset: 3px; }
+
+a, .pf-v5-c-button.pf-m-link { color: var(--lz-ink); text-decoration: underline; text-underline-offset: .25em; }
+a:hover { color: var(--lz-a-light); }
+
+/* Messages (wrong password, account locked): a band with a coloured edge. */
+.pf-v5-c-alert {
+  --pf-v5-c-alert--BackgroundColor: var(--lz-raised);
+  --pf-v5-c-alert--BoxShadow: none;
+  border-radius: 0; border-left: 3px solid var(--lz-a-light); color: var(--lz-ink);
+}
+.pf-v5-c-alert.pf-m-danger { border-left-color: var(--lz-danger); }
+.pf-v5-c-alert__title, .pf-v5-c-helper-text__item-text { color: var(--lz-ink); }
+.pf-v5-c-helper-text__item.pf-m-error .pf-v5-c-helper-text__item-text { color: var(--lz-danger); }
+
+/* One focus mark per field: the field's own teal line, not the browser's or PatternFly's ring on the input inside. */
+.pf-v5-c-login__main-body .pf-v5-c-form-control > :is(input, select, textarea):focus,
+.pf-v5-c-login__main-body .pf-v5-c-form-control > :is(input, select, textarea):focus-visible { outline: 0; box-shadow: none; }
+.pf-v5-c-login__main-header-utilities select { padding-left: 0; }
+.pf-v5-c-login__main-header-utilities select:focus-visible { outline: 2px solid var(--lz-a-light); outline-offset: 2px; }

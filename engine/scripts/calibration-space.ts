@@ -40,7 +40,7 @@ export const SPACES: Record<string, Dimension[]> = {
   global: [logDim("rosAdj"), logDim("windAdj"), logDim("holdWidthPerFlame")],
   /**
    * Per fuel group for the fuels that carry Guimarães's fires (understory, shrub, grass), the midflame
-   * wind, the line hold and the crown fire rate; litter and the moisture offset stay physical (ADR 0061).
+   * wind, the line hold and the crown fire rate; litter and the moisture offset stay physical (ADR 0064).
    */
   groupsCrown: [
     logDim("rosAdjUnderstory"),

@@ -18,7 +18,7 @@ import { Segmented, Shell, Toggle } from "./components/Shell";
 import { MapView, type Draft, type MapShape } from "./components/MapView";
 import { fetchGrid, fetchGridHeader, fetchGridIndex, type GridBundle, type GridIndexEntry } from "./lib/load-grid";
 import { lngLatToProjected, type LngLat } from "./lib/projection";
-import { fuelSwatch, renderLayer, renderMask, SLOPE_CLASSES, TRANSPARENT_PNG, type LayerView } from "./lib/render";
+import { fuelSwatch, renderLayer, renderMask, SLOPE_CLASSES, type LayerView } from "./lib/render";
 import { navigate, useRoute } from "./lib/route";
 import { newVariantId, useVariants, variantStore } from "./lib/variants";
 
@@ -133,7 +133,7 @@ export function GridEditor() {
   const shaMismatch = !!(bundle && variant && variant.base.sha256 !== bundle.sha256);
   const edited = useMemo(() => (base && variant && !shaMismatch ? applyVariant(base, variant) : base), [base, variant, shaMismatch]);
   const terrainUrl = useMemo(() => (edited ? renderLayer(edited, view) : null), [edited, view]);
-  const maskUrl = useMemo(() => {
+  const mask = useMemo(() => {
     if (!base || !edited || !showEdited) return null;
     const mask = new Uint8Array(base.fuel.length);
     for (let i = 0; i < mask.length; i++) mask[i] = base.fuel[i] !== edited.fuel[i] || base.barrier[i] !== edited.barrier[i] ? 1 : 0;
@@ -308,7 +308,7 @@ export function GridEditor() {
           accent="var(--b)"
           grid={edited}
           terrainUrl={terrainUrl}
-          fireUrl={maskUrl ?? TRANSPARENT_PNG}
+          fire={mask}
           showOsm={false}
           contours={view === "elevation"}
           ignition={null}

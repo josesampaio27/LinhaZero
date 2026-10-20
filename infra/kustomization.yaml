@@ -1,0 +1,38 @@
+# The whole stack on Kubernetes: `kubectl apply -k infra` (infra/k8s/README.md).
+# It lives here, not in k8s/, because kustomize only reads files below it, and the database scripts are in db/.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: linha-zero
+
+resources:
+  - k8s/namespace.yaml
+  - k8s/postgres.yaml
+  - k8s/nats.yaml
+  - k8s/keycloak.yaml
+  - k8s/api.yaml
+  - k8s/ingest.yaml
+  - k8s/engine-worker.yaml
+  - k8s/web.yaml
+  - k8s/landing.yaml
+  - k8s/cloudflared.yaml
+
+configMapGenerator:
+  # LZ_DOMAIN: the one place the domain is set.
+  - name: linhazero-config
+    envs: [k8s/config.env]
+  - name: postgres-init
+    files: [db/000_keycloak.sh, db/001_init.sql, db/002_users.sql, db/003_access_requests.sql]
+
+secretGenerator:
+  # Copy k8s/secrets.env.example to k8s/secrets.env (gitignored) and fill it in.
+  - name: linhazero-secrets
+    envs: [k8s/secrets.env]
+
+images:
+  - { name: linhazero-api, newName: ghcr.io/josesampaio27/linhazero-api, newTag: main }
+  - { name: linhazero-ingest, newName: ghcr.io/josesampaio27/linhazero-ingest, newTag: main }
+  - { name: linhazero-engine-worker, newName: ghcr.io/josesampaio27/linhazero-engine-worker, newTag: main }
+  - { name: linhazero-web, newName: ghcr.io/josesampaio27/linhazero-web, newTag: main }
+  - { name: linhazero-landing, newName: ghcr.io/josesampaio27/linhazero-landing, newTag: main }
+  - { name: linhazero-keycloak, newName: ghcr.io/josesampaio27/linhazero-keycloak, newTag: main }
+  - { name: linhazero-grids, newName: ghcr.io/josesampaio27/linhazero-grids, newTag: main }

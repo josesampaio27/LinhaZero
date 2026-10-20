@@ -46,7 +46,7 @@ import {
   type ObservedFire,
 } from "./lib/load-grid";
 import { gridBounds, gridToLngLat, lngLatToProjected, projectedToLngLat, type LngLat } from "./lib/projection";
-import { FireRenderer, renderTerrain } from "./lib/render";
+import { fireArrival, fireIntensity, fireProbability, renderTerrain } from "./lib/render";
 import { clearRouteParams, navigate, useRoute } from "./lib/route";
 import { describeCell, placeStats } from "./lib/places";
 import { isLineKind, KIND_LABEL, newId } from "./lib/scenario";
@@ -176,11 +176,11 @@ export function App() {
   const [results, setResults] = useState<Results | null>(null);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [showOsm, setShowOsm] = useState(false);
+  const [showOsm, setShowOsm] = useState(true);
   // Replays of real fires: the observed perimeters, drawn over the simulation up to the time shown.
   const [observedFire, setObservedFire] = useState<ObservedFire | null>(null);
   const [showObserved, setShowObserved] = useState(true);
-  const [terrain3d, setTerrain3d] = useState(false);
+  const [terrain3d, setTerrain3d] = useState(true);
   const [contours, setContours] = useState(true);
   const [ensemble, setEnsemble] = useState(false);
   const [ensembleWhere, setEnsembleWhere] = useState<EnsembleWhere>("browser");
@@ -318,22 +318,19 @@ export function App() {
   };
 
   // --- Fire layers ---
-  const renderers = useRef<Partial<Record<DecisionId, FireRenderer>>>({});
-  const fireUrls = useMemo(() => {
-    const out: Record<DecisionId, string | null> = { A: null, B: null };
+  const fireImages = useMemo(() => {
+    const out: Record<DecisionId, ImageData | null> = { A: null, B: null };
     if (!grid) return out;
     const { cols, rows } = grid.header;
     for (const d of DECISIONS) {
-      let r = renderers.current[d];
-      if (!r || r.size[0] !== cols || r.size[1] !== rows) r = renderers.current[d] = new FireRenderer(cols, rows);
       const prob = results?.[d].burnProbability;
       const intensity = results?.[d].intensityKwM;
       out[d] =
         viewMode === "probability" && prob
-          ? r.probability(prob)
+          ? fireProbability(cols, rows, prob)
           : viewMode === "intensity" && intensity
-            ? r.intensity(intensity, results![d].arrivalMin, t)
-            : r.arrival(results?.[d].arrivalMin ?? null, t, results?.durationMin ?? durationMin);
+            ? fireIntensity(cols, rows, intensity, results![d].arrivalMin, t)
+            : fireArrival(cols, rows, results?.[d].arrivalMin ?? null, t, results?.durationMin ?? durationMin);
     }
     return out;
   }, [grid, results, t, durationMin, viewMode]);
@@ -841,7 +838,7 @@ export function App() {
             accent={ACCENT[d]}
             grid={decisionGrids[d]}
             terrainUrl={terrainUrls[d]}
-            fireUrl={fireUrls[d]}
+            fire={fireImages[d]}
             showOsm={showOsm}
             observed={observedOverlay}
             terrain3d={terrain3d}
