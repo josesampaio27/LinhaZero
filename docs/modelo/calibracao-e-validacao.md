@@ -19,6 +19,8 @@ Como sabemos que o motor faz o que dizemos, e como o vamos aproximar dos incênd
 | `moisture.test.ts` | Humidade do combustível morto (NFDRS 1978): as três regressões de Simard calculadas à mão, a correção pelo estado do tempo, a noite; tabela do combustível vivo; FFMC horário (seca, molha com a chuva, equilíbrio) |
 | `calibration.test.ts` | CMA-ES encontra o mínimo de uma função de teste; espaço de parâmetros; fator por grupo de combustível e correção da humidade; amostras de calibração no ensemble com emparelhamento; pontuação por intervalo num fogo sintético; o motor segue o veredicto do relatório de calibração |
 | `reference.test.ts` | Os nove incêndios reais da CI (ver abaixo) |
+| `reference-30m.test.ts` | Três incêndios reais a 30 m (Baião, Valença, Valpaços), com a calibração da grelha de 30 m: Sørensen desde a ignição e custo por intervalo |
+| `changing-conditions.test.ts` | Passos recalculados quando o tempo muda ou começa um ataque; cantos entre barreiras; opções `crownRatio` e `demSmoothM` ([ADR 0063](../decisoes/0063-tempo-que-muda-cantos-e-estado-de-partida.md)) |
 | `demo-scenario.test.ts` | Nos cenários de demonstração (incluindo `faixa`, com uma variante de grelha), a decisão B arde menos e atinge menos edifícios e, com incerteza, ganha na maioria dos cenários de vento; a grelha real de Guimarães carrega e simula em menos de 100 ms |
 
 `npm run bench` mede uma corrida e um ensemble (ver [Requisitos de qualidade](../arquitetura/10-qualidade.md#desempenho)).
@@ -155,11 +157,58 @@ Leitura e limites:
 - **Tier B:** o acerto é baixo (0,14) para todos os modelos. Junta o combustível de depois do fogo e os fogos extremos de 2017.
 - **Horas aproximadas:** as horas das progressões do PT-FireSprd são aproximadas, e as observações a cada 30 minutos de alguns fogos são ruidosas a 100 m.
 
+### Grelha de 30 m ([ADR 0064](../decisoes/0064-calibracao-da-grelha-de-30-m.md))
+
+A grelha de 30 m foi calibrada à parte, como se a de 100 m não existisse:
+
+- **Ponto de partida:** os valores físicos.
+- **Casos:** os mesmos incêndios, reconstruídos a 30 m.
+- **Estado de partida:** cada simulação parte do fogo observado, quer na ignição quer no recomeço de cada intervalo.
+
+**Fogos que fazem sentido para o motor** (`engine/scripts/fire-selection.ts`, escolhidos só com os dados):
+
+- tier A;
+- no máximo 25% da área ardida em células que o mapa diz não arderem;
+- pelo menos 60% nos combustíveis que existem em Guimarães.
+
+Ficam 19 fogos. O tier B saiu: as cicatrizes de 2016 e 2017 aparecem no mapa de 2018 como mato de regeneração ou como não ardível.
+
+**Resultados nos fogos de teste (5 partes, 19 fogos):**
+
+| | Custo por intervalo | Sørensen desde a ignição | Corridas rápidas (simulada / observada) |
+| --- | --- | --- | --- |
+| Modelo físico | 1,095 | 0,332 | 0,55 |
+| Ajuste a 30 m (6 parâmetros) | 1,069 | 0,329 | 0,37 |
+| Valores da grelha de 100 m (não ajustados a 30 m) | 1,073 | **0,398** | **0,76** |
+
+Os valores da grelha de 100 m aceleram as corridas rápidas, mas os intervalos lentos (noites, combate) ficam 2,5 vezes mais rápidos do que o observado, contra 2,0 no modelo físico.
+
+- **O ajuste a 30 m não passou a regra:** emparelhado, o custo desce 0,025, mas o intervalo de 90% vai de −0,065 a +0,016.
+- **O ajuste dá valores perto dos físicos:**
+
+  | Parâmetro | Melhor ajuste | Intervalo de 90% do bootstrap |
+  | --- | --- | --- |
+  | Matos | 0,79 | 0,45–0,96 |
+  | Herbáceas | 0,82 | 0,42–0,94 |
+  | Vento | 0,81 | 0,63–1,53 |
+  | Sub-bosque, linhas, fogo de copas | ≈ 1 | — |
+- **Hipóteses testadas** contra o ajuste, nos mesmos fogos e partes. Nenhuma passou a regra:
+  - sem fogo de copas: pior, +0,017;
+  - um fator único para todos os combustíveis: empate, −0,001, com Sørensen +0,008;
+  - razão de copa 0,5: pior;
+  - relevo suavizado: empate.
+- **Ajuste só nos intervalos de fogo livre** (exploratório): também abranda o fogo (vento 0,81, matos 0,87). As corridas rápidas ficam piores (0,375 contra 0,55). Estes fatores não as resolvem.
+- **Decisão:** a grelha de 30 m usa por agora os valores da de 100 m (`PT_CALIBRATION_30M = PT_CALIBRATION`).
+  - **Porquê:** nos 13 fogos que esses valores nunca viram, ganham ao modelo físico no Sørensen desde a ignição (+0,061, 90%: +0,016 a +0,113) e no custo (−0,021, 90%: −0,042 a +0,002).
+  - **Porque é que o ajuste não os encontrou:** o objetivo do ajuste só vê o custo por intervalo, e o CMA-ES, a partir dos valores físicos, não chegou à região de vento alto.
+  - **A seguir:** a [recalibração](../plano-refit-30m.md) junta o Sørensen desde a ignição ao objetivo.
+
 O `engine/test/reference.test.ts` corre os nove incêndios da CI (menos de 1 s). Falha se o acerto de algum descer mais de 0,03 em relação ao registado, se a média calibrada ficar abaixo de 0,45 ou se o Rothermel deixar de bater o simples. O `engine/test/calibration.test.ts` verifica o relatório e que o motor segue o seu veredicto.
 
 ## Próximos passos
 
-- **Fogos rápidos:** os picos continuam subestimados. Um modelo de fogo de copas (Van Wagner, Cruz) e focos secundários a 30 m são os candidatos, a testar com a mesma regra de adoção.
+- **Fogos rápidos:** os picos continuam subestimados, também a 30 m e com fogo de copas. Nenhum fator de velocidade os resolve sem estragar o resto. O vento de entrada (reanálise de 31 km) é o suspeito seguinte.
+- **Recalibrar a grelha de 30 m** com o Sørensen desde a ignição no objetivo ([plano](../plano-refit-30m.md)).
 - **Combustível vivo:** a humidade viva vem de uma tabela mensal; a humidade vista por satélite pode ajudar nas herbáceas.
 - **Tier B:** restaurar o combustível de antes do fogo para usar os fogos de 2015–2017.
 - **Combate observado,** se houver dados (meios, linhas), para separar a calibração física do efeito do combate.

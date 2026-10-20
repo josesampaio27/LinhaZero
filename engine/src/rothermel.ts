@@ -151,16 +151,18 @@ export const ASSUMED_CANOPY_HEIGHT_M = 12;
 
 /**
  * Wind adjustment factor of a fuel bed, as in BehavePlus (Albini and Baughman 1979; Andrews 2012):
- * sheltered by the canopy when its crown fill (cover / 3) is at least 5% and it is at least 6 ft
- * tall, otherwise the unsheltered value from the fuel bed depth. canopyCover is a fraction (0–1).
+ * sheltered by the canopy when its crown fill (cover × crown ratio / 3) is at least 5% and it is at
+ * least 6 ft tall, otherwise the unsheltered value from the fuel bed depth. canopyCover and crownRatio
+ * are fractions (0–1).
  */
 export function windAdjustmentFactor(
   depthM: number,
   canopyCover: number,
   canopyHeightM = ASSUMED_CANOPY_HEIGHT_M,
+  crownRatio = 1,
 ): number {
   const h = canopyHeightM * M_TO_FT;
-  const crownFill = canopyCover / 3;
+  const crownFill = (canopyCover * crownRatio) / 3;
   if (crownFill >= 0.05 && h >= 6) {
     return (
       0.555 /

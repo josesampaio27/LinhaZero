@@ -53,6 +53,19 @@ python3.11 -m venv .venv
 .venv/bin/python build_references.py --ptfs ~/PT-FireSprd_v0.08 --offline  # depois, só da cache
 ```
 
+A 30 m (a grelha `guimaraes-30m` tem a sua própria calibração, [ADR 0064](../docs/decisoes/0064-calibracao-da-grelha-de-30-m.md)), noutra pasta e com o manifesto ao lado, para não substituir o de 100 m que está no git:
+
+```bash
+.venv/bin/python build_references.py --ptfs ~/PT-FireSprd_v0.08 --cell 30 --out out/reference-30m --manifest out/reference-30m/manifest.json
+```
+
+Sem Python local, a imagem do `Dockerfile` corre os mesmos scripts com a pasta montada:
+
+```bash
+docker build -t lz-prep data-prep
+docker run --rm -v "$PWD:/repo" -v ~/PT-FireSprd_v0.08:/ptfs:ro -w /repo/data-prep --entrypoint python lz-prep \n  build_references.py --ptfs /ptfs --cell 30 --out out/reference-30m --manifest out/reference-30m/manifest.json
+```
+
 Com os casos construídos, `npm run calibrate -w engine` calibra o motor (ver [Calibração e validação](../docs/modelo/calibracao-e-validacao.md)).
 
 `export_replay.py` põe um destes incêndios na aplicação, para o ver simulado ao lado do que ardeu:

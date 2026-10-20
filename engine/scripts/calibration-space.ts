@@ -38,6 +38,21 @@ export const SPACES: Record<string, Dimension[]> = {
   groups: SPACE,
   /** The three numbers of PT_CALIBRATION. */
   global: [logDim("rosAdj"), logDim("windAdj"), logDim("holdWidthPerFlame")],
+  /**
+   * Per fuel group for the fuels that carry Guimarães's fires (understory, shrub, grass), the midflame
+   * wind, the line hold and the crown fire rate; litter and the moisture offset stay physical (ADR 0064).
+   */
+  groupsCrown: [
+    logDim("rosAdjUnderstory"),
+    logDim("rosAdjShrub"),
+    logDim("rosAdjGrass"),
+    logDim("windAdj"),
+    logDim("holdWidthPerFlame"),
+    logDim("crownAdj"),
+  ],
+  /** The same without crown fire (crownFire=0): the crown on/off hypothesis. */
+  groupsNoCrown: [logDim("rosAdjUnderstory"), logDim("rosAdjShrub"), logDim("rosAdjGrass"), logDim("windAdj"), logDim("holdWidthPerFlame")],
+
   /** Plus the crown fire rate factor. */
   globalCrown: [logDim("rosAdj"), logDim("windAdj"), logDim("holdWidthPerFlame"), logDim("crownAdj")],
   /** Plus the share of the gust in the wind (linear, 0–1). */

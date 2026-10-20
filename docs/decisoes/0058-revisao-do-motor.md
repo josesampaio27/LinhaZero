@@ -16,7 +16,7 @@ Uma revisão independente do motor, feita a partir do documento [O motor explica
      - Cada passo cobre agora uma parte (`SECTOR_FRACTION` = 0,6) do setor angular até às direções vizinhas. Usa a velocidade da elipse no ângulo desse setor mais próximo da cabeça.
      - Com 32 direções (acrescentam-se os passos (1,3) e (2,3)), a cabeça fica a 80–100% da velocidade teórica para qualquer ângulo do vento, e a área entre 0,8 e 1,3 da elipse.
      - Um teste varre o ângulo do vento.
-   - **Custo:** cerca de 4 vezes mais cálculo. O ensemble de Guimarães a 30 m, 4 horas, passa a cerca de 0,6 s.
+   - **Custo:** cerca de 4 vezes mais cálculo. O ensemble de Guimarães a 30 m, 4 horas, passa a cerca de 0,6 s. Depois da ADR 0063 (passos recalculados a cada mudança do tempo), cada decisão a 30 m leva 1,1–1,8 s.
 2. **Limite do vento original de Rothermel.**
    - O limite revisto de Andrews et al. (2013), 96,8·I_R^(1/3), é **mais** restritivo do que o original (0,9·I_R) sempre que I_R > 1116 Btu/ft²/min, o que inclui quase todos os combustíveis de Guimarães.
    - A ADR 0057 adotou-o com a justificação contrária, e estava errada.

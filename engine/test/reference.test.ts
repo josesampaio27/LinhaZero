@@ -5,22 +5,23 @@ import { listCases, loadCase, scoreCase } from "../scripts/reference";
 // Real fires from PT-FireSprd (engine/test/reference, built by data-prep/build_reference.py), simulated
 // from the observed ignition with the hourly ERA5 weather of those days and no suppression. The scores
 // below are the mean Sørensen over each fire's observation times (deterministic runs), recorded on
-// 2026-10-19 after the 32-direction stencil with sectors (ADR 0058). "legacy" is the retired simple
+// 2026-10-20 after ADR 0063 (steps recomputed when the weather changes, the fire starting from the observed
+// ignition zone), with the 100 m calibration (PT_CALIBRATION). "legacy" is the retired simple
 // model, kept in the engine only as this reference. A change that lowers one by more than TOLERANCE, or the mean, fails here: it is
 // a change in how well the engine reproduces real fires and must be looked at, not waved through.
 const BASELINE: Record<
   string,
   { rothermel: number; calibrated: number; legacy: number }
 > = {
-  Alijo_24072019: { rothermel: 0.27, calibrated: 0.49, legacy: 0.15 },
-  Baiao_04092019: { rothermel: 0.1, calibrated: 0.33, legacy: 0.05 },
-  CabeceirasdeBasto_06092016: { rothermel: 0.57, calibrated: 0.34, legacy: 0.28 },
-  CastroDaire_07092020: { rothermel: 0.51, calibrated: 0.57, legacy: 0.39 },
-  OliveiraFrades_07092020: { rothermel: 0.24, calibrated: 0.25, legacy: 0.19 },
-  SaoJoaoPesqueira_10072020: { rothermel: 0.35, calibrated: 0.39, legacy: 0.2 },
-  Valenca_04092019: { rothermel: 0.41, calibrated: 0.41, legacy: 0.18 },
-  Valpacos_13092019: { rothermel: 0.32, calibrated: 0.37, legacy: 0.24 },
-  VieiradoMinho_10082016: { rothermel: 0.59, calibrated: 0.53, legacy: 0.4 },
+  Alijo_24072019: { rothermel: 0.29, calibrated: 0.52, legacy: 0.17 },
+  Baiao_04092019: { rothermel: 0.12, calibrated: 0.32, legacy: 0.06 },
+  CabeceirasdeBasto_06092016: { rothermel: 0.47, calibrated: 0.52, legacy: 0.26 },
+  CastroDaire_07092020: { rothermel: 0.48, calibrated: 0.51, legacy: 0.4 },
+  OliveiraFrades_07092020: { rothermel: 0.36, calibrated: 0.36, legacy: 0.22 },
+  SaoJoaoPesqueira_10072020: { rothermel: 0.36, calibrated: 0.41, legacy: 0.21 },
+  Valenca_04092019: { rothermel: 0.44, calibrated: 0.4, legacy: 0.2 },
+  Valpacos_13092019: { rothermel: 0.34, calibrated: 0.39, legacy: 0.25 },
+  VieiradoMinho_10082016: { rothermel: 0.6, calibrated: 0.53, legacy: 0.41 },
 };
 const TOLERANCE = 0.03;
 

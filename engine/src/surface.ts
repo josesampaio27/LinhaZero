@@ -24,15 +24,50 @@ interface Terrain {
   upslopeDeg: Float32Array;
 }
 
-const terrainCache = new WeakMap<PreparedGrid, Terrain>();
+const terrainCache = new WeakMap<PreparedGrid, Map<number, Terrain>>();
 
-/** Slope and upslope direction of every cell (Horn's method), cached per prepared grid. */
-export function terrainOf(grid: PreparedGrid): Terrain {
-  let t = terrainCache.get(grid);
+/** Box mean of the elevation over cells within halfWidth cells (clamped at the edges). */
+function boxSmooth(z: Float32Array, rows: number, cols: number, halfWidth: number): Float32Array {
+  const tmp = new Float32Array(z.length);
+  const out = new Float32Array(z.length);
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++) {
+      let s = 0, k = 0;
+      for (let d = -halfWidth; d <= halfWidth; d++) {
+        const cc = c + d;
+        if (cc < 0 || cc >= cols) continue;
+        s += z[r * cols + cc];
+        k++;
+      }
+      tmp[r * cols + c] = s / k;
+    }
+  for (let r = 0; r < rows; r++)
+    for (let c = 0; c < cols; c++) {
+      let s = 0, k = 0;
+      for (let d = -halfWidth; d <= halfWidth; d++) {
+        const rr = r + d;
+        if (rr < 0 || rr >= rows) continue;
+        s += tmp[rr * cols + c];
+        k++;
+      }
+      out[r * cols + c] = s / k;
+    }
+  return out;
+}
+
+/**
+ * Slope and upslope direction of every cell (Horn's method), cached per prepared grid; with
+ * smoothM > 0 the elevation is first box-averaged over ±smoothM (ModelParams.demSmoothM).
+ */
+export function terrainOf(grid: PreparedGrid, smoothM = 0): Terrain {
+  let byGrid = terrainCache.get(grid);
+  if (!byGrid) terrainCache.set(grid, (byGrid = new Map()));
+  let t = byGrid.get(smoothM);
   if (!t) {
     const { rows, cols, cellSize } = grid.header;
+    const half = Math.round(smoothM / cellSize);
     const { slopeDeg, aspectDeg } = computeSlopeAspect(
-      grid.elevation,
+      half > 0 ? boxSmooth(grid.elevation, rows, cols, half) : grid.elevation,
       rows,
       cols,
       cellSize,
@@ -44,7 +79,7 @@ export function terrainOf(grid: PreparedGrid): Terrain {
       upslopeDeg[i] = (aspectDeg[i] + 180) % 360;
     }
     t = { slopeTan, upslopeDeg };
-    terrainCache.set(grid, t);
+    byGrid.set(smoothM, t);
   }
   return t;
 }
@@ -104,6 +139,8 @@ export class RothermelRates {
     private readonly crown: { enabled: boolean; rateAdj: number } = { enabled: false, rateAdj: 1 },
     /** Wind limit (headFire): 1 Rothermel 1972, 2 Andrews et al. 2013, 0 none. */
     private readonly windLimit = 1,
+    /** Crown ratio for the sheltered wind factor, and DEM smoothing (ModelParams.crownRatio, demSmoothM). */
+    private readonly terrainOptions: { crownRatio?: number; demSmoothM?: number } = {},
   ) {
     const n = grid.header.rows * grid.header.cols;
     this.ros = new Float32Array(n);
@@ -113,7 +150,7 @@ export class RothermelRates {
     this.ecc = new Float32Array(n);
     this.intensityPerRate = new Float32Array(n);
     this.done = new Uint8Array(n);
-    this.terrain = terrainOf(grid);
+    this.terrain = terrainOf(grid, terrainOptions.demSmoothM ?? 0);
   }
 
   /** The 10-m wind in use: speed (m/s) and the direction it blows TOWARDS (degrees from north). */
@@ -187,7 +224,7 @@ export class RothermelRates {
     const cover = this.grid.canopy?.[i];
     const waf =
       base.bed.params.underCanopy && cover !== undefined && cover <= 100
-        ? windAdjustmentFactor(base.bed.params.depthM, cover / 100)
+        ? windAdjustmentFactor(base.bed.params.depthM, cover / 100, undefined, this.terrainOptions.crownRatio ?? 1)
         : base.bed.waf;
     const wind = this.wind10mMs * WIND_20FT_PER_10M * waf * this.windAdj;
     const h = headFire(
@@ -216,7 +253,10 @@ export class RothermelRates {
       const c = crownFire(canopy, surfaceKwM, this.wind10mMs * 3.6, base.d1 * 100, this.crown.rateAdj);
       if (c && c.rate > h.ros) {
         this.ros[i] = c.rate;
-        this.intensityPerRate[i] += c.extraIntensityPerRate;
+        // Physical intensity at Cruz's rate (c.rate / rateAdj): the surface and the canopy fuel both burn
+        // at it. Per unit of the adjusted rate in use, that is their heat per unit rate over rateAdj.
+        const heatPerRate = h.intensityKwM / h.ros + c.extraIntensityPerRate;
+        this.intensityPerRate[i] = heatPerRate / (this.crown.rateAdj > 0 ? this.crown.rateAdj : 1);
       }
     }
   }

@@ -96,3 +96,5 @@ O que se pôs de lado, e porquê.
 | [0060](0060-tempo-em-direto-por-omissao.md) | Tempo em direto por omissão, com cada valor ajustável à mão | aceite | 2026-10-20 |
 | [0061](0061-keycloak-e-sessao-no-servidor.md) | Login com Keycloak e sessão guardada pela API | aceite | 2026-10-20 |
 | [0062](0062-pedidos-de-acesso-e-convites-por-email.md) | Pedidos de acesso na landing e convites por email | aceite | 2026-10-20 |
+| [0063](0063-tempo-que-muda-cantos-e-estado-de-partida.md) | Passos que se recalculam quando o tempo muda, cantos, intensidade das copas e estado de partida | aceite | 2026-10-20 |
+| [0064](0064-calibracao-da-grelha-de-30-m.md) | Calibração da grelha de 30 m | aceite | 2026-10-20 |

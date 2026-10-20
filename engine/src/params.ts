@@ -86,6 +86,16 @@ export interface ModelParams {
   gustShare: number;
   /** Rothermel's wind limit: 1 = original (0.9 I_R), 2 = Andrews et al. 2013 revised, 0 = none. */
   windLimit: number;
+  /**
+   * Crown ratio of the trees in the sheltered wind adjustment factor (BehavePlus: crown fill = cover ×
+   * crown ratio / 3). 1 = crowns as deep as the trees are tall (the engine's original choice).
+   */
+  crownRatio: number;
+  /**
+   * Half-width (m) of a box filter on the elevation before the slope is computed; 0 = none. The DEM
+   * (Copernicus GLO-30) is a surface model: tree and building edges add slope that is not terrain.
+   */
+  demSmoothM: number;
 }
 
 export const DEFAULT_PARAMS: ModelParams = {
@@ -113,6 +123,8 @@ export const DEFAULT_PARAMS: ModelParams = {
   crownAdj: 1,
   gustShare: 0,
   windLimit: 1,
+  crownRatio: 1,
+  demSmoothM: 0,
 };
 
 /** The spread factor of a fuel group (no group: rosAdj alone). */
@@ -172,4 +184,6 @@ export const PARAM_RANGES: Record<keyof ModelParams, [number, number]> = {
   crownAdj: [0.1, 5],
   gustShare: [0, 1],
   windLimit: [0, 2],
+  crownRatio: [0.1, 1],
+  demSmoothM: [0, 500],
 };

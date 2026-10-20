@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   applyVariant,
   DEFAULT_PARAMS,
-  PT_CALIBRATION,
+  calibrationFor,
   emptyVariant,
   PARAM_RANGES,
   parseGridVariant,
@@ -66,6 +66,8 @@ const PARAM_LABEL: Record<keyof ModelParams, string> = {
   crownAdj: "Ajuste da velocidade do fogo de copas (Rothermel)",
   gustShare: "Fração da rajada somada ao vento médio (0 a 1)",
   windLimit: "Limite do vento de Rothermel (1 original, 2 revisto em 2013, 0 sem)",
+  crownRatio: "Razão de copa no abrigo do vento (0,1 a 1; Rothermel)",
+  demSmoothM: "Suavização do relevo antes do declive (m, 0 = nenhuma)",
 };
 
 /** Coefficients of the retired simple model (ADR 0058): not shown, kept so older variant files still load. */
@@ -566,7 +568,7 @@ export function GridEditor() {
                 min={PARAM_RANGES[k][0]}
                 max={PARAM_RANGES[k][1]}
                 step={0.01}
-                placeholder={String(PT_CALIBRATION[k] ?? DEFAULT_PARAMS[k])}
+                placeholder={String(calibrationFor(base?.header.cellSize ?? 100).params[k] ?? DEFAULT_PARAMS[k])}
                 value={variant?.params[k] ?? ""}
                 onChange={(e) => setParam(k, e.target.value)}
                 disabled={!variant || shaMismatch}

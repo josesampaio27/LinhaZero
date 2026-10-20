@@ -11,12 +11,13 @@ import {
 } from "../src/moisture";
 import type { ModelParams } from "../src/params";
 import {
-  burnedAreaIgnitions,
   cellAt,
   type ProjectedPoint,
 } from "../src/scenario";
 import { simulate } from "../src/simulate";
 import type {
+  CellRef,
+  Ignition,
   PreparedGrid,
   Scenario,
   SpreadModel,
@@ -184,6 +185,20 @@ export function weatherStepsOf(
   return steps;
 }
 
+/**
+ * The fire as observed at minute `atMin`, as ignitions at minute 0: every cell observed burned by then
+ * (observed.f32 counts a cell when the observed perimeter covers its centre), as a whole burned cell, so
+ * the simulation starts from the observed state at any cell size. An ignition zone smaller than a cell
+ * (no cell at minute 0) starts from the centre of the cell holding it.
+ */
+export function observedIgnitions(c: ReferenceCase, ignition: CellRef, atMin = 0): Ignition[] {
+  const { cols } = c.grid.header;
+  const out: Ignition[] = [];
+  for (let i = 0; i < c.observed.length; i++)
+    if (c.observed[i] <= atMin) out.push({ cell: { row: Math.floor(i / cols), col: i % cols }, t0Min: 0, burned: true });
+  return out.length ? out : [{ cell: ignition, t0Min: 0 }];
+}
+
 export function scenarioOf(
   c: ReferenceCase,
   spreadModel: SpreadModel,
@@ -203,7 +218,7 @@ export function scenarioOf(
   const weatherSteps = weatherStepsOf(c, durationMin, 0, opts.weather, opts.moisture);
   return {
     ignition,
-    ignitions: burnedAreaIgnitions(header, c.ignitionArea, ignition),
+    ignitions: observedIgnitions(c, ignition),
     wind: weatherSteps[0].wind,
     weatherSteps,
     durationMin,

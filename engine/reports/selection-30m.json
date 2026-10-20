@@ -1,0 +1,1198 @@
+{
+ "created": "2026-10-20",
+ "cases": "C:\\projects\\LinhaZero\\data-prep\\out\\reference-30m",
+ "targetGrid": "C:\\projects\\LinhaZero\\web\\public\\grids\\guimaraes-30m",
+ "rule": {
+  "maxNonBurnable": 0.25,
+  "minTargetFuels": 0.6,
+  "minTargetShare": 0.005,
+  "minNewHa": 5,
+  "lockedKm": 0
+ },
+ "fit": [
+  "Agueda_05092019",
+  "Alijo_24072019",
+  "Avis_21072020",
+  "Baiao_04092019",
+  "Chaves_30072020",
+  "Fundao_06082020",
+  "MirandadoCorvo_13092019",
+  "Mogadouro_20072021",
+  "Nisa_01082019",
+  "OliveiraFrades_07092020",
+  "Penedono_21072019",
+  "PortoMos_06092020",
+  "Sabugal_29082019",
+  "SaoJoaoPesqueira_10072020",
+  "Sernancelhe_06082020",
+  "Serta_13092019",
+  "Tomar_03082019",
+  "Valenca_04092019",
+  "Valpacos_13092019"
+ ],
+ "locked": [],
+ "perFire": [
+  {
+   "fire": "CabeceirasdeBasto_06092016",
+   "tier": "B",
+   "year": 2016,
+   "region": "Norte",
+   "burnedHa": 1333,
+   "cells": 195716,
+   "nonBurnable": 0.008032941811799648,
+   "targetFuels": 0.9999999999999999,
+   "similarity": 0.1404210616319014,
+   "scorable": 3,
+   "distanceKm": 32.51158286329926,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 97%",
+    "Mato atlântico alto (V-MAa) 1%",
+    "Herbáceo alto (V-Ha) 1%"
+   ]
+  },
+  {
+   "fire": "Baiao_04092019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Norte",
+   "burnedHa": 552,
+   "cells": 127204,
+   "nonBurnable": 0.05457803844900619,
+   "targetFuels": 0.9946579355505774,
+   "similarity": 0.4115788374806332,
+   "scorable": 5,
+   "distanceKm": 40.55302552839416,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 40%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 22%",
+    "Mato atlântico alto (V-MAa) 17%"
+   ]
+  },
+  {
+   "fire": "Cinfaes_08082016",
+   "tier": "B",
+   "year": 2016,
+   "region": "Norte",
+   "burnedHa": 760,
+   "cells": 114725,
+   "nonBurnable": 0.1362397820163488,
+   "targetFuels": 0.999039912220546,
+   "similarity": 0.14855983284864813,
+   "scorable": 2,
+   "distanceKm": 47.892983635270845,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 88%",
+    "Mato atlântico baixo (V-MAb) 10%",
+    "Herbáceo alto (V-Ha) 1%"
+   ]
+  },
+  {
+   "fire": "Cinfaes_07082016",
+   "tier": "B",
+   "year": 2016,
+   "region": "Norte",
+   "burnedHa": 537,
+   "cells": 105820,
+   "nonBurnable": 0.024455611390284758,
+   "targetFuels": 0.9994848901098901,
+   "similarity": 0.14724665941188053,
+   "scorable": 4,
+   "distanceKm": 48.190272499267195,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 85%",
+    "Mato atlântico baixo (V-MAb) 14%",
+    "Mato atlântico alto (V-MAa) 1%"
+   ]
+  },
+  {
+   "fire": "ArcosdeValdevez_08082016",
+   "tier": "B",
+   "year": 2016,
+   "region": "Norte",
+   "burnedHa": 5376,
+   "cells": 465532,
+   "nonBurnable": 0.004470190359791726,
+   "targetFuels": 0.999579563418654,
+   "similarity": 0.12881462240775873,
+   "scorable": 9,
+   "distanceKm": 49.87557032340557,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 98%",
+    "Mato sob folhosas caducifólias (M-CAD) 1%",
+    "Mato atlântico baixo (V-MAb) 0%"
+   ]
+  },
+  {
+   "fire": "Boticas_05092016",
+   "tier": "B",
+   "year": 2016,
+   "region": "Norte",
+   "burnedHa": 1647,
+   "cells": 161898,
+   "nonBurnable": 0.036992514070269385,
+   "targetFuels": 0.9971062187925557,
+   "similarity": 0.12637705160311494,
+   "scorable": 3,
+   "distanceKm": 57.20466797041273,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 98%",
+    "Mato atlântico baixo (V-MAb) 0%",
+    "Herbáceo alto (V-Ha) 0%"
+   ]
+  },
+  {
+   "fire": "Caminha_09082016",
+   "tier": "B",
+   "year": 2016,
+   "region": "Norte",
+   "burnedHa": 1614,
+   "cells": 173405,
+   "nonBurnable": 0.022468777876895628,
+   "targetFuels": 0.9986881879883648,
+   "similarity": 0.13010810431486078,
+   "scorable": 5,
+   "distanceKm": 61.14661584918695,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 98%",
+    "Mato sob eucaliptal (M-EUC) 1%",
+    "Mato atlântico baixo (V-MAb) 1%"
+   ]
+  },
+  {
+   "fire": "Arouca_08082016",
+   "tier": "B",
+   "year": 2016,
+   "region": "Centro",
+   "burnedHa": 22835,
+   "cells": 1089000,
+   "nonBurnable": 0.015591683909744802,
+   "targetFuels": 0.9992392971105302,
+   "similarity": 0.14085089302543868,
+   "scorable": 14,
+   "distanceKm": 62.142741536069394,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 97%",
+    "Mato sob eucaliptal (M-EUC) 1%",
+    "Mato atlântico alto (V-MAa) 0%"
+   ]
+  },
+  {
+   "fire": "Valenca_04092019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Norte",
+   "burnedHa": 536,
+   "cells": 143317,
+   "nonBurnable": 0.027394957983193278,
+   "targetFuels": 0.9638845688612409,
+   "similarity": 0.5089133767471525,
+   "scorable": 3,
+   "distanceKm": 62.5982907215213,
+   "topFuels": [
+    "Mato atlântico alto (V-MAa) 40%",
+    "Mato sob eucaliptal (M-EUC) 27%",
+    "Mato atlântico baixo (V-MAb) 16%"
+   ]
+  },
+  {
+   "fire": "Moncao_09082016",
+   "tier": "B",
+   "year": 2016,
+   "region": "Norte",
+   "burnedHa": 854,
+   "cells": 190825,
+   "nonBurnable": 0.007903055848261328,
+   "targetFuels": 0.9993627190653211,
+   "similarity": 0.1424326128457582,
+   "scorable": 5,
+   "distanceKm": 62.99164588627476,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 97%",
+    "Mato atlântico baixo (V-MAb) 1%",
+    "Mato atlântico alto (V-MAa) 1%"
+   ]
+  },
+  {
+   "fire": "Moncao_06092016",
+   "tier": "B",
+   "year": 2016,
+   "region": "Norte",
+   "burnedHa": 472,
+   "cells": 119364,
+   "nonBurnable": 0,
+   "targetFuels": 0.999618320610687,
+   "similarity": 0.16527651955626158,
+   "scorable": 3,
+   "distanceKm": 63.47665812928911,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 95%",
+    "Mato atlântico alto (V-MAa) 3%",
+    "Mato sob folhosas caducifólias (M-CAD) 1%"
+   ]
+  },
+  {
+   "fire": "Alijo_24072019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Norte",
+   "burnedHa": 574,
+   "cells": 147201,
+   "nonBurnable": 0.053655475368685285,
+   "targetFuels": 0.7879641909814323,
+   "similarity": 0.17948874813513882,
+   "scorable": 5,
+   "distanceKm": 68.00948565786796,
+   "topFuels": [
+    "Mato atlântico alto (V-MAa) 69%",
+    "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 21%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 3%"
+   ]
+  },
+  {
+   "fire": "CastroDaire_07092020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Centro",
+   "burnedHa": 344,
+   "cells": 94860,
+   "nonBurnable": 0.004183006535947713,
+   "targetFuels": 0.9986873195064321,
+   "similarity": 0.1561930115181154,
+   "scorable": 1,
+   "distanceKm": 68.51493876312102,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 86%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 7%",
+    "Mato atlântico alto (V-MAa) 4%"
+   ]
+  },
+  {
+   "fire": "CastroDaire_05102017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Norte",
+   "burnedHa": 691,
+   "cells": 123176,
+   "nonBurnable": 0.8663017982799062,
+   "targetFuels": 0.9990253411306041,
+   "similarity": 0.1997282782081225,
+   "scorable": 3,
+   "distanceKm": 69.88466677286362,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 82%",
+    "Herbáceo alto (V-Ha) 7%",
+    "Mato atlântico alto (V-MAa) 6%"
+   ]
+  },
+  {
+   "fire": "Valpacos_13092019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Norte",
+   "burnedHa": 414,
+   "cells": 120060,
+   "nonBurnable": 0.008034744842562433,
+   "targetFuels": 0.9929947460595446,
+   "similarity": 0.4440687144218248,
+   "scorable": 4,
+   "distanceKm": 78.67941675199978,
+   "topFuels": [
+    "Mato sob folhosas caducifólias (M-CAD) 47%",
+    "Mato atlântico alto (V-MAa) 25%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 13%"
+   ]
+  },
+  {
+   "fire": "OliveiraFrades_07092020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Centro",
+   "burnedHa": 1635,
+   "cells": 224315,
+   "nonBurnable": 0.010569195199823847,
+   "targetFuels": 0.9791365305441192,
+   "similarity": 0.5193826940761949,
+   "scorable": 13,
+   "distanceKm": 82.71917777878572,
+   "topFuels": [
+    "Mato sob eucaliptal (M-EUC) 49%",
+    "Mato atlântico alto (V-MAa) 25%",
+    "Mato atlântico baixo (V-MAb) 18%"
+   ]
+  },
+  {
+   "fire": "SaoJoaoPesqueira_10072020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Norte",
+   "burnedHa": 748,
+   "cells": 115533,
+   "nonBurnable": 0.002164762477450391,
+   "targetFuels": 0.9924068940580932,
+   "similarity": 0.243728073932874,
+   "scorable": 7,
+   "distanceKm": 82.7590229205786,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 51%",
+    "Mato atlântico alto (V-MAa) 43%",
+    "Herbáceo alto (V-Ha) 3%"
+   ]
+  },
+  {
+   "fire": "Agueda_15102017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 7546,
+   "cells": 582912,
+   "nonBurnable": 0.9328840648854961,
+   "targetFuels": 0.9968011373733784,
+   "similarity": 0.6030571884506479,
+   "scorable": 11,
+   "distanceKm": 84.00028326206356,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 36%",
+    "Mato sob eucaliptal (M-EUC) 30%",
+    "Mato sob folhosas caducifólias (M-CAD) 14%"
+   ]
+  },
+  {
+   "fire": "Sernancelhe_06082020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Centro",
+   "burnedHa": 2223,
+   "cells": 174777,
+   "nonBurnable": 0.004898983764524879,
+   "targetFuels": 0.9457645048417284,
+   "similarity": 0.2689610855077729,
+   "scorable": 7,
+   "distanceKm": 86.43702960413043,
+   "topFuels": [
+    "Mato atlântico alto (V-MAa) 67%",
+    "Mato atlântico baixo (V-MAb) 11%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 8%"
+   ]
+  },
+  {
+   "fire": "Chaves_30072020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Norte",
+   "burnedHa": 2094,
+   "cells": 254549,
+   "nonBurnable": 0.008767782696522973,
+   "targetFuels": 0.972510081082253,
+   "similarity": 0.5557343019971559,
+   "scorable": 7,
+   "distanceKm": 87.20669391791934,
+   "topFuels": [
+    "Mato atlântico alto (V-MAa) 41%",
+    "Herbáceo alto (V-Ha) 21%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 17%"
+   ]
+  },
+  {
+   "fire": "Agueda_05092019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Centro",
+   "burnedHa": 1421,
+   "cells": 177317,
+   "nonBurnable": 0.06099955659720023,
+   "targetFuels": 0.9926470588235294,
+   "similarity": 0.4656646305302368,
+   "scorable": 15,
+   "distanceKm": 88.43292387107235,
+   "topFuels": [
+    "Mato sob eucaliptal (M-EUC) 88%",
+    "Mato atlântico alto (V-MAa) 5%",
+    "Herbáceo alto (V-Ha) 3%"
+   ]
+  },
+  {
+   "fire": "OliveiraFrades_15102017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 9211,
+   "cells": 519552,
+   "nonBurnable": 0.8484679720170399,
+   "targetFuels": 0.9894899735637372,
+   "similarity": 0.28522640702844904,
+   "scorable": 16,
+   "distanceKm": 88.46866151543814,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 73%",
+    "Mato sob eucaliptal (M-EUC) 9%",
+    "Mato sob folhosas caducifólias (M-CAD) 7%"
+   ]
+  },
+  {
+   "fire": "Agueda_08082016",
+   "tier": "B",
+   "year": 2016,
+   "region": "Centro",
+   "burnedHa": 7224,
+   "cells": 377280,
+   "nonBurnable": 1,
+   "targetFuels": 0,
+   "similarity": 0,
+   "scorable": 8,
+   "distanceKm": 94.54498657878521,
+   "topFuels": []
+  },
+  {
+   "fire": "Penedono_21072019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Centro",
+   "burnedHa": 726,
+   "cells": 121536,
+   "nonBurnable": 0.07706603890472061,
+   "targetFuels": 0.9801315612833937,
+   "similarity": 0.39715402426897395,
+   "scorable": 5,
+   "distanceKm": 94.97943870733582,
+   "topFuels": [
+    "Mato atlântico alto (V-MAa) 62%",
+    "Mato sob folhosas caducifólias (M-CAD) 17%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 10%"
+   ]
+  },
+  {
+   "fire": "Mirandela_16072017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Norte",
+   "burnedHa": 950,
+   "cells": 129198,
+   "nonBurnable": 0.928497016762951,
+   "targetFuels": 0.909933774834437,
+   "similarity": 0.3103807342874384,
+   "scorable": 3,
+   "distanceKm": 101.86200339006841,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 53%",
+    "Mato atlântico baixo (V-MAb) 16%",
+    "Herbáceo alto (V-Ha) 10%"
+   ]
+  },
+  {
+   "fire": "Mortagua_07102017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 954,
+   "cells": 141024,
+   "nonBurnable": 0.8458274398868458,
+   "targetFuels": 1,
+   "similarity": 0.5271732216619891,
+   "scorable": 1,
+   "distanceKm": 112.1766464832423,
+   "topFuels": [
+    "Mato sob eucaliptal (M-EUC) 66%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 27%",
+    "Herbáceo alto (V-Ha) 3%"
+   ]
+  },
+  {
+   "fire": "Anadia_10082016",
+   "tier": "B",
+   "year": 2016,
+   "region": "Centro",
+   "burnedHa": 3282,
+   "cells": 231000,
+   "nonBurnable": 0.022484233616671238,
+   "targetFuels": 1,
+   "similarity": 0.13585214346555785,
+   "scorable": 4,
+   "distanceKm": 114.81177291428165,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 98%",
+    "Mato sob eucaliptal (M-EUC) 1%",
+    "Mato mediterrâneo baixo (V-MMb) 0%"
+   ]
+  },
+  {
+   "fire": "Lousa_15102017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 45302,
+   "cells": 2375100,
+   "nonBurnable": 0.9873211763373656,
+   "targetFuels": 0.9913820119084926,
+   "similarity": 0.5548262107268189,
+   "scorable": 36,
+   "distanceKm": 121.47005606622714,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 34%",
+    "Mato sob eucaliptal (M-EUC) 29%",
+    "Mato atlântico alto (V-MAa) 16%"
+   ]
+  },
+  {
+   "fire": "FigueiradaFoz_15102017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 15146,
+   "cells": 1247832,
+   "nonBurnable": 0.9854776222280323,
+   "targetFuels": 0.9909983633387888,
+   "similarity": 0.6351447033673004,
+   "scorable": 21,
+   "distanceKm": 126.1358887501876,
+   "topFuels": [
+    "Herbáceo alto (V-Ha) 36%",
+    "Mato sob eucaliptal (M-EUC) 21%",
+    "Mato atlântico alto (V-MAa) 16%"
+   ]
+  },
+  {
+   "fire": "Gouveia_10082015",
+   "tier": "B",
+   "year": 2015,
+   "region": "Centro",
+   "burnedHa": 2482,
+   "cells": 195888,
+   "nonBurnable": 0.23315686416708972,
+   "targetFuels": 1,
+   "similarity": 0.1353921170136697,
+   "scorable": 4,
+   "distanceKm": 126.81515638712067,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 89%",
+    "Mato atlântico baixo (V-MAb) 11%",
+    "Mato atlântico alto (V-MAa) 0%"
+   ]
+  },
+  {
+   "fire": "Arganil_15102017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 31958,
+   "cells": 1879184,
+   "nonBurnable": 0.9607729936607085,
+   "targetFuels": 0.9310790437217316,
+   "similarity": 0.16447297208005202,
+   "scorable": 11,
+   "distanceKm": 127.32416120481473,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 79%",
+    "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 7%",
+    "Mato atlântico alto (V-MAa) 4%"
+   ]
+  },
+  {
+   "fire": "FreixodeEspadaaCinta_06092016",
+   "tier": "B",
+   "year": 2016,
+   "region": "Norte",
+   "burnedHa": 5142,
+   "cells": 454894,
+   "nonBurnable": 0.046155461817163464,
+   "targetFuels": 0.9987155020551967,
+   "similarity": 0.1549612384178815,
+   "scorable": 5,
+   "distanceKm": 132.165035302597,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 95%",
+    "Mato atlântico baixo (V-MAb) 2%",
+    "Herbáceo alto (V-Ha) 1%"
+   ]
+  },
+  {
+   "fire": "FreixoEspadaaCinta_20082021",
+   "tier": "A",
+   "year": 2021,
+   "region": "Norte",
+   "burnedHa": 291,
+   "cells": 94785,
+   "nonBurnable": 0.00030950170225936243,
+   "targetFuels": 0.9962848297213622,
+   "similarity": 0.17035834298805702,
+   "scorable": 1,
+   "distanceKm": 134.20507761566108,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 58%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 38%",
+    "Mato atlântico alto (V-MAa) 2%"
+   ]
+  },
+  {
+   "fire": "Guarda_23082017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 3145,
+   "cells": 240640,
+   "nonBurnable": 0.8437544713120618,
+   "targetFuels": 0.9626373626373625,
+   "similarity": 0.27885359017650285,
+   "scorable": 5,
+   "distanceKm": 136.16316824949934,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 51%",
+    "Mato atlântico alto (V-MAa) 28%",
+    "Mato sob folhosas caducifólias (M-CAD) 10%"
+   ]
+  },
+  {
+   "fire": "Guarda_17072017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 6638,
+   "cells": 421580,
+   "nonBurnable": 0.955622745884969,
+   "targetFuels": 0.9358386801099909,
+   "similarity": 0.4641296852697237,
+   "scorable": 6,
+   "distanceKm": 142.9281014133929,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 41%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 13%",
+    "Herbáceo alto (V-Ha) 13%"
+   ]
+  },
+  {
+   "fire": "Mogadouro_20072021",
+   "tier": "A",
+   "year": 2021,
+   "region": "Norte",
+   "burnedHa": 250,
+   "cells": 79750,
+   "nonBurnable": 0,
+   "targetFuels": 0.8929343907714492,
+   "similarity": 0.4541899704582929,
+   "scorable": 5,
+   "distanceKm": 146.13543219325032,
+   "topFuels": [
+    "Mato sob folhosas caducifólias (M-CAD) 38%",
+    "Mato atlântico alto (V-MAa) 23%",
+    "Herbáceo alto (V-Ha) 16%"
+   ]
+  },
+  {
+   "fire": "MirandadoCorvo_13092019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Centro",
+   "burnedHa": 521,
+   "cells": 102102,
+   "nonBurnable": 0.014520311149524633,
+   "targetFuels": 0.9640413962462724,
+   "similarity": 0.524225881025462,
+   "scorable": 3,
+   "distanceKm": 146.59335371125042,
+   "topFuels": [
+    "Mato sob eucaliptal (M-EUC) 56%",
+    "Mato atlântico alto (V-MAa) 31%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 4%"
+   ]
+  },
+  {
+   "fire": "Sabugal_29082019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Centro",
+   "burnedHa": 578,
+   "cells": 96726,
+   "nonBurnable": 0.004206918043004051,
+   "targetFuels": 0.8414958535440462,
+   "similarity": 0.33611254460782963,
+   "scorable": 5,
+   "distanceKm": 152.02470279762068,
+   "topFuels": [
+    "Mato atlântico alto (V-MAa) 43%",
+    "Mato atlântico baixo (V-MAb) 18%",
+    "Herbáceo baixo (V-Hb) 14%"
+   ]
+  },
+  {
+   "fire": "Gois_17062017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 15626,
+   "cells": 703893,
+   "nonBurnable": 0.9852442304480294,
+   "targetFuels": 0.9843871975019516,
+   "similarity": 0.28055298367917514,
+   "scorable": 104,
+   "distanceKm": 156.45107773289882,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 66%",
+    "Mato atlântico alto (V-MAa) 15%",
+    "Mato sob eucaliptal (M-EUC) 13%"
+   ]
+  },
+  {
+   "fire": "Fundao_07082020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Centro",
+   "burnedHa": 409,
+   "cells": 98150,
+   "nonBurnable": 0.02004846882573254,
+   "targetFuels": 0.599820143884892,
+   "similarity": 0.36875877436496424,
+   "scorable": 7,
+   "distanceKm": 156.80906944891208,
+   "topFuels": [
+    "238 22%",
+    "Mato atlântico alto (V-MAa) 17%",
+    "Mato atlântico baixo (V-MAb) 14%"
+   ]
+  },
+  {
+   "fire": "Fundao_06082020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Centro",
+   "burnedHa": 723,
+   "cells": 128790,
+   "nonBurnable": 0.0034873583260680036,
+   "targetFuels": 1,
+   "similarity": 0.2672950097783717,
+   "scorable": 4,
+   "distanceKm": 159.99575996511538,
+   "topFuels": [
+    "Mato atlântico alto (V-MAa) 81%",
+    "Mato sob eucaliptal (M-EUC) 15%",
+    "Mato sob folhosas caducifólias (M-CAD) 2%"
+   ]
+  },
+  {
+   "fire": "CasteloBranco_13082017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 6168,
+   "cells": 331344,
+   "nonBurnable": 0.9358128811976537,
+   "targetFuels": 0.969311207092521,
+   "similarity": 0.24944522807522726,
+   "scorable": 8,
+   "distanceKm": 165.3186769504379,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 70%",
+    "Mato atlântico alto (V-MAa) 10%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 5%"
+   ]
+  },
+  {
+   "fire": "Oleiros_03082015",
+   "tier": "B",
+   "year": 2015,
+   "region": "Centro",
+   "burnedHa": 851,
+   "cells": 121320,
+   "nonBurnable": 0.07906140999894302,
+   "targetFuels": 0.9793412142775163,
+   "similarity": 0.12979308528817832,
+   "scorable": 2,
+   "distanceKm": 168.8409619324654,
+   "topFuels": [
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 96%",
+    "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 2%",
+    "Mato atlântico alto (V-MAa) 1%"
+   ]
+  },
+  {
+   "fire": "Oleiros_23082017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 7001,
+   "cells": 545032,
+   "nonBurnable": 0.9663941170420652,
+   "targetFuels": 0.8221117061973987,
+   "similarity": 0.47602457922544417,
+   "scorable": 6,
+   "distanceKm": 169.27426862819738,
+   "topFuels": [
+    "Mato sob eucaliptal (M-EUC) 23%",
+    "Mato atlântico baixo (V-MAb) 21%",
+    "Mato atlântico alto (V-MAa) 18%"
+   ]
+  },
+  {
+   "fire": "ProencaaNova_13092020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Centro",
+   "burnedHa": 13251,
+   "cells": 580940,
+   "nonBurnable": 0.003871283228514378,
+   "targetFuels": 0.49362505795401856,
+   "similarity": 0.17940198184403275,
+   "scorable": 7,
+   "distanceKm": 175.4076591564782,
+   "topFuels": [
+    "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 50%",
+    "Mato atlântico alto (V-MAa) 40%",
+    "Mato sob eucaliptal (M-EUC) 6%"
+   ]
+  },
+  {
+   "fire": "Oleiros_25072020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Centro",
+   "burnedHa": 5287,
+   "cells": 328792,
+   "nonBurnable": 0.0012255736365493293,
+   "targetFuels": 0.5252914309087191,
+   "similarity": 0.3109185154378182,
+   "scorable": 11,
+   "distanceKm": 181.05715363767735,
+   "topFuels": [
+    "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 47%",
+    "Mato atlântico alto (V-MAa) 29%",
+    "Mato sob eucaliptal (M-EUC) 19%"
+   ]
+  },
+  {
+   "fire": "Alcobaca_15102017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 18544,
+   "cells": 1456917,
+   "nonBurnable": 0.9838337854955422,
+   "targetFuels": 0.9714800360252177,
+   "similarity": 0.3382400657967249,
+   "scorable": 13,
+   "distanceKm": 186.8671217603508,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 32%",
+    "Mato sob pinhal (M-PIN) 29%",
+    "Mato sob eucaliptal (M-EUC) 14%"
+   ]
+  },
+  {
+   "fire": "Serta_13092019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Centro",
+   "burnedHa": 675,
+   "cells": 613431,
+   "nonBurnable": 0.013994402239104359,
+   "targetFuels": 0.641389564747229,
+   "similarity": 0.24494866767380272,
+   "scorable": 8,
+   "distanceKm": 194.0360808279819,
+   "topFuels": [
+    "Mato atlântico alto (V-MAa) 46%",
+    "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 35%",
+    "Mato sob eucaliptal (M-EUC) 9%"
+   ]
+  },
+  {
+   "fire": "CasteloBranco_29082020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Centro",
+   "burnedHa": 315,
+   "cells": 88294,
+   "nonBurnable": 0.009425878320479864,
+   "targetFuels": 0.5233564013840831,
+   "similarity": 0.3991924988694318,
+   "scorable": 3,
+   "distanceKm": 194.45055681263287,
+   "topFuels": [
+    "Mato sob eucaliptal (M-EUC) 40%",
+    "236 34%",
+    "Herbáceo baixo (V-Hb) 12%"
+   ]
+  },
+  {
+   "fire": "ViladeRei_20072019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Centro",
+   "burnedHa": 9194,
+   "cells": 538244,
+   "nonBurnable": 0.008957415565345081,
+   "targetFuels": 0.5671457499876524,
+   "similarity": 0.3097756946576616,
+   "scorable": 23,
+   "distanceKm": 194.57311951981052,
+   "topFuels": [
+    "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 43%",
+    "Mato atlântico alto (V-MAa) 34%",
+    "Mato sob eucaliptal (M-EUC) 15%"
+   ]
+  },
+  {
+   "fire": "CasteloBranco_23072017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 4450,
+   "cells": 547200,
+   "nonBurnable": 0.9577510365052078,
+   "targetFuels": 0.5897558640497845,
+   "similarity": 0.3612731670602109,
+   "scorable": 8,
+   "distanceKm": 202.89008751024366,
+   "topFuels": [
+    "236 24%",
+    "Mato (V-MH; confirmar designação na documentação FUMOD) 16%",
+    "Mato mediterrâneo baixo (V-MMb) 16%"
+   ]
+  },
+  {
+   "fire": "IdanhaaNova_30062020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Centro",
+   "burnedHa": 730,
+   "cells": 136945,
+   "nonBurnable": 0.22057917436845348,
+   "targetFuels": 0.49913043478260866,
+   "similarity": 0.45322050755026605,
+   "scorable": 5,
+   "distanceKm": 203.38241615740372,
+   "topFuels": [
+    "236 35%",
+    "Herbáceo alto (V-Ha) 32%",
+    "Mato sob eucaliptal (M-EUC) 17%"
+   ]
+  },
+  {
+   "fire": "Alvaiazere_11082017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 23511,
+   "cells": 3345216,
+   "nonBurnable": 0.9469100736498798,
+   "targetFuels": 0.8418775686783473,
+   "similarity": 0.5857009834673852,
+   "scorable": 13,
+   "distanceKm": 205.33056007265398,
+   "topFuels": [
+    "Mato sob eucaliptal (M-EUC) 31%",
+    "Mato atlântico baixo (V-MAb) 16%",
+    "Mato atlântico alto (V-MAa) 11%"
+   ]
+  },
+  {
+   "fire": "Abrantes_09082017",
+   "tier": "B",
+   "year": 2017,
+   "region": "Centro",
+   "burnedHa": 3623,
+   "cells": 262528,
+   "nonBurnable": 1,
+   "targetFuels": 0,
+   "similarity": 0,
+   "scorable": 5,
+   "distanceKm": 213.26164533563258,
+   "topFuels": []
+  },
+  {
+   "fire": "Tomar_03082019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Centro",
+   "burnedHa": 440,
+   "cells": 134583,
+   "nonBurnable": 0.0171638741315897,
+   "targetFuels": 0.8920997920997922,
+   "similarity": 0.5512769710634751,
+   "scorable": 6,
+   "distanceKm": 213.68806068590848,
+   "topFuels": [
+    "Mato atlântico alto (V-MAa) 41%",
+    "Mato sob eucaliptal (M-EUC) 37%",
+    "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 9%"
+   ]
+  },
+  {
+   "fire": "PortoMos_06092020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Centro",
+   "burnedHa": 976,
+   "cells": 126882,
+   "nonBurnable": 0,
+   "targetFuels": 0.6751498386353159,
+   "similarity": 0.27558680275502256,
+   "scorable": 8,
+   "distanceKm": 218.8111878839841,
+   "topFuels": [
+    "Mato atlântico alto (V-MAa) 35%",
+    "236 29%",
+    "Mato atlântico baixo (V-MAb) 15%"
+   ]
+  },
+  {
+   "fire": "Nisa_01082019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Sul",
+   "burnedHa": 701,
+   "cells": 111879,
+   "nonBurnable": 0.0053901437371663245,
+   "targetFuels": 0.6779354838709677,
+   "similarity": 0.3754460558933645,
+   "scorable": 5,
+   "distanceKm": 226.97958146841705,
+   "topFuels": [
+    "Herbáceo alto (V-Ha) 55%",
+    "Herbáceo baixo (V-Hb) 31%",
+    "Mato atlântico baixo (V-MAb) 5%"
+   ]
+  },
+  {
+   "fire": "Avis_21072020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Sul",
+   "burnedHa": 663,
+   "cells": 108262,
+   "nonBurnable": 0.004074979625101874,
+   "targetFuels": 0.8501091107474086,
+   "similarity": 0.26351866174993827,
+   "scorable": 4,
+   "distanceKm": 259.5096621223384,
+   "topFuels": [
+    "Mato atlântico baixo (V-MAb) 47%",
+    "Herbáceo alto (V-Ha) 13%",
+    "Herbáceo baixo (V-Hb) 10%"
+   ]
+  },
+  {
+   "fire": "Ourique_10062019",
+   "tier": "A",
+   "year": 2019,
+   "region": "Sul",
+   "burnedHa": 419,
+   "cells": 98172,
+   "nonBurnable": 0.007308684436801376,
+   "targetFuels": 0.26006929406669554,
+   "similarity": 0.2602661402025953,
+   "scorable": 5,
+   "distanceKm": 428.42408114608617,
+   "topFuels": [
+    "Herbáceo baixo (V-Hb) 61%",
+    "Herbáceo alto (V-Ha) 15%",
+    "Mato sob eucaliptal (M-EUC) 10%"
+   ]
+  },
+  {
+   "fire": "Odemira_18082021",
+   "tier": "A",
+   "year": 2021,
+   "region": "Sul",
+   "burnedHa": 941,
+   "cells": 181846,
+   "nonBurnable": 0.008797093134442532,
+   "targetFuels": 0.590970480416747,
+   "similarity": 0.4975171833806278,
+   "scorable": 11,
+   "distanceKm": 448.8978411089007,
+   "topFuels": [
+    "Mato sob eucaliptal (M-EUC) 32%",
+    "236 15%",
+    "Herbáceo baixo (V-Hb) 11%"
+   ]
+  },
+  {
+   "fire": "Silves_06072020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Sul",
+   "burnedHa": 400,
+   "cells": 91784,
+   "nonBurnable": 0,
+   "targetFuels": 0.25782481423102904,
+   "similarity": 0.044007401853205466,
+   "scorable": 3,
+   "distanceKm": 453.28618147170715,
+   "topFuels": [
+    "Herbáceo baixo (V-Hb) 44%",
+    "Mato mediterrâneo baixo (V-MMb) 21%",
+    "236 19%"
+   ]
+  },
+  {
+   "fire": "Monchique_03082018",
+   "tier": "A",
+   "year": 2018,
+   "region": "Sul",
+   "burnedHa": 24455,
+   "cells": 1044856,
+   "nonBurnable": 0.006690711026056235,
+   "targetFuels": 0.5553978851583169,
+   "similarity": 0.4924427487909022,
+   "scorable": 13,
+   "distanceKm": 461.11198317004875,
+   "topFuels": [
+    "Mato sob eucaliptal (M-EUC) 36%",
+    "236 28%",
+    "Herbáceo baixo (V-Hb) 9%"
+   ]
+  },
+  {
+   "fire": "Monchique_17072021",
+   "tier": "A",
+   "year": 2021,
+   "region": "Sul",
+   "burnedHa": 1877,
+   "cells": 196875,
+   "nonBurnable": 0.009160671462829737,
+   "targetFuels": 0.4583474514739339,
+   "similarity": 0.3053857899503447,
+   "scorable": 6,
+   "distanceKm": 469.8240055844692,
+   "topFuels": [
+    "236 45%",
+    "Mato sob eucaliptal (M-EUC) 21%",
+    "Mato mediterrâneo baixo (V-MMb) 15%"
+   ]
+  },
+  {
+   "fire": "CastroMarim_16082021",
+   "tier": "A",
+   "year": 2021,
+   "region": "Sul",
+   "burnedHa": 5939,
+   "cells": 332210,
+   "nonBurnable": 0.01838268723668657,
+   "targetFuels": 0.31818813394469914,
+   "similarity": 0.18960459426951928,
+   "scorable": 18,
+   "distanceKm": 471.8687716589005,
+   "topFuels": [
+    "236 56%",
+    "Mato mediterrâneo baixo (V-MMb) 14%",
+    "Herbáceo baixo (V-Hb) 11%"
+   ]
+  },
+  {
+   "fire": "Aljezur_19062020",
+   "tier": "A",
+   "year": 2020,
+   "region": "Sul",
+   "burnedHa": 2232,
+   "cells": 179413,
+   "nonBurnable": 0.004314690108472116,
+   "targetFuels": 0.2205977644581241,
+   "similarity": 0.12293010104519266,
+   "scorable": 9,
+   "distanceKm": 481.77199345588946,
+   "topFuels": [
+    "Herbáceo baixo (V-Hb) 35%",
+    "236 26%",
+    "Mato sob esclerófilas (M-ESC) 16%"
+   ]
+  }
+ ]
+}

@@ -222,8 +222,8 @@ describe("grid variants on the server", () => {
       durationMin: small.durationMin,
       interventions: [],
       spreadModel: "rothermel",
-      params: rothermelParams(variant.params),
-      ensemble: rothermelEnsemble(small.ensemble, variant.params),
+      params: rothermelParams(variant.params, syn.prepared.header.cellSize),
+      ensemble: rothermelEnsemble(small.ensemble, variant.params, syn.prepared.header.cellSize),
     });
     expect(result.B.metrics).toEqual(browser.metrics);
     expect(result.B.runs).toEqual(browser.runs);

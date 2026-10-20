@@ -4,9 +4,14 @@ Como o LinhaZero mede a incerteza e compara as duas decisões cenário a cenári
 
 ## Hoje (feito)
 
-Com "Incerteza" ligada, cada decisão corre **30 vezes com o vento perturbado**, mais uma vez com o vento previsto (`engine/src/simulate.ts`):
+Com "Incerteza" ligada, cada decisão corre **30 vezes com o tempo, o combustível e a ignição perturbados** (200 no servidor), mais uma vez com o tempo previsto (`engine/src/simulate.ts`):
 
-- **Perturbação:** a direção varia até ±20° e a velocidade até ±25%, com distribuição uniforme, a partir de uma semente fixa (2035).
+- **Perturbação** (`BURN_CHANCE_ENSEMBLE` em `engine/src/calibration.ts`, a mesma na interface e no servidor), com uma semente fixa (2035):
+  - direção do vento até ±30° e velocidade até ±37,5%, uniformes;
+  - humidade do combustível morto até ±4 pontos;
+  - velocidade de cada grupo de combustível com um fator lognormal de média 1 (desvio 0,6 em escala logarítmica);
+  - ponto de ignição até 400 m (uma ignição numa célula que não arde passa para a ardível mais próxima).
+- **Origem destes valores:** a secção seguinte. A versão inicial variava só o vento, ±20° e ±25%.
 - **Mapa principal e métricas** vêm da corrida com o vento previsto; a **probabilidade de arder** de cada célula é a fração das 30 corridas perturbadas em que ela arde dentro da duração ([ADR 0007](../decisoes/0007-ensemble.md)).
 - **Vista de incerteza:** os mapas mostram a probabilidade de arder até ao fim da duração; o painel acrescenta a área com probabilidade ≥ 50% ([ADR 0014](../decisoes/0014-vista-de-incerteza.md)).
 

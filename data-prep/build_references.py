@@ -3,11 +3,13 @@
   python build_references.py --ptfs ~/PT-FireSprd_v0.08                 all fires into out/reference
   python build_references.py --ptfs ... --only Baiao_04092019 Alijo_24072019
   python build_references.py --ptfs ... --manifest-only                  rewrite the manifest from built cases
+  python build_references.py --ptfs ... --cell 30 --out out/reference-30m --manifest out/reference-30m/manifest.json
 
 Fires already built are skipped (--force rebuilds them). Every download is cached in cache/, so after a
 first run the whole set rebuilds offline (--offline).
 
-The manifest (engine/test/reference/manifest.json, committed) lists per fire: year, region, fuel year,
+The manifest (by default engine/test/reference/manifest.json, committed; --manifest writes it elsewhere, e.g.
+next to a 30 m set, so the committed 100 m manifest is not overwritten) lists per fire: year, region, fuel year,
 tier and whether it can be fitted:
   tier A  2018-2021: FUMOD fuel map of the fire's own year; used to fit and to validate on held-out fires
   tier B  2015-2017: FUMOD 2018, so the scar shows the fuels after the fire; validation only, reported apart
@@ -82,14 +84,15 @@ def manifest_entry(case_dir: Path) -> dict:
     }
 
 
-def write_manifest(out: Path, fires: list[str]) -> list[dict]:
+def write_manifest(out: Path, fires: list[str], manifest: Path = MANIFEST) -> list[dict]:
     entries = [manifest_entry(out / f) for f in fires if (out / f / "case.json").exists()]
     doc = {
         "source": "PT-FireSprd v0.08 (Benali et al., doi:10.5281/zenodo.7495506), CC BY 4.0",
         "builtWith": "data-prep/build_references.py",
         "cases": entries,
     }
-    MANIFEST.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+    manifest.parent.mkdir(parents=True, exist_ok=True)
+    manifest.write_text(json.dumps(doc, indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
     return entries
 
 
@@ -103,6 +106,7 @@ def main() -> int:
     ap.add_argument("--offline", action="store_true")
     ap.add_argument("--force", action="store_true")
     ap.add_argument("--manifest-only", action="store_true")
+    ap.add_argument("--manifest", default=str(MANIFEST), help="onde escrever o manifesto (por omissão o do git, a 100 m)")
     args = ap.parse_args()
 
     ptfs = Path(args.ptfs).expanduser().resolve()
@@ -115,10 +119,11 @@ def main() -> int:
             for k, j in enumerate(jobs, 1):
                 fire, msg = j.result()
                 print(f"[{k}/{len(fires)}] {fire}: {msg}", flush=True)
-    entries = write_manifest(out, list_fires(ptfs))
+    manifest = Path(args.manifest).resolve()
+    entries = write_manifest(out, list_fires(ptfs), manifest)
     tiers = {t: sum(e["tier"] == t for e in entries) for t in "AB"}
     print(f"\n{len(entries)} casos: tier A {tiers['A']}, tier B {tiers['B']}, {sum(e['fit'] for e in entries)} para ajuste."
-          f" Manifesto em {MANIFEST}")
+          f" Manifesto em {manifest}")
     missing = [f for f in list_fires(ptfs) if not (out / f / "case.json").exists()]
     if missing:
         print("Por construir: " + ", ".join(missing))
