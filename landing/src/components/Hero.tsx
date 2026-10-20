@@ -118,13 +118,13 @@ export function Hero() {
           <span className="line"><span data-line style={{ "--i": 1 } as React.CSSProperties}>duas decisões</span></span>
         </h1>
         <div
-          className="md:col-span-12 md:grid md:grid-cols-12 md:items-end md:gap-x-6 lg:col-span-5 lg:col-start-8 lg:block lg:pb-3"
+          className="md:col-span-12 md:grid md:grid-cols-12 md:items-end md:gap-x-6 lg:col-span-5 lg:col-start-8 lg:block lg:pb-3 2xl:col-start-7"
           data-load
           style={{ "--d": "380ms" } as React.CSSProperties}
         >
           <p className="max-w-[52ch] md:col-span-7">
             O LinhaZero simula um incêndio rural com a decisão A e com a B, lado a lado, e diz em português claro qual
-            protege mais edifícios e aldeias. Feito em Guimarães, com os dados e os incêndios de Portugal.
+            protege mais edifícios e aldeias. Feito em Guimarães, com dados e incêndios de Portugal.
           </p>
           <div className="mt-5 flex flex-wrap items-center gap-x-6 gap-y-2 md:col-span-5 md:mt-0 md:justify-end lg:mt-5 lg:justify-start">
             <a href={DEMO_URL} className="btn btn-solid">Cenário de demonstração</a>
