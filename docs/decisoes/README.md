@@ -95,3 +95,4 @@ O que se pôs de lado, e porquê.
 | [0059](0059-pasta-backend-com-projetos-linhazero.md) | Pasta `backend/` com projetos `LinhaZero.*` | aceite | 2026-10-19 |
 | [0060](0060-tempo-em-direto-por-omissao.md) | Tempo em direto por omissão, com cada valor ajustável à mão | aceite | 2026-10-20 |
 | [0061](0061-keycloak-e-sessao-no-servidor.md) | Login com Keycloak e sessão guardada pela API | aceite | 2026-10-20 |
+| [0062](0062-pedidos-de-acesso-e-convites-por-email.md) | Pedidos de acesso na landing e convites por email | aceite | 2026-10-20 |

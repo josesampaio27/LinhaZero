@@ -1,3 +1,4 @@
+using LinhaZero.Api.Auth;
 using LinhaZero.Api.Models;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,5 +12,5 @@ public sealed class MeController : ControllerBase
     [HttpGet]
     [ProducesResponseType<MeResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ErrorResponse>(StatusCodes.Status401Unauthorized)]
-    public MeResponse Get() => new(User.FindFirst("name")?.Value ?? "", User.FindFirst("email")?.Value);
+    public MeResponse Get() => new(User.FindFirst("name")?.Value ?? "", User.FindFirst("email")?.Value, User.IsInRole(AuthSetup.AdminRole));
 }

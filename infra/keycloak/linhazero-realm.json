@@ -7,7 +7,7 @@
   "registrationEmailAsUsername": true,
   "loginWithEmailAllowed": true,
   "duplicateEmailsAllowed": false,
-  "resetPasswordAllowed": false,
+  "resetPasswordAllowed": true,
   "rememberMe": false,
   "verifyEmail": false,
   "editUsernameAllowed": false,
@@ -25,7 +25,10 @@
   "accessTokenLifespan": 300,
   "loginTheme": "linhazero",
   "internationalizationEnabled": true,
-  "supportedLocales": ["pt", "en"],
+  "supportedLocales": [
+    "pt",
+    "en"
+  ],
   "defaultLocale": "pt",
   "clients": [
     {
@@ -46,12 +49,101 @@
       "frontchannelLogout": false,
       "rootUrl": "https://app.${LZ_DOMAIN}",
       "baseUrl": "/",
-      "redirectUris": ["https://app.${LZ_DOMAIN}/api/auth/callback", "${OIDC_EXTRA_REDIRECT_URI}"],
+      "redirectUris": [
+        "https://app.${LZ_DOMAIN}/api/auth/callback",
+        "https://app.${LZ_DOMAIN}/api/auth/login",
+        "${OIDC_EXTRA_REDIRECT_URI}"
+      ],
       "webOrigins": [],
       "attributes": {
         "pkce.code.challenge.method": "S256",
         "post.logout.redirect.uris": "https://landing.${LZ_DOMAIN}/##https://${LZ_DOMAIN}/##${OIDC_EXTRA_POST_LOGOUT_URI}"
+      },
+      "protocolMappers": [
+        {
+          "name": "realm roles in id token",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "config": {
+            "claim.name": "roles",
+            "multivalued": "true",
+            "jsonType.label": "String",
+            "id.token.claim": "true",
+            "access.token.claim": "false",
+            "userinfo.token.claim": "false",
+            "introspection.token.claim": "false"
+          }
+        }
+      ]
+    },
+    {
+      "clientId": "linhazero-api-admin",
+      "name": "LinhaZero API (user admin)",
+      "description": "The API's own client: creates the accounts of approved access requests (client credentials, manage-users only).",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "${KEYCLOAK_ADMIN_CLIENT_SECRET}",
+      "standardFlowEnabled": false,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": false,
+      "serviceAccountsEnabled": true,
+      "fullScopeAllowed": false
+    }
+  ],
+  "smtpServer": {
+    "host": "${SMTP_HOST}",
+    "port": "${SMTP_PORT}",
+    "from": "${SMTP_FROM}",
+    "fromDisplayName": "LinhaZero",
+    "auth": "${SMTP_AUTH}",
+    "user": "${SMTP_USER}",
+    "password": "${SMTP_PASSWORD}",
+    "starttls": "${SMTP_STARTTLS}",
+    "ssl": "${SMTP_SSL}"
+  },
+  "roles": {
+    "realm": [
+      {
+        "name": "linhazero-admin",
+        "description": "Sees and answers access requests in the app (Pedidos de acesso)."
+      }
+    ]
+  },
+  "scopeMappings": [
+    {
+      "client": "linhazero-app",
+      "roles": [
+        "linhazero-admin"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "service-account-linhazero-api-admin",
+      "enabled": true,
+      "serviceAccountClientId": "linhazero-api-admin",
+      "clientRoles": {
+        "realm-management": [
+          "manage-users",
+          "view-users",
+          "query-users"
+        ]
       }
     }
-  ]
+  ],
+  "clientScopeMappings": {
+    "realm-management": [
+      {
+        "client": "linhazero-api-admin",
+        "roles": [
+          "manage-users",
+          "view-users",
+          "query-users"
+        ]
+      }
+    ]
+  },
+  "emailTheme": "linhazero"
 }

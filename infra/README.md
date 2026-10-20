@@ -27,7 +27,8 @@ O nome do projeto é `linha-zero`, por isso os volumes chamam-se `linha-zero_pgd
 | `proxy` | `caddy:2.11.7-alpine` | 80, 443 | A única entrada do browser, como o túnel no cluster (`infra/Caddyfile`): `linhazero.localhost` e `landing.` → `landing`; `app.` → `web`, e `/api/*` → `api` (SSE sem buffering); `account.` → `keycloak`. HTTPS com a autoridade local do Caddy |
 | `web` | `web/` (build Node 24, servida por `nginx-unprivileged:1.28.0-alpine`) | — | A interface compilada, em https://app.linhazero.localhost; serve as grelhas de `web/public/grids` |
 | `landing` | `landing/` (build Node 24, servida por `nginx-unprivileged:1.28.0-alpine`) | — | A página de apresentação compilada, em https://linhazero.localhost; serve a grelha do relevo de `web/public/grids` |
-| `keycloak` | `infra/keycloak/` (Keycloak 26.8.1, tema e realm `linhazero`) | — | O login, em https://account.linhazero.localhost; base própria `keycloak` no mesmo Postgres |
+| `keycloak` | `infra/keycloak/` (Keycloak 26.8.1, tema e realm `linhazero`) | — | O login, em https://account.linhazero.localhost; base própria `keycloak` no mesmo Postgres; envia os emails (convites, recuperação de palavra-passe) |
+| `mailpit` | `axllent/mailpit:v1.31.3` | 127.0.0.1:8025 | Caixa de correio falsa: recebe todos os emails do Keycloak, para os ver em http://localhost:8025. No cluster usa-se um serviço de email a sério |
 | `postgres` | `postgres:16.12-alpine` | 5432 | `snapshots`, `source_status`, `runs`, `run_rasters`, `users`, `data_protection_keys`, e a base `keycloak` (`infra/db/*`, aplicado quando o volume `pgdata` está vazio) |
 | `nats` | `nats:2.10.29-alpine` (JetStream) | 4222, 8222 (monitor) | Stream `RUNS` = `runs.jobs` (fila de trabalho); eventos `runs.<id>.events` em NATS core |
 | `ingest` | `backend/src/LinhaZero.Ingest` (.NET 10) | 127.0.0.1:8081 | Recolhe IPMA, Open-Meteo e fogos.pt em intervalos fixos; um líder por advisory lock; `GET /health/ready` |
@@ -51,6 +52,8 @@ A ingestão faz **um** pedido ao fogos.pt a cada 2 minutos e respeita o `Retry-A
 | `OIDC_CLIENT_SECRET` | `dev-secret-change-me` | O segredo do cliente `linhazero-app`, o mesmo no Keycloak e na API |
 | `KEYCLOAK_DB_PASSWORD` | `keycloak` | Senha do utilizador `keycloak` (base `keycloak`) |
 | `KC_BOOTSTRAP_ADMIN_PASSWORD` | `admin` | Senha do `admin` da consola do Keycloak (realm `master`); só conta no primeiro arranque |
+| `KEYCLOAK_ADMIN_CLIENT_SECRET` | `dev-admin-secret-change-me` | O segredo do cliente `linhazero-api-admin`, com que a API cria as contas dos pedidos aprovados; o mesmo no Keycloak e na API |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM`, `SMTP_AUTH`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_STARTTLS`, `SMTP_SSL` | Mailpit | O servidor de email do Keycloak. Por omissão o Mailpit local; para enviar emails a sério, os dados de um serviço como o Brevo (ver `infra/.env.example`) |
 | `INGEST_INTERVAL_<FONTE>` | 10, 10, 60, 1440, 1440, 15, 2 | Minutos entre recolhas: `IPMA_OBSERVATIONS`, `IPMA_WARNINGS`, `IPMA_RCM_D0`, `IPMA_STATIONS`, `IPMA_DISTRICTS`, `OPEN_METEO`, `FOGOS_ACTIVE` |
 
 Todos os serviços leem a ligação ao Postgres das variáveis libpq (`PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`), definidas no compose; o worker lê `NATS_URL` e `GRIDS_DIR`; a API lê `OIDC_AUTHORITY`, `OIDC_METADATA_ADDRESS`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` e `LANDING_URL`.
@@ -108,11 +111,11 @@ O Chrome, o Edge, o Firefox e o curl resolvem `*.localhost` sozinhos, em qualque
 - `infra/dev-login.sh` e `infra/smoke.sh` são scripts bash: correm no Git Bash ou no WSL, não no PowerShell.
 - Os scripts que correm dentro dos contentores (`*.sh`) têm de ficar com fins de linha LF; o `.gitattributes` garante-o. Quem clonou antes dessa regra e vê `set: illegal option -` no log do Postgres: `git rm --cached -r . -q; git reset --hard` (com o trabalho guardado antes).
 
-**Dar acesso a alguém** (não há registo público): na consola, realm `linhazero` → Users → Create user (email como nome de utilizador), depois Credentials → Set password com "Temporary" ligado; no primeiro login a pessoa escolhe a sua.
+**Dar acesso a alguém** (não há registo público): a pessoa usa "Pedir acesso" na landing; quem tem o papel `linhazero-admin` aprova o pedido na aplicação (iniciais → "Pedidos de acesso"), o que cria a conta e envia o convite por email. O percurso completo está no [README](../README.md#pedir-acesso-e-criar-contas) e o porquê na [ADR 0062](../docs/decisoes/0062-pedidos-de-acesso-e-convites-por-email.md). A API aceita no máximo 5 pedidos por hora de cada endereço (`ACCESS_REQUESTS_PER_HOUR`). Também se pode criar uma conta à mão na consola (Users → Create user → Credentials → Set password com "Temporary" ligado).
 
 **Com curl:** `infra/dev-login.sh /tmp/lz.jar` faz o login e deixa o cookie no ficheiro; depois `curl -k -b /tmp/lz.jar -H 'X-LinhaZero: 1' https://app.linhazero.localhost/api/v1/...`. Todos os pedidos que não são GET precisam desse cabeçalho (proteção contra CSRF).
 
-**Mudar o realm:** `infra/keycloak/linhazero-realm.json` só é importado quando o realm ainda não existe. Num realm existente, muda-se na consola, ou apaga-se a base `keycloak` para o importar de novo.
+**Mudar o realm:** `infra/keycloak/linhazero-realm.json` só é importado quando o realm ainda não existe. Localmente, depois de o mudar (ou de puxar uma mudança), refazer a base do Keycloak com o passo 3 do [README](../README.md#primeira-vez). No cluster, com contas reais, muda-se na consola.
 
 ## Escalar
 

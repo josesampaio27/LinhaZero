@@ -39,21 +39,34 @@ Import-Certificate -FilePath "$env:TEMP\caddy-root.crt" -CertStoreLocation Cert:
 
 No Firefox, se o aviso continuar: `about:config` → `security.enterprise_roots.enabled` → `true`. O Safari não abre `*.localhost`; usar o Chrome, o Edge ou o Firefox (ou ver as notas em [Login](infra/README.md#login-keycloak)).
 
-**3. Só para quem já tinha corrido o projeto antes do login.** A base de dados antiga não tem as tabelas novas nem a base do Keycloak, e sem elas o "Entrar" dá erro. Os mesmos comandos no Terminal e no PowerShell:
+**3. Só para quem já tinha a base de dados de antes.** Os scripts de `infra/db/` só correm numa base vazia, por isso uma base antiga não tem as tabelas novas, e o Keycloak só lê a configuração do repositório (`infra/keycloak/linhazero-realm.json`) quando a sua base está vazia. Estes comandos põem tudo em dia sem perder os dados da aplicação (as contas criadas no Keycloak perdem-se; o utilizador de teste volta). Os mesmos comandos no Terminal e no PowerShell; repetir sempre que um destes ficheiros mudar:
 
 ```bash
-docker compose cp infra/db/000_keycloak.sh postgres:/tmp/000_keycloak.sh
-docker compose exec -e KEYCLOAK_DB_PASSWORD=keycloak -e POSTGRES_USER=dois -e POSTGRES_DB=dois postgres sh /tmp/000_keycloak.sh
-docker compose cp infra/db/002_users.sql postgres:/tmp/002_users.sql
-docker compose exec postgres psql -U dois -d dois -f /tmp/002_users.sql
+docker compose stop keycloak
+docker compose exec postgres psql -U dois -d dois -c "drop database if exists keycloak"
+docker compose cp infra/db/. postgres:/tmp/db/
+docker compose exec -e KEYCLOAK_DB_PASSWORD=keycloak -e POSTGRES_USER=dois -e POSTGRES_DB=dois postgres sh /tmp/db/000_keycloak.sh
+docker compose exec postgres psql -U dois -d dois -f /tmp/db/002_users.sql -f /tmp/db/003_access_requests.sql
 docker compose up -d --build
+docker compose restart api   # esquece as chaves do Keycloak antigo
 ```
 
 Em alternativa, quem não precisa dos dados antigos começa do zero: `docker compose down -v` e depois `docker compose up -d --build`.
 
-**4. Abrir.** **https://linhazero.localhost** → "Entrar", com o utilizador de teste `dev@linhazero.localhost` / `linhazero-dev`. Os cenários de demonstração abrem sem login. O Keycloak demora um minuto a ficar pronto depois de arrancar: se o "Entrar" der erro logo no início, esperar e tentar de novo.
+**4. Abrir.** **https://linhazero.localhost** → "Entrar", com o utilizador de teste `dev@linhazero.localhost` / `linhazero-dev` (é administrador: vê os pedidos de acesso). Os cenários de demonstração abrem sem login. O Keycloak demora um minuto a ficar pronto depois de arrancar: se o "Entrar" der erro logo no início, esperar e tentar de novo.
 
-No Windows, se o passo 1 disser que as portas 80 ou 443 estão ocupadas, `netstat -ano | findstr ":80 :443"` mostra que programa as usa. Mais detalhes (dar acesso a outras pessoas, consola de administração, `npm run dev`) em [Login](infra/README.md#login-keycloak).
+Os emails (convites, recuperação de palavra-passe) não saem do computador: vão para uma caixa de correio falsa, em **http://localhost:8025**.
+
+No Windows, se o passo 1 disser que as portas 80 ou 443 estão ocupadas, `netstat -ano | findstr ":80 :443"` mostra que programa as usa. Mais detalhes (pedidos de acesso, consola de administração, `npm run dev`) em [Login](infra/README.md#login-keycloak).
+
+### Pedir acesso e criar contas
+
+1. Na landing, **"Pedir acesso"** abre um formulário (nome, email, entidade, tipo, mensagem). O pedido fica guardado.
+2. Quem administra (papel `linhazero-admin` no Keycloak) vê-o na aplicação: as iniciais no canto → **"Pedidos de acesso"**.
+3. **"Aprovar e enviar convite"** cria a conta no Keycloak e envia à pessoa um email com uma ligação para escolher a palavra-passe (válida 7 dias). **"Recusar"** só marca o pedido; não envia email.
+4. A pessoa escolhe a palavra-passe e entra. Se a esquecer, "Esqueceu-se da palavra-passe?" na página de login envia uma ligação nova.
+
+Para tornar alguém administrador: consola do Keycloak (https://account.linhazero.localhost/admin, `admin` / `admin`) → realm `linhazero` → Users → a pessoa → Role mapping → Assign role → `linhazero-admin`. A pessoa tem de sair e entrar de novo.
 
 ### O que arranca
 
@@ -66,7 +79,8 @@ No Windows, se o passo 1 disser que as portas 80 ou 443 estão ocupadas, `netsta
 | `api` | API REST + SSE (.NET 10); documentação interativa (Swagger UI) | https://app.linhazero.localhost/api/docs |
 | `ingest` | Recolhe o tempo (IPMA, Open-Meteo) e as ocorrências (fogos.pt) | 127.0.0.1:8081 |
 | `engine-worker` | Corre o motor para os ensembles pedidos ao servidor | — |
-| `postgres` | Base de dados: snapshots das fontes e corridas | 127.0.0.1:5432 |
+| `mailpit` | Caixa de correio falsa: mostra os emails que o Keycloak envia | http://localhost:8025 |
+| `postgres` | Base de dados: snapshots das fontes, corridas, utilizadores e pedidos de acesso | 127.0.0.1:5432 |
 | `nats` | Fila de trabalho entre a API e os workers | 127.0.0.1:4222 |
 
 Com tudo a correr, o tempo vem em direto do IPMA e do Open-Meteo, as ocorrências do fogos.pt aparecem nos mapas e a incerteza pode correr "no servidor (200)" em vez de "no browser (30)". Se o servidor falhar a meio, a interface volta ao browser sozinha.

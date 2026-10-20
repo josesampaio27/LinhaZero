@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using LinhaZero.Api.Auth;
 using LinhaZero.Api.Controllers;
+using LinhaZero.Api.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
@@ -26,6 +27,8 @@ public sealed class ApiFactory : WebApplicationFactory<HealthController>
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
         builder.UseSetting("GRIDS_DIR", RepoGrids());
+        builder.UseSetting("CORS_ORIGINS", LandingOrigin);
+        builder.UseSetting("ACCESS_REQUESTS_PER_HOUR", "1000"); // AccessRequestsHttpTests checks the real limit on its own
         builder.ConfigureServices(services =>
         {
             services.AddSingleton(_ => Pg.CreateDataSource("Host=127.0.0.1;Port=1;Username=x;Password=x;Database=x;Timeout=2"));
@@ -37,6 +40,7 @@ public sealed class ApiFactory : WebApplicationFactory<HealthController>
             services.AddSingleton<IDataProtectionProvider>(new EphemeralDataProtectionProvider());
             services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, TestUser>(TestUser.SchemeName, _ => { });
             services.Configure<AuthenticationOptions>(auth => auth.DefaultAuthenticateScheme = TestUser.SchemeName);
+            services.AddSingleton<IKeycloakAdmin, FakeKeycloakAdmin>();
         });
     }
 
@@ -45,6 +49,16 @@ public sealed class ApiFactory : WebApplicationFactory<HealthController>
         base.ConfigureClient(client);
         client.DefaultRequestHeaders.Add(TestUser.Header, "Utilizador de teste");
         client.DefaultRequestHeaders.Add(AuthSetup.CsrfHeader, "1");
+    }
+
+    public const string LandingOrigin = "https://landing.linhazero.test";
+
+    /// <summary>Signed in with the admin role (linhazero-admin).</summary>
+    public HttpClient CreateAdminClient()
+    {
+        var client = CreateClient();
+        client.DefaultRequestHeaders.Add(TestUser.RolesHeader, "linhazero-admin");
+        return client;
     }
 
     /// <summary>No session and no CSRF header; redirects are returned, not followed.</summary>
@@ -75,6 +89,7 @@ public sealed class TestUser(IOptionsMonitor<AuthenticationSchemeOptions> option
 {
     public const string SchemeName = "Test";
     public const string Header = "X-Test-User";
+    public const string RolesHeader = "X-Test-Roles";
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
@@ -83,7 +98,20 @@ public sealed class TestUser(IOptionsMonitor<AuthenticationSchemeOptions> option
             return Task.FromResult(AuthenticateResult.NoResult());
         }
 
-        var identity = new ClaimsIdentity([new Claim("name", name), new Claim("email", "teste@linhazero.localhost")], SchemeName, "name", "role");
+        var roles = Request.Headers[RolesHeader].ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(r => new Claim("role", r.Trim()));
+        var identity = new ClaimsIdentity([new Claim("name", name), new Claim("email", "teste@linhazero.localhost"), .. roles], SchemeName, "name", "role");
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName)));
+    }
+}
+
+/// <summary>Keycloak's admin API, for tests: records the invites instead of sending them.</summary>
+public sealed class FakeKeycloakAdmin : IKeycloakAdmin
+{
+    public List<string> Invited { get; } = [];
+
+    public Task<string> InviteAsync(string email, string name, CancellationToken ct)
+    {
+        Invited.Add(email);
+        return Task.FromResult(Guid.NewGuid().ToString());
     }
 }

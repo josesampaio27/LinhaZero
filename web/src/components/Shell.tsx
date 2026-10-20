@@ -40,13 +40,9 @@ export function Shell<T extends string>({ title, menu, stage, tabs, tab, onTab, 
           <span title={title}>{title}</span>
         </span>
         <SignIn />
+        <AccountMenu />
         <Popover icon="menu" label="Menu" className="menu">
-          {(close) => (
-            <>
-              {menu(close)}
-              <Account />
-            </>
-          )}
+          {menu}
         </Popover>
       </header>
       <div className="stage">{stage}</div>
@@ -90,36 +86,57 @@ function SignIn() {
   );
 }
 
-/** Who is signed in, at the foot of the menu: the account (on account.<domain>) and logging out. */
-function Account() {
+/** "UT" for "Utilizador de teste": the first letters of the first and last words. */
+export function initials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (words.length === 0) return "?";
+  const first = words[0][0];
+  const last = words.length > 1 ? words[words.length - 1][0] : "";
+  return (first + last).toUpperCase();
+}
+
+/** The signed-in person's initials in the app bar; opens who it is, the account (on account.<domain>) and "Sair". */
+function AccountMenu() {
   const session = useSession();
   if (session.state !== "signed-in") return null;
-  const { name, email } = session.me;
+  const { name, email, isAdmin } = session.me;
   return (
-    <div className="account">
-      <p>
-        <b>{name}</b>
-        {email && email !== name && <span>{email}</span>}
-      </p>
-      <a className="button menu-item" href={ACCOUNT_URL}>
-        Conta
-      </a>
-      <button className="menu-item" onClick={() => void logout()}>
-        Sair
-      </button>
-    </div>
+    <Popover label={`Conta de ${name}`} face={<span className="avatar">{initials(name)}</span>} className="account-menu">
+      {(close) => (
+        <div className="account">
+          <p>
+            <b>{name}</b>
+            {email && email !== name && <span>{email}</span>}
+          </p>
+          {isAdmin && (
+            <a className="button menu-item" href="#/pedidos" onClick={close}>
+              Pedidos de acesso
+            </a>
+          )}
+          <a className="button menu-item" href={ACCOUNT_URL}>
+            Conta
+          </a>
+          <button className="menu-item" onClick={() => void logout()}>
+            Sair
+          </button>
+        </div>
+      )}
+    </Popover>
   );
 }
 
-/** An icon button that opens a floating panel; a tap outside closes it. */
+/** An icon button (or `face`, e.g. initials) that opens a floating panel; a tap outside closes it. */
 export function Popover({
-  icon,
+  icon = "menu",
+  face,
   label,
   badge,
   className = "",
   children,
 }: {
-  icon: IconName;
+  icon?: IconName;
+  /** Shown instead of the icon while closed. */
+  face?: ReactNode;
   label: string;
   badge?: number;
   className?: string;
@@ -143,7 +160,7 @@ export function Popover({
   return (
     <div className={`popover ${className}`}>
       <button ref={trigger} className="icon-btn" aria-label={label} title={label} aria-expanded={open} onClick={() => setOpen(!open)}>
-        <Icon name={open ? "close" : icon} />
+        {open || !face ? <Icon name={open ? "close" : icon} /> : face}
         {!!badge && <span className="badge">{badge}</span>}
       </button>
       {open && (

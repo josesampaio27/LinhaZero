@@ -35,6 +35,25 @@ spec:
               valueFrom: { secretKeyRef: { name: linhazero-secrets, key: OIDC_CLIENT_SECRET } }
             - { name: OIDC_EXTRA_REDIRECT_URI, value: "https://app.$(LZ_DOMAIN)/api/auth/callback" }
             - { name: OIDC_EXTRA_POST_LOGOUT_URI, value: "https://landing.$(LZ_DOMAIN)/" }
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: KEYCLOAK_ADMIN_CLIENT_SECRET } }
+            # Email (realm import): invites and forgotten passwords.
+            - name: SMTP_HOST
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_HOST } }
+            - name: SMTP_PORT
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_PORT } }
+            - name: SMTP_FROM
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_FROM } }
+            - name: SMTP_USER
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_USER } }
+            - name: SMTP_AUTH
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_AUTH } }
+            - name: SMTP_STARTTLS
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_STARTTLS } }
+            - name: SMTP_SSL
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_SSL } }
+            - name: SMTP_PASSWORD
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: SMTP_PASSWORD } }
           ports:
             - { name: http, containerPort: 8080 }
             - { name: management, containerPort: 9000 }

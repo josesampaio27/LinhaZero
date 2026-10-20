@@ -39,6 +39,13 @@ spec:
             - name: OIDC_CLIENT_SECRET
               valueFrom: { secretKeyRef: { name: linhazero-secrets, key: OIDC_CLIENT_SECRET } }
             - { name: LANDING_URL, value: "https://landing.$(LZ_DOMAIN)/" }
+            - { name: APP_URL, value: "https://app.$(LZ_DOMAIN)/" }
+            # "Pedir acesso": the landing's origins, and the API's own Keycloak client that creates approved accounts.
+            - { name: CORS_ORIGINS, value: "https://landing.$(LZ_DOMAIN),https://$(LZ_DOMAIN)" }
+            - { name: KEYCLOAK_URL, value: "http://keycloak:8080" }
+            - { name: KEYCLOAK_ADMIN_CLIENT_ID, value: linhazero-api-admin }
+            - name: KEYCLOAK_ADMIN_CLIENT_SECRET
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: KEYCLOAK_ADMIN_CLIENT_SECRET } }
           ports:
             - { name: http, containerPort: 8080 }
           readinessProbe:

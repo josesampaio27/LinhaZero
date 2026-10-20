@@ -1,6 +1,8 @@
 using System.Security.Claims;
+using System.Threading.RateLimiting;
 using LinhaZero.Api.Models;
 using LinhaZero.Api.Repositories;
+using LinhaZero.Api.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -28,6 +30,20 @@ public static class AuthSetup
 
     /// <summary>The claim with our own users.id (infra/db/002_users.sql), set at login.</summary>
     public const string UserIdClaim = "lz_user";
+
+    /// <summary>The Keycloak realm role of the people who answer access requests (docs/decisoes/0062).</summary>
+    public const string AdminRole = "linhazero-admin";
+
+    public const string AdminPolicy = "admin";
+
+    /// <summary>The CORS policy that lets the landing (another subdomain) post an access request.</summary>
+    public const string LandingCors = "landing";
+
+    /// <summary>The rate limit on access requests: ACCESS_REQUESTS_PER_HOUR (5 by default) from one address.</summary>
+    public const string AccessRequestLimit = "access-requests";
+
+    /// <summary>Our users.id for the signed-in person (null for the test user, who is not in the table).</summary>
+    public static Guid? UserId(ClaimsPrincipal user) => Guid.TryParse(user.FindFirst(UserIdClaim)?.Value, out var id) ? id : null;
 
     /// <summary>The id_token, handed from the logout action to the sign-out redirect below.</summary>
     public const string IdTokenItem = "lz.id_token";
@@ -109,6 +125,8 @@ public static class AuthSetup
                 oidc.GetClaimsFromUserInfoEndpoint = false;
                 oidc.SaveTokens = false;
                 oidc.TokenValidationParameters.NameClaimType = "name";
+                // When Keycloak's signing keys change (rotation, a reset realm), fetch them again after 30 s, not 5 min.
+                oidc.RefreshInterval = TimeSpan.FromSeconds(30);
 
                 oidc.Events.OnTokenValidated = async context =>
                 {
@@ -129,6 +147,8 @@ public static class AuthSetup
                             new Claim("sub", subject),
                             new Claim("name", name),
                             .. email is null ? Array.Empty<Claim>() : [new Claim("email", email)],
+                            // Realm roles (the "roles" claim of the client's mapper): read again at each login.
+                            .. principal.FindAll("roles").Select(role => new Claim("role", role.Value)),
                         ],
                         context.Principal!.Identity!.AuthenticationType,
                         "name",
@@ -166,16 +186,42 @@ public static class AuthSetup
 
         // Every endpoint needs a session unless it says [AllowAnonymous].
         services.AddAuthorizationBuilder()
-            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build())
+            .AddPolicy(AdminPolicy, policy => policy.RequireAuthenticatedUser().RequireRole(AdminRole));
+
+        // The landing posts access requests from its own subdomain: only its origins, only that endpoint.
+        var landingOrigins = (config["CORS_ORIGINS"] ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        services.AddCors(cors => cors.AddPolicy(LandingCors, policy =>
+            policy.WithOrigins(landingOrigins).WithMethods("POST").WithHeaders("content-type", CsrfHeader)));
+
+        var perHour = int.TryParse(config["ACCESS_REQUESTS_PER_HOUR"], out var limit) && limit > 0 ? limit : 5;
+        services.AddRateLimiter(limiter =>
+        {
+            limiter.AddPolicy(AccessRequestLimit, context => RateLimitPartition.GetFixedWindowLimiter(
+                context.Connection.RemoteIpAddress?.ToString() ?? "?",
+                _ => new FixedWindowRateLimiterOptions { PermitLimit = perHour, Window = TimeSpan.FromHours(1) }));
+            limiter.OnRejected = (context, _) =>
+                new ValueTask(WriteError(context.HttpContext.Response, StatusCodes.Status429TooManyRequests, "Demasiados pedidos. Tente mais tarde."));
+        });
 
         services.AddSingleton<UserRepository>();
+        services.AddSingleton<AccessRequestRepository>();
+        services.Configure<KeycloakAdminOptions>(keycloak =>
+        {
+            keycloak.BaseUrl = config["KEYCLOAK_URL"] ?? keycloak.BaseUrl;
+            keycloak.ClientId = config["KEYCLOAK_ADMIN_CLIENT_ID"] ?? keycloak.ClientId;
+            keycloak.ClientSecret = config["KEYCLOAK_ADMIN_CLIENT_SECRET"];
+            keycloak.AppUrl = config["APP_URL"] ?? keycloak.AppUrl;
+        });
+        services.AddHttpClient<IKeycloakAdmin, KeycloakAdmin>(http => http.Timeout = TimeSpan.FromSeconds(20));
         return services;
     }
 
-    /// <summary>Forwarded headers, the CSRF check, then authentication and authorization, in that order.</summary>
+    /// <summary>Forwarded headers, CORS, the CSRF check, authentication, authorization and rate limits, in that order.</summary>
     public static WebApplication UseLinhaZeroAuth(this WebApplication app)
     {
         app.UseForwardedHeaders();
+        app.UseCors();
         app.Use(async (context, next) =>
         {
             var request = context.Request;
@@ -192,6 +238,7 @@ public static class AuthSetup
         });
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseRateLimiter();
         return app;
     }
 
