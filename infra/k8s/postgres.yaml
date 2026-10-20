@@ -30,7 +30,7 @@ spec:
             periodSeconds: 5
           resources:
             requests: { cpu: 100m, memory: 256Mi }
-            limits: { memory: 1Gi }
+            limits: { cpu: 1000m, memory: 1Gi }
           volumeMounts:
             - { name: data, mountPath: /var/lib/postgresql/data }
             - { name: init, mountPath: /docker-entrypoint-initdb.d, readOnly: true }
