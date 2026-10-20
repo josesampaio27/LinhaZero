@@ -2,9 +2,9 @@ name: Images
 
 # Builds the images the cluster runs (infra/k8s) and pushes them to GitHub's registry as
 # ghcr.io/<owner>/linhazero-<name>, tagged `main` and with the commit sha.
-# Repository variables (Settings → Secrets and variables → Actions → Variables):
-#   LZ_DOMAIN        the domain of landing., app. and account. (built into the web pages)
-#   IMAGE_PLATFORMS  optional; linux/amd64 by default, "linux/amd64,linux/arm64" for ARM nodes (slower, emulated)
+# The images hold no domain: the pages work out app./account. from their own address, and the servers read it from
+# the cluster's config (infra/k8s/config.env). Optional repository variable (Settings → Secrets and variables →
+# Actions → Variables): IMAGE_PLATFORMS, linux/amd64 by default; "linux/amd64,linux/arm64" for ARM nodes (slower).
 
 on:
   push:
@@ -34,11 +34,9 @@ jobs:
           - name: web
             context: .
             file: web/Dockerfile
-            args: VITE_ACCOUNT_URL=https://account.${LZ_DOMAIN}/realms/linhazero/account
           - name: landing
             context: .
             file: landing/Dockerfile
-            args: VITE_APP_URL=https://app.${LZ_DOMAIN}/
           - name: keycloak
             context: infra/keycloak
             file: infra/keycloak/Dockerfile
@@ -54,19 +52,10 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      - name: Build arguments
-        id: args
-        env:
-          LZ_DOMAIN: ${{ vars.LZ_DOMAIN }}
-          ARGS: ${{ matrix.args }}
-        run: |
-          if [ -n "$ARGS" ] && [ -z "$LZ_DOMAIN" ]; then echo "Falta a variável LZ_DOMAIN do repositório" >&2; exit 1; fi
-          { echo "list<<EOF"; echo "$ARGS" | envsubst; echo "EOF"; } >> "$GITHUB_OUTPUT"
       - uses: docker/build-push-action@v6
         with:
           context: ${{ matrix.context }}
           file: ${{ matrix.file }}
-          build-args: ${{ steps.args.outputs.list }}
           platforms: ${{ vars.IMAGE_PLATFORMS || 'linux/amd64' }}
           push: true
           tags: |

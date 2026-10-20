@@ -19,8 +19,8 @@ O domínio tem de usar a DNS da Cloudflare (plano gratuito): adicioná-lo à con
 
 O workflow [`images.yml`](../../.github/workflows/images.yml) constrói as sete imagens e publica-as em `ghcr.io/<dono>/linhazero-<nome>`, com as etiquetas `main` e o sha do commit, a cada push para `main`.
 
-1. No GitHub, Settings → Secrets and variables → Actions → **Variables**: `LZ_DOMAIN` = o domínio (fica dentro das páginas compiladas). Para nós ARM, `IMAGE_PLATFORMS` = `linux/amd64,linux/arm64`.
-2. Correr o workflow (Actions → Images → Run workflow).
+1. As imagens não levam o domínio: as páginas descobrem `app.` e `account.` a partir do seu próprio endereço, e a API e o Keycloak leem-no do `config.env` (passo 4). Só para nós ARM: no GitHub, Settings → Secrets and variables → Actions → **Variables**, `IMAGE_PLATFORMS` = `linux/amd64,linux/arm64`.
+2. O workflow corre sozinho a cada push para `main`; para correr já: Actions → Images → Run workflow.
 3. Os pacotes do GHCR nascem privados. Ou se tornam públicos (Packages → cada pacote → Package settings), ou o cluster recebe uma credencial (um *token* clássico com `read:packages`):
 
    ```bash

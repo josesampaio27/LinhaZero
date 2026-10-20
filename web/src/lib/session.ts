@@ -14,10 +14,26 @@ export type Session =
 /** The CSRF header every non-GET call carries (the API refuses those without it). */
 export const CSRF_HEADER = { "X-LinhaZero": "1" };
 
-/** Profile, password and two-step login, on account.<domain> (Keycloak). */
+/** Outside a browser (the unit tests run in Node) there is no page address. */
+const NO_PAGE = { protocol: "https:", hostname: "" };
+
+/**
+ * Profile, password and two-step login, on account.<domain> (Keycloak), next to this app.<domain>; worked out in the
+ * browser so one build serves any domain. VITE_ACCOUNT_URL overrides it; `npm run dev` gets the local one.
+ */
 export const ACCOUNT_URL =
   (import.meta.env.VITE_ACCOUNT_URL as string | undefined) ??
-  "https://account.linhazero.localhost/realms/linhazero/account";
+  accountNextToApp(globalThis.location ?? NO_PAGE);
+
+export function accountNextToApp({
+  protocol,
+  hostname,
+}: Pick<Location, "protocol" | "hostname">): string {
+  const domain = hostname.startsWith("app.")
+    ? hostname.slice("app.".length)
+    : "linhazero.localhost";
+  return `${hostname.startsWith("app.") ? protocol : "https:"}//account.${domain}/realms/linhazero/account`;
+}
 
 /**
  * The demo opens without login (docs/plano/landing.md): a scenario link or ?demo. Everything else needs a session; an

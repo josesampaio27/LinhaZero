@@ -129,8 +129,6 @@ services:
     build:
       context: ..
       dockerfile: web/Dockerfile
-      args:
-        VITE_ACCOUNT_URL: https://account.${LZ_DOMAIN:-linhazero.localhost}/realms/linhazero/account
     restart: unless-stopped
     volumes:
       - ../web/public/grids:/usr/share/nginx/html/grids:ro
@@ -141,8 +139,6 @@ services:
     build:
       context: ..
       dockerfile: landing/Dockerfile
-      args:
-        VITE_APP_URL: https://app.${LZ_DOMAIN:-linhazero.localhost}/
     restart: unless-stopped
     volumes:
       - ../web/public/grids:/usr/share/nginx/html/grids:ro

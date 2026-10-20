@@ -13,9 +13,6 @@ COPY engine/src engine/src
 COPY engine/tsconfig.json engine/
 COPY web/src web/src
 COPY landing/ landing/
-# Where "Entrar" and the demo go (landing/src/components/Hero.tsx); set per environment from LZ_DOMAIN.
-ARG VITE_APP_URL
-ENV VITE_APP_URL=$VITE_APP_URL
 RUN rm -rf landing/public/grids && npm run build -w landing
 
 FROM nginxinc/nginx-unprivileged:1.28.0-alpine

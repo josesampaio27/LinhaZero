@@ -2,8 +2,16 @@ import { lazy, Suspense, useEffect, useRef, useState } from "react";
 
 const HeroMap = lazy(() => import("./HeroMap"));
 
-/** The interface. Set VITE_APP_URL when the two are served apart. */
-export const APP_URL = (import.meta.env.VITE_APP_URL as string | undefined) ?? "/app/";
+/**
+ * The interface: app.<domain> next to this page (landing.<domain> or <domain>), worked out in the browser so one build
+ * serves any domain. VITE_APP_URL overrides it; on localhost (`npm run dev:landing`) it is /app/.
+ */
+export const APP_URL = (import.meta.env.VITE_APP_URL as string | undefined) ?? appNextToLanding(globalThis.location ?? { protocol: "https:", hostname: "localhost" });
+
+export function appNextToLanding({ protocol, hostname }: Pick<Location, "protocol" | "hostname">): string {
+  if (hostname === "localhost" || /^[\d.:[\]]+$/.test(hostname)) return "/app/";
+  return `${protocol}//app.${hostname.replace(/^landing\./, "")}/`;
+}
 /** The demonstration scenario, which opens without login. Set VITE_DEMO_URL when it moves. */
 export const DEMO_URL = (import.meta.env.VITE_DEMO_URL as string | undefined) ?? `${APP_URL}?demo`;
 /** The login: the app's API sends the browser to Keycloak (account.<domain>) and back into the app. */
