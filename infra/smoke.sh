@@ -6,7 +6,14 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 COMPOSE="docker compose"
-API=http://localhost:8080/api/v1
+APP=https://app.${LZ_DOMAIN:-linhazero.localhost}
+API=$APP/api/v1
+# Every curl below goes through the proxy with the session of infra/dev-login.sh and the CSRF header (via .curlrc).
+CURL_HOME=$(mktemp -d)
+export CURL_HOME
+trap 'rm -rf "$CURL_HOME"' EXIT
+JAR=$CURL_HOME/jar
+printf 'insecure\ncookie = "%s"\nheader = "X-LinhaZero: 1"\n' "$JAR" > "$CURL_HOME/.curlrc"
 PSQL="$COMPOSE exec -T postgres psql -U dois -tA -c"
 
 step() { printf '\n== %s\n' "$*"; }
@@ -28,6 +35,13 @@ fi
 step "2. readiness"
 wait_for 120 "api com idleWorkers >= 1" bash -c "curl -sf $API/health | grep -q '\"idleWorkers\":[1-9]'"
 curl -s "$API/health"; echo
+
+step "2b. login (Keycloak) and what needs it"
+[[ $(curl -q -sk -o /dev/null -w '%{http_code}' "$API/me") == 401 ]] || fail "sem sessão, /me devia dar 401"
+[[ $(curl -q -sk -o /dev/null -w '%{http_code}' -X POST -H 'content-type: application/json' -d '{}' "$API/runs") == 403 ]] \
+  || fail "POST sem o cabeçalho X-LinhaZero devia dar 403"
+wait_for 120 "keycloak" bash -c "curl -sf https://account.${LZ_DOMAIN:-linhazero.localhost}/realms/linhazero/.well-known/openid-configuration > /dev/null"
+infra/dev-login.sh "$JAR"
 wait_for 60 "ingest líder" bash -c "curl -sf http://127.0.0.1:8081/health/ready | grep -q '\"leader\":true'"
 curl -s http://127.0.0.1:8081/health/ready; echo
 
@@ -44,7 +58,7 @@ echo "runId $ID"
 
 step "5. SSE until done"
 # sed quits at "done"; curl's SIGPIPE must not trip pipefail.
-EVENTS=$( (timeout 120 curl -sN "$API/runs/$ID/events" || true) | sed '/^event: done/q')
+EVENTS=$( (curl -sN --max-time 120 "$API/runs/$ID/events" || true) | sed '/^event: done/q')
 printf '%s\n' "$EVENTS"
 grep -q '^event: done' <<<"$EVENTS" || fail "sem evento done"
 [[ "$(status_of "$ID")" == done ]] || fail "estado final não é done"

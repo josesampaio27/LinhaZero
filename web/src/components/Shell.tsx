@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Icon, Mark, type IconName } from "./Icon";
+import { ACCOUNT_URL, loginUrl, logout, useSession } from "../lib/session";
 
 export interface Tab<T extends string> {
   id: T;
@@ -38,8 +39,14 @@ export function Shell<T extends string>({ title, menu, stage, tabs, tab, onTab, 
           </b>
           <span title={title}>{title}</span>
         </span>
+        <SignIn />
         <Popover icon="menu" label="Menu" className="menu">
-          {menu}
+          {(close) => (
+            <>
+              {menu(close)}
+              <Account />
+            </>
+          )}
         </Popover>
       </header>
       <div className="stage">{stage}</div>
@@ -68,6 +75,38 @@ export function Shell<T extends string>({ title, menu, stage, tabs, tab, onTab, 
         <div className="sheet-body">{children}</div>
         {footer && <div className="sheet-foot">{footer}</div>}
       </section>
+    </div>
+  );
+}
+
+/** "Entrar" in the app bar when nobody is signed in (the demo opens without login). */
+function SignIn() {
+  const session = useSession();
+  if (session.state !== "anonymous") return null;
+  return (
+    <a className="button signin" href={loginUrl()}>
+      Entrar
+    </a>
+  );
+}
+
+/** Who is signed in, at the foot of the menu: the account (on account.<domain>) and logging out. */
+function Account() {
+  const session = useSession();
+  if (session.state !== "signed-in") return null;
+  const { name, email } = session.me;
+  return (
+    <div className="account">
+      <p>
+        <b>{name}</b>
+        {email && email !== name && <span>{email}</span>}
+      </p>
+      <a className="button menu-item" href={ACCOUNT_URL}>
+        Conta
+      </a>
+      <button className="menu-item" onClick={() => void logout()}>
+        Sair
+      </button>
     </div>
   );
 }

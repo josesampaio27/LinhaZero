@@ -1,0 +1,85 @@
+/* LinhaZero on top of Keycloak's PatternFly 5 login: the landing's tokens (landing/src/index.css), dark only. */
+@font-face { font-family: "Barlow"; font-weight: 400; font-display: swap; src: url("../fonts/barlow-400.woff2") format("woff2"); }
+@font-face { font-family: "Barlow"; font-weight: 500; font-display: swap; src: url("../fonts/barlow-500.woff2") format("woff2"); }
+@font-face { font-family: "Barlow Condensed"; font-weight: 700; font-display: swap; src: url("../fonts/barlow-condensed-700.woff2") format("woff2"); }
+
+:root {
+  --lz-bg: #111615;
+  --lz-panel: #192120;
+  --lz-raised: #1f2927;
+  --lz-ink: #e5ebe8;
+  --lz-muted: #a3afaa;
+  --lz-line: #2b3533;
+  --lz-a: #0b7782;
+  --lz-a-light: #3db6c1;
+  --lz-danger: #f0605f;
+
+  color-scheme: dark;
+  --pf-v5-global--FontFamily--text: "Barlow", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --pf-v5-global--FontFamily--heading: "Barlow Condensed", "Arial Narrow", sans-serif;
+  --pf-v5-global--Color--100: var(--lz-ink);
+  --pf-v5-global--Color--200: var(--lz-muted);
+  --pf-v5-global--BackgroundColor--100: var(--lz-panel);
+  --pf-v5-global--BackgroundColor--200: var(--lz-bg);
+  --pf-v5-global--BorderColor--100: var(--lz-line);
+  --pf-v5-global--BorderColor--200: var(--lz-line);
+  --pf-v5-global--primary-color--100: var(--lz-a);
+  --pf-v5-global--primary-color--200: var(--lz-a-light);
+  --pf-v5-global--link--Color: var(--lz-a-light);
+  --pf-v5-global--link--Color--hover: var(--lz-ink);
+  --pf-v5-global--danger-color--100: var(--lz-danger);
+  --pf-v5-global--BorderRadius--sm: 4px;
+  --keycloak-card-top-color: var(--lz-a);
+}
+
+html, body, #keycloak-bg { background: var(--lz-bg); color: var(--lz-ink); }
+body { font-family: var(--pf-v5-global--FontFamily--text); }
+
+.pf-v5-c-login__main {
+  background: var(--lz-panel);
+  border: 1px solid var(--lz-line);
+  border-radius: 8px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / .4), 0 6px 18px rgb(0 0 0 / .35);
+}
+.pf-v5-c-login__main-header, .pf-v5-c-login__main-body, .pf-v5-c-login__main-footer { background: transparent; }
+.pf-v5-c-title, #kc-page-title {
+  font-family: var(--pf-v5-global--FontFamily--heading);
+  font-weight: 700;
+  color: var(--lz-ink);
+}
+
+/* The header: the logo and the name, as in the landing's top bar. */
+#kc-header-wrapper { display: flex; align-items: center; justify-content: center; gap: .6rem; padding: 2rem 0 1.25rem; }
+#kc-header-wrapper::before {
+  content: "";
+  width: 28px;
+  height: 33px;
+  background: url("../img/logo.png") center / contain no-repeat;
+}
+.lz-brand {
+  font-family: var(--pf-v5-global--FontFamily--heading);
+  font-weight: 700;
+  font-size: 1.75rem;
+  letter-spacing: .01em;
+  color: var(--lz-ink);
+  text-transform: none;
+}
+
+.pf-v5-c-form-control {
+  --pf-v5-c-form-control--BackgroundColor: var(--lz-raised);
+  --pf-v5-c-form-control--Color: var(--lz-ink);
+  --pf-v5-c-form-control--after--BorderBottomColor: var(--lz-line);
+  --pf-v5-c-form-control--hover--after--BorderBottomColor: var(--lz-a-light);
+  --pf-v5-c-form-control--focus--after--BorderBottomColor: var(--lz-a-light);
+}
+.pf-v5-c-form__label-text { color: var(--lz-ink); }
+
+.pf-v5-c-button.pf-m-primary {
+  --pf-v5-c-button--m-primary--BackgroundColor: var(--lz-a);
+  --pf-v5-c-button--m-primary--hover--BackgroundColor: #0a6670;
+  --pf-v5-c-button--m-primary--Color: #fff;
+  font-weight: 500;
+}
+.pf-v5-c-button:focus-visible, .pf-v5-c-form-control:focus-within { outline: 2px solid var(--lz-a-light); outline-offset: 2px; }
+
+.pf-v5-c-alert { --pf-v5-c-alert--BackgroundColor: var(--lz-raised); }

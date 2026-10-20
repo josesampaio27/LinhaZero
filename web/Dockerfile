@@ -1,5 +1,5 @@
 # Build context: the repo root (npm ci needs the root lockfile). Builds the interface and serves it with nginx,
-# which also forwards /api to the API container. The grids are mounted at run time (see infra/docker-compose.yml).
+# (the proxy in front routes /api to the API). The grids are mounted at run time (see infra/docker-compose.yml).
 FROM node:24.13.0-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
@@ -10,6 +10,9 @@ RUN npm ci -w web -w engine --include-workspace-root
 COPY engine/src engine/src
 COPY engine/tsconfig.json engine/
 COPY web/ web/
+# The account page on account.<domain> (web/src/lib/session.ts); set per environment from LZ_DOMAIN.
+ARG VITE_ACCOUNT_URL
+ENV VITE_ACCOUNT_URL=$VITE_ACCOUNT_URL
 RUN npm run build -w web
 
 FROM nginxinc/nginx-unprivileged:1.28.0-alpine

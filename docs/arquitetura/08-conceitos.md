@@ -31,7 +31,7 @@ O formato atual está em [Formato da grelha](../referencia/formato-grelha.md) (f
 
 ## Identidade e separação entre entidades
 
-**Estado:** planeado.
+**Estado:** em curso. O login já existe ([ADR 0061](../decisoes/0061-keycloak-e-sessao-no-servidor.md)): Keycloak em `account.<domínio>`, sessão num cookie da API, tabela `users`. Faltam as entidades, os papéis e a função de autorização.
 
 - **Um só emissor OpenID Connect:** a API confia num só emissor.
   - Com uma entidade, é o fornecedor de identidade dela (por exemplo Microsoft Entra ID, com convidados B2B para outras entidades).

@@ -1,0 +1,29 @@
+# The local stand-in for Cloudflare Tunnel + the cluster ingress: one HTTPS entry, routed by host name.
+# LZ_DOMAIN defaults to linhazero.localhost (browsers and curl send *.localhost to 127.0.0.1).
+# Certificates come from Caddy's own local authority; trust it once (infra/README.md).
+{
+	local_certs
+}
+
+{$LZ_DOMAIN}, landing.{$LZ_DOMAIN} {
+	reverse_proxy landing:8080
+}
+
+app.{$LZ_DOMAIN} {
+	handle /api/* {
+		# Run progress is streamed with SSE: flush every event at once.
+		reverse_proxy api:8080 {
+			flush_interval -1
+		}
+	}
+	handle {
+		reverse_proxy web:8080
+	}
+}
+
+# Locally the Keycloak admin console stays reachable here (to invite users); in the cluster only /realms/ and
+# /resources/ are routed (infra/README.md).
+account.{$LZ_DOMAIN} {
+	redir / /realms/linhazero/account 302
+	reverse_proxy keycloak:8080
+}

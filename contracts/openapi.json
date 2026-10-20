@@ -79,6 +79,37 @@
         }
       }
     },
+    "/api/v1/me": {
+      "get": {
+        "tags": [
+          "Me"
+        ],
+        "summary": "Who is signed in. 401 without a session: the web then sends the browser to the login.",
+        "operationId": "Me_Get",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/runs": {
       "post": {
         "tags": [
@@ -632,6 +663,24 @@
         "description": "One intervention, already rasterised into cells by the browser."
       },
       "JsonElement": { },
+      "MeResponse": {
+        "required": [
+          "name",
+          "email"
+        ],
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "The GET /api/v1/me body: who is signed in, as Keycloak named them."
+      },
       "ModelWind": {
         "required": [
           "directionDeg",
@@ -1138,6 +1187,9 @@
     },
     {
       "name": "Incidents"
+    },
+    {
+      "name": "Me"
     },
     {
       "name": "Runs"

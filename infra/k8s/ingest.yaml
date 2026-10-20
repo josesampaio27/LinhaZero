@@ -1,0 +1,46 @@
+# Ingest: pulls IPMA, Open-Meteo and fogos.pt into Postgres. Extra replicas would wait on the leader lock.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingest
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: ingest }
+  template:
+    metadata:
+      labels: { app: ingest }
+    spec:
+      initContainers:
+        - name: grids
+          image: linhazero-grids
+          imagePullPolicy: Always
+          command: ["cp", "-r", "/grids/.", "/out/"]
+          volumeMounts:
+            - { name: grids, mountPath: /out }
+      containers:
+        - name: ingest
+          image: linhazero-ingest
+          imagePullPolicy: Always
+          env:
+            - { name: PGHOST, value: postgres }
+            - { name: PGUSER, value: dois }
+            - { name: PGDATABASE, value: dois }
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: POSTGRES_PASSWORD } }
+            - { name: ASPNETCORE_URLS, value: "http://+:8081" }
+            - { name: GRIDS_DIR, value: /grids }
+            - name: FOGOS_API_KEY
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: FOGOS_API_KEY, optional: true } }
+          ports:
+            - { name: http, containerPort: 8081 }
+          livenessProbe:
+            tcpSocket: { port: http }
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { memory: 512Mi }
+          volumeMounts:
+            - { name: grids, mountPath: /grids, readOnly: true }
+      volumes:
+        - { name: grids, emptyDir: {} }

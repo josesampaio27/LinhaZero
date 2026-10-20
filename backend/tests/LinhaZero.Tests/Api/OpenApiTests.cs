@@ -27,6 +27,7 @@ public class OpenApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
         {
             "GET /api/v1/health",
             "GET /api/v1/incidents/active",
+            "GET /api/v1/me",
             "GET /api/v1/runs/{id}",
             "GET /api/v1/runs/{id}/events",
             "GET /api/v1/runs/{id}/rasters/{decision}/{layer}",
@@ -57,7 +58,7 @@ public class OpenApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             .ToList();
         Assert.Equal(new[]
         {
-            "Health_Get", "Incidents_Active", "Runs_Create", "Runs_Events", "Runs_Get", "Runs_Raster", "Weather_Get",
+            "Health_Get", "Incidents_Active", "Me_Get", "Runs_Create", "Runs_Events", "Runs_Get", "Runs_Raster", "Weather_Get",
         }.Order(), ids);
     }
 

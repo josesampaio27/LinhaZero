@@ -1,11 +1,13 @@
 using LinhaZero.Api.Models;
 using LinhaZero.Api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LinhaZero.Api.Controllers;
 
 [ApiController]
 [Route("api/v1/health")]
+[AllowAnonymous] // probes and smoke.sh, without a session
 public sealed class HealthController(HealthService health) : ControllerBase
 {
     /// <summary>Whether Postgres and NATS answer, and how many engine workers are idle.</summary>

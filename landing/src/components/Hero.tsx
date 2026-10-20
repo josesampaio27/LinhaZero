@@ -6,8 +6,9 @@ const HeroMap = lazy(() => import("./HeroMap"));
 export const APP_URL = (import.meta.env.VITE_APP_URL as string | undefined) ?? "/app/";
 /** The demonstration scenario, which opens without login. Set VITE_DEMO_URL when it moves. */
 export const DEMO_URL = (import.meta.env.VITE_DEMO_URL as string | undefined) ?? `${APP_URL}?demo`;
-/** Entry points of the authentication that comes next; plain links until there is a router. */
-export const SIGNIN_URL = "/entrar";
+/** The login: the app's API sends the browser to Keycloak (account.<domain>) and back into the app. */
+export const SIGNIN_URL = (import.meta.env.VITE_SIGNIN_URL as string | undefined) ?? `${APP_URL}api/auth/login`;
+/** Not built yet: the request goes to the LinhaZero team (docs/plano/landing.md). */
 export const SIGNUP_URL = "/pedir-acesso";
 /** Where the divider between A and B starts: just west of the ignition, so both fires are in view. */
 export const SPLIT_START = 0.62;
