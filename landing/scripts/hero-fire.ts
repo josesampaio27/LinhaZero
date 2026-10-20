@@ -120,7 +120,7 @@ function resample(z: ArrayLike<number>, r0: number, c0: number, r1: number, c1: 
 }
 
 /** Marching-squares segments chained into polylines, as one SVG path string (0.1-unit precision). */
-function contourPath(z: Float32Array, h: number, w: number, step: number, keep: (level: number) => boolean): string {
+function contourPath(z: Float32Array, h: number, w: number, step: number, keep: (level: number) => boolean, minPoints = 2): string {
   const segs = contourSegments(z, h, w, step).filter((s) => keep(s.level));
   const key = (p: [number, number]) => `${p[0].toFixed(1)},${p[1].toFixed(1)}`;
   const ends = new Map<string, number[]>();
@@ -140,6 +140,7 @@ function contourPath(z: Float32Array, h: number, w: number, step: number, keep: 
       used[next] = 1;
       line.push(key(segs[next].a) === tail ? segs[next].b : segs[next].a);
     }
+    if (line.length < minPoints) continue; // tiny rings are noise at page scale
     d += "M" + line.map((p) => `${p[0].toFixed(1)} ${p[1].toFixed(1)}`).join("L");
   }
   return d;
@@ -152,7 +153,7 @@ function svgFile(name: string, w: number, h: number, body: string) {
 }
 mkdirSync("landing/public/textures", { recursive: true });
 
-// 1. The hero fire under decision A, as arrival lines every 30 minutes ("A resposta"). Cells the fire never
+// 1. The hero fire under decision A, as arrival lines every hour ("A resposta"). Cells the fire never
 // reaches sit just past the last line, so the four-hour line closes.
 {
   const t = Float32Array.from(A.arrivalMin, (v) => (Number.isFinite(v) && v <= durationMin ? v : durationMin + 30));
@@ -164,11 +165,11 @@ mkdirSync("landing/public/textures", { recursive: true });
   }
   const m = 10, k = 4;
   const win = resample(t, r0 - m, c0 - m, r1 + m, c1 + m, k);
-  const d = contourPath(win.z, win.h, win.w, 30, (l) => l >= 30 && l <= durationMin);
+  const d = contourPath(win.z, win.h, win.w, 60, (l) => l >= 60 && l <= durationMin);
   svgFile("isocronas.svg", win.w, win.h, `<path d="${d}" fill="none" stroke="#e5ebe8" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
 }
 
-// 2. The relief of the Penha every 25 metres, around its summit ("Pedir acesso"), in a dark ink for the teal field.
+// 2. The relief of the Penha every 50 metres, around its summit ("Pedir acesso"), in a dark ink for the teal field.
 {
   let best = ignition, top = -Infinity;
   for (let r = ignition.row - 25; r <= ignition.row + 25; r++) {
@@ -179,14 +180,15 @@ mkdirSync("landing/public/textures", { recursive: true });
   }
   const m = 17, k = 2; // 50 m samples: smooth enough at page scale, and under 40 KB gzipped
   const win = resample(grid.elevation, best.row - m, best.col - m * 1.6, best.row + m, best.col + m * 1.6, k);
-  const d = contourPath(win.z, win.h, win.w, 25, () => true);
+  const d = contourPath(win.z, win.h, win.w, 50, () => true);
   svgFile("penha-relevo.svg", win.w, win.h, `<path d="${d}" fill="none" stroke="#032a2e" stroke-width="1.2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
   console.log(`Penha: cume a ${Math.round(top)} m na célula ${best.row},${best.col}`);
 }
 
-// 3. Every 100 m cell of the grid that holds buildings, one dot sized by how many (the footer).
+// 3. Every 100 m cell of the grid with four buildings or more, one dot sized by how many (the footer): the
+// settlements, without the scatter of lone houses.
 {
-  const buckets: [number, number, number][] = [[1, 3, 0.2], [4, 15, 0.34], [16, Infinity, 0.5]];
+  const buckets: [number, number, number][] = [[4, 15, 0.3], [16, Infinity, 0.48]];
   const paths = buckets.map(() => "");
   for (let r = 0; r < rows; r++) {
     for (let c = 0; c < cols; c++) {
@@ -197,4 +199,12 @@ mkdirSync("landing/public/textures", { recursive: true });
   }
   const body = paths.map((d, i) => `<path d="${d}" stroke="#e5ebe8" stroke-width="${buckets[i][2]}" stroke-linecap="round"/>`).join("");
   svgFile("edificios.svg", cols, rows, body);
+}
+
+// 4. The whole grid's relief every 50 metres, from the city to the Penha: the field behind "A resposta", edge
+// to edge, under the hour lines of the fire.
+{
+  const win = resample(grid.elevation, 0, 0, rows, cols, 1);
+  const d = contourPath(win.z, win.h, win.w, 50, () => true, 8);
+  svgFile("guimaraes-relevo.svg", win.w, win.h, `<path d="${d}" fill="none" stroke="#e5ebe8" stroke-width="1" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
 }

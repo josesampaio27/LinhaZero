@@ -150,13 +150,14 @@ A primeira versão lia-se genérica ("feita por IA"). O redesenho seguiu as skil
 
 **Secções**
 
-- **Herói:** "O mesmo fogo, / duas decisões" em duas linhas a qualquer largura, com tamanho `min(11vw, 15svh)`; à direita, na linha de base do título, a frase (cerca de 50 caracteres por linha) e "Cenário de demonstração"; por baixo, o mapa 3D a toda a largura e com a altura que sobra (55 a 63 % do ecrã no computador), com o divisor arrastável (A à esquerda, linha de contenção; B à direita, ataque direto), os títulos "Decisão A"/"Decisão B" iguais aos `.map-title` da aplicação (barra de 5 px teal e violeta) e a legenda das horas. A câmara segue o rato em toda a janela. Cartaz `hero.webp` 1920 × 800 (`/?poster` a 960 × 400, 2×), recortado com `object-cover`; o divisor começa a 62 %, sobre a ignição.
+- **Herói:** banda do título por cima e mapa a toda a largura com a altura que sobra (55 a 63 % do ecrã no computador). Título "O mesmo fogo, / duas decisões" com "fogo" na rampa do fogo do mapa (só a ponta clara, amarelo a laranja, 4,5:1 ou mais) e "decisões" nas tintas das decisões (teal a violeta), a pedido do utilizador. O utilizador escolheu a versão animada, que é agora a única (o interruptor `?fogo` saiu): tremor de calor em "fogo" e ondulação em "decisões", por filtro SVG de baixa frequência (cerca de 1 px, 2 e 1,6 de escala), numa só passagem de 4 s, de 1,1 s a 5,1 s depois de carregar (depois de o título subir e o divisor varrer). A deformação entra, mantém-se e volta a 0, por isso as palavras param exatamente como desenhadas; nada se mexe mais de 5 s (WCAG 2.2.2) e, com movimento reduzido, as palavras ficam paradas desde o início. O mapa vem primeiro como dois cartazes inteiros, `hero-a.webp` e `hero-b.webp` (1600 × 1000, de `/?poster` a 800 × 500, 2×, com versões de 800 e 1200 px feitas por `to-webp.ts` em `srcset`, e pré-carregados no `index.html`), com B recortado no divisor em CSS (o recorte fica num invólucro, para que o zoom de 1,5× no telemóvel, centrado na cabeça do fogo, não o desloque), por isso o divisor arrasta-se também no telemóvel e com as setas. Ao carregar, o divisor varre de quase tudo A até 70 %, sobre a cabeça do fogo onde A e B diferem, em cerca de um segundo (sem varrimento com movimento reduzido). Os títulos "Decisão A"/"Decisão B" (os `.map-title` da aplicação) acompanham o divisor, um de cada lado; a pastilha "Arraste para comparar" some ao primeiro gesto. No computador, o MapLibre substitui os cartazes quando o browser fica livre e segue o rato em toda a janela. `hero.webp` (900 px) é só o mapa pequeno do painel.
 - **Como funciona:** os cinco passos numa lista ao lado do painel do cenário da aplicação, que mostra a comparação final; passar o rato ou carregar num passo mostra o painel nesse passo. No telemóvel fica só a lista.
 - **A resposta, por palavras:** as quatro frases-modelo da comparação, no estilo `.headline` da aplicação, com os valores por preencher (`X`, `aldeia`, `hh:mm`, `N`, `mm`), nunca números reais; no computador, ao lado, Monchique dias depois do incêndio de agosto de 2018. Não há vídeo: nas coleções abertas não existe filmagem honesta de um incêndio português, e material estrangeiro não entra.
 - **Satélite:** Portugal a 18 de junho de 2017 (MODIS, NASA), num ecrã próprio.
 - **Validação:** "Testado em 80 incêndios portugueses", a tabela de Sørensen (0,25 / 0,34 / 0,38), "ganha em 28 dos 34", a regra de honestidade e um retângulo no lugar do gráfico, que vai mudar.
 - **Dados:** as seis fontes numa lista curta, ao lado de Guimarães vista da Penha e de um caminho na Penha (fotos fora no telemóvel).
 - **Para quem decide:** as seis entidades da proposta, cada uma com o seu "para quê" numa linha.
+- **Quem somos** (entre "Para quem decide" e "Pedir acesso": depois de dizer para quem é, diz quem o faz, mesmo antes de pedir confiança): os dois developers, por ordem alfabética, José Sampaio (Senior Software Engineer) e Rodrigo Vicente (Mid Software Engineer & DevOps), com os cargos tal como o utilizador os escreveu, em inglês (`lang="en"`). Dois retratos 4:5 lado a lado em todas as medidas, com nome e cargo por baixo, no campo fundo. **Conteúdo provisório:** os retratos em `landing/public/team/jose-sampaio.webp` e `rodrigo.webp` são marcadores (tom liso, silhueta, iniciais, "RETRATO A COLOCAR"); basta trocar os ficheiros. Os dados estão no array `TEAM` de `App.tsx`. Sem biografias nem ligações. Está também na barra.
 - **Pedir acesso:** o slogan, uma frase, e o diálogo da aplicação (entidade e tipo) que leva a `/pedir-acesso?entidade=…&tipo=…`.
 - **Rodapé:** sóbrio, nas margens da página: logótipo e nome em tamanho normal, "Por portugueses, para Portugal.", as três ações, a documentação, o código e os créditos das imagens.
 
@@ -164,12 +165,27 @@ A primeira versão lia-se genérica ("feita por IA"). O redesenho seguiu as skil
 
 | Ficheiro | Dados | Onde | gzip |
 | --- | --- | --- | --- |
-| `isocronas.svg` | o fogo do herói com a decisão A, linhas de chegada de 30 em 30 min (30 a 240) | "A resposta, por palavras"; abaixo do computador desce para trás das frases | 6,5 KB |
-| `penha-relevo.svg` | o relevo da Penha de 25 em 25 m, à volta do cume (602 m), em tinta escura | campo teal de "Pedir acesso" | 11,3 KB |
-| `edificios.svg` | cada célula de 100 m da grelha com edifícios, um ponto por célula, maior onde há mais | rodapé (fora no telemóvel, onde ficaria sob os créditos) | 7,9 KB |
+| `guimaraes-relevo.svg` | o relevo de toda a grelha de 50 em 50 m (anéis pequenos retirados) | "A resposta", de ponta a ponta, a 0,11, com máscara que o apaga sob o título e a introdução | 30 KB |
+| `isocronas.svg` | o fogo do herói com a decisão A, linhas de chegada de hora a hora | "A resposta", destaque em baixo à direita, a 0,14 | 4 KB |
+| `penha-relevo.svg` | o relevo da Penha de 50 em 50 m, à volta do cume (602 m), em tinta escura | campo teal de "Pedir acesso", a 0,2 | 6 KB |
+| `edificios.svg` | as células de 100 m com quatro edifícios ou mais, um ponto cada | rodapé, a 0,12 (fora no telemóvel) | 3 KB |
 
-As outras secções ficam lisas, para as texturadas se lerem. O texto mantém 4,5:1: as linhas claras ficam a 20 a 26 % sobre o fundo escuro, e as do teal são escuras, o que só aumenta o contraste do texto branco. O antigo `hero/contours.svg`, que não era usado, foi retirado.
+As outras secções ficam lisas, para as texturadas se lerem. O texto mantém 4,5:1 com folga (cerca de 12:1 para a tinta e 6,5:1 para o cinzento sobre as linhas): as linhas claras ficam a 11 a 14 % sobre o fundo escuro, e as do teal são escuras, o que só aumenta o contraste do texto branco. O antigo `hero/contours.svg`, que não era usado, foi retirado.
 
 **Imagens** (em `landing/public/photos`, créditos em `credits.json` e no rodapé; WebP feitos com `landing/scripts/to-webp.ts`): NASA MODIS, Portugal a 18 de junho de 2017 (domínio público); Halley Oliveira, Guimarães vista da Penha (CC BY-SA 2.0); Manuel_Rocha, caminho na Penha (CC BY-SA 3.0); Bextrel, Incêndio de Monchique 2018 (CC BY-SA 4.0).
 
-**Peso:** JS principal ~54 KB gz, CSS ~8 KB gz; o MapLibre continua num chunk à parte, só no computador, depois de `load` e de o browser ficar livre.
+**Peso:** JS principal ~56 KB gz, CSS ~9 KB gz; o MapLibre continua num chunk à parte, só no computador, depois de `load` e de o browser ficar livre.
+
+**Revisão impeccable (outubro de 2026).** Crítica e auditoria com a skill impeccable (modo Persuade, duas avaliações isoladas, detetor). Mudanças:
+
+- **Herói:** zoom de 1,5× no telemóvel sobre a cabeça do fogo (antes o fogo era uma mancha de 60 px), pastilha "Arraste para comparar" em cima no telemóvel, fora do fogo; divisor com Home/End e setas para cima e para baixo, `aria-valuemin`/`max` iguais ao limite real (6 a 94); cartazes com `srcset` e pré-carregamento.
+- **Acessibilidade:** ligação "Saltar para o conteúdo"; anel de foco branco no campo teal (o teal sobre teal ficava a 2,2:1); ligações da barra e do rodapé com alvos de 44 ou 24 px; entrelinha das frases a 1,3; barra de scroll, cursor de texto e `accent-color` da paleta.
+- **Como funciona:** no telemóvel, onde o painel não aparece, os passos são uma lista simples, não botões que não fazem nada. O passo ativo leva a barra em tinta, não em teal (o teal é só da decisão A).
+- **Frases:** um só cenário coerente, em que ganha B (como no mapa do herói, onde B arde menos), com o aviso sobre a linha de A; "variações do vento" em todo o lado (o painel dizia "cenários").
+- **Validação:** a legenda liga 80 a 34 ("Dos 80, só os 34 de 2018 a 2021 têm o combustível do próprio ano") e diz porque nem um motor perfeito chegaria a 1 (os fogos reais foram combatidos); colunas "Modelo simples / Sem calibrar / LinhaZero"; linhas "8 no Norte" e "26 de teste"; "Ver incêndio a incêndio" também no telemóvel.
+- **Pedir acesso:** o campo Entidade vem vazio (com exemplo) e é obrigatório; tipos Bombeiros, Proteção civil, Câmara, GNR, INEM e Outra; "Cenário de demonstração" também no telemóvel.
+- **Logótipo:** `logo-outline.png` (3×, contorno branco de ~1,3 px a seguir a silhueta, feito em canvas), na barra e no rodapé; o favicon não mudou.
+- **Texto:** "que se podem ajustar"; sem vírgula antes de "e" em "Para quem decide".
+
+Os avisos que ficam no detetor são decisões do utilizador: o texto em gradiente de "fogo" e "decisões", e as barras de 5 px dos títulos dos mapas e das frases (o estilo da aplicação).
+

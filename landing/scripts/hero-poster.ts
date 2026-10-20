@@ -1,4 +1,4 @@
-// Captures the hero poster (landing/public/hero/hero.webp) from the `/?poster` page with a headless Chrome,
+// Captures the hero posters (landing/public/hero/hero-a.webp, hero-b.webp and the split hero.webp) from the `/?poster` page with a headless Chrome,
 // driven over the DevTools protocol so it can wait for the map to finish drawing.
 //   npm run build -w landing && npm run preview -w landing -- --port 4173   (in another terminal)
 //   npx tsx landing/scripts/hero-poster.ts [http://localhost:4173] [path/to/chrome]
@@ -18,7 +18,7 @@ const proc = spawn(chrome, [
   "--headless", "--no-sandbox", "--hide-scrollbars",
   "--use-angle=swiftshader", "--enable-unsafe-swiftshader", "--ignore-gpu-blocklist",
   `--remote-debugging-port=${port}`, `--user-data-dir=${mkdtempSync(join(tmpdir(), "hero-"))}`,
-  "--window-size=1920,800", "about:blank",
+  "--window-size=1600,1000", "about:blank",
 ], { stdio: "ignore" });
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -41,7 +41,7 @@ try {
     new Promise<{ result?: { result?: { value?: string } } }>((resolve) => { pending.set(++id, resolve); ws.send(JSON.stringify({ id, method, params })); });
   const evaluate = async (expression: string) => (await send("Runtime.evaluate", { expression, returnByValue: true })).result?.result?.value;
 
-  await send("Emulation.setDeviceMetricsOverride", { width: 960, height: 400, deviceScaleFactor: 2, mobile: false });
+  await send("Emulation.setDeviceMetricsOverride", { width: 800, height: 500, deviceScaleFactor: 2, mobile: false });
   await send("Page.navigate", { url: `${base}/?poster` });
   let dataUrl = "";
   for (let i = 0; i < 300 && !dataUrl; i++) {
@@ -49,9 +49,12 @@ try {
     dataUrl = (await evaluate("document.getElementById('poster')?.textContent ?? ''")) || "";
   }
   if (!dataUrl) throw new Error("O mapa não ficou pronto em 150 s");
-  const out = new URL("../public/hero/hero.webp", import.meta.url);
-  writeFileSync(out, Buffer.from(dataUrl.split(",")[1], "base64"));
-  console.log(`hero.webp: ${Math.round(dataUrl.length * 0.75 / 1024)} KB`);
+  // The frame of decision A, the frame of decision B, and the two split (the small map in the scenario panel).
+  const frames = JSON.parse(dataUrl) as Record<"a" | "b" | "split", string>;
+  for (const [key, name] of [["a", "hero-a.webp"], ["b", "hero-b.webp"], ["split", "hero.webp"]] as const) {
+    writeFileSync(new URL(`../public/hero/${name}`, import.meta.url), Buffer.from(frames[key].split(",")[1], "base64"));
+    console.log(`${name}: ${Math.round((frames[key].length * 0.75) / 1024)} KB`);
+  }
   ws.close();
 } finally {
   proc.kill();

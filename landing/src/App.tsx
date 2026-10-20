@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { APP_URL, DEMO_URL, Hero, SIGNIN_URL, SIGNUP_URL } from "@/components/Hero";
 import { ScenarioCard, type Stage } from "@/components/ScenarioCard";
 
@@ -14,14 +14,28 @@ const css = (vars: Record<string, string | number>) => vars as React.CSSProperti
 
 const STEPS: [string, string][] = [
   ["Marca-se a ignição no mapa.", "A grelha de Guimarães já traz combustível, relevo, estradas e 12 000 edifícios."],
-  ["O tempo vem do IPMA.", "Vento, humidade e temperatura daquele local e daquela hora, e ajustáveis."],
+  ["O tempo vem do IPMA.", "Vento, humidade e temperatura daquele local e daquela hora, que se podem ajustar."],
   ["Desenham-se duas decisões.", "Uma linha de contenção contra um ataque direto, com a hora a que os meios chegam."],
   ["Os dois mapas avançam juntos.", "Hora a hora, com a área ardida colorida pela hora a que o fogo chega."],
   ["Por baixo, a comparação.", "Edifícios e aldeias protegidos, e em quantas de 30 variações do vento cada decisão ganha."],
 ];
 
+/** True from the md breakpoint up, where the scenario panel is on screen. */
+function useWide() {
+  const q = "(min-width: 768px)";
+  const [wide, setWide] = useState(() => matchMedia(q).matches);
+  useEffect(() => {
+    const m = matchMedia(q), on = () => setWide(m.matches);
+    m.addEventListener("change", on);
+    return () => m.removeEventListener("change", on);
+  }, []);
+  return wide;
+}
+
 function HowItWorks() {
   const [stage, setStage] = useState<Stage>(5);
+  // Without the panel (phones) a step has nothing to show: plain list items, not buttons that do nothing.
+  const wide = useWide();
   return (
     <section id="como-funciona" aria-labelledby="como-funciona-h" className="fit px-margin">
       <div className="grid items-center gap-x-6 md:grid-cols-12">
@@ -37,16 +51,23 @@ function HowItWorks() {
           <ol className="mt-[clamp(1rem,3svh,2rem)] grid gap-1">
             {STEPS.map(([step, detail], i) => (
               <li key={step} data-reveal="row" style={css({ "--i": i + 1 })}>
-                <button
-                  type="button"
-                  aria-pressed={stage === i + 1}
-                  onClick={() => setStage((i + 1) as Stage)}
-                  onMouseEnter={() => setStage((i + 1) as Stage)}
-                  className={`block w-full border-l-[5px] py-[clamp(0.4rem,1.2svh,0.9rem)] pl-5 text-left transition-colors duration-200 hover:bg-panel ${stage === i + 1 ? "border-decision-a-light bg-panel" : "border-raised"}`}
-                >
-                  <span className="block text-statement font-medium">{step}</span>
-                  <span className="mt-1 block max-w-[52ch] text-muted">{detail}</span>
-                </button>
+                {wide ? (
+                  <button
+                    type="button"
+                    aria-pressed={stage === i + 1}
+                    onClick={() => setStage((i + 1) as Stage)}
+                    onMouseEnter={() => setStage((i + 1) as Stage)}
+                    className={`block w-full border-l-[5px] py-[clamp(0.4rem,1.2svh,0.9rem)] pl-5 text-left transition-colors duration-200 hover:bg-panel ${stage === i + 1 ? "border-ink bg-panel" : "border-raised"}`}
+                  >
+                    <span className="block text-statement font-medium">{step}</span>
+                    <span className="mt-1 block max-w-[52ch] text-muted">{detail}</span>
+                  </button>
+                ) : (
+                  <div className="border-l-[5px] border-raised py-[clamp(0.4rem,1.2svh,0.9rem)] pl-5">
+                    <span className="block text-statement font-medium">{step}</span>
+                    <span className="mt-1 block max-w-[52ch] text-muted">{detail}</span>
+                  </div>
+                )}
               </li>
             ))}
           </ol>
@@ -66,11 +87,12 @@ function Answer() {
       <div className="grid flex-1 gap-x-6 gap-y-10 md:grid-cols-12">
         <div className="self-center md:col-span-12 lg:col-span-7">
           <h2 id="resposta-h" className="text-heading" data-reveal>A resposta, por palavras</h2>
-          <p className="mt-4 max-w-[54ch]" data-reveal style={css({ "--i": 1 })}>
-            Por baixo dos dois mapas, o LinhaZero escreve o que muda. As frases são sempre estas; os números saem do cenário.
+          <p className="mt-5 max-w-[54ch]" data-reveal style={css({ "--i": 1 })}>
+            Por baixo dos dois mapas, o LinhaZero escreve o que muda, com a cor da decisão que ganha. As frases são sempre
+            estas; os números saem do cenário.
           </p>
           <div data-ui className="says mt-[clamp(1.25rem,4svh,2.5rem)] text-statement">
-            <p className="win-A" data-reveal="row" style={css({ "--i": 2 })}>A decisão A protege <Slot>X</Slot> edifícios a mais do que a B.</p>
+            <p className="win-B" data-reveal="row" style={css({ "--i": 2 })}>A decisão B protege <Slot>X</Slot> edifícios a mais do que a A.</p>
             <p className="win-B" data-reveal="row" style={css({ "--i": 3 })}>Com a decisão A, o fogo chega a <Slot>aldeia</Slot> às <Slot>hh:mm</Slot>. Com a B, não chega.</p>
             <p className="win-B" data-reveal="row" style={css({ "--i": 4 })}>B é melhor do que A em <Slot>N</Slot> de 30 variações do vento.</p>
             <p className="warn" data-reveal="row" style={css({ "--i": 5 })}>A equipa só chega à linha aos <Slot>mm</Slot> minutos; o fogo passa lá aos <Slot>mm</Slot>.</p>
@@ -123,8 +145,8 @@ function Satellite() {
 
 const VALIDATION: [string, string, string, string][] = [
   ["34 de 2018 a 2021", "0,25", "0,34", "0,38"],
-  ["8 na região Norte", "0,18", "0,26", "0,39"],
-  ["26 fora do ajuste", "0,26", "0,35", "0,38"],
+  ["8 no Norte", "0,18", "0,26", "0,39"],
+  ["26 de teste", "0,26", "0,35", "0,38"],
 ];
 
 function Proof() {
@@ -138,40 +160,43 @@ function Proof() {
             incêndios portugueses
           </h2>
           <p className="mt-4 max-w-[34ch] text-statement lg:hidden" data-reveal style={css({ "--i": 1 })}>
-            O motor calibrado ganha ao modelo simples em 28 dos 34 incêndios em que pode ser medido.
+            O LinhaZero acerta mais do que o modelo simples em 28 desses 34 incêndios.
           </p>
           <table className="mt-[clamp(1.25rem,4svh,3rem)] w-full border-collapse text-left tabular-nums" data-reveal style={css({ "--i": 2 })}>
             <caption className="mb-3 text-left text-small text-muted">
-              Sobreposição entre a área simulada e a que ardeu (Sørensen; 1 é perfeito).
+              Dos 80, só os 34 de 2018 a 2021 têm o combustível do próprio ano. Sobreposição com a área que ardeu: os fogos
+              reais foram combatidos e a simulação não, por isso nem um motor perfeito chegaria a 1.
             </caption>
             <thead>
               <tr className="text-small text-muted">
                 <th scope="col" className="py-2.5 pr-3 font-medium">Incêndios</th>
-                <th scope="col" className="py-2.5 pr-3 text-right font-medium">Simples</th>
-                <th scope="col" className="py-2.5 pr-3 text-right font-medium">Rothermel</th>
-                <th scope="col" className="py-2.5 pr-3 text-right font-medium text-ink">Calibrado</th>
+                <th scope="col" className="py-2.5 pr-3 text-right font-medium">Modelo simples</th>
+                <th scope="col" className="py-2.5 pr-3 text-right font-medium">Sem calibrar</th>
+                <th scope="col" className="py-2.5 pr-3 text-right font-medium text-ink">LinhaZero</th>
               </tr>
             </thead>
             <tbody>
               {VALIDATION.map(([set, a, b, c], i) => (
                 <tr key={set} className={i % 2 ? "" : "bg-panel"}>
-                  <td className="py-3 pr-3 pl-3">{set}</td>
-                  <td className="py-3 pr-3 text-right">{a}</td>
-                  <td className="py-3 pr-3 text-right">{b}</td>
-                  <td className="py-3 pr-3 text-right font-medium">{c}</td>
+                  <td className="py-2 pr-3 pl-3 sm:py-3">{set}</td>
+                  <td className="py-2 pr-3 text-right sm:py-3">{a}</td>
+                  <td className="py-2 pr-3 text-right sm:py-3">{b}</td>
+                  <td className="py-2 pr-3 text-right font-medium sm:py-3">{c}</td>
                 </tr>
               ))}
             </tbody>
           </table>
-          <p className="mt-6 hidden max-w-[62ch] sm:block" data-reveal style={css({ "--i": 3 })}>
-            Incêndios portugueses do PT-FireSprd, de 2015 a 2021, simulados da ignição real, com o tempo real e sem combate.
-            Uma mudança no motor só entra se melhorar em fogos que não serviram para a afinar.{" "}
+          <p className="mt-6 max-w-[62ch]" data-reveal style={css({ "--i": 3 })}>
+            <span className="max-sm:hidden">
+              Incêndios portugueses do PT-FireSprd, de 2015 a 2021, simulados da ignição real, com o tempo real e sem combate.
+              Uma mudança no motor só entra se melhorar em fogos que não serviram para a afinar.{" "}
+            </span>
             <a href={`${DOCS}/modelo/validacao-resumo.md`} className="link font-medium">Ver incêndio a incêndio</a>.
           </p>
         </div>
         <div className="mt-8 flex flex-col gap-6 lg:col-span-5 lg:col-start-8 lg:mt-0">
           <p className="hidden max-w-[34ch] text-statement lg:block" data-reveal style={css({ "--i": 1 })}>
-            O motor calibrado ganha ao modelo simples em 28 dos 34 incêndios em que pode ser medido.
+            O LinhaZero acerta mais do que o modelo simples em 28 desses 34 incêndios.
           </p>
           {/* Placeholder for the validation chart, which is about to change. */}
           <div
@@ -210,12 +235,12 @@ function Data() {
             <br />
             de Portugal
           </h2>
-          <p className="mt-4 max-w-[46ch]" data-reveal style={css({ "--i": 1 })}>
+          <p className="mt-5 max-w-[46ch]" data-reveal style={css({ "--i": 1 })}>
             Fontes portuguesas e europeias sobre Portugal, numa grelha de Guimarães que vai da cidade à Penha.
           </p>
           <dl className="mt-[clamp(1rem,3.5svh,2.5rem)] grid gap-y-[clamp(0.5rem,1.6svh,1rem)]">
             {SOURCES.map(([name, what], i) => (
-              <div key={name} className="grid sm:grid-cols-[10rem_1fr] sm:items-baseline sm:gap-6" data-reveal="row" style={css({ "--i": i + 2 })}>
+              <div key={name} className="grid sm:grid-cols-[11.5rem_1fr] sm:items-baseline sm:gap-6" data-reveal="row" style={css({ "--i": i + 2 })}>
                 <dt className="font-display text-statement leading-tight">{name}</dt>
                 <dd className="m-0">{what}</dd>
               </div>
@@ -261,11 +286,11 @@ function Data() {
 /* ---------- Who it is for: an index of the people who decide ---------- */
 
 const ROLES: [string, string][] = [
-  ["Comandante das operações", "Escolher entre duas táticas, e justificar a escolha."],
+  ["Comandante das operações", "Escolher entre duas táticas e justificar a escolha."],
   ["Proteção civil municipal", "Preparar planos prévios para cada encosta."],
   ["GNR", "Que estradas cortar e que aldeias avisar."],
   ["INEM", "Onde posicionar os meios de socorro."],
-  ["Bombeiros", "Treinar, e rever ocorrências reais."],
+  ["Bombeiros", "Treinar e rever ocorrências reais."],
   ["Câmara e Laboratório da Paisagem", "Onde as faixas de gestão protegem mais casas."],
 ];
 
@@ -282,7 +307,7 @@ function Audience() {
           {ROLES.map(([who, why], i) => (
             <div
               key={who}
-              className={`grid px-3 py-[clamp(0.45rem,1.4svh,1rem)] sm:grid-cols-12 sm:items-baseline sm:gap-6 ${i % 2 ? "" : "bg-panel"}`}
+              className={`grid px-3 py-[clamp(0.4rem,1.2svh,1rem)] sm:grid-cols-12 sm:items-baseline sm:gap-6 ${i % 2 ? "" : "bg-panel"}`}
               data-reveal="row"
               style={css({ "--i": i })}
             >
@@ -291,6 +316,50 @@ function Audience() {
             </div>
           ))}
         </dl>
+      </div>
+    </section>
+  );
+}
+
+/* ---------- Who makes it: the two developers, between who it is for and the request ---------- */
+
+// Sample content until the real one arrives: the pictures in public/team/ are placeholders (4:5); swap the files.
+const TEAM: { name: string; role: string; photo: string }[] = [
+  // Alphabetical.
+  { name: "José Sampaio", role: "Senior Software Engineer", photo: "/team/jose-sampaio.webp" },
+  { name: "Rodrigo Vicente", role: "Mid Software Engineer & DevOps", photo: "/team/rodrigo.webp" },
+];
+
+function Team() {
+  return (
+    <section id="quem-somos" aria-labelledby="quem-somos-h" className="fit bg-deep px-margin">
+      <div className="grid gap-x-6 gap-y-[clamp(1.25rem,4svh,3rem)] lg:grid-cols-12 lg:items-end">
+        <div className="lg:col-span-4 lg:pb-2">
+          <h2 id="quem-somos-h" className="text-heading" data-reveal>Quem somos</h2>
+          <p className="mt-5 max-w-[34ch]" data-reveal style={css({ "--i": 1 })}>
+            As duas pessoas que construíram o LinhaZero para o Hack4Guimarães 2035.
+          </p>
+        </div>
+        {/* Two portraits side by side at every size, each with its name and role under it. */}
+        <ul className="grid grid-cols-2 gap-x-[clamp(0.75rem,2vw,1.5rem)] lg:col-span-8">
+          {TEAM.map((p, i) => (
+            <li key={p.photo} className="flex flex-col" data-reveal="mask" style={css({ "--i": i + 1 })}>
+              <img
+                src={p.photo}
+                alt={`Retrato de ${p.name}`}
+                width={800}
+                height={1000}
+                loading="lazy"
+                decoding="async"
+                className="aspect-[4/5] max-h-[min(58svh,44rem)] w-full bg-raised object-cover lg:h-[min(52svh,40rem)] lg:max-h-none lg:w-auto lg:self-start"
+              />
+              <div>
+                <p className="mt-3 font-display text-statement leading-tight">{p.name}</p>
+                <p className="mt-1 text-small text-muted" lang="en">{p.role}</p>
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </section>
   );
@@ -341,7 +410,7 @@ function AccessRequest() {
   if (state === "sent") {
     return (
       <div data-ui className="dialog" role="status">
-        <p className="font-display text-[26px] leading-tight">Pedido enviado</p>
+        <p className="font-display text-[clamp(1.25rem,3.2svh,1.625rem)] leading-tight">Pedido enviado</p>
         <p>
           Obrigado, {name.split(" ")[0]}. A equipa do LinhaZero vai ver o pedido de {entity}. Quando for aprovado, recebe em{" "}
           <b>{email}</b> um email para escolher a palavra-passe e entrar.
@@ -352,7 +421,9 @@ function AccessRequest() {
 
   return (
     <form data-ui className="dialog" onSubmit={(e) => void send(e)}>
-      <p className="font-display text-[26px] leading-tight">Pedir acesso ao LinhaZero</p>
+      <p className="font-display text-[clamp(1.25rem,3.2svh,1.625rem)] leading-tight">Pedir acesso ao LinhaZero</p>
+      {/* Name and email share a row where there is width for both. */}
+      <div className="pair">
       <label>
         Nome
         <input type="text" name="name" required maxLength={200} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />
@@ -361,6 +432,7 @@ function AccessRequest() {
         Email
         <input type="email" name="email" required maxLength={254} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
       </label>
+      </div>
       <label>
         Entidade
         <input
@@ -368,7 +440,7 @@ function AccessRequest() {
           name="organization"
           required
           maxLength={200}
-          placeholder="Bombeiros Voluntários de Guimarães"
+          placeholder="Ex.: BV de Guimarães"
           value={entity}
           onChange={(e) => setEntity(e.target.value)}
           autoComplete="organization"
@@ -389,7 +461,7 @@ function AccessRequest() {
         <span>
           Mensagem <span className="font-normal text-muted">(opcional)</span>
         </span>
-        <textarea name="message" rows={3} maxLength={2000} value={message} onChange={(e) => setMessage(e.target.value)} />
+        <textarea name="message" rows={2} maxLength={2000} value={message} onChange={(e) => setMessage(e.target.value)} />
       </label>
       <label className="trap" aria-hidden="true">
         Website
@@ -410,18 +482,18 @@ function AccessRequest() {
 function Close() {
   return (
     <section id="pedir-acesso" aria-labelledby="pedir-acesso-h" className="tex tex-penha screen bg-decision-a px-margin text-white">
-      <div className="grid items-center gap-x-6 gap-y-8 lg:grid-cols-12">
+      <div className="grid items-center gap-x-6 gap-y-[clamp(1rem,3svh,2rem)] lg:grid-cols-12">
         <div className="lg:col-span-6" data-reveal>
           <h2 id="pedir-acesso-h" className="text-heading">
             Simular, comparar
             <br />
             e aperfeiçoar.
           </h2>
-          <p className="mt-4 max-w-[44ch]">
+          <p className="mt-5 max-w-[44ch] max-sm:hidden">
             Peça acesso para a sua entidade. O pedido chega à equipa do LinhaZero, que responde com os próximos passos.
             Até lá, o cenário de demonstração abre sem login.
           </p>
-          <a href={DEMO_URL} className="link mt-3 hidden py-2 font-medium sm:inline-block">Cenário de demonstração</a>
+          <a href={DEMO_URL} className="link mt-3 inline-block py-2 font-medium max-sm:mt-1">Cenário de demonstração</a>
         </div>
         <div className="lg:col-span-5 lg:col-start-8" data-reveal style={css({ "--i": 1 })}>
           <AccessRequest />
@@ -452,8 +524,8 @@ function Footer() {
     <footer className="tex tex-edificios bg-deep px-margin pt-[clamp(3rem,8svh,6rem)] pb-6">
       <div className="grid gap-x-6 gap-y-8 lg:grid-cols-12">
         <div className="lg:col-span-5">
-          <a href="#" className="inline-flex items-center gap-2.5" aria-label="LinhaZero, voltar ao início">
-            <img src="/logo.png" alt="" width={28} height={33} className="h-8 w-auto" />
+          <a href="#" className="inline-flex min-h-11 items-center gap-2.5" aria-label="LinhaZero, voltar ao início">
+            <img src="/logo-outline.png" alt="" width={85} height={99} className="h-8 w-auto" />
             <span className="font-display text-statement leading-none">LinhaZero</span>
           </a>
           <p className="mt-4 max-w-[42ch]">
@@ -470,7 +542,7 @@ function Footer() {
           <p className="font-medium">Documentação</p>
           <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-small text-muted lg:grid">
             {DOC_LINKS.map(([href, label]) => (
-              <li key={label}><a href={href} className="link">{label}</a></li>
+              <li key={label}><a href={href} className="link inline-block py-0.5">{label}</a></li>
             ))}
           </ul>
         </div>
@@ -499,13 +571,14 @@ export function App() {
   return (
     <>
       <Hero />
-      <main>
+      <main id="conteudo" tabIndex={-1} className="outline-none">
         <HowItWorks />
         <Answer />
         <Satellite />
         <Proof />
         <Data />
         <Audience />
+        <Team />
         <Close />
       </main>
       <Footer />

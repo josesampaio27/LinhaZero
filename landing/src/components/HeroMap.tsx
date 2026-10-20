@@ -1,7 +1,7 @@
 // The hero's 3D relief: OpenStreetMap over the Guimarães grid's elevation, under a tilted camera that follows
 // the pointer. Two maps in sync show the same fire under decision A (left) and decision B (right), split by a
 // divider the visitor drags. Loaded as its own chunk after the page is idle (see Hero.tsx).
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import maplibregl from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { demTilePixels } from "@web/lib/dem-tile";
@@ -16,7 +16,8 @@ const PITCH = 58;
 /** How far the camera swings with the pointer: bearing left/right, pitch up/down. */
 const SWING_DEG = 22;
 const TILT_DEG = 7;
-const SPLIT_MIN = 0.08;
+/** The basemap's paint: desaturated and dimmed; labels stay legible. The posters are captured with the same values. */
+const OSM_PAINT = { "raster-saturation": -0.7, "raster-contrast": -0.08, "raster-brightness-max": 0.8 };
 
 /** Terrarium DEM tiles from the grid's own elevation, as in the interface's MapView; cached, both maps ask for the same tiles. */
 let demGrid: Awaited<ReturnType<typeof fetchGrid>>["data"] | null = null;
@@ -42,18 +43,17 @@ interface Props {
   onReady: (canvases: HTMLCanvasElement[]) => void;
   /** Keeps the drawing buffers so the canvases can be read back (the poster capture only). */
   readable?: boolean;
-  /** Where the divider between A and B starts, 0 to 1 from the left. */
-  splitStart: number;
+  /** Where the divider between A and B sits, 0 to 1 from the left; the scene around the map owns it. */
+  split: number;
+  /** True while the divider is being dragged: the camera holds still. */
+  hold?: React.RefObject<boolean>;
 }
 
-export default function HeroMap({ follow, onReady, readable = false, splitStart }: Props) {
-  const box = useRef<HTMLDivElement>(null);
+export default function HeroMap({ follow, onReady, readable = false, split, hold }: Props) {
   const containerA = useRef<HTMLDivElement>(null);
   const containerB = useRef<HTMLDivElement>(null);
   const ready = useRef(onReady);
   ready.current = onReady;
-  const [split, setSplit] = useState(splitStart);
-  const dragging = useRef(false);
 
   useEffect(() => {
     let disposed = false;
@@ -75,7 +75,7 @@ export default function HeroMap({ follow, onReady, readable = false, splitStart 
     const nudge = () => { if (!frame) frame = requestAnimationFrame(step); };
     const onMove = (e: PointerEvent) => {
       const el = follow.current;
-      if (!el || dragging.current) return;
+      if (!el || hold?.current) return;
       // Measured against the hero's box but tracked on the whole window, so the camera keeps following
       // beside the hero; clamped at the box's edges.
       // The page body stands for the whole window (the hero follows the pointer everywhere on the page).
@@ -106,7 +106,8 @@ export default function HeroMap({ follow, onReady, readable = false, splitStart 
             },
             layers: [
               { id: "bg", type: "background", paint: { "background-color": bg } },
-              { id: "osm", type: "raster", source: "osm" },
+              // The street map muted, so it sits calmly on the dark page under the fire (which keeps full strength).
+              { id: "osm", type: "raster", source: "osm", paint: OSM_PAINT },
             ],
           },
           center: GUIMARAES,
@@ -153,57 +154,15 @@ export default function HeroMap({ follow, onReady, readable = false, splitStart 
       document.documentElement.removeEventListener("pointerleave", onLeave);
       for (const m of maps) m.remove();
     };
-  }, [follow, readable]);
+  }, [follow, readable, hold]);
 
-  // The divider: dragged with the pointer, or moved with the arrow keys.
-  const splitFrom = (clientX: number) => {
-    const r = box.current!.getBoundingClientRect();
-    setSplit(Math.max(SPLIT_MIN, Math.min(1 - SPLIT_MIN, (clientX - r.left) / r.width)));
-  };
-  const onHandleDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    dragging.current = true;
-    e.currentTarget.setPointerCapture(e.pointerId);
-    splitFrom(e.clientX);
-  };
-  const onHandleMove = (e: React.PointerEvent<HTMLDivElement>) => { if (dragging.current) splitFrom(e.clientX); };
-  const onHandleUp = () => { dragging.current = false; };
-  const onHandleKey = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
-    e.preventDefault();
-    setSplit((s) => Math.max(SPLIT_MIN, Math.min(1 - SPLIT_MIN, s + (e.key === "ArrowLeft" ? -0.05 : 0.05))));
-  };
   const pct = `${(split * 100).toFixed(2)}%`;
 
   return (
-    <div ref={box} data-ui className="relative h-full w-full select-none">
+    <div className="relative h-full w-full select-none">
       <div className="absolute inset-0"><div ref={containerA} className="h-full w-full" aria-hidden="true" /></div>
       <div className="absolute inset-0" style={{ clipPath: `inset(0 0 0 ${pct})` }}>
         <div ref={containerB} className="h-full w-full" aria-hidden="true" />
-      </div>
-      {/* The map titles of the interface (.map-title in web/src/styles.css): panel, accent bar on the left, shadow. */}
-      <span className="map-title left-2.5 border-decision-a">Decisão A</span>
-      <span className="map-title right-2.5 border-decision-b">Decisão B</span>
-      <div
-        role="slider"
-        aria-label="Divisor entre a decisão A e a decisão B"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={Math.round(split * 100)}
-        tabIndex={0}
-        onPointerDown={onHandleDown}
-        onPointerMove={onHandleMove}
-        onPointerUp={onHandleUp}
-        onPointerCancel={onHandleUp}
-        onKeyDown={onHandleKey}
-        className="absolute top-0 bottom-0 w-10 -translate-x-1/2 cursor-col-resize touch-none outline-none focus-visible:[&>i]:ring-2 focus-visible:[&>i]:ring-ring"
-        style={{ left: pct }}
-      >
-        <span className="divider-line absolute top-0 bottom-0 left-1/2 w-0.5 -translate-x-1/2 bg-white" />
-        <i className="divider-handle absolute top-1/2 left-1/2 flex size-9 -translate-1/2 items-center justify-center rounded-full bg-white text-[#18211f]">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M5 3 1 8l4 5M11 3l4 5-4 5" />
-          </svg>
-        </i>
       </div>
     </div>
   );

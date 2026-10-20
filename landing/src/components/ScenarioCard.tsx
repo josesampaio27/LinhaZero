@@ -47,7 +47,7 @@ export function ScenarioCard({ stage }: { stage: Stage }) {
         {stage === 3 && <span className="go">Simular 4 horas</span>}
         {stage >= 4 && (
           <div className="maps">
-            <img src="/hero/hero.webp" alt="" width={1920} height={800} loading="lazy" decoding="async" />
+            <img src="/hero/hero.webp" alt="" width={900} height={563} loading="lazy" decoding="async" />
             <span className="map-title left-1.5 border-decision-a">A</span>
             <span className="map-title right-1.5 border-decision-b">B</span>
           </div>
@@ -59,9 +59,9 @@ export function ScenarioCard({ stage }: { stage: Stage }) {
         )}
         {stage === 5 && (
           <>
-            <p className="say win-A">A protege <Slot>X</Slot> edifícios a mais do que a B</p>
+            <p className="say win-B">B protege <Slot>X</Slot> edifícios a mais do que a A</p>
             <p className="say win-B">Com a A, o fogo chega a <Slot>aldeia</Slot> às <Slot>hh:mm</Slot></p>
-            <p className="say win-A">A é melhor em <Slot>N</Slot> de 30 cenários</p>
+            <p className="say win-B">B é melhor em <Slot>N</Slot> de 30 variações do vento</p>
           </>
         )}
       </div>

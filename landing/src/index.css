@@ -81,7 +81,7 @@
   --text-heading--line-height: 0.92;
   --text-heading--letter-spacing: -0.015em;
   --text-statement: clamp(1.25rem, min(2.1vw, 3.4svh), 2rem);
-  --text-statement--line-height: 1.2;
+  --text-statement--line-height: 1.3;
   --text-body: 1.125rem;
   --text-body--line-height: 1.55;
   --text-small: 0.9375rem;
@@ -90,13 +90,17 @@
 
 @layer base {
   * { border-color: var(--line); }
-  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 24px; }
+  html { -webkit-text-size-adjust: 100%; scroll-padding-top: 24px; scrollbar-color: var(--raised) var(--bg); accent-color: var(--a-light); }
+  input { caret-color: var(--a-light); }
   body { background: var(--bg); color: var(--ink); font-family: var(--font-sans); font-size: 1.125rem; line-height: 1.55; -webkit-font-smoothing: antialiased; }
   h1, h2, h3 { font-family: var(--font-display); font-weight: 700; text-wrap: balance; }
   p, li, dd { text-wrap: pretty; }
   button, a { -webkit-tap-highlight-color: transparent; }
   :focus-visible { outline: 3px solid var(--a-light); outline-offset: 3px; }
   ::selection { background: var(--b); color: #fff; }
+  /* On the teal field the teal ring would vanish (2.2:1): white there, teal again inside the dark dialog. */
+  #pedir-acesso :focus-visible { outline-color: #fff; }
+  #pedir-acesso [data-ui] :focus-visible { outline-color: var(--a-light); }
 }
 
 /* ---------- One screen per section: every section fits one viewport on its own (scripts/fit-check.ts). ---------- */
@@ -105,6 +109,9 @@
 .screen { min-height: 100svh; display: flex; flex-direction: column; justify-content: center; }
 
 /* ---------- Links and controls: feedback under the hand. ---------- */
+/* The skip link: off screen until it takes the keyboard focus. */
+.skip { position: absolute; left: var(--margin); top: 12px; z-index: 20; }
+.skip:not(:focus-visible) { width: 1px; height: 1px; min-height: 0; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 .link { text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 0.22em; text-decoration-color: color-mix(in srgb, currentColor 45%, transparent); transition: text-decoration-color 180ms ease, color 180ms ease; }
 .link:hover { text-decoration-color: currentColor; }
 .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 22px; font-weight: 500; white-space: nowrap; transition: background-color 180ms ease, color 180ms ease, transform 140ms var(--ease-out); }
@@ -147,8 +154,8 @@
 [data-ui] .divider-handle { box-shadow: var(--map-shadow); }
 
 /* The hour legend over the hero map. */
-[data-ui].legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 8px 12px; border-radius: 8px; background: #fff; color: #18211f; font-size: 14px; line-height: 1.3; box-shadow: var(--map-shadow); }
-[data-ui].legend i { display: inline-block; width: 14px; height: 14px; margin-right: 6px; border-radius: 3px; vertical-align: -2px; }
+[data-ui] .legend, [data-ui].legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; padding: 8px 12px; border-radius: 8px; background: #fff; color: #18211f; font-size: 14px; line-height: 1.3; box-shadow: var(--map-shadow); }
+[data-ui] .legend i, [data-ui].legend i { display: inline-block; width: 14px; height: 14px; margin-right: 6px; border-radius: 3px; vertical-align: -2px; }
 
 /* The scenario panel of the interface's sidebar. */
 [data-ui].panel { width: min(100%, 460px); border-radius: 12px; background: var(--panel); color: var(--ink); font-size: 16px; line-height: 1.4; box-shadow: var(--shadow); overflow: hidden; }
@@ -185,24 +192,31 @@
 [data-ui] .slot { padding: 0 0.25em; border-radius: 0.2em; background: rgb(255 255 255 / .12); font-variant-numeric: tabular-nums; -webkit-box-decoration-break: clone; box-decoration-break: clone; }
 
 /* The access request, as the product's own dialog. */
-[data-ui].dialog { width: min(100%, 460px); border-radius: 14px; background: var(--panel); color: var(--ink); box-shadow: var(--shadow); padding: 24px; display: grid; gap: 16px; }
-[data-ui].dialog label { display: grid; gap: 6px; font-size: 15px; font-weight: 500; }
-[data-ui].dialog :is(input[type="text"], input[type="email"], textarea) { min-height: 48px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); font: inherit; font-size: 17px; color: inherit; }
+/* Tight enough that the whole request, with an error line, fits one screen beside the slogan (scripts/fit-check.ts). */
+[data-ui].dialog { width: min(100%, 480px); border-radius: 14px; background: var(--panel); color: var(--ink); box-shadow: var(--shadow); padding: clamp(16px, 2.6svh, 24px); display: grid; gap: clamp(8px, 1.2svh, 14px); }
+[data-ui].dialog label { display: grid; gap: 4px; font-size: 15px; font-weight: 500; }
+[data-ui].dialog .pair { display: grid; gap: inherit; }
+@media (min-width: 480px) { [data-ui].dialog .pair { grid-template-columns: 1fr 1fr; gap: 12px; } }
+/* The access section's own padding: it holds the tallest content of any screen. */
+#pedir-acesso { padding-block: clamp(1rem, 4svh, 4rem); }
+@media (max-width: 639px) { #pedir-acesso { padding-block: 1rem; } }
+[data-ui].dialog :is(input[type="text"], input[type="email"], textarea) { min-height: 44px; min-width: 0; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); font: inherit; font-size: 17px; color: inherit; }
 [data-ui].dialog textarea { padding: 10px 12px; resize: vertical; }
 [data-ui].dialog :is(input[type="text"], input[type="email"], textarea):focus { outline: 2px solid var(--a-light); outline-offset: 1px; }
 /* The trap field for bots: out of sight and out of the tab order, but still in the form. */
 [data-ui].dialog .trap { position: absolute; left: -10000px; width: 1px; height: 1px; overflow: hidden; }
-[data-ui].dialog .error { margin: 0; color: #ffb4b0; font-weight: 500; }
+[data-ui].dialog .error { margin: 0; color: #ffb4b0; font-size: 15px; line-height: 1.4; font-weight: 500; }
 [data-ui].dialog button:disabled { opacity: .7; cursor: default; }
-[data-ui].dialog .seg { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; padding: 4px; border-radius: 10px; background: var(--bg); }
-@media (min-width: 480px) { [data-ui].dialog .seg { grid-template-columns: repeat(3, 1fr); } }
-[data-ui].dialog .seg label { display: block; }
+[data-ui].dialog :is(input, textarea)::placeholder { color: var(--muted-ink); }
+/* The five types wrap on two rows at most; each keeps a 40 px target. */
+[data-ui].dialog .seg { display: flex; flex-wrap: wrap; gap: 4px; padding: 4px; border-radius: 10px; background: var(--bg); }
+[data-ui].dialog .seg label { display: block; flex: 1 1 auto; }
 [data-ui].dialog .seg input { position: absolute; opacity: 0; pointer-events: none; }
-[data-ui].dialog .seg span { display: block; padding: 9px 4px; border-radius: 7px; text-align: center; font-size: 15px; font-weight: 500; cursor: pointer; transition: background-color 180ms ease; }
+[data-ui].dialog .seg span { display: block; padding: 9px 10px; white-space: nowrap; border-radius: 7px; text-align: center; font-size: 15px; font-weight: 500; cursor: pointer; transition: background-color 180ms ease; }
 [data-ui].dialog .seg span:hover { background: var(--raised); }
 [data-ui].dialog .seg input:checked + span { background: var(--raised); box-shadow: inset 0 0 0 2px var(--a-light); font-weight: 700; }
 [data-ui].dialog .seg input:focus-visible + span { outline: 2px solid var(--a-light); }
-[data-ui].dialog button { height: 52px; border: 0; border-radius: 10px; background: var(--ink); color: var(--bg); font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; transition: background-color 180ms ease, transform 140ms var(--ease-out); }
+[data-ui].dialog button { height: 48px; border: 0; border-radius: 10px; background: var(--ink); color: var(--bg); font: inherit; font-size: 17px; font-weight: 700; cursor: pointer; transition: background-color 180ms ease, transform 140ms var(--ease-out); }
 [data-ui].dialog button:hover { background: #fff; }
 [data-ui].dialog button:active { transform: scale(0.97); }
 
@@ -211,17 +225,43 @@
    Static CSS backgrounds on a layer behind the content, so text keeps its contrast. ---------- */
 .tex { position: relative; isolation: isolate; }
 .tex::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background-repeat: no-repeat; }
-/* The hero fire under decision A, every 30 minutes, rising behind the comparison sentences. */
-.tex-isocronas::before { background-image: url("/textures/isocronas.svg"); background-size: auto 118%; background-position: 4% 70%; opacity: .26; }
-/* The Penha's relief every 25 m, in dark ink on the teal field; its summit sits behind the form. */
-.tex-penha::before { background-image: url("/textures/penha-relevo.svg"); background-size: cover; background-position: 50% 50%; opacity: .32; }
+/* A topographic field: the whole grid's relief every 50 m, edge to edge, and the fire's hour lines over it at the
+   bottom right. A mask (not a visible gradient) fades both out under the heading and the intro. */
+.tex-isocronas::before, .tex-isocronas::after { -webkit-mask-image: linear-gradient(160deg, transparent 22%, #000 58%); mask-image: linear-gradient(160deg, transparent 22%, #000 58%); } /* taste-skill-ignore: a mask that keeps the lines away from the text */
+.tex-isocronas::before { background-image: url("/textures/guimaraes-relevo.svg"); background-size: cover; background-position: 55% 60%; opacity: .11; }
+.tex-isocronas::after { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; background: url("/textures/isocronas.svg") no-repeat 96% 100% / auto 70%; opacity: .14; }
+/* The Penha's relief every 50 m, in dark ink on the teal field; its summit sits behind the form. */
+.tex-penha::before { background-image: url("/textures/penha-relevo.svg"); background-size: cover; background-position: 50% 50%; opacity: .2; }
 /* Every 100 m cell of the Guimarães grid that holds buildings, one dot each: the city the page is made in. */
-.tex-edificios::before { background-image: url("/textures/edificios.svg"); background-size: auto 260%; background-position: 54% 38%; opacity: .2; }
+.tex-edificios::before { background-image: url("/textures/edificios.svg"); background-size: auto 260%; background-position: 54% 38%; opacity: .12; }
 /* Narrower screens: the isochrones move under the sentences (whose panels are opaque), away from the intro, and
    the footer's dot field is left out where it would sit under the credits. */
 @media (max-width: 1023px) {
-  .tex-isocronas::before { background-size: auto 62%; background-position: 100% 92%; }
+  .tex-isocronas::after { background-size: auto 45%; }
 }
 @media (max-width: 639px) {
   .tex-edificios::before { content: none; }
 }
+
+/* The divider's hint, as the interface's pill under its divider: gone after the first drag or arrow key. */
+[data-ui] .drag-hint { position: absolute; bottom: clamp(56px, 10svh, 88px); left: 50%; transform: translateX(-50%); padding: 6px 12px; border-radius: 999px; background: #fff; color: #18211f; font-size: 14px; font-weight: 700; white-space: nowrap; box-shadow: var(--map-shadow); pointer-events: none; transition: opacity 240ms ease; }
+[data-ui] .drag-hint.is-gone { opacity: 0; }
+/* Phones: the hero frame is closer, on the fire's head (the divider's start); the hint moves up, off the fire. */
+@media (max-width: 639px) {
+  [data-ui] .poster { transform: scale(1.5); transform-origin: 72% 64%; }
+  [data-ui] .drag-hint { top: 52px; bottom: auto; }
+}
+[data-ui] .divider:focus-visible .divider-handle { outline: 3px solid var(--a-light); outline-offset: 2px; }
+
+/* The title words, by the user's decision: "fogo" burns in the map's hour ramp, "decisões" moves like water in
+   the decision inks. Only the ramp's light end (4.5:1 or better on the ground) is used. Static under reduced motion. */
+.word-fire, .word-water { display: inline-block; -webkit-background-clip: text; background-clip: text; color: transparent; padding: 0.06em 0.03em 0.2em; margin: -0.06em -0.03em -0.2em; } /* taste-skill-ignore: the two title words carry fire and water, the user's request */
+.word-fire { background-image: linear-gradient(to top, #f6d35a 25%, #f5b04c 55%, #f39d42 85%, #f6d35a); background-size: 100% 200%; background-position: 50% 100%; } /* taste-skill-ignore: fire ramp inside the word, the user's request */
+.word-water { background-image: linear-gradient(90deg, #3db6c1, #a08cf5 50%, #3db6c1); background-size: 200% 100%; } /* taste-skill-ignore: decision inks inside the word, the user's request */
+/* One run with the filters' (Hero.tsx HEAT: 1.1 s in, 4 s long), ending where it started. */
+@media (prefers-reduced-motion: no-preference) {
+  .word-fire { filter: url(#lz-fire); animation: flow 4s linear 1.1s both; }
+  .word-water { filter: url(#lz-water); animation: tide 4s var(--ease-in-out) 1.1s both; }
+}
+@keyframes flow { to { background-position: 50% -100%; } }
+@keyframes tide { 50% { background-position: 60% 0; } }

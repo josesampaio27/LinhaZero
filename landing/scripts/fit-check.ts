@@ -18,12 +18,19 @@ const port = 9351;
 const MEASURE = `(() => {
   const vh = innerHeight, vw = innerWidth;
   const sections = [...document.querySelectorAll("#root > header, main > section, #root > footer")];
-  const TEXT = "h1,h2,h3,p,li,dt,dd,th,td,a,button,label,input,figcaption,legend,span.map-title";
+  const TEXT = "h1,h2,h3,p,li,dt,dd,th,td,a,button,label,input,textarea,figcaption,legend,span.map-title";
   return sections.map((s) => {
     const r = s.getBoundingClientRect();
+    // Visually hidden on purpose (a honeypot, .sr-only, a skip link at rest): clipped to 1 px somewhere up the tree,
+    // or placed wholly off the screen. Those are not spills.
+    const hiddenOnPurpose = (el) => {
+      for (let n = el; n && n !== s; n = n.parentElement) { const b = n.getBoundingClientRect(); if (b.width <= 1 && b.height <= 1) return true; }
+      const e = el.getBoundingClientRect();
+      return e.right <= 0 || e.left >= vw;
+    };
     const spill = [...s.querySelectorAll(TEXT)].filter((el) => {
       const e = el.getBoundingClientRect();
-      if (!e.width || !e.height || getComputedStyle(el).visibility === "hidden") return false;
+      if (!e.width || !e.height || getComputedStyle(el).visibility === "hidden" || hiddenOnPurpose(el)) return false;
       return e.bottom > r.bottom + 1 || e.top < r.top - 1 || e.right > vw + 1 || e.left < -1;
     }).map((el) => el.tagName.toLowerCase() + ": " + (el.textContent || el.value || "").trim().slice(0, 40));
     return { id: s.id || s.tagName.toLowerCase(), h: Math.round(r.height), vh, fits: r.height <= vh + 0.5, spill };
