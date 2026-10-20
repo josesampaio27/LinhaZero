@@ -120,6 +120,16 @@ services:
     depends_on:
       - api
 
+  landing:
+    build:
+      context: ..
+      dockerfile: landing/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3001:8080"
+    volumes:
+      - ../web/public/grids:/usr/share/nginx/html/grids:ro
+
   geo-pipeline:
     build: ../data-prep
     profiles: ["batch"]

@@ -24,6 +24,7 @@ Este comando arranca tudo:
 | Serviço | O que faz | Endereço |
 | --- | --- | --- |
 | `web` | A interface (nginx), que encaminha `/api` para a API | http://localhost:3000 |
+| `landing` | A página de apresentação (nginx) | http://localhost:3001 |
 | `api` | API REST + SSE (.NET 10); documentação interativa (Swagger UI) | http://localhost:3000/api/docs |
 | `ingest` | Recolhe o tempo (IPMA, Open-Meteo) e as ocorrências (fogos.pt) | 127.0.0.1:8081 |
 | `engine-worker` | Corre o motor para os ensembles pedidos ao servidor | — |

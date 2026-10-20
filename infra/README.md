@@ -23,6 +23,7 @@ O nome do projeto é `linha-zero`, por isso os volumes chamam-se `linha-zero_pgd
 | Serviço | Imagem | Porta no host | Função |
 | --- | --- | --- | --- |
 | `web` | `web/` (build Node 24, servida por `nginx-unprivileged:1.28.0-alpine`) | 3000 | A interface compilada; encaminha `/api` para a API (SSE sem buffering) e serve as grelhas de `web/public/grids` |
+| `landing` | `landing/` (build Node 24, servida por `nginx-unprivileged:1.28.0-alpine`) | 3001 | A página de apresentação compilada; serve a grelha do relevo de `web/public/grids` |
 | `postgres` | `postgres:16.12-alpine` | 5432 | `snapshots`, `source_status`, `runs`, `run_rasters` (`infra/db/001_init.sql`, aplicado quando o volume `pgdata` está vazio) |
 | `nats` | `nats:2.10.29-alpine` (JetStream) | 4222, 8222 (monitor) | Stream `RUNS` = `runs.jobs` (fila de trabalho); eventos `runs.<id>.events` em NATS core |
 | `ingest` | `backend/src/LinhaZero.Ingest` (.NET 10) | 127.0.0.1:8081 | Recolhe IPMA, Open-Meteo e fogos.pt em intervalos fixos; um líder por advisory lock; `GET /health/ready` |
