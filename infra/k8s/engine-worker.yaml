@@ -15,14 +15,14 @@ spec:
       initContainers:
         - name: grids
           image: linhazero-grids
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command: ["cp", "-r", "/grids/.", "/out/"]
           volumeMounts:
             - { name: grids, mountPath: /out }
       containers:
         - name: engine-worker
           image: linhazero-engine-worker
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - { name: PGHOST, value: postgres }
             - { name: PGUSER, value: dois }

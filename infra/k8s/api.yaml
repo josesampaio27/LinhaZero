@@ -15,14 +15,14 @@ spec:
       initContainers:
         - name: grids
           image: linhazero-grids
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command: ["cp", "-r", "/grids/.", "/out/"]
           volumeMounts:
             - { name: grids, mountPath: /out }
       containers:
         - name: api
           image: linhazero-api
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: LZ_DOMAIN
               valueFrom: { configMapKeyRef: { name: linhazero-config, key: LZ_DOMAIN } }
@@ -38,7 +38,7 @@ spec:
             - { name: OIDC_CLIENT_ID, value: linhazero-app }
             - name: OIDC_CLIENT_SECRET
               valueFrom: { secretKeyRef: { name: linhazero-secrets, key: OIDC_CLIENT_SECRET } }
-            - { name: LANDING_URL, value: "https://landing.$(LZ_DOMAIN)/" }
+            - { name: LANDING_URL, value: "https://$(LZ_DOMAIN)/" }
             - { name: APP_URL, value: "https://app.$(LZ_DOMAIN)/" }
             # "Pedir acesso": the landing's origins, and the API's own Keycloak client that creates approved accounts.
             - { name: CORS_ORIGINS, value: "https://landing.$(LZ_DOMAIN),https://$(LZ_DOMAIN)" }

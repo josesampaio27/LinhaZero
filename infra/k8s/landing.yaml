@@ -14,14 +14,14 @@ spec:
       initContainers:
         - name: grids
           image: linhazero-grids
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           command: ["cp", "-r", "/grids/.", "/out/"]
           volumeMounts:
             - { name: grids, mountPath: /out }
       containers:
         - name: landing
           image: linhazero-landing
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           ports:
             - { name: http, containerPort: 8080 }
           readinessProbe:

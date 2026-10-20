@@ -23,11 +23,11 @@ configMapGenerator:
   - name: postgres-init
     files: [db/000_keycloak.sh, db/001_init.sql, db/002_users.sql, db/003_access_requests.sql]
 
-secretGenerator:
-  # Copy k8s/secrets.env.example to k8s/secrets.env (gitignored) and fill it in.
-  - name: linhazero-secrets
-    envs: [k8s/secrets.env]
+# The secret linhazero-secrets is not generated here: it is created once in the cluster from k8s/secrets.env
+# (k8s/README.md, step 4), so the deploy job (k8s/deploy.sh) can apply this folder without ever holding the passwords.
 
+# `main` is for a quick manual look only: k8s/deploy.sh swaps it for the commit sha it deploys (the pods use
+# imagePullPolicy IfNotPresent, so a moving tag would not be pulled again).
 images:
   - { name: linhazero-api, newName: ghcr.io/josesampaio27/linhazero-api, newTag: main }
   - { name: linhazero-ingest, newName: ghcr.io/josesampaio27/linhazero-ingest, newTag: main }

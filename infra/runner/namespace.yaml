@@ -1,0 +1,11 @@
+# arc-systems: the controller. arc-runners: the runner pods (one per job, gone when the job ends) and the secret
+# arc-github, the GitHub token the controller registers them with.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arc-systems
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: arc-runners
