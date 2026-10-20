@@ -122,6 +122,61 @@ export class IncidentsClient {
     }
 }
 
+export class MeClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Who is signed in. 401 without a session: the web then sends the browser to the login.
+     * @return OK
+     */
+    get(signal?: AbortSignal): Promise<MeResponse> {
+        let url_ = this.baseUrl + "/api/v1/me";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            signal,
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processGet(_response);
+        });
+    }
+
+    protected processGet(response: Response): Promise<MeResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as MeResponse;
+            return result200;
+            });
+        } else if (status === 401) {
+            return response.text().then((_responseText) => {
+            let result401: any = null;
+            result401 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ErrorResponse;
+            return throwException("Unauthorized", status, _responseText, _headers, result401);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<MeResponse>(null as any);
+    }
+}
+
 export class RunsClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -502,6 +557,12 @@ export interface InterventionCells {
 export interface JsonElement {
 
     [key: string]: any;
+}
+
+/** The GET /api/v1/me body: who is signed in, as Keycloak named them. */
+export interface MeResponse {
+    name: string;
+    email: string | null;
 }
 
 /** Current wind from the Open-Meteo model at the nearest lattice point; cloud cover in % (fuel moisture). */

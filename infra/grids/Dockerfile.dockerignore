@@ -1,0 +1,3 @@
+# Only the grids; the root .dockerignore leaves them out of every other image.
+*
+!web/public/grids

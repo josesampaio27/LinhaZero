@@ -1,0 +1,44 @@
+# Engine workers: take one run at a time from the NATS queue. Throughput grows with replicas.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: engine-worker
+spec:
+  replicas: 2
+  selector:
+    matchLabels: { app: engine-worker }
+  template:
+    metadata:
+      labels: { app: engine-worker }
+    spec:
+      terminationGracePeriodSeconds: 30
+      initContainers:
+        - name: grids
+          image: linhazero-grids
+          imagePullPolicy: Always
+          command: ["cp", "-r", "/grids/.", "/out/"]
+          volumeMounts:
+            - { name: grids, mountPath: /out }
+      containers:
+        - name: engine-worker
+          image: linhazero-engine-worker
+          imagePullPolicy: Always
+          env:
+            - { name: PGHOST, value: postgres }
+            - { name: PGUSER, value: dois }
+            - { name: PGDATABASE, value: dois }
+            - name: PGPASSWORD
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: POSTGRES_PASSWORD } }
+            - { name: NATS_URL, value: "nats://nats:4222" }
+            - { name: GRIDS_DIR, value: /grids }
+          livenessProbe:
+            httpGet: { path: /healthz, port: 9090 }
+            periodSeconds: 30
+            timeoutSeconds: 15
+          resources:
+            requests: { cpu: 500m, memory: 256Mi }
+            limits: { memory: 1Gi }
+          volumeMounts:
+            - { name: grids, mountPath: /grids, readOnly: true }
+      volumes:
+        - { name: grids, emptyDir: {} }

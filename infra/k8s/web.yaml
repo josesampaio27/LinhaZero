@@ -1,0 +1,45 @@
+# The app's pages on app.<domain> (the tunnel sends app.<domain>/api to the api service instead).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: web }
+  template:
+    metadata:
+      labels: { app: web }
+    spec:
+      initContainers:
+        - name: grids
+          image: linhazero-grids
+          imagePullPolicy: Always
+          command: ["cp", "-r", "/grids/.", "/out/"]
+          volumeMounts:
+            - { name: grids, mountPath: /out }
+      containers:
+        - name: web
+          image: linhazero-web
+          imagePullPolicy: Always
+          ports:
+            - { name: http, containerPort: 8080 }
+          readinessProbe:
+            httpGet: { path: /, port: http }
+            periodSeconds: 10
+          resources:
+            requests: { cpu: 20m, memory: 32Mi }
+            limits: { memory: 128Mi }
+          volumeMounts:
+            - { name: grids, mountPath: /usr/share/nginx/html/grids, readOnly: true }
+      volumes:
+        - { name: grids, emptyDir: {} }
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  selector: { app: web }
+  ports:
+    - { name: http, port: 8080, targetPort: http }

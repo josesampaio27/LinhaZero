@@ -9,23 +9,61 @@ O motor simula o fogo sem combate, exceto o que se desenha, e foi validado em 80
 
 ## Como correr
 
-Requisitos: Docker com Docker Compose 2.20 ou mais recente (o Docker Desktop já traz). Não é preciso Node, .NET nem Python.
+Requisitos: Docker com Docker Compose 2.20 ou mais recente (o Docker Desktop já traz), e as portas 80 e 443 livres. Não é preciso Node, .NET nem Python. Funciona em macOS, Linux e Windows; o comando abaixo é o mesmo no Terminal e no PowerShell.
 
-Na raiz do repositório:
+### Primeira vez
+
+Todos os comandos correm na raiz do repositório.
+
+**1. Arrancar tudo.** Demora alguns minutos (descarrega as imagens e compila tudo); as vezes seguintes arrancam em segundos. Quem tem Node pode usar `npm run up`, que faz o mesmo.
 
 ```bash
 docker compose up -d --build
 ```
 
-Abre **http://localhost:3000**. A primeira vez demora alguns minutos (descarrega as imagens e compila tudo); as seguintes arrancam em segundos. Quem tem Node pode usar `npm run up`, que faz o mesmo.
+**2. Confiar no certificado local.** O HTTPS local usa uma autoridade de certificação do próprio proxy (Caddy); sem este passo o browser avisa que a ligação não é segura. Faz-se uma vez por máquina, com o passo 1 já a correr. Depois, fechar e voltar a abrir o browser.
 
-Este comando arranca tudo:
+macOS (Terminal):
+
+```bash
+docker compose cp proxy:/data/caddy/pki/authorities/local/root.crt /tmp/caddy-root.crt
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/caddy-root.crt
+```
+
+Windows (PowerShell aberto **como administrador**, na pasta do repositório):
+
+```powershell
+docker compose cp proxy:/data/caddy/pki/authorities/local/root.crt "$env:TEMP\caddy-root.crt"
+Import-Certificate -FilePath "$env:TEMP\caddy-root.crt" -CertStoreLocation Cert:\LocalMachine\Root
+```
+
+No Firefox, se o aviso continuar: `about:config` → `security.enterprise_roots.enabled` → `true`. O Safari não abre `*.localhost`; usar o Chrome, o Edge ou o Firefox (ou ver as notas em [Login](infra/README.md#login-keycloak)).
+
+**3. Só para quem já tinha corrido o projeto antes do login.** A base de dados antiga não tem as tabelas novas nem a base do Keycloak, e sem elas o "Entrar" dá erro. Os mesmos comandos no Terminal e no PowerShell:
+
+```bash
+docker compose cp infra/db/000_keycloak.sh postgres:/tmp/000_keycloak.sh
+docker compose exec -e KEYCLOAK_DB_PASSWORD=keycloak -e POSTGRES_USER=dois -e POSTGRES_DB=dois postgres sh /tmp/000_keycloak.sh
+docker compose cp infra/db/002_users.sql postgres:/tmp/002_users.sql
+docker compose exec postgres psql -U dois -d dois -f /tmp/002_users.sql
+docker compose up -d --build
+```
+
+Em alternativa, quem não precisa dos dados antigos começa do zero: `docker compose down -v` e depois `docker compose up -d --build`.
+
+**4. Abrir.** **https://linhazero.localhost** → "Entrar", com o utilizador de teste `dev@linhazero.localhost` / `linhazero-dev`. Os cenários de demonstração abrem sem login. O Keycloak demora um minuto a ficar pronto depois de arrancar: se o "Entrar" der erro logo no início, esperar e tentar de novo.
+
+No Windows, se o passo 1 disser que as portas 80 ou 443 estão ocupadas, `netstat -ano | findstr ":80 :443"` mostra que programa as usa. Mais detalhes (dar acesso a outras pessoas, consola de administração, `npm run dev`) em [Login](infra/README.md#login-keycloak).
+
+### O que arranca
 
 | Serviço | O que faz | Endereço |
 | --- | --- | --- |
-| `web` | A interface (nginx), que encaminha `/api` para a API | http://localhost:3000 |
-| `landing` | A página de apresentação (nginx) | http://localhost:3001 |
-| `api` | API REST + SSE (.NET 10); documentação interativa (Swagger UI) | http://localhost:3000/api/docs |
+| `proxy` | A entrada HTTPS (Caddy): encaminha cada endereço para o seu serviço | portas 80 e 443 |
+| `landing` | A página de apresentação (nginx) | https://linhazero.localhost |
+| `web` | A interface (nginx) | https://app.linhazero.localhost |
+| `keycloak` | O login e a conta de cada utilizador | https://account.linhazero.localhost |
+| `api` | API REST + SSE (.NET 10); documentação interativa (Swagger UI) | https://app.linhazero.localhost/api/docs |
 | `ingest` | Recolhe o tempo (IPMA, Open-Meteo) e as ocorrências (fogos.pt) | 127.0.0.1:8081 |
 | `engine-worker` | Corre o motor para os ensembles pedidos ao servidor | — |
 | `postgres` | Base de dados: snapshots das fontes e corridas | 127.0.0.1:5432 |
@@ -86,7 +124,7 @@ A CI (`.github/workflows/ci.yml`) corre o typecheck, o lint, os testes (motor e 
    com o minuto de início. Para terminar, faz duplo clique ou carrega em Enter; Esc cancela.
 5. **Simular**. Para ver a incerteza, liga "Incerteza" e escolhe "no browser (30)" ou, com os serviços a correr, "no servidor (200)": o painel diz em quantos cenários de vento cada decisão é melhor. As variantes de grelha também correm no servidor.
 
-Um cenário em `web/public/scenarios/` (listado em `index.json`) abre com `http://localhost:3000/?scenario=<nome>` (ou `:5173` com `npm run dev`). Os cenários de demonstração são incêndios reais (Alijó 2019, Vieira do Minho 2016): a simulação parte da ignição e do tempo reais, e a camada "Fogo real" mostra o perímetro observado à hora da barra de tempo.
+Um cenário em `web/public/scenarios/` (listado em `index.json`) abre com `https://app.linhazero.localhost/?scenario=<nome>` (ou `http://localhost:5173/?scenario=<nome>` com `npm run dev`), sem login. Os cenários de demonstração são incêndios reais (Alijó 2019, Vieira do Minho 2016): a simulação parte da ignição e do tempo reais, e a camada "Fogo real" mostra o perímetro observado à hora da barra de tempo.
 
 ### Editor de grelha
 

@@ -1,4 +1,5 @@
 using System.Text.Json.Serialization;
+using LinhaZero.Api.Auth;
 using LinhaZero.Api.Messaging;
 using LinhaZero.Api.OpenApi;
 using LinhaZero.Api.Repositories;
@@ -47,6 +48,9 @@ services.AddSingleton<RunQueue>();
 services.AddSingleton<GridCatalog>();
 services.AddHostedService<NatsStreamSetup>();
 
+// Login and sessions (Auth/AuthSetup.cs): every endpoint needs a session unless it is [AllowAnonymous]
+services.AddLinhaZeroAuth(config);
+
 // Application services (no per-request state, so singletons)
 services.AddSingleton<SnapshotReader>();
 services.AddSingleton<WeatherService>();
@@ -87,8 +91,16 @@ services.AddOpenApi(openApi =>
 var app = builder.Build();
 app.Logger.LogInformation("API pronta; grelhas em {Grids}", app.Services.GetRequiredService<GridCatalog>().Directory);
 
-// Both under /api/, so the web container and Vite's proxy forward them too (http://localhost:3000/api/docs).
-app.MapOpenApi("/api/openapi/{documentName}.json");
+app.UseLinhaZeroAuth();
+
+// Both under /api/, so the proxy and Vite's proxy forward them too (https://app.linhazero.localhost/api/docs).
+// The document needs a session, except in Development.
+var openApi = app.MapOpenApi("/api/openapi/{documentName}.json");
+if (app.Environment.IsDevelopment())
+{
+    openApi.AllowAnonymous();
+}
+
 app.UseSwaggerUI(swagger =>
 {
     swagger.RoutePrefix = "api/docs";

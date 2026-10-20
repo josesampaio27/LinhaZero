@@ -1,2 +1,4 @@
 # The contract examples are read byte for byte by the .NET and Node tests: keep LF on every platform.
 contracts/examples/*.json text eol=lf
+# Shell scripts run inside Linux containers (infra/db/*.sh by Postgres) or in bash: a CRLF checkout on Windows breaks them.
+*.sh text eol=lf
