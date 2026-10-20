@@ -115,8 +115,9 @@ export function runDecision(grid: PreparedGrid, request: RunRequest, d: Decision
     durationMin: request.durationMin,
     interventions: request.decisions[d],
     // Always Rothermel (ADR 0058). Runs and seed from the client; jitter, perturbations and samples are the server's own.
-    ensemble: request.ensemble && rothermelEnsemble(request.ensemble, target.params),
-    params: rothermelParams(target.params),
+    // The calibration of the grid's resolution (100 m or 30 m, calibrationFor).
+    ensemble: request.ensemble && rothermelEnsemble(request.ensemble, target.params, grid.header.cellSize),
+    params: rothermelParams(target.params, grid.header.cellSize),
     ...parseSpreadModel(request.spreadModel, request.moisture),
     ...(request.weatherSteps != null && { weatherSteps: parseWeatherSteps(request.weatherSteps) }),
     ...(request.ignitions != null && { ignitions: parseIgnitions(request.ignitions, grid.header.rows, grid.header.cols) }),

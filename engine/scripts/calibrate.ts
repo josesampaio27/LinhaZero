@@ -2,6 +2,13 @@
 //   python data-prep/build_references.py --ptfs <PT-FireSprd_v0.08>      once: builds the cases
 //   npm run calibrate -w engine                                          fit, held-out tests, bootstrap
 //   npm run calibrate -w engine -- --quick                               fewer generations and samples
+//   npm run calibrate -w engine -- --cases ../data-prep/out/reference-30m --select <selection.json> \
+//     --incumbent physical --space groupsCrown --fixed crownFire=1 --label 30m      a 30 m calibration
+//
+// --cases: the folder of built cases (with its manifest.json; default the 100 m set). --select: the
+// pre-registered fires (fit, locked: see fire-selection.ts); without it, every tier A fire with an
+// interval is fitted. --incumbent: what a new fit must beat, "pt" (PT_CALIBRATION, the 100 m grid's) or
+// "physical" (no calibration: the engine's physical defaults).
 //
 // Objective: the interval cost (scripts/intervals.ts) averaged over fires, plus a weak prior towards the
 // physical defaults; 7 parameters (calibration-space.ts), fitted by CMA-ES on the tier A fires (fuel map
@@ -12,9 +19,11 @@
 // Uncertainty: refits on bootstrap resamples of the fires; the parameter sets are the samples the
 // ensemble draws. Writes engine/reports/pt-firesprd-<date>.json.
 import { execSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
-import { join } from "node:path";
-import { PT_CALIBRATION } from "../src/calibration";
+import { join, resolve } from "node:path";
+import { PT_CALIBRATION, PT_CALIBRATION_SEEN } from "../src/calibration";
+import { SECTOR_FRACTION, SEED_SHARE } from "../src/spread-rothermel";
 import type { ModelParams } from "../src/params";
 import { createRng } from "../src/random";
 import { Pool, type CaseRef } from "./calibration-pool";
@@ -52,6 +61,13 @@ const text = (name: string, fallback: string) => {
 const WEATHER = text("weather", "era5") as WeatherSource;
 const MOISTURE = text("moisture", "nfdrs") as MoistureModel;
 const LABEL = text("label", "");
+const CASES = resolve(text("cases", FULL_REFERENCE_DIR));
+const SELECT = text("select", "");
+const INCUMBENT = text("incumbent", "pt");
+if (INCUMBENT !== "pt" && INCUMBENT !== "physical") throw new Error(`--incumbent pt ou physical, não ${INCUMBENT}`);
+const OUTDIR = text("outdir", "");
+// "all": 5-fold, leave-one-year-out and Norte left out; "folds": the 5-fold split only (structural hypotheses).
+const SPLITS = text("splits", "all");
 // What is fitted (calibration-space.ts SPACES) and on what: "all" intervals (slow ones at 0.25) or
 // "free" (free-running intervals only: the engine simulates an unfought fire, ADR 0057).
 const SPACE_NAME = text("space", "groups");
@@ -70,15 +86,21 @@ const FIXED: Partial<ModelParams> = Object.fromEntries(
 );
 const toParams = (x: number[]): Partial<ModelParams> => ({ ...FIXED, ...toSpaceParams(x, SPACE) });
 
-const manifest: ManifestEntry[] = JSON.parse(
-  readFileSync(join(REFERENCE_DIR, "manifest.json"), "utf8"),
-).cases;
-const entries = manifest.filter((e) => existsSync(join(FULL_REFERENCE_DIR, e.fire, "case.json")));
-if (entries.length < manifest.length)
-  console.warn(`aviso: ${manifest.length - entries.length} casos do manifesto por construir (build_references.py)`);
-const refs: CaseRef[] = entries.map((e) => ({ fire: e.fire, dir: FULL_REFERENCE_DIR }));
+// The cases' own manifest when the folder has one (a 30 m set), else the committed one (100 m).
+const manifestPath = existsSync(join(CASES, "manifest.json")) ? join(CASES, "manifest.json") : join(REFERENCE_DIR, "manifest.json");
+const manifestText = readFileSync(manifestPath, "utf8");
+const manifest: (ManifestEntry & { cellSize?: number })[] = JSON.parse(manifestText).cases;
+// A pre-registered selection (fire-selection.ts): the fires to fit, and a locked set only read at the end.
+const selection: { fit: string[]; locked?: string[]; rule?: unknown } | undefined = SELECT ? JSON.parse(readFileSync(SELECT, "utf8")) : undefined;
+const wanted = selection ? new Set([...selection.fit, ...(selection.locked ?? [])]) : undefined;
+const entries = manifest.filter((e) => (!wanted || wanted.has(e.fire)) && existsSync(join(CASES, e.fire, "case.json")));
+if (entries.length < (wanted ? wanted.size : manifest.length))
+  console.warn(`aviso: ${(wanted ? wanted.size : manifest.length) - entries.length} casos por construir (build_references.py)`);
+const cellSizes = [...new Set(entries.map((e) => e.cellSize ?? 100))];
+const refs: CaseRef[] = entries.map((e) => ({ fire: e.fire, dir: CASES }));
 const all = entries.map((_, i) => i);
 const pool = new Pool(refs, undefined, { weather: WEATHER, moisture: MOISTURE, freeOnly: OBJECTIVE === "free" });
+console.log(`casos ${CASES} (células de ${cellSizes.join(", ")} m), incumbente ${INCUMBENT}`);
 console.log(`tempo ${WEATHER}, humidade ${MOISTURE}, espaço ${SPACE_NAME}, objetivo ${OBJECTIVE}${Object.keys(FIXED).length ? `, fixos ${JSON.stringify(FIXED)}` : ""}`);
 
 const mean = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / xs.length;
@@ -88,7 +110,8 @@ const elapsed = () => `${((performance.now() - t0) / 60_000).toFixed(1)} min`;
 
 // Reference parameter sets, scored once on every fire.
 const UNCALIBRATED: Partial<ModelParams> = {};
-const CURRENT = PT_CALIBRATION as Partial<ModelParams>;
+// What a new fit must beat ("current" below): the 100 m calibration, or the physical model.
+const CURRENT: Partial<ModelParams> = INCUMBENT === "pt" ? (PT_CALIBRATION as Partial<ModelParams>) : {};
 console.log(`${entries.length} casos; a pontuar as referências (${elapsed()})`);
 const [costUncal, costCurrent, costLegacy] = await Promise.all([
   pool.scores(UNCALIBRATED, all),
@@ -96,12 +119,17 @@ const [costUncal, costCurrent, costLegacy] = await Promise.all([
   pool.scores(undefined, all, { metric: "intervals", model: "legacy" }),
 ]);
 // Fires with an interval to score in tier A are fitted; the rest only validate.
-const fitSet = all.filter((i) => entries[i].tier === "A" && entries[i].fit && Number.isFinite(costUncal[i]));
-const tierB = all.filter((i) => entries[i].tier === "B" && Number.isFinite(costUncal[i]));
+const fitSet = all.filter(
+  (i) => entries[i].tier === "A" && entries[i].fit && Number.isFinite(costUncal[i]) && (!selection || selection.fit.includes(entries[i].fire)),
+);
+// Validation only: the locked set of a selection, or else every tier B fire.
+const tierB = all.filter(
+  (i) => Number.isFinite(costUncal[i]) && (selection ? (selection.locked ?? []).includes(entries[i].fire) : entries[i].tier === "B"),
+);
 console.log(`ajuste em ${fitSet.length} fogos (tier A), validação extra em ${tierB.length} (tier B)`);
 
 /** Fits on `fires` (bootstrap: with multiplicities `weights`), from x0. */
-async function fit(fires: number[], generations: number, x0: number[], sigma: number, seed: number, weights?: number[]) {
+async function fit(fires: number[], generations: number, x0: number[], sigma: number, seed: number, weights?: number[], trace?: { gen: number; f: number; sigma: number }[]) {
   const w = weights ?? fires.map(() => 1);
   const wSum = w.reduce((a, b) => a + b, 0);
   return cmaes(
@@ -110,7 +138,7 @@ async function fit(fires: number[], generations: number, x0: number[], sigma: nu
       return costs.map((c, k) => c.reduce((s, v, j) => s + w[j] * v, 0) / wSum + penalty(xs[k], SPACE));
     },
     x0,
-    { sigma, maxGenerations: generations, seed, lambda: 12 },
+    { sigma, maxGenerations: generations, seed, lambda: 12, onGeneration: trace && ((gen, b, sg) => trace.push({ gen, f: b.f, sigma: sg })) },
   );
 }
 
@@ -122,7 +150,8 @@ const show = (p: Partial<ModelParams>) =>
 
 // 1. The fit on every tier A fire.
 console.log(`\n[1] ajuste em todos os fogos tier A (${GENERATIONS} gerações)`);
-const best = await fit(fitSet, GENERATIONS, xStart, 0.7, SEED);
+const convergence: { gen: number; f: number; sigma: number }[] = [];
+const best = await fit(fitSet, GENERATIONS, xStart, 0.7, SEED, undefined, convergence);
 const bestParams = toParams(best.x);
 console.log(`  J ${f2(best.f)}: ${show(bestParams)} (${elapsed()})`);
 
@@ -133,18 +162,29 @@ interface Split {
   fitted: Partial<ModelParams>;
 }
 const rng = createRng(SEED + 100);
-const shuffled = [...fitSet].sort(() => rng() - 0.5);
+// Fisher–Yates with the seeded generator (sorting by a random comparator is biased).
+const shuffled = [...fitSet];
+for (let i = shuffled.length - 1; i > 0; i--) {
+  const j = Math.floor(rng() * (i + 1));
+  [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+}
 const splits: { name: string; test: number[] }[] = [];
 for (let k = 0; k < 5; k++) splits.push({ name: `5-fold ${k + 1}`, test: shuffled.filter((_, i) => i % 5 === k) });
-for (const year of [...new Set(fitSet.map((i) => entries[i].year))].sort())
-  splits.push({ name: `sem ${year}`, test: fitSet.filter((i) => entries[i].year === year) });
-splits.push({ name: "sem Norte", test: fitSet.filter((i) => entries[i].region === "Norte") });
+if (SPLITS === "all") {
+  for (const year of [...new Set(fitSet.map((i) => entries[i].year))].sort())
+    splits.push({ name: `sem ${year}`, test: fitSet.filter((i) => entries[i].year === year) });
+  splits.push({ name: "sem Norte", test: fitSet.filter((i) => entries[i].region === "Norte") });
+}
 
 const done: Split[] = [];
 console.log(`\n[2] testes com fogos deixados de fora (${FOLD_GENERATIONS} gerações cada)`);
 for (const s of splits) {
   const train = fitSet.filter((i) => !s.test.includes(i));
-  if (!s.test.length || train.length < 3) continue;
+  if (!s.test.length) continue;
+  if (train.length < 3) {
+    console.warn(`  aviso: ${s.name} ignorado (só ${train.length} fogos para ajustar)`);
+    continue;
+  }
   const r = await fit(train, FOLD_GENERATIONS, xStart, 0.7, SEED + done.length + 1);
   done.push({ ...s, fitted: toParams(r.x) });
   console.log(`  ${s.name.padEnd(12)} ${s.test.length} fogos de teste (${elapsed()})`);
@@ -196,7 +236,8 @@ const pooled = (k: "fitted" | "uncalibrated" | "current" | "legacy", m: "cost" |
 };
 // The current calibration was fitted on these fires (ADR 0053), so it is not held out on them: the fair
 // comparison with it uses only the other tier A fires.
-const OLD_FIT = new Set(["Alijo_24072019", "Baiao_04092019", "CastroDaire_07092020", "OliveiraFrades_07092020", "SaoJoaoPesqueira_10072020", "Valenca_04092019", "Valpacos_13092019"]);
+// Fires the incumbent was fitted on (none for the physical model).
+const OLD_FIT = new Set<string>(INCUMBENT === "pt" ? PT_CALIBRATION_SEEN : []);
 const foldIdx = done.map((s, k) => [s, k] as const).filter(([s]) => s.name.startsWith("5-fold"));
 function pooledOn(keep: (fire: number) => boolean) {
   const per = { cost: { fitted: [] as number[], uncalibrated: [] as number[], current: [] as number[], legacy: [] as number[] }, sorensen: { fitted: [] as number[], uncalibrated: [] as number[], current: [] as number[], legacy: [] as number[] } };
@@ -222,7 +263,8 @@ const heldOut = {
   newFires: pooledOn((i) => !OLD_FIT.has(entries[i].fire)),
 };
 
-// 3. Bootstrap: refit on fires drawn with replacement, warm-started from the best fit.
+// 3. Bootstrap: refit on fires drawn with replacement, each from the physical defaults like the main fit
+// (starting at the best fit shrank the samples towards it and understated the uncertainty).
 console.log(`\n[3] bootstrap: ${BOOTSTRAP} reajustes (${BOOT_GENERATIONS} gerações cada)`);
 const brng = createRng(SEED + 200);
 const samples: Partial<ModelParams>[] = [];
@@ -233,7 +275,7 @@ for (let b = 0; b < BOOTSTRAP; b++) {
     counts.set(i, (counts.get(i) ?? 0) + 1);
   }
   const fires = [...counts.keys()];
-  const r = await fit(fires, BOOT_GENERATIONS, best.x, 0.25, SEED + 300 + b, fires.map((i) => counts.get(i)!));
+  const r = await fit(fires, BOOT_GENERATIONS, xStart, 0.7, SEED + 300 + b, fires.map((i) => counts.get(i)!));
   samples.push(toParams(r.x));
   if ((b + 1) % 5 === 0 || b === BOOTSTRAP - 1) console.log(`  ${b + 1}/${BOOTSTRAP} (${elapsed()})`);
 }
@@ -287,13 +329,37 @@ const physics = (() => {
 // interval cost and the Sørensen from the ignition. Objective "free" (unfought fire, ADR 0057): better
 // free-running cost, fast runs closer to observed, and early-hours Sørensen not worse; whole-fire
 // Sørensen is reported but does not decide, since the real fires were fought.
-const adopt =
+// Paired comparison on the held-out fires the incumbent has not seen: per fire, the fold fit minus the
+// incumbent, with a bootstrap over fires for a 90% interval (ADR 0061). Adopt when the cost falls by at
+// least 0.02 with an interval below 0, the Sørensen from the ignition does not fall by more than 0.01, and
+// the locked fires (if any) do not get worse on average.
+const paired = (() => {
+  const dc: number[] = [], ds: number[] = [];
+  for (const [s, k] of foldIdx)
+    s.test.forEach((i, j) => {
+      if (OLD_FIT.has(entries[i].fire)) return;
+      dc.push(testCost[k][j] - costCurrent[i]);
+      ds.push(testCum[k][j] - cumCurrent[i]);
+    });
+  const prng = createRng(SEED + 400);
+  const boot = Array.from({ length: 4000 }, () => {
+    let a = 0;
+    for (let k = 0; k < dc.length; k++) a += dc[Math.floor(prng() * dc.length)];
+    return a / dc.length;
+  }).sort((a, b) => a - b);
+  return { fires: dc.length, cost: mean(dc), costP05: boot[200], costP95: boot[3799], sorensen: mean(ds) };
+})();
+const lockedCost = tierB.length ? { fitted: mean(tierB.map((i) => costBestAll[i])), current: mean(tierB.map((i) => costCurrent[i])) } : undefined;
+const adoptPaired =
+  paired.cost <= -0.02 && paired.costP95 < 0 && paired.sorensen >= -0.01 && (!lockedCost || lockedCost.fitted <= lockedCost.current);
+const adoptOld =
   OBJECTIVE === "free"
     ? heldOut.cost.fitted < heldOut.cost.current &&
       Math.abs(Math.log(physics.rates.fitted.fast.medianRatio)) < Math.abs(Math.log(physics.rates.current.fast.medianRatio)) &&
       physics.early.fitted >= physics.early.current - 0.005
     : heldOut.newFires.cost.fitted < heldOut.newFires.cost.current &&
       heldOut.newFires.sorensen.fitted > heldOut.newFires.sorensen.current;
+const adopt = OBJECTIVE === "free" ? adoptOld : adoptPaired;
 
 console.log(`\nParâmetros: ${show(bestParams)}`);
 console.log("Intervalo 90% (bootstrap): " + SPACE.map((d) => `${d.name} ${quantiles[d.name].p05.toFixed(2)}–${quantiles[d.name].p95.toFixed(2)}`).join(", "));
@@ -322,13 +388,20 @@ console.log(
     `Sørensen ${f2(on(cumBest, tierB))} (atual ${f2(on(cumCurrent, tierB))})`,
 );
 console.log(`Brier (${BRIER_RUNS} realizações, tier A): só o melhor ${f2(mean(brierBest))}, com as amostras ${f2(mean(brierSamples))}, calib. atual ${f2(mean(brierCurrent))}`);
-console.log(adopt ? "\nADOTAR: melhor que a calibração atual nos fogos que nenhuma viu." : "\nNÃO ADOTAR: não melhora a calibração atual nos fogos que nenhuma viu.");
+console.log(
+  `\nEmparelhado nos ${paired.fires} fogos de teste que o incumbente (${INCUMBENT}) não viu: custo ${paired.cost >= 0 ? "+" : ""}${f2(paired.cost)} ` +
+    `(90%: ${f2(paired.costP05)} a ${f2(paired.costP95)}), Sørensen ${paired.sorensen >= 0 ? "+" : ""}${f2(paired.sorensen)}` +
+    (lockedCost ? `; fogos fechados (${tierB.length}): custo ${f2(lockedCost.fitted)} contra ${f2(lockedCost.current)}` : ""),
+);
+console.log(adopt ? "\nADOTAR: melhor que o incumbente nos fogos que nenhum viu." : "\nNÃO ADOTAR: não melhora o incumbente nos fogos que nenhum viu.");
 
 const date = new Date().toISOString().slice(0, 10);
-const id = `pt-firesprd-${date}`;
+const cellTag = cellSizes.length === 1 && cellSizes[0] !== 100 ? `${cellSizes[0]}m-` : "";
+const id = `pt-firesprd-${cellTag}${date}`;
 const git = (() => {
   try {
-    return execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim();
+    const dirty = execSync("git status --porcelain -- src scripts", { encoding: "utf8", cwd: import.meta.dirname }).trim() ? "+changes" : "";
+    return execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim() + dirty;
   } catch {
     return "?";
   }
@@ -340,6 +413,15 @@ const out = {
   created: date,
   git,
   adopt,
+  adoption: { rule: "paired held-out cost ≤ −0.02, 90% bootstrap interval < 0, Sørensen ≥ −0.01, locked set not worse (ADR 0061)", incumbent: INCUMBENT, incumbentParams: CURRENT, paired, locked: lockedCost, oldRule: adoptOld },
+  provenance: {
+    cases: CASES,
+    cellSizes,
+    manifestSha256: createHash("sha256").update(manifestText).digest("hex"),
+    selection: selection ?? null,
+    engine: { seedShare: SEED_SHARE, sectorFraction: SECTOR_FRACTION },
+  },
+  convergence,
   objective: "mean over fires of the weighted interval cost (1 − Sørensen of new cells + 0.5 |log growth ratio|), plus 0.01 Σ x² prior",
   space: SPACE_NAME,
   intervals: OBJECTIVE === "free" ? "free-running only" : "all, slow at 0.25",
@@ -352,6 +434,10 @@ const out = {
   quantiles,
   heldOut,
   splits: rows.map((r) => ({ ...r, fitted: round(r.fitted) })),
+  /** Every fit fire once, scored with the parameters fitted on the other folds (5-fold), for paired comparisons. */
+  heldOutPerFire: foldIdx.flatMap(([sp, k]) =>
+    sp.test.map((i, j) => ({ fire: entries[i].fire, fold: sp.name, cost: testCost[k][j], sorensen: testCum[k][j], current: { cost: costCurrent[i], sorensen: cumCurrent[i] } })),
+  ),
   tierB: {
     fires: tierB.map((i) => entries[i].fire),
     cost: { fitted: on(costBestAll, tierB), uncalibrated: on(costUncal, tierB), current: on(costCurrent, tierB), legacy: on(costLegacy, tierB) },
@@ -368,7 +454,7 @@ const out = {
 };
 // Experiments (--quick, or a --label) go to data-prep/out; only a full default run is a calibration.
 const experiment = quick || LABEL !== "";
-const outDir = join(import.meta.dirname, experiment ? "../../data-prep/out/calibration" : "../reports");
+const outDir = OUTDIR ? resolve(OUTDIR) : join(import.meta.dirname, experiment ? "../../data-prep/out/calibration" : "../reports");
 mkdirSync(outDir, { recursive: true });
 const outPath = join(outDir, `${id}${quick ? "-quick" : ""}${LABEL ? `-${LABEL}` : ""}.json`);
 writeFileSync(outPath, JSON.stringify(out, null, 1) + "\n");

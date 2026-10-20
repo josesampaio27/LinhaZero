@@ -2,6 +2,8 @@
 //   npm run validate -w engine                 all cases, default parameters
 //   npm run validate -w engine -- --rosAdj 1.5 --windAdj 1.2
 //   npm run validate -w engine -- --set all --intervals   the 80 fires (build_references.py), interval scores
+//   npm run validate -w engine -- --set ../data-prep/out/reference-30m   a folder of built cases (30 m)
+import { resolve } from "node:path";
 import { PT_CALIBRATION } from "../src/calibration";
 import type { ModelParams } from "../src/params";
 import { scoreIntervals, weightedCost } from "./intervals";
@@ -23,7 +25,7 @@ let intervals = false;
 for (let i = 0; i < args.length; i += 2) {
   const key = args[i].replace(/^--/, "");
   if (key === "runs") runs = Number(args[i + 1]);
-  else if (key === "set") dir = args[i + 1] === "all" ? FULL_REFERENCE_DIR : REFERENCE_DIR;
+  else if (key === "set") dir = args[i + 1] === "all" ? FULL_REFERENCE_DIR : args[i + 1] === "ci" ? REFERENCE_DIR : resolve(args[i + 1]);
   else if (key === "intervals") {
     intervals = true;
     i--; // a flag without a value

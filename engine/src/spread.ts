@@ -4,7 +4,7 @@ import { DEFAULT_PARAMS, type ModelParams } from "./params";
 import type { SurfaceBase } from "./rothermel";
 import { computeArrivalRothermel } from "./spread-rothermel";
 import type { RothermelRates } from "./surface";
-import type { CellRef, PreparedGrid } from "./types";
+import type { CellRef, Ignition, PreparedGrid } from "./types";
 
 // 8-neighbour offsets and the bearing (degrees clockwise from north) of each step.
 // Rows grow southwards, columns eastwards.
@@ -15,7 +15,7 @@ const BEARING = [0, 45, 90, 135, 180, 225, 270, 315];
 export interface SpreadInput {
   ignition: CellRef;
   /** Several ignited cells, each from its own minute (e.g. an observed perimeter); replaces `ignition`. */
-  ignitions?: { cell: CellRef; t0Min: number }[];
+  ignitions?: Ignition[];
   /** Direction the wind blows FROM, degrees clockwise from north. */
   windDirectionDeg: number;
   /** Wind speed, m/s. */

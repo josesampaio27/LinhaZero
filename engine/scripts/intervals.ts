@@ -6,9 +6,8 @@
 // interval are compared. Errors in rate and direction are measured where they happen, as in data
 // assimilation, instead of compounding.
 import type { ModelParams } from "../src/params";
-import { burnedAreaIgnitions, type ProjectedPoint } from "../src/scenario";
 import { simulate } from "../src/simulate";
-import type { CellRef, EnsembleOptions, PreparedGrid, Scenario, SpreadModel } from "../src/types";
+import type { EnsembleOptions, Ignition, PreparedGrid, Scenario, SpreadModel } from "../src/types";
 import {
   scenarioOf,
   weatherStepsOf,
@@ -24,8 +23,11 @@ export interface IntervalOptions {
   seed?: number;
   weather?: WeatherSource;
   moisture?: MoistureModel;
-  /** Intervals with fewer observed new cells than this are skipped (a 100 m grid loses small growth). */
-  minNewCells?: number;
+  /**
+   * Intervals whose observed new area is below this (ha) are skipped: small growth is mostly mapping
+   * error. In hectares, so the same intervals are scored at any cell size.
+   */
+  minNewHa?: number;
   /** Weight of an interval that is not free-running (slow, late or held by firefighting). */
   slowWeight?: number;
   /**
@@ -44,7 +46,7 @@ export interface IntervalScore {
   /** Sørensen of the cells that burned during the interval (simulated against observed). */
   sorensen: number;
   /**
-   * |log(simulated / observed new area)|, with one cell added to both, capped at ln 5: a factor of 5 is
+   * |log(simulated / observed new area)|, with one hectare added to both (so the same at any cell size), capped at ln 5: a factor of 5 is
    * already wholly wrong, and the cap keeps one runaway night or held interval from dominating a fire.
    */
   growthError: number;
@@ -141,22 +143,22 @@ export function intervalScenario(
   // rears that had gone out do not start spreading again (ADR 0058).
   const prevStart = Math.max(0, ...c.observationMinutes.filter((t) => t < startMin - 1e-6), 0);
   const burnedAtStart = new Uint8Array(n);
-  const ignitions: { cell: CellRef; t0Min: number }[] = [];
+  const ignitions: Ignition[] = [];
   let spent: Uint8Array | undefined;
   for (let i = 0; i < n; i++) {
     const o = c.observed[i];
     if (!(o <= startMin)) continue;
     burnedAtStart[i] = 1;
     if (startMin > 0 && o <= prevStart && prevStart > 0) (spent ??= new Uint8Array(n))[i] = 1;
-    else ignitions.push({ cell: { row: Math.floor(i / header.cols), col: i % header.cols }, t0Min: 0 });
+    // Whole burned cells: the fire leaves from their edges, where the observed front is on average.
+    else ignitions.push({ cell: { row: Math.floor(i / header.cols), col: i % header.cols }, t0Min: 0, burned: true });
   }
-  if (startMin === 0 || !ignitions.length)
-    for (const ig of burnedAreaIgnitions(header, c.ignitionArea as ProjectedPoint[], base.ignition)) {
-      const i = ig.cell.row * header.cols + ig.cell.col;
-      if (spent?.[i]) continue;
-      if (!burnedAtStart[i]) burnedAtStart[i] = 1;
-      ignitions.push(ig);
-    }
+  // No cell observed burned yet (an ignition zone smaller than a cell): the cell holding the ignition.
+  if (!ignitions.length) {
+    const ig = base.ignition;
+    burnedAtStart[ig.row * header.cols + ig.col] = 1;
+    ignitions.push({ cell: ig, t0Min: 0 });
+  }
   let grid = c.grid;
   if (spent) {
     const fuel = c.grid.fuel.slice();
@@ -196,7 +198,7 @@ export function scoreIntervals(
     seed = 2035,
     weather = "era5",
     moisture = "nfdrs",
-    minNewCells = 5,
+    minNewHa = 5,
     freeOnly = false,
   } = opts;
   const slowWeight = freeOnly ? 0 : (opts.slowWeight ?? 0.25);
@@ -213,7 +215,7 @@ export function scoreIntervals(
     return k;
   });
   const growth = bounds.map(([a, b], k) => (obsNew[k] * cellHa) / ((b - a) / 60));
-  const scored = bounds.map((_, k) => obsNew[k] >= minNewCells);
+  const scored = bounds.map((_, k) => obsNew[k] * cellHa >= minNewHa);
   const medianGrowth = percentile(
     growth.filter((_, k) => scored[k]),
     0.5,
@@ -269,7 +271,7 @@ export function scoreIntervals(
       observedNew: tp + fn,
       simulatedNew: tp + fp,
       sorensen: 2 * tp + fp + fn ? (2 * tp) / (2 * tp + fp + fn) : 1,
-      growthError: Math.min(MAX_GROWTH_ERROR, Math.abs(Math.log((tp + fp + 1) / (tp + fn + 1)))),
+      growthError: Math.min(MAX_GROWTH_ERROR, Math.abs(Math.log((tp + fp + 1 / cellHa) / (tp + fn + 1 / cellHa)))),
       observedRateMMin: percentile(dObs, 0.9) / dt,
       simulatedRateMMin: percentile(dSim, 0.9) / dt,
       l2RateMMin: l2Rate,
@@ -293,14 +295,15 @@ export function brierIntervals(
   runs: number,
   opts: IntervalOptions & { paramSamples?: Partial<ModelParams>[] } = {},
 ): { brier: number; cells: number } {
-  const { weather = "era5", moisture = "nfdrs", minNewCells = 5, seed = 2035 } = opts;
+  const { weather = "era5", moisture = "nfdrs", minNewHa = 5, seed = 2035 } = opts;
+  const cellHaB = (c.grid.header.cellSize * c.grid.header.cellSize) / 10_000;
   let sum = 0,
     cells = 0;
   for (const [startMin, endMin] of intervalBounds(c)) {
     let observedNew = 0;
     for (let i = 0; i < c.observed.length; i++)
       if (c.observed[i] > startMin && c.observed[i] <= endMin) observedNew++;
-    if (observedNew < minNewCells) continue;
+    if (observedNew * cellHaB < minNewHa) continue;
     const dt = endMin - startMin;
     const counts = new Uint16Array(c.observed.length);
     let burnedAtStart: Uint8Array | undefined;
@@ -379,7 +382,7 @@ export function ensembleIntervals(
   ensemble: EnsembleOptions,
   opts: IntervalOptions = {},
 ): { all: EnsembleTally; free: EnsembleTally } {
-  const { weather = "era5", moisture = "nfdrs", minNewCells = 5 } = opts;
+  const { weather = "era5", moisture = "nfdrs", minNewHa = 5 } = opts;
   let t = emptyTally();
   let free = emptyTally();
   // Free-running intervals as in scoreIntervals: growth at or above the fire's median, or L2 > 5 m/min.
@@ -387,11 +390,12 @@ export function ensembleIntervals(
   const bounds = intervalBounds(c);
   const obsNew = bounds.map(([a, b]) => c.observed.reduce((k, o) => (o > a && o <= b ? k + 1 : k), 0));
   const growth = bounds.map(([a, b], k) => (obsNew[k] * cs * cs) / ((b - a) / 60));
-  const scoredGrowth = growth.filter((_, k) => obsNew[k] >= minNewCells).sort((x, y) => x - y);
+  const csHa = (cs * cs) / 10_000;
+  const scoredGrowth = growth.filter((_, k) => obsNew[k] * csHa >= minNewHa).sort((x, y) => x - y);
   const medianGrowth = scoredGrowth.length ? scoredGrowth[Math.floor(scoredGrowth.length / 2)] : 0;
   for (const [k, [startMin, endMin]] of bounds.entries()) {
     const observedNew = obsNew[k];
-    if (observedNew < minNewCells) continue;
+    if (observedNew * csHa < minNewHa) continue;
     const l2 = c.intervals?.find((iv) => Math.abs(iv.startMin - startMin) < 1 && Math.abs(iv.endMin - endMin) < 1 && iv.rosMH !== null);
     const isFree = growth[k] >= medianGrowth || (l2?.rosMH != null && l2.rosMH / 60 > 5);
     const { scenario, burnedAtStart, grid: g } = intervalScenario(c, startMin, endMin, opts.spreadModel ?? "rothermel", params, weather, moisture);

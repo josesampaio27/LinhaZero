@@ -70,6 +70,18 @@ export interface CellRef {
   col: number;
 }
 
+/**
+ * A cell set alight at minute t0Min (t0Min < 0: before the simulation starts). burned: the cell is part
+ * of a burned area at t0Min (its centre burned, the front part way to its edges: SEED_SHARE in
+ * spread-rothermel.ts), so an observed burned area (cells whose centre the observed perimeter covers)
+ * restarts where the observed front is, on average, at any cell size.
+ */
+export interface Ignition {
+  cell: CellRef;
+  t0Min: number;
+  burned?: boolean;
+}
+
 export interface Wind {
   directionDeg: number; // direction the wind blows FROM (meteorological convention)
   speedMs: number;
@@ -83,7 +95,7 @@ export interface Scenario {
    * Several ignited cells, each from its own minute (an observed perimeter, a spot fire); replaces
    * `ignition` for the spread, which stays as the reference point.
    */
-  ignitions?: { cell: CellRef; t0Min: number }[];
+  ignitions?: Ignition[];
   wind: Wind;
   durationMin: number; // e.g. 240
   interventions: Intervention[];

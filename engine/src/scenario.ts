@@ -3,7 +3,7 @@
 // same thing. Errors are user-facing, so their messages are in Portuguese.
 import { rasterizePolygon, rasterizePolyline } from "./geometry";
 import { gridToProjected, projectedToGrid } from "./grid";
-import { BURN_CHANCE_ENSEMBLE, PT_CALIBRATION, PT_CALIBRATION_SAMPLES } from "./calibration";
+import { calibrationFor } from "./calibration";
 import { DEFAULT_PARAMS, type ModelParams } from "./params";
 import { SIZE_CLASSES, type FuelMoisture } from "./rothermel";
 import type { CellRef, EnsembleOptions, GridHeader, Intervention, InterventionKind, Scenario, SpreadModel, WeatherStep, Wind } from "./types";
@@ -108,13 +108,13 @@ export function buildScenario(header: GridHeader, inputs: ScenarioInputs, decisi
   const ignition = cellAt(header, inputs.ignition[0], inputs.ignition[1]);
   if (!ignition) throw new Error("A ignição está fora da grelha");
   const params = inputs.variants[decision]?.params ?? {};
-  const modelParams = rothermelParams(params);
+  const modelParams = rothermelParams(params, header.cellSize);
   return {
     ignition,
     wind: inputs.wind,
     durationMin: inputs.durationMin,
     interventions: inputs.decisions[decision].map((d) => toEngineIntervention(header, d, params)),
-    ensemble: inputs.ensemble ? rothermelEnsemble(DEFAULT_ENSEMBLE, params) : undefined,
+    ensemble: inputs.ensemble ? rothermelEnsemble(DEFAULT_ENSEMBLE, params, header.cellSize) : undefined,
     params: Object.keys(modelParams).length ? modelParams : undefined,
     spreadModel: "rothermel" as const,
     moisture: inputs.moisture,
@@ -123,18 +123,21 @@ export function buildScenario(header: GridHeader, inputs: ScenarioInputs, decisi
   };
 }
 
-/** Parameters of a Rothermel run: the calibration on real fires (PT_CALIBRATION), then a grid variant's own values. */
-export function rothermelParams(variantParams: Partial<ModelParams> = {}): Partial<ModelParams> {
-  return { ...PT_CALIBRATION, ...variantParams };
+/**
+ * Parameters of a Rothermel run: the calibration on real fires of the grid's resolution (calibrationFor:
+ * 100 m or 30 m), then a grid variant's own values.
+ */
+export function rothermelParams(variantParams: Partial<ModelParams> = {}, cellSize = 100): Partial<ModelParams> {
+  return { ...calibrationFor(cellSize).params, ...variantParams };
 }
 
 /**
  * Calibration samples for a Rothermel ensemble, without the coefficients a grid variant sets itself (the
  * variant's value then holds in every run).
  */
-export function rothermelSamples(variantParams: Partial<ModelParams> = {}): Partial<ModelParams>[] {
+export function rothermelSamples(variantParams: Partial<ModelParams> = {}, cellSize = 100): Partial<ModelParams>[] {
   const own = new Set(Object.keys(variantParams));
-  return PT_CALIBRATION_SAMPLES.map((s) => Object.fromEntries(Object.entries(s).filter(([k]) => !own.has(k))));
+  return calibrationFor(cellSize).samples.map((s) => Object.fromEntries(Object.entries(s).filter(([k]) => !own.has(k))));
 }
 
 /**
@@ -142,12 +145,12 @@ export function rothermelSamples(variantParams: Partial<ModelParams> = {}): Part
  * real fires (BURN_CHANCE_ENSEMBLE) and the calibration samples. The app and the server both use it, so
  * the probability means the same everywhere.
  */
-export function rothermelEnsemble(base: EnsembleOptions, variantParams: Partial<ModelParams> = {}): EnsembleOptions {
-  const paramSamples = rothermelSamples(variantParams);
+export function rothermelEnsemble(base: EnsembleOptions, variantParams: Partial<ModelParams> = {}, cellSize = 100): EnsembleOptions {
+  const paramSamples = rothermelSamples(variantParams, cellSize);
   return {
     runs: base.runs,
     seed: base.seed,
-    ...BURN_CHANCE_ENSEMBLE,
+    ...calibrationFor(cellSize).ensemble,
     ...(paramSamples.length && { paramSamples }),
   };
 }

@@ -1,0 +1,2573 @@
+{
+ "id": "pt-firesprd-30m-2026-10-20",
+ "created": "2026-10-20",
+ "git": "64153dd",
+ "adopt": false,
+ "adoption": {
+  "rule": "paired held-out cost ≤ −0.02, 90% bootstrap interval < 0, Sørensen ≥ −0.01, locked set not worse (ADR 0061)",
+  "incumbent": "physical",
+  "incumbentParams": {},
+  "paired": {
+   "fires": 19,
+   "cost": -0.025348556512734096,
+   "costP05": -0.0645542978196687,
+   "costP95": 0.0159362440940664,
+   "sorensen": -0.0033348710801752827
+  },
+  "oldRule": false
+ },
+ "provenance": {
+  "cases": "C:\\projects\\LinhaZero\\data-prep\\out\\reference-30m",
+  "cellSizes": [
+   30
+  ],
+  "manifestSha256": "259e42b66c95b7d35231d7aafbbdc65a61865bfdbea0061b14b94900971be061",
+  "selection": {
+   "created": "2026-10-20",
+   "cases": "C:\\projects\\LinhaZero\\data-prep\\out\\reference-30m",
+   "targetGrid": "C:\\projects\\LinhaZero\\web\\public\\grids\\guimaraes-30m",
+   "rule": {
+    "maxNonBurnable": 0.25,
+    "minTargetFuels": 0.6,
+    "minTargetShare": 0.005,
+    "minNewHa": 5,
+    "lockedKm": 0
+   },
+   "fit": [
+    "Agueda_05092019",
+    "Alijo_24072019",
+    "Avis_21072020",
+    "Baiao_04092019",
+    "Chaves_30072020",
+    "Fundao_06082020",
+    "MirandadoCorvo_13092019",
+    "Mogadouro_20072021",
+    "Nisa_01082019",
+    "OliveiraFrades_07092020",
+    "Penedono_21072019",
+    "PortoMos_06092020",
+    "Sabugal_29082019",
+    "SaoJoaoPesqueira_10072020",
+    "Sernancelhe_06082020",
+    "Serta_13092019",
+    "Tomar_03082019",
+    "Valenca_04092019",
+    "Valpacos_13092019"
+   ],
+   "locked": [],
+   "perFire": [
+    {
+     "fire": "CabeceirasdeBasto_06092016",
+     "tier": "B",
+     "year": 2016,
+     "region": "Norte",
+     "burnedHa": 1333,
+     "cells": 195716,
+     "nonBurnable": 0.008032941811799648,
+     "targetFuels": 0.9999999999999999,
+     "similarity": 0.1404210616319014,
+     "scorable": 3,
+     "distanceKm": 32.51158286329926,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 97%",
+      "Mato atlântico alto (V-MAa) 1%",
+      "Herbáceo alto (V-Ha) 1%"
+     ]
+    },
+    {
+     "fire": "Baiao_04092019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Norte",
+     "burnedHa": 552,
+     "cells": 127204,
+     "nonBurnable": 0.05457803844900619,
+     "targetFuels": 0.9946579355505774,
+     "similarity": 0.4115788374806332,
+     "scorable": 5,
+     "distanceKm": 40.55302552839416,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 40%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 22%",
+      "Mato atlântico alto (V-MAa) 17%"
+     ]
+    },
+    {
+     "fire": "Cinfaes_08082016",
+     "tier": "B",
+     "year": 2016,
+     "region": "Norte",
+     "burnedHa": 760,
+     "cells": 114725,
+     "nonBurnable": 0.1362397820163488,
+     "targetFuels": 0.999039912220546,
+     "similarity": 0.14855983284864813,
+     "scorable": 2,
+     "distanceKm": 47.892983635270845,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 88%",
+      "Mato atlântico baixo (V-MAb) 10%",
+      "Herbáceo alto (V-Ha) 1%"
+     ]
+    },
+    {
+     "fire": "Cinfaes_07082016",
+     "tier": "B",
+     "year": 2016,
+     "region": "Norte",
+     "burnedHa": 537,
+     "cells": 105820,
+     "nonBurnable": 0.024455611390284758,
+     "targetFuels": 0.9994848901098901,
+     "similarity": 0.14724665941188053,
+     "scorable": 4,
+     "distanceKm": 48.190272499267195,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 85%",
+      "Mato atlântico baixo (V-MAb) 14%",
+      "Mato atlântico alto (V-MAa) 1%"
+     ]
+    },
+    {
+     "fire": "ArcosdeValdevez_08082016",
+     "tier": "B",
+     "year": 2016,
+     "region": "Norte",
+     "burnedHa": 5376,
+     "cells": 465532,
+     "nonBurnable": 0.004470190359791726,
+     "targetFuels": 0.999579563418654,
+     "similarity": 0.12881462240775873,
+     "scorable": 9,
+     "distanceKm": 49.87557032340557,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 98%",
+      "Mato sob folhosas caducifólias (M-CAD) 1%",
+      "Mato atlântico baixo (V-MAb) 0%"
+     ]
+    },
+    {
+     "fire": "Boticas_05092016",
+     "tier": "B",
+     "year": 2016,
+     "region": "Norte",
+     "burnedHa": 1647,
+     "cells": 161898,
+     "nonBurnable": 0.036992514070269385,
+     "targetFuels": 0.9971062187925557,
+     "similarity": 0.12637705160311494,
+     "scorable": 3,
+     "distanceKm": 57.20466797041273,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 98%",
+      "Mato atlântico baixo (V-MAb) 0%",
+      "Herbáceo alto (V-Ha) 0%"
+     ]
+    },
+    {
+     "fire": "Caminha_09082016",
+     "tier": "B",
+     "year": 2016,
+     "region": "Norte",
+     "burnedHa": 1614,
+     "cells": 173405,
+     "nonBurnable": 0.022468777876895628,
+     "targetFuels": 0.9986881879883648,
+     "similarity": 0.13010810431486078,
+     "scorable": 5,
+     "distanceKm": 61.14661584918695,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 98%",
+      "Mato sob eucaliptal (M-EUC) 1%",
+      "Mato atlântico baixo (V-MAb) 1%"
+     ]
+    },
+    {
+     "fire": "Arouca_08082016",
+     "tier": "B",
+     "year": 2016,
+     "region": "Centro",
+     "burnedHa": 22835,
+     "cells": 1089000,
+     "nonBurnable": 0.015591683909744802,
+     "targetFuels": 0.9992392971105302,
+     "similarity": 0.14085089302543868,
+     "scorable": 14,
+     "distanceKm": 62.142741536069394,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 97%",
+      "Mato sob eucaliptal (M-EUC) 1%",
+      "Mato atlântico alto (V-MAa) 0%"
+     ]
+    },
+    {
+     "fire": "Valenca_04092019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Norte",
+     "burnedHa": 536,
+     "cells": 143317,
+     "nonBurnable": 0.027394957983193278,
+     "targetFuels": 0.9638845688612409,
+     "similarity": 0.5089133767471525,
+     "scorable": 3,
+     "distanceKm": 62.5982907215213,
+     "topFuels": [
+      "Mato atlântico alto (V-MAa) 40%",
+      "Mato sob eucaliptal (M-EUC) 27%",
+      "Mato atlântico baixo (V-MAb) 16%"
+     ]
+    },
+    {
+     "fire": "Moncao_09082016",
+     "tier": "B",
+     "year": 2016,
+     "region": "Norte",
+     "burnedHa": 854,
+     "cells": 190825,
+     "nonBurnable": 0.007903055848261328,
+     "targetFuels": 0.9993627190653211,
+     "similarity": 0.1424326128457582,
+     "scorable": 5,
+     "distanceKm": 62.99164588627476,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 97%",
+      "Mato atlântico baixo (V-MAb) 1%",
+      "Mato atlântico alto (V-MAa) 1%"
+     ]
+    },
+    {
+     "fire": "Moncao_06092016",
+     "tier": "B",
+     "year": 2016,
+     "region": "Norte",
+     "burnedHa": 472,
+     "cells": 119364,
+     "nonBurnable": 0,
+     "targetFuels": 0.999618320610687,
+     "similarity": 0.16527651955626158,
+     "scorable": 3,
+     "distanceKm": 63.47665812928911,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 95%",
+      "Mato atlântico alto (V-MAa) 3%",
+      "Mato sob folhosas caducifólias (M-CAD) 1%"
+     ]
+    },
+    {
+     "fire": "Alijo_24072019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Norte",
+     "burnedHa": 574,
+     "cells": 147201,
+     "nonBurnable": 0.053655475368685285,
+     "targetFuels": 0.7879641909814323,
+     "similarity": 0.17948874813513882,
+     "scorable": 5,
+     "distanceKm": 68.00948565786796,
+     "topFuels": [
+      "Mato atlântico alto (V-MAa) 69%",
+      "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 21%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 3%"
+     ]
+    },
+    {
+     "fire": "CastroDaire_07092020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Centro",
+     "burnedHa": 344,
+     "cells": 94860,
+     "nonBurnable": 0.004183006535947713,
+     "targetFuels": 0.9986873195064321,
+     "similarity": 0.1561930115181154,
+     "scorable": 1,
+     "distanceKm": 68.51493876312102,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 86%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 7%",
+      "Mato atlântico alto (V-MAa) 4%"
+     ]
+    },
+    {
+     "fire": "CastroDaire_05102017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Norte",
+     "burnedHa": 691,
+     "cells": 123176,
+     "nonBurnable": 0.8663017982799062,
+     "targetFuels": 0.9990253411306041,
+     "similarity": 0.1997282782081225,
+     "scorable": 3,
+     "distanceKm": 69.88466677286362,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 82%",
+      "Herbáceo alto (V-Ha) 7%",
+      "Mato atlântico alto (V-MAa) 6%"
+     ]
+    },
+    {
+     "fire": "Valpacos_13092019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Norte",
+     "burnedHa": 414,
+     "cells": 120060,
+     "nonBurnable": 0.008034744842562433,
+     "targetFuels": 0.9929947460595446,
+     "similarity": 0.4440687144218248,
+     "scorable": 4,
+     "distanceKm": 78.67941675199978,
+     "topFuels": [
+      "Mato sob folhosas caducifólias (M-CAD) 47%",
+      "Mato atlântico alto (V-MAa) 25%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 13%"
+     ]
+    },
+    {
+     "fire": "OliveiraFrades_07092020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Centro",
+     "burnedHa": 1635,
+     "cells": 224315,
+     "nonBurnable": 0.010569195199823847,
+     "targetFuels": 0.9791365305441192,
+     "similarity": 0.5193826940761949,
+     "scorable": 13,
+     "distanceKm": 82.71917777878572,
+     "topFuels": [
+      "Mato sob eucaliptal (M-EUC) 49%",
+      "Mato atlântico alto (V-MAa) 25%",
+      "Mato atlântico baixo (V-MAb) 18%"
+     ]
+    },
+    {
+     "fire": "SaoJoaoPesqueira_10072020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Norte",
+     "burnedHa": 748,
+     "cells": 115533,
+     "nonBurnable": 0.002164762477450391,
+     "targetFuels": 0.9924068940580932,
+     "similarity": 0.243728073932874,
+     "scorable": 7,
+     "distanceKm": 82.7590229205786,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 51%",
+      "Mato atlântico alto (V-MAa) 43%",
+      "Herbáceo alto (V-Ha) 3%"
+     ]
+    },
+    {
+     "fire": "Agueda_15102017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 7546,
+     "cells": 582912,
+     "nonBurnable": 0.9328840648854961,
+     "targetFuels": 0.9968011373733784,
+     "similarity": 0.6030571884506479,
+     "scorable": 11,
+     "distanceKm": 84.00028326206356,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 36%",
+      "Mato sob eucaliptal (M-EUC) 30%",
+      "Mato sob folhosas caducifólias (M-CAD) 14%"
+     ]
+    },
+    {
+     "fire": "Sernancelhe_06082020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Centro",
+     "burnedHa": 2223,
+     "cells": 174777,
+     "nonBurnable": 0.004898983764524879,
+     "targetFuels": 0.9457645048417284,
+     "similarity": 0.2689610855077729,
+     "scorable": 7,
+     "distanceKm": 86.43702960413043,
+     "topFuels": [
+      "Mato atlântico alto (V-MAa) 67%",
+      "Mato atlântico baixo (V-MAb) 11%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 8%"
+     ]
+    },
+    {
+     "fire": "Chaves_30072020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Norte",
+     "burnedHa": 2094,
+     "cells": 254549,
+     "nonBurnable": 0.008767782696522973,
+     "targetFuels": 0.972510081082253,
+     "similarity": 0.5557343019971559,
+     "scorable": 7,
+     "distanceKm": 87.20669391791934,
+     "topFuels": [
+      "Mato atlântico alto (V-MAa) 41%",
+      "Herbáceo alto (V-Ha) 21%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 17%"
+     ]
+    },
+    {
+     "fire": "Agueda_05092019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Centro",
+     "burnedHa": 1421,
+     "cells": 177317,
+     "nonBurnable": 0.06099955659720023,
+     "targetFuels": 0.9926470588235294,
+     "similarity": 0.4656646305302368,
+     "scorable": 15,
+     "distanceKm": 88.43292387107235,
+     "topFuels": [
+      "Mato sob eucaliptal (M-EUC) 88%",
+      "Mato atlântico alto (V-MAa) 5%",
+      "Herbáceo alto (V-Ha) 3%"
+     ]
+    },
+    {
+     "fire": "OliveiraFrades_15102017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 9211,
+     "cells": 519552,
+     "nonBurnable": 0.8484679720170399,
+     "targetFuels": 0.9894899735637372,
+     "similarity": 0.28522640702844904,
+     "scorable": 16,
+     "distanceKm": 88.46866151543814,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 73%",
+      "Mato sob eucaliptal (M-EUC) 9%",
+      "Mato sob folhosas caducifólias (M-CAD) 7%"
+     ]
+    },
+    {
+     "fire": "Agueda_08082016",
+     "tier": "B",
+     "year": 2016,
+     "region": "Centro",
+     "burnedHa": 7224,
+     "cells": 377280,
+     "nonBurnable": 1,
+     "targetFuels": 0,
+     "similarity": 0,
+     "scorable": 8,
+     "distanceKm": 94.54498657878521,
+     "topFuels": []
+    },
+    {
+     "fire": "Penedono_21072019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Centro",
+     "burnedHa": 726,
+     "cells": 121536,
+     "nonBurnable": 0.07706603890472061,
+     "targetFuels": 0.9801315612833937,
+     "similarity": 0.39715402426897395,
+     "scorable": 5,
+     "distanceKm": 94.97943870733582,
+     "topFuels": [
+      "Mato atlântico alto (V-MAa) 62%",
+      "Mato sob folhosas caducifólias (M-CAD) 17%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 10%"
+     ]
+    },
+    {
+     "fire": "Mirandela_16072017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Norte",
+     "burnedHa": 950,
+     "cells": 129198,
+     "nonBurnable": 0.928497016762951,
+     "targetFuels": 0.909933774834437,
+     "similarity": 0.3103807342874384,
+     "scorable": 3,
+     "distanceKm": 101.86200339006841,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 53%",
+      "Mato atlântico baixo (V-MAb) 16%",
+      "Herbáceo alto (V-Ha) 10%"
+     ]
+    },
+    {
+     "fire": "Mortagua_07102017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 954,
+     "cells": 141024,
+     "nonBurnable": 0.8458274398868458,
+     "targetFuels": 1,
+     "similarity": 0.5271732216619891,
+     "scorable": 1,
+     "distanceKm": 112.1766464832423,
+     "topFuels": [
+      "Mato sob eucaliptal (M-EUC) 66%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 27%",
+      "Herbáceo alto (V-Ha) 3%"
+     ]
+    },
+    {
+     "fire": "Anadia_10082016",
+     "tier": "B",
+     "year": 2016,
+     "region": "Centro",
+     "burnedHa": 3282,
+     "cells": 231000,
+     "nonBurnable": 0.022484233616671238,
+     "targetFuels": 1,
+     "similarity": 0.13585214346555785,
+     "scorable": 4,
+     "distanceKm": 114.81177291428165,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 98%",
+      "Mato sob eucaliptal (M-EUC) 1%",
+      "Mato mediterrâneo baixo (V-MMb) 0%"
+     ]
+    },
+    {
+     "fire": "Lousa_15102017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 45302,
+     "cells": 2375100,
+     "nonBurnable": 0.9873211763373656,
+     "targetFuels": 0.9913820119084926,
+     "similarity": 0.5548262107268189,
+     "scorable": 36,
+     "distanceKm": 121.47005606622714,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 34%",
+      "Mato sob eucaliptal (M-EUC) 29%",
+      "Mato atlântico alto (V-MAa) 16%"
+     ]
+    },
+    {
+     "fire": "FigueiradaFoz_15102017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 15146,
+     "cells": 1247832,
+     "nonBurnable": 0.9854776222280323,
+     "targetFuels": 0.9909983633387888,
+     "similarity": 0.6351447033673004,
+     "scorable": 21,
+     "distanceKm": 126.1358887501876,
+     "topFuels": [
+      "Herbáceo alto (V-Ha) 36%",
+      "Mato sob eucaliptal (M-EUC) 21%",
+      "Mato atlântico alto (V-MAa) 16%"
+     ]
+    },
+    {
+     "fire": "Gouveia_10082015",
+     "tier": "B",
+     "year": 2015,
+     "region": "Centro",
+     "burnedHa": 2482,
+     "cells": 195888,
+     "nonBurnable": 0.23315686416708972,
+     "targetFuels": 1,
+     "similarity": 0.1353921170136697,
+     "scorable": 4,
+     "distanceKm": 126.81515638712067,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 89%",
+      "Mato atlântico baixo (V-MAb) 11%",
+      "Mato atlântico alto (V-MAa) 0%"
+     ]
+    },
+    {
+     "fire": "Arganil_15102017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 31958,
+     "cells": 1879184,
+     "nonBurnable": 0.9607729936607085,
+     "targetFuels": 0.9310790437217316,
+     "similarity": 0.16447297208005202,
+     "scorable": 11,
+     "distanceKm": 127.32416120481473,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 79%",
+      "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 7%",
+      "Mato atlântico alto (V-MAa) 4%"
+     ]
+    },
+    {
+     "fire": "FreixodeEspadaaCinta_06092016",
+     "tier": "B",
+     "year": 2016,
+     "region": "Norte",
+     "burnedHa": 5142,
+     "cells": 454894,
+     "nonBurnable": 0.046155461817163464,
+     "targetFuels": 0.9987155020551967,
+     "similarity": 0.1549612384178815,
+     "scorable": 5,
+     "distanceKm": 132.165035302597,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 95%",
+      "Mato atlântico baixo (V-MAb) 2%",
+      "Herbáceo alto (V-Ha) 1%"
+     ]
+    },
+    {
+     "fire": "FreixoEspadaaCinta_20082021",
+     "tier": "A",
+     "year": 2021,
+     "region": "Norte",
+     "burnedHa": 291,
+     "cells": 94785,
+     "nonBurnable": 0.00030950170225936243,
+     "targetFuels": 0.9962848297213622,
+     "similarity": 0.17035834298805702,
+     "scorable": 1,
+     "distanceKm": 134.20507761566108,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 58%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 38%",
+      "Mato atlântico alto (V-MAa) 2%"
+     ]
+    },
+    {
+     "fire": "Guarda_23082017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 3145,
+     "cells": 240640,
+     "nonBurnable": 0.8437544713120618,
+     "targetFuels": 0.9626373626373625,
+     "similarity": 0.27885359017650285,
+     "scorable": 5,
+     "distanceKm": 136.16316824949934,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 51%",
+      "Mato atlântico alto (V-MAa) 28%",
+      "Mato sob folhosas caducifólias (M-CAD) 10%"
+     ]
+    },
+    {
+     "fire": "Guarda_17072017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 6638,
+     "cells": 421580,
+     "nonBurnable": 0.955622745884969,
+     "targetFuels": 0.9358386801099909,
+     "similarity": 0.4641296852697237,
+     "scorable": 6,
+     "distanceKm": 142.9281014133929,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 41%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 13%",
+      "Herbáceo alto (V-Ha) 13%"
+     ]
+    },
+    {
+     "fire": "Mogadouro_20072021",
+     "tier": "A",
+     "year": 2021,
+     "region": "Norte",
+     "burnedHa": 250,
+     "cells": 79750,
+     "nonBurnable": 0,
+     "targetFuels": 0.8929343907714492,
+     "similarity": 0.4541899704582929,
+     "scorable": 5,
+     "distanceKm": 146.13543219325032,
+     "topFuels": [
+      "Mato sob folhosas caducifólias (M-CAD) 38%",
+      "Mato atlântico alto (V-MAa) 23%",
+      "Herbáceo alto (V-Ha) 16%"
+     ]
+    },
+    {
+     "fire": "MirandadoCorvo_13092019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Centro",
+     "burnedHa": 521,
+     "cells": 102102,
+     "nonBurnable": 0.014520311149524633,
+     "targetFuels": 0.9640413962462724,
+     "similarity": 0.524225881025462,
+     "scorable": 3,
+     "distanceKm": 146.59335371125042,
+     "topFuels": [
+      "Mato sob eucaliptal (M-EUC) 56%",
+      "Mato atlântico alto (V-MAa) 31%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 4%"
+     ]
+    },
+    {
+     "fire": "Sabugal_29082019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Centro",
+     "burnedHa": 578,
+     "cells": 96726,
+     "nonBurnable": 0.004206918043004051,
+     "targetFuels": 0.8414958535440462,
+     "similarity": 0.33611254460782963,
+     "scorable": 5,
+     "distanceKm": 152.02470279762068,
+     "topFuels": [
+      "Mato atlântico alto (V-MAa) 43%",
+      "Mato atlântico baixo (V-MAb) 18%",
+      "Herbáceo baixo (V-Hb) 14%"
+     ]
+    },
+    {
+     "fire": "Gois_17062017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 15626,
+     "cells": 703893,
+     "nonBurnable": 0.9852442304480294,
+     "targetFuels": 0.9843871975019516,
+     "similarity": 0.28055298367917514,
+     "scorable": 104,
+     "distanceKm": 156.45107773289882,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 66%",
+      "Mato atlântico alto (V-MAa) 15%",
+      "Mato sob eucaliptal (M-EUC) 13%"
+     ]
+    },
+    {
+     "fire": "Fundao_07082020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Centro",
+     "burnedHa": 409,
+     "cells": 98150,
+     "nonBurnable": 0.02004846882573254,
+     "targetFuels": 0.599820143884892,
+     "similarity": 0.36875877436496424,
+     "scorable": 7,
+     "distanceKm": 156.80906944891208,
+     "topFuels": [
+      "238 22%",
+      "Mato atlântico alto (V-MAa) 17%",
+      "Mato atlântico baixo (V-MAb) 14%"
+     ]
+    },
+    {
+     "fire": "Fundao_06082020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Centro",
+     "burnedHa": 723,
+     "cells": 128790,
+     "nonBurnable": 0.0034873583260680036,
+     "targetFuels": 1,
+     "similarity": 0.2672950097783717,
+     "scorable": 4,
+     "distanceKm": 159.99575996511538,
+     "topFuels": [
+      "Mato atlântico alto (V-MAa) 81%",
+      "Mato sob eucaliptal (M-EUC) 15%",
+      "Mato sob folhosas caducifólias (M-CAD) 2%"
+     ]
+    },
+    {
+     "fire": "CasteloBranco_13082017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 6168,
+     "cells": 331344,
+     "nonBurnable": 0.9358128811976537,
+     "targetFuels": 0.969311207092521,
+     "similarity": 0.24944522807522726,
+     "scorable": 8,
+     "distanceKm": 165.3186769504379,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 70%",
+      "Mato atlântico alto (V-MAa) 10%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 5%"
+     ]
+    },
+    {
+     "fire": "Oleiros_03082015",
+     "tier": "B",
+     "year": 2015,
+     "region": "Centro",
+     "burnedHa": 851,
+     "cells": 121320,
+     "nonBurnable": 0.07906140999894302,
+     "targetFuels": 0.9793412142775163,
+     "similarity": 0.12979308528817832,
+     "scorable": 2,
+     "distanceKm": 168.8409619324654,
+     "topFuels": [
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 96%",
+      "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 2%",
+      "Mato atlântico alto (V-MAa) 1%"
+     ]
+    },
+    {
+     "fire": "Oleiros_23082017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 7001,
+     "cells": 545032,
+     "nonBurnable": 0.9663941170420652,
+     "targetFuels": 0.8221117061973987,
+     "similarity": 0.47602457922544417,
+     "scorable": 6,
+     "distanceKm": 169.27426862819738,
+     "topFuels": [
+      "Mato sob eucaliptal (M-EUC) 23%",
+      "Mato atlântico baixo (V-MAb) 21%",
+      "Mato atlântico alto (V-MAa) 18%"
+     ]
+    },
+    {
+     "fire": "ProencaaNova_13092020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Centro",
+     "burnedHa": 13251,
+     "cells": 580940,
+     "nonBurnable": 0.003871283228514378,
+     "targetFuels": 0.49362505795401856,
+     "similarity": 0.17940198184403275,
+     "scorable": 7,
+     "distanceKm": 175.4076591564782,
+     "topFuels": [
+      "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 50%",
+      "Mato atlântico alto (V-MAa) 40%",
+      "Mato sob eucaliptal (M-EUC) 6%"
+     ]
+    },
+    {
+     "fire": "Oleiros_25072020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Centro",
+     "burnedHa": 5287,
+     "cells": 328792,
+     "nonBurnable": 0.0012255736365493293,
+     "targetFuels": 0.5252914309087191,
+     "similarity": 0.3109185154378182,
+     "scorable": 11,
+     "distanceKm": 181.05715363767735,
+     "topFuels": [
+      "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 47%",
+      "Mato atlântico alto (V-MAa) 29%",
+      "Mato sob eucaliptal (M-EUC) 19%"
+     ]
+    },
+    {
+     "fire": "Alcobaca_15102017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 18544,
+     "cells": 1456917,
+     "nonBurnable": 0.9838337854955422,
+     "targetFuels": 0.9714800360252177,
+     "similarity": 0.3382400657967249,
+     "scorable": 13,
+     "distanceKm": 186.8671217603508,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 32%",
+      "Mato sob pinhal (M-PIN) 29%",
+      "Mato sob eucaliptal (M-EUC) 14%"
+     ]
+    },
+    {
+     "fire": "Serta_13092019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Centro",
+     "burnedHa": 675,
+     "cells": 613431,
+     "nonBurnable": 0.013994402239104359,
+     "targetFuels": 0.641389564747229,
+     "similarity": 0.24494866767380272,
+     "scorable": 8,
+     "distanceKm": 194.0360808279819,
+     "topFuels": [
+      "Mato atlântico alto (V-MAa) 46%",
+      "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 35%",
+      "Mato sob eucaliptal (M-EUC) 9%"
+     ]
+    },
+    {
+     "fire": "CasteloBranco_29082020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Centro",
+     "burnedHa": 315,
+     "cells": 88294,
+     "nonBurnable": 0.009425878320479864,
+     "targetFuels": 0.5233564013840831,
+     "similarity": 0.3991924988694318,
+     "scorable": 3,
+     "distanceKm": 194.45055681263287,
+     "topFuels": [
+      "Mato sob eucaliptal (M-EUC) 40%",
+      "236 34%",
+      "Herbáceo baixo (V-Hb) 12%"
+     ]
+    },
+    {
+     "fire": "ViladeRei_20072019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Centro",
+     "burnedHa": 9194,
+     "cells": 538244,
+     "nonBurnable": 0.008957415565345081,
+     "targetFuels": 0.5671457499876524,
+     "similarity": 0.3097756946576616,
+     "scorable": 23,
+     "distanceKm": 194.57311951981052,
+     "topFuels": [
+      "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 43%",
+      "Mato atlântico alto (V-MAa) 34%",
+      "Mato sob eucaliptal (M-EUC) 15%"
+     ]
+    },
+    {
+     "fire": "CasteloBranco_23072017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 4450,
+     "cells": 547200,
+     "nonBurnable": 0.9577510365052078,
+     "targetFuels": 0.5897558640497845,
+     "similarity": 0.3612731670602109,
+     "scorable": 8,
+     "distanceKm": 202.89008751024366,
+     "topFuels": [
+      "236 24%",
+      "Mato (V-MH; confirmar designação na documentação FUMOD) 16%",
+      "Mato mediterrâneo baixo (V-MMb) 16%"
+     ]
+    },
+    {
+     "fire": "IdanhaaNova_30062020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Centro",
+     "burnedHa": 730,
+     "cells": 136945,
+     "nonBurnable": 0.22057917436845348,
+     "targetFuels": 0.49913043478260866,
+     "similarity": 0.45322050755026605,
+     "scorable": 5,
+     "distanceKm": 203.38241615740372,
+     "topFuels": [
+      "236 35%",
+      "Herbáceo alto (V-Ha) 32%",
+      "Mato sob eucaliptal (M-EUC) 17%"
+     ]
+    },
+    {
+     "fire": "Alvaiazere_11082017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 23511,
+     "cells": 3345216,
+     "nonBurnable": 0.9469100736498798,
+     "targetFuels": 0.8418775686783473,
+     "similarity": 0.5857009834673852,
+     "scorable": 13,
+     "distanceKm": 205.33056007265398,
+     "topFuels": [
+      "Mato sob eucaliptal (M-EUC) 31%",
+      "Mato atlântico baixo (V-MAb) 16%",
+      "Mato atlântico alto (V-MAa) 11%"
+     ]
+    },
+    {
+     "fire": "Abrantes_09082017",
+     "tier": "B",
+     "year": 2017,
+     "region": "Centro",
+     "burnedHa": 3623,
+     "cells": 262528,
+     "nonBurnable": 1,
+     "targetFuels": 0,
+     "similarity": 0,
+     "scorable": 5,
+     "distanceKm": 213.26164533563258,
+     "topFuels": []
+    },
+    {
+     "fire": "Tomar_03082019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Centro",
+     "burnedHa": 440,
+     "cells": 134583,
+     "nonBurnable": 0.0171638741315897,
+     "targetFuels": 0.8920997920997922,
+     "similarity": 0.5512769710634751,
+     "scorable": 6,
+     "distanceKm": 213.68806068590848,
+     "topFuels": [
+      "Mato atlântico alto (V-MAa) 41%",
+      "Mato sob eucaliptal (M-EUC) 37%",
+      "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4) 9%"
+     ]
+    },
+    {
+     "fire": "PortoMos_06092020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Centro",
+     "burnedHa": 976,
+     "cells": 126882,
+     "nonBurnable": 0,
+     "targetFuels": 0.6751498386353159,
+     "similarity": 0.27558680275502256,
+     "scorable": 8,
+     "distanceKm": 218.8111878839841,
+     "topFuels": [
+      "Mato atlântico alto (V-MAa) 35%",
+      "236 29%",
+      "Mato atlântico baixo (V-MAb) 15%"
+     ]
+    },
+    {
+     "fire": "Nisa_01082019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Sul",
+     "burnedHa": 701,
+     "cells": 111879,
+     "nonBurnable": 0.0053901437371663245,
+     "targetFuels": 0.6779354838709677,
+     "similarity": 0.3754460558933645,
+     "scorable": 5,
+     "distanceKm": 226.97958146841705,
+     "topFuels": [
+      "Herbáceo alto (V-Ha) 55%",
+      "Herbáceo baixo (V-Hb) 31%",
+      "Mato atlântico baixo (V-MAb) 5%"
+     ]
+    },
+    {
+     "fire": "Avis_21072020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Sul",
+     "burnedHa": 663,
+     "cells": 108262,
+     "nonBurnable": 0.004074979625101874,
+     "targetFuels": 0.8501091107474086,
+     "similarity": 0.26351866174993827,
+     "scorable": 4,
+     "distanceKm": 259.5096621223384,
+     "topFuels": [
+      "Mato atlântico baixo (V-MAb) 47%",
+      "Herbáceo alto (V-Ha) 13%",
+      "Herbáceo baixo (V-Hb) 10%"
+     ]
+    },
+    {
+     "fire": "Ourique_10062019",
+     "tier": "A",
+     "year": 2019,
+     "region": "Sul",
+     "burnedHa": 419,
+     "cells": 98172,
+     "nonBurnable": 0.007308684436801376,
+     "targetFuels": 0.26006929406669554,
+     "similarity": 0.2602661402025953,
+     "scorable": 5,
+     "distanceKm": 428.42408114608617,
+     "topFuels": [
+      "Herbáceo baixo (V-Hb) 61%",
+      "Herbáceo alto (V-Ha) 15%",
+      "Mato sob eucaliptal (M-EUC) 10%"
+     ]
+    },
+    {
+     "fire": "Odemira_18082021",
+     "tier": "A",
+     "year": 2021,
+     "region": "Sul",
+     "burnedHa": 941,
+     "cells": 181846,
+     "nonBurnable": 0.008797093134442532,
+     "targetFuels": 0.590970480416747,
+     "similarity": 0.4975171833806278,
+     "scorable": 11,
+     "distanceKm": 448.8978411089007,
+     "topFuels": [
+      "Mato sob eucaliptal (M-EUC) 32%",
+      "236 15%",
+      "Herbáceo baixo (V-Hb) 11%"
+     ]
+    },
+    {
+     "fire": "Silves_06072020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Sul",
+     "burnedHa": 400,
+     "cells": 91784,
+     "nonBurnable": 0,
+     "targetFuels": 0.25782481423102904,
+     "similarity": 0.044007401853205466,
+     "scorable": 3,
+     "distanceKm": 453.28618147170715,
+     "topFuels": [
+      "Herbáceo baixo (V-Hb) 44%",
+      "Mato mediterrâneo baixo (V-MMb) 21%",
+      "236 19%"
+     ]
+    },
+    {
+     "fire": "Monchique_03082018",
+     "tier": "A",
+     "year": 2018,
+     "region": "Sul",
+     "burnedHa": 24455,
+     "cells": 1044856,
+     "nonBurnable": 0.006690711026056235,
+     "targetFuels": 0.5553978851583169,
+     "similarity": 0.4924427487909022,
+     "scorable": 13,
+     "distanceKm": 461.11198317004875,
+     "topFuels": [
+      "Mato sob eucaliptal (M-EUC) 36%",
+      "236 28%",
+      "Herbáceo baixo (V-Hb) 9%"
+     ]
+    },
+    {
+     "fire": "Monchique_17072021",
+     "tier": "A",
+     "year": 2021,
+     "region": "Sul",
+     "burnedHa": 1877,
+     "cells": 196875,
+     "nonBurnable": 0.009160671462829737,
+     "targetFuels": 0.4583474514739339,
+     "similarity": 0.3053857899503447,
+     "scorable": 6,
+     "distanceKm": 469.8240055844692,
+     "topFuels": [
+      "236 45%",
+      "Mato sob eucaliptal (M-EUC) 21%",
+      "Mato mediterrâneo baixo (V-MMb) 15%"
+     ]
+    },
+    {
+     "fire": "CastroMarim_16082021",
+     "tier": "A",
+     "year": 2021,
+     "region": "Sul",
+     "burnedHa": 5939,
+     "cells": 332210,
+     "nonBurnable": 0.01838268723668657,
+     "targetFuels": 0.31818813394469914,
+     "similarity": 0.18960459426951928,
+     "scorable": 18,
+     "distanceKm": 471.8687716589005,
+     "topFuels": [
+      "236 56%",
+      "Mato mediterrâneo baixo (V-MMb) 14%",
+      "Herbáceo baixo (V-Hb) 11%"
+     ]
+    },
+    {
+     "fire": "Aljezur_19062020",
+     "tier": "A",
+     "year": 2020,
+     "region": "Sul",
+     "burnedHa": 2232,
+     "cells": 179413,
+     "nonBurnable": 0.004314690108472116,
+     "targetFuels": 0.2205977644581241,
+     "similarity": 0.12293010104519266,
+     "scorable": 9,
+     "distanceKm": 481.77199345588946,
+     "topFuels": [
+      "Herbáceo baixo (V-Hb) 35%",
+      "236 26%",
+      "Mato sob esclerófilas (M-ESC) 16%"
+     ]
+    }
+   ]
+  },
+  "engine": {
+   "seedShare": 0.65,
+   "sectorFraction": 0.6
+  }
+ },
+ "convergence": [
+  {
+   "gen": 0,
+   "f": 1.096260777359617,
+   "sigma": 0.6651634468657334
+  },
+  {
+   "gen": 1,
+   "f": 1.096260777359617,
+   "sigma": 0.6901240305114513
+  },
+  {
+   "gen": 2,
+   "f": 1.085949114182749,
+   "sigma": 0.6321991641290147
+  },
+  {
+   "gen": 3,
+   "f": 1.077841562745914,
+   "sigma": 0.5447639344692274
+  },
+  {
+   "gen": 4,
+   "f": 1.077841562745914,
+   "sigma": 0.47857369518906273
+  },
+  {
+   "gen": 5,
+   "f": 1.077841562745914,
+   "sigma": 0.402194225383191
+  },
+  {
+   "gen": 6,
+   "f": 1.077841562745914,
+   "sigma": 0.35073350091982924
+  },
+  {
+   "gen": 7,
+   "f": 1.0728106834040259,
+   "sigma": 0.33422772060234834
+  },
+  {
+   "gen": 8,
+   "f": 1.0621262047489881,
+   "sigma": 0.3303292546563867
+  },
+  {
+   "gen": 9,
+   "f": 1.061806062990945,
+   "sigma": 0.311849177154394
+  },
+  {
+   "gen": 10,
+   "f": 1.061806062990945,
+   "sigma": 0.2947184177820388
+  },
+  {
+   "gen": 11,
+   "f": 1.061806062990945,
+   "sigma": 0.2706376872844501
+  },
+  {
+   "gen": 12,
+   "f": 1.061806062990945,
+   "sigma": 0.2541597156818461
+  },
+  {
+   "gen": 13,
+   "f": 1.061806062990945,
+   "sigma": 0.2483569114805271
+  },
+  {
+   "gen": 14,
+   "f": 1.061806062990945,
+   "sigma": 0.24482961336907952
+  },
+  {
+   "gen": 15,
+   "f": 1.061806062990945,
+   "sigma": 0.23641688871497923
+  },
+  {
+   "gen": 16,
+   "f": 1.061806062990945,
+   "sigma": 0.20977568812857433
+  },
+  {
+   "gen": 17,
+   "f": 1.0614164596768962,
+   "sigma": 0.19773606240555416
+  },
+  {
+   "gen": 18,
+   "f": 1.059380773538391,
+   "sigma": 0.19465643630513751
+  },
+  {
+   "gen": 19,
+   "f": 1.0581714907254545,
+   "sigma": 0.19849358536286493
+  },
+  {
+   "gen": 20,
+   "f": 1.0581714907254545,
+   "sigma": 0.19690805444356402
+  },
+  {
+   "gen": 21,
+   "f": 1.0581714907254545,
+   "sigma": 0.19968278859643523
+  },
+  {
+   "gen": 22,
+   "f": 1.0575276733338823,
+   "sigma": 0.1891592795485614
+  },
+  {
+   "gen": 23,
+   "f": 1.0560791605514996,
+   "sigma": 0.17946651076445638
+  },
+  {
+   "gen": 24,
+   "f": 1.0560791605514996,
+   "sigma": 0.16242104808598604
+  },
+  {
+   "gen": 25,
+   "f": 1.0560791605514996,
+   "sigma": 0.14153357970968722
+  },
+  {
+   "gen": 26,
+   "f": 1.0560791605514996,
+   "sigma": 0.134439727038319
+  },
+  {
+   "gen": 27,
+   "f": 1.0560791605514996,
+   "sigma": 0.11886364194275244
+  },
+  {
+   "gen": 28,
+   "f": 1.0560791605514996,
+   "sigma": 0.11452593505165966
+  },
+  {
+   "gen": 29,
+   "f": 1.0560791605514996,
+   "sigma": 0.10383141996359789
+  },
+  {
+   "gen": 30,
+   "f": 1.0560791605514996,
+   "sigma": 0.08365162742233238
+  },
+  {
+   "gen": 31,
+   "f": 1.0560791605514996,
+   "sigma": 0.07720782958963937
+  },
+  {
+   "gen": 32,
+   "f": 1.0560791605514996,
+   "sigma": 0.07069426593166285
+  },
+  {
+   "gen": 33,
+   "f": 1.0560791605514996,
+   "sigma": 0.06984794530376229
+  },
+  {
+   "gen": 34,
+   "f": 1.0560791605514996,
+   "sigma": 0.06839033196538336
+  },
+  {
+   "gen": 35,
+   "f": 1.0559263676508777,
+   "sigma": 0.0588953155219781
+  },
+  {
+   "gen": 36,
+   "f": 1.0557803864010853,
+   "sigma": 0.05656551840646655
+  },
+  {
+   "gen": 37,
+   "f": 1.0557803864010853,
+   "sigma": 0.057709590738076265
+  },
+  {
+   "gen": 38,
+   "f": 1.0557803864010853,
+   "sigma": 0.05370794430812001
+  },
+  {
+   "gen": 39,
+   "f": 1.0556787302940183,
+   "sigma": 0.052680053294894655
+  },
+  {
+   "gen": 40,
+   "f": 1.0556787302940183,
+   "sigma": 0.04674447064613433
+  },
+  {
+   "gen": 41,
+   "f": 1.0556787302940183,
+   "sigma": 0.04552341603096829
+  },
+  {
+   "gen": 42,
+   "f": 1.0556787302940183,
+   "sigma": 0.041523380987234404
+  },
+  {
+   "gen": 43,
+   "f": 1.0556787302940183,
+   "sigma": 0.04014060372206458
+  },
+  {
+   "gen": 44,
+   "f": 1.0556787302940183,
+   "sigma": 0.036091655108737075
+  },
+  {
+   "gen": 45,
+   "f": 1.0556787302940183,
+   "sigma": 0.03426416216880811
+  },
+  {
+   "gen": 46,
+   "f": 1.0556787302940183,
+   "sigma": 0.034656185069874376
+  },
+  {
+   "gen": 47,
+   "f": 1.0556787302940183,
+   "sigma": 0.03097843598390751
+  },
+  {
+   "gen": 48,
+   "f": 1.0556787302940183,
+   "sigma": 0.028738816167950723
+  },
+  {
+   "gen": 49,
+   "f": 1.055607821694844,
+   "sigma": 0.025817540416594034
+  },
+  {
+   "gen": 50,
+   "f": 1.055607821694844,
+   "sigma": 0.022234525586991016
+  },
+  {
+   "gen": 51,
+   "f": 1.0555420100320452,
+   "sigma": 0.020597101652389784
+  },
+  {
+   "gen": 52,
+   "f": 1.0555420100320452,
+   "sigma": 0.018861147748408455
+  },
+  {
+   "gen": 53,
+   "f": 1.0555420100320452,
+   "sigma": 0.0173296426049751
+  },
+  {
+   "gen": 54,
+   "f": 1.0555420100320452,
+   "sigma": 0.014368896772975058
+  },
+  {
+   "gen": 55,
+   "f": 1.0555420100320452,
+   "sigma": 0.013248689954576794
+  },
+  {
+   "gen": 56,
+   "f": 1.0555420100320452,
+   "sigma": 0.012503834670466797
+  },
+  {
+   "gen": 57,
+   "f": 1.0555295583851778,
+   "sigma": 0.011370671013689722
+  },
+  {
+   "gen": 58,
+   "f": 1.0555295583851778,
+   "sigma": 0.009690991146928818
+  },
+  {
+   "gen": 59,
+   "f": 1.0555040030133231,
+   "sigma": 0.01024704326819875
+  }
+ ],
+ "objective": "mean over fires of the weighted interval cost (1 − Sørensen of new cells + 0.5 |log growth ratio|), plus 0.01 Σ x² prior",
+ "space": "groupsCrown",
+ "intervals": "all, slow at 0.25",
+ "fixed": {
+  "crownFire": 1
+ },
+ "physics": {
+  "early": {
+   "fitted": 0.3807806548189781,
+   "uncalibrated": 0.3970215532336998,
+   "current": 0.3970215532336998,
+   "legacy": 0.2966425216424871
+  },
+  "rates": {
+   "fitted": {
+    "fast": {
+     "n": 32,
+     "medianRatio": 0.3670254619633612,
+     "within15": 0.09375
+    },
+    "slow": {
+     "n": 19,
+     "medianRatio": 1.2,
+     "within15": 0.42105263157894735
+    }
+   },
+   "uncalibrated": {
+    "fast": {
+     "n": 32,
+     "medianRatio": 0.5511512808558604,
+     "within15": 0.34375
+    },
+    "slow": {
+     "n": 19,
+     "medianRatio": 2.005387277535576,
+     "within15": 0.2631578947368421
+    }
+   },
+   "current": {
+    "fast": {
+     "n": 32,
+     "medianRatio": 0.5511512808558604,
+     "within15": 0.34375
+    },
+    "slow": {
+     "n": 19,
+     "medianRatio": 2.005387277535576,
+     "within15": 0.2631578947368421
+    }
+   }
+  }
+ },
+ "settings": {
+  "generations": 60,
+  "foldGenerations": 40,
+  "bootstrap": 10,
+  "bootGenerations": 20,
+  "seed": 1,
+  "weather": "era5",
+  "moisture": "nfdrs"
+ },
+ "best": {
+  "crownFire": 1,
+  "rosAdjUnderstory": 0.9956,
+  "rosAdjShrub": 0.7891,
+  "rosAdjGrass": 0.8213,
+  "windAdj": 0.8117,
+  "holdWidthPerFlame": 0.996,
+  "crownAdj": 0.9963
+ },
+ "bestObjective": 1.0555040030133231,
+ "samples": [
+  {
+   "crownFire": 1,
+   "rosAdjUnderstory": 1.008,
+   "rosAdjShrub": 0.525,
+   "rosAdjGrass": 0.9156,
+   "windAdj": 0.9268,
+   "holdWidthPerFlame": 0.942,
+   "crownAdj": 0.9883
+  },
+  {
+   "crownFire": 1,
+   "rosAdjUnderstory": 1.0941,
+   "rosAdjShrub": 0.8399,
+   "rosAdjGrass": 0.8005,
+   "windAdj": 0.8212,
+   "holdWidthPerFlame": 0.8356,
+   "crownAdj": 1.0938
+  },
+  {
+   "crownFire": 1,
+   "rosAdjUnderstory": 0.5175,
+   "rosAdjShrub": 0.8125,
+   "rosAdjGrass": 0.415,
+   "windAdj": 1.5299,
+   "holdWidthPerFlame": 0.6986,
+   "crownAdj": 1.3384
+  },
+  {
+   "crownFire": 1,
+   "rosAdjUnderstory": 0.7385,
+   "rosAdjShrub": 0.9555,
+   "rosAdjGrass": 0.9448,
+   "windAdj": 0.9307,
+   "holdWidthPerFlame": 1.7671,
+   "crownAdj": 1.2447
+  },
+  {
+   "crownFire": 1,
+   "rosAdjUnderstory": 1.0335,
+   "rosAdjShrub": 0.7023,
+   "rosAdjGrass": 0.728,
+   "windAdj": 0.9219,
+   "holdWidthPerFlame": 0.9639,
+   "crownAdj": 0.8017
+  },
+  {
+   "crownFire": 1,
+   "rosAdjUnderstory": 1.0541,
+   "rosAdjShrub": 0.934,
+   "rosAdjGrass": 0.834,
+   "windAdj": 0.6415,
+   "holdWidthPerFlame": 1.2897,
+   "crownAdj": 0.7034
+  },
+  {
+   "crownFire": 1,
+   "rosAdjUnderstory": 1.2254,
+   "rosAdjShrub": 0.6773,
+   "rosAdjGrass": 0.7529,
+   "windAdj": 0.8504,
+   "holdWidthPerFlame": 1.1063,
+   "crownAdj": 0.6533
+  },
+  {
+   "crownFire": 1,
+   "rosAdjUnderstory": 0.9953,
+   "rosAdjShrub": 0.4502,
+   "rosAdjGrass": 0.6205,
+   "windAdj": 1.2717,
+   "holdWidthPerFlame": 0.8427,
+   "crownAdj": 0.699
+  },
+  {
+   "crownFire": 1,
+   "rosAdjUnderstory": 0.7327,
+   "rosAdjShrub": 0.8175,
+   "rosAdjGrass": 0.932,
+   "windAdj": 0.6293,
+   "holdWidthPerFlame": 0.9521,
+   "crownAdj": 0.9033
+  },
+  {
+   "crownFire": 1,
+   "rosAdjUnderstory": 0.8964,
+   "rosAdjShrub": 0.6777,
+   "rosAdjGrass": 0.9254,
+   "windAdj": 0.837,
+   "holdWidthPerFlame": 0.68,
+   "crownAdj": 0.968
+  }
+ ],
+ "quantiles": {
+  "rosAdjUnderstory": {
+   "p05": 0.5175218253768247,
+   "p50": 1.0080135083995687,
+   "p95": 1.225447855060545
+  },
+  "rosAdjShrub": {
+   "p05": 0.450162116438659,
+   "p50": 0.812460042530227,
+   "p95": 0.9554785869233144
+  },
+  "rosAdjGrass": {
+   "p05": 0.4150054601092905,
+   "p50": 0.833967366094563,
+   "p95": 0.9448303439868282
+  },
+  "windAdj": {
+   "p05": 0.6293000877298323,
+   "p50": 0.9218716207814905,
+   "p95": 1.5299194647781258
+  },
+  "holdWidthPerFlame": {
+   "p05": 0.6800462777096254,
+   "p50": 0.9521202205338973,
+   "p95": 1.767052656345774
+  },
+  "crownAdj": {
+   "p05": 0.6533444759740242,
+   "p50": 0.9679777922055917,
+   "p95": 1.3384371828284698
+  }
+ },
+ "heldOut": {
+  "cost": {
+   "fitted": 1.0692391551561578,
+   "uncalibrated": 1.0945877116688916,
+   "current": 1.0945877116688916,
+   "legacy": 1.318361758628402
+  },
+  "sorensen": {
+   "fitted": 0.32868033897467674,
+   "uncalibrated": 0.3320152100548521,
+   "current": 0.3320152100548521,
+   "legacy": 0.2239747606945282
+  },
+  "newFires": {
+   "fires": 19,
+   "cost": {
+    "fitted": 1.0692391551561578,
+    "uncalibrated": 1.0945877116688916,
+    "current": 1.0945877116688916,
+    "legacy": 1.3183617586284018
+   },
+   "sorensen": {
+    "fitted": 0.3286803389746768,
+    "uncalibrated": 0.3320152100548521,
+    "current": 0.3320152100548521,
+    "legacy": 0.2239747606945282
+   }
+  }
+ },
+ "splits": [
+  {
+   "name": "5-fold 1",
+   "fires": [
+    "Alijo_24072019",
+    "Sernancelhe_06082020",
+    "Valpacos_13092019",
+    "Penedono_21072019"
+   ],
+   "fitted": {
+    "crownFire": 1,
+    "rosAdjUnderstory": 0.9259,
+    "rosAdjShrub": 0.703,
+    "rosAdjGrass": 0.8152,
+    "windAdj": 0.8789,
+    "holdWidthPerFlame": 0.8737,
+    "crownAdj": 0.9519
+   },
+   "cost": {
+    "fitted": 0.9366827010500296,
+    "uncalibrated": 0.9891436550629351,
+    "current": 0.9891436550629351,
+    "legacy": 1.202477155313605
+   },
+   "sorensen": {
+    "fitted": 0.3251136745236784,
+    "uncalibrated": 0.30744420299916797,
+    "current": 0.30744420299916797,
+    "legacy": 0.2292225659326898
+   }
+  },
+  {
+   "name": "5-fold 2",
+   "fires": [
+    "Chaves_30072020",
+    "Serta_13092019",
+    "PortoMos_06092020",
+    "OliveiraFrades_07092020"
+   ],
+   "fitted": {
+    "crownFire": 1,
+    "rosAdjUnderstory": 0.8823,
+    "rosAdjShrub": 0.8746,
+    "rosAdjGrass": 0.8036,
+    "windAdj": 0.8137,
+    "holdWidthPerFlame": 1.205,
+    "crownAdj": 1.0249
+   },
+   "cost": {
+    "fitted": 1.1597285205494734,
+    "uncalibrated": 1.1915131659512048,
+    "current": 1.1915131659512048,
+    "legacy": 1.3370542526052829
+   },
+   "sorensen": {
+    "fitted": 0.31639016633848616,
+    "uncalibrated": 0.29166799032785995,
+    "current": 0.29166799032785995,
+    "legacy": 0.21176170291145208
+   }
+  },
+  {
+   "name": "5-fold 3",
+   "fires": [
+    "Nisa_01082019",
+    "MirandadoCorvo_13092019",
+    "Mogadouro_20072021",
+    "SaoJoaoPesqueira_10072020"
+   ],
+   "fitted": {
+    "crownFire": 1,
+    "rosAdjUnderstory": 0.824,
+    "rosAdjShrub": 0.8932,
+    "rosAdjGrass": 0.6452,
+    "windAdj": 0.7959,
+    "holdWidthPerFlame": 1.5513,
+    "crownAdj": 0.9459
+   },
+   "cost": {
+    "fitted": 1.0378314985485022,
+    "uncalibrated": 1.0317430515995971,
+    "current": 1.0317430515995971,
+    "legacy": 1.3947413085486022
+   },
+   "sorensen": {
+    "fitted": 0.3006133389847132,
+    "uncalibrated": 0.36086680987619946,
+    "current": 0.36086680987619946,
+    "legacy": 0.25200100388843566
+   }
+  },
+  {
+   "name": "5-fold 4",
+   "fires": [
+    "Valenca_04092019",
+    "Baiao_04092019",
+    "Tomar_03082019",
+    "Avis_21072020"
+   ],
+   "fitted": {
+    "crownFire": 1,
+    "rosAdjUnderstory": 0.8462,
+    "rosAdjShrub": 0.8839,
+    "rosAdjGrass": 0.7923,
+    "windAdj": 0.802,
+    "holdWidthPerFlame": 1.1949,
+    "crownAdj": 1.0858
+   },
+   "cost": {
+    "fitted": 1.0709906580532635,
+    "uncalibrated": 1.124021279975008,
+    "current": 1.124021279975008,
+    "legacy": 1.3604502455545038
+   },
+   "sorensen": {
+    "fitted": 0.2762207324895396,
+    "uncalibrated": 0.2698776937775115,
+    "current": 0.2698776937775115,
+    "legacy": 0.15278141354803135
+   }
+  },
+  {
+   "name": "5-fold 5",
+   "fires": [
+    "Sabugal_29082019",
+    "Agueda_05092019",
+    "Fundao_06082020"
+   ],
+   "fitted": {
+    "crownFire": 1,
+    "rosAdjUnderstory": 0.8875,
+    "rosAdjShrub": 0.7491,
+    "rosAdjGrass": 0.835,
+    "windAdj": 0.8657,
+    "holdWidthPerFlame": 0.9993,
+    "crownAdj": 0.9454
+   },
+   "cost": {
+    "fitted": 1.1648701450539731,
+    "uncalibrated": 1.1504939704513208,
+    "current": 1.1504939704513208,
+    "legacy": 1.289993855283886
+   },
+   "sorensen": {
+    "fitted": 0.4571915970577298,
+    "uncalibrated": 0.46295406770641145,
+    "current": 0.46295406770641145,
+    "legacy": 0.29081790269120017
+   }
+  },
+  {
+   "name": "sem 2019",
+   "fires": [
+    "Agueda_05092019",
+    "Alijo_24072019",
+    "Baiao_04092019",
+    "MirandadoCorvo_13092019",
+    "Nisa_01082019",
+    "Penedono_21072019",
+    "Sabugal_29082019",
+    "Serta_13092019",
+    "Tomar_03082019",
+    "Valenca_04092019",
+    "Valpacos_13092019"
+   ],
+   "fitted": {
+    "crownFire": 1,
+    "rosAdjUnderstory": 0.8109,
+    "rosAdjShrub": 0.6318,
+    "rosAdjGrass": 0.4138,
+    "windAdj": 1.5421,
+    "holdWidthPerFlame": 1.4275,
+    "crownAdj": 1.0293
+   },
+   "cost": {
+    "fitted": 1.1027246858967628,
+    "uncalibrated": 1.1226060520744803,
+    "current": 1.1226060520744803,
+    "legacy": 1.3527560041404358
+   },
+   "sorensen": {
+    "fitted": 0.3830851852559942,
+    "uncalibrated": 0.33935916732982346,
+    "current": 0.33935916732982346,
+    "legacy": 0.23451107028612717
+   }
+  },
+  {
+   "name": "sem 2020",
+   "fires": [
+    "Avis_21072020",
+    "Chaves_30072020",
+    "Fundao_06082020",
+    "OliveiraFrades_07092020",
+    "PortoMos_06092020",
+    "SaoJoaoPesqueira_10072020",
+    "Sernancelhe_06082020"
+   ],
+   "fitted": {
+    "crownFire": 1,
+    "rosAdjUnderstory": 1.0672,
+    "rosAdjShrub": 0.6375,
+    "rosAdjGrass": 0.7533,
+    "windAdj": 0.8694,
+    "holdWidthPerFlame": 1.1715,
+    "crownAdj": 0.9331
+   },
+   "cost": {
+    "fitted": 1.0858054188791775,
+    "uncalibrated": 1.0611513958668588,
+    "current": 1.0611513958668588,
+    "legacy": 1.2432445138402517
+   },
+   "sorensen": {
+    "fitted": 0.31957353995964993,
+    "uncalibrated": 0.3322861991775317,
+    "current": 0.3322861991775317,
+    "legacy": 0.2193884174710217
+   }
+  },
+  {
+   "name": "sem 2021",
+   "fires": [
+    "Mogadouro_20072021"
+   ],
+   "fitted": {
+    "crownFire": 1,
+    "rosAdjUnderstory": 0.9323,
+    "rosAdjShrub": 0.7968,
+    "rosAdjGrass": 0.8372,
+    "windAdj": 0.8006,
+    "holdWidthPerFlame": 1.147,
+    "crownAdj": 1.095
+   },
+   "cost": {
+    "fitted": 0.9235264760482383,
+    "uncalibrated": 1.0204401778216474,
+    "current": 1.0204401778216474,
+    "legacy": 1.465845771513076
+   },
+   "sorensen": {
+    "fitted": 0.15877740528469178,
+    "uncalibrated": 0.24933475617140913,
+    "current": 0.24933475617140913,
+    "legacy": 0.1401797577514851
+   }
+  },
+  {
+   "name": "sem Norte",
+   "fires": [
+    "Alijo_24072019",
+    "Baiao_04092019",
+    "Chaves_30072020",
+    "Mogadouro_20072021",
+    "SaoJoaoPesqueira_10072020",
+    "Valenca_04092019",
+    "Valpacos_13092019"
+   ],
+   "fitted": {
+    "crownFire": 1,
+    "rosAdjUnderstory": 0.753,
+    "rosAdjShrub": 1.0143,
+    "rosAdjGrass": 0.875,
+    "windAdj": 0.8206,
+    "holdWidthPerFlame": 0.9194,
+    "crownAdj": 0.9691
+   },
+   "cost": {
+    "fitted": 1.0588628272560088,
+    "uncalibrated": 1.1172505481561747,
+    "current": 1.1172505481561747,
+    "legacy": 1.3714289274036828
+   },
+   "sorensen": {
+    "fitted": 0.27626151392561926,
+    "uncalibrated": 0.27361601252383067,
+    "current": 0.27361601252383067,
+    "legacy": 0.16014610209409605
+   }
+  }
+ ],
+ "heldOutPerFire": [
+  {
+   "fire": "Alijo_24072019",
+   "fold": "5-fold 1",
+   "cost": 0.7822584616053583,
+   "sorensen": 0.33099386802916236,
+   "current": {
+    "cost": 0.9323006153555241,
+    "sorensen": 0.2879119912643824
+   }
+  },
+  {
+   "fire": "Sernancelhe_06082020",
+   "fold": "5-fold 1",
+   "cost": 0.9430131234791383,
+   "sorensen": 0.4083074311757661,
+   "current": {
+    "cost": 0.9882658263673305,
+    "sorensen": 0.47776210716590733
+   }
+  },
+  {
+   "fire": "Valpacos_13092019",
+   "fold": "5-fold 1",
+   "cost": 1.0953563680705303,
+   "sorensen": 0.3750465457043321,
+   "current": {
+    "cost": 1.2032770596995233,
+    "sorensen": 0.3244134507889239
+   }
+  },
+  {
+   "fire": "Penedono_21072019",
+   "fold": "5-fold 1",
+   "cost": 0.9261028510450915,
+   "sorensen": 0.18610685318545314,
+   "current": {
+    "cost": 0.8327311188293625,
+    "sorensen": 0.1396892627774581
+   }
+  },
+  {
+   "fire": "Chaves_30072020",
+   "fold": "5-fold 2",
+   "cost": 1.2089558614999691,
+   "sorensen": 0.16898627173381833,
+   "current": {
+    "cost": 1.1472137165762635,
+    "sorensen": 0.16202614748581373
+   }
+  },
+  {
+   "fire": "Serta_13092019",
+   "fold": "5-fold 2",
+   "cost": 1.2338398110279178,
+   "sorensen": 0.3877766641226495,
+   "current": {
+    "cost": 1.3581504049814226,
+    "sorensen": 0.366863285989114
+   }
+  },
+  {
+   "fire": "PortoMos_06092020",
+   "fold": "5-fold 2",
+   "cost": 1.106508686623777,
+   "sorensen": 0.33861823922440976,
+   "current": {
+    "cost": 1.089153815123948,
+    "sorensen": 0.2789801386021272
+   }
+  },
+  {
+   "fire": "OliveiraFrades_07092020",
+   "fold": "5-fold 2",
+   "cost": 1.0896097230462296,
+   "sorensen": 0.3701794902730672,
+   "current": {
+    "cost": 1.1715347271231855,
+    "sorensen": 0.358802389234385
+   }
+  },
+  {
+   "fire": "Nisa_01082019",
+   "fold": "5-fold 3",
+   "cost": 1.3607101878998302,
+   "sorensen": 0.28351121264843177,
+   "current": {
+    "cost": 1.0785339628200876,
+    "sorensen": 0.43991386235353397
+   }
+  },
+  {
+   "fire": "MirandadoCorvo_13092019",
+   "fold": "5-fold 3",
+   "cost": 0.9538161014933646,
+   "sorensen": 0.43576616111313426,
+   "current": {
+    "cost": 1.0388469018958089,
+    "sorensen": 0.39480686596332726
+   }
+  },
+  {
+   "fire": "Mogadouro_20072021",
+   "fold": "5-fold 3",
+   "cost": 0.950221228172737,
+   "sorensen": 0.13661511079300967,
+   "current": {
+    "cost": 1.0204401778216474,
+    "sorensen": 0.24933475617140913
+   }
+  },
+  {
+   "fire": "SaoJoaoPesqueira_10072020",
+   "fold": "5-fold 3",
+   "cost": 0.8865784766280774,
+   "sorensen": 0.34656087138427694,
+   "current": {
+    "cost": 0.9891511638608449,
+    "sorensen": 0.35941175501652733
+   }
+  },
+  {
+   "fire": "Valenca_04092019",
+   "fold": "5-fold 4",
+   "cost": 1.134982519575605,
+   "sorensen": 0.4941598456387239,
+   "current": {
+    "cost": 1.3303555914526466,
+    "sorensen": 0.40037697537171213
+   }
+  },
+  {
+   "fire": "Baiao_04092019",
+   "fold": "5-fold 4",
+   "cost": 1.1467113138328475,
+   "sorensen": 0.14176638927423796,
+   "current": {
+    "cost": 1.198015512326774,
+    "sorensen": 0.13183701156804606
+   }
+  },
+  {
+   "fire": "Tomar_03082019",
+   "fold": "5-fold 4",
+   "cost": 0.9204753090820281,
+   "sorensen": 0.3784601772758189,
+   "current": {
+    "cost": 0.95114467122036,
+    "sorensen": 0.4585591408430633
+   }
+  },
+  {
+   "fire": "Avis_21072020",
+   "fold": "5-fold 4",
+   "cost": 1.0817934897225738,
+   "sorensen": 0.09049651776937781,
+   "current": {
+    "cost": 1.0165693449002517,
+    "sorensen": 0.08873764732722428
+   }
+  },
+  {
+   "fire": "Sabugal_29082019",
+   "fold": "5-fold 5",
+   "cost": 0.9411242125473919,
+   "sorensen": 0.475565183259773,
+   "current": {
+    "cost": 0.9983356973995394,
+    "sorensen": 0.6216394226199605
+   }
+  },
+  {
+   "fire": "Agueda_05092019",
+   "fold": "5-fold 5",
+   "cost": 1.4369097143598537,
+   "sorensen": 0.3494276654861711,
+   "current": {
+    "cost": 1.4269750368382335,
+    "sorensen": 0.16693957108853666
+   }
+  },
+  {
+   "fire": "Fundao_06082020",
+   "fold": "5-fold 5",
+   "cost": 1.1165765082546741,
+   "sorensen": 0.5465819424272453,
+   "current": {
+    "cost": 1.0261711771161894,
+    "sorensen": 0.6002832094107371
+   }
+  }
+ ],
+ "tierB": {
+  "fires": [],
+  "cost": {
+   "fitted": null,
+   "uncalibrated": null,
+   "current": null,
+   "legacy": null
+  },
+  "sorensen": {
+   "fitted": null,
+   "uncalibrated": null,
+   "current": null,
+   "legacy": null
+  }
+ },
+ "brier": {
+  "runs": 20,
+  "best": 0.0487089378815272,
+  "samples": 0.04428277489991832,
+  "current": 0.06171138441757084
+ },
+ "perFire": [
+  {
+   "fire": "Agueda_05092019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.4321825892041742,
+    "uncalibrated": 1.4269750368382335,
+    "current": 1.4269750368382335,
+    "legacy": 1.424542924085641
+   },
+   "sorensen": {
+    "best": 0.3493893897924123,
+    "uncalibrated": 0.16693957108853666,
+    "current": 0.16693957108853666,
+    "legacy": 0.16053654050551905
+   }
+  },
+  {
+   "fire": "Alijo_24072019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.7834435231993209,
+    "uncalibrated": 0.9323006153555241,
+    "current": 0.9323006153555241,
+    "legacy": 1.1356686630623003
+   },
+   "sorensen": {
+    "best": 0.32706320575543407,
+    "uncalibrated": 0.2879119912643824,
+    "current": 0.2879119912643824,
+    "legacy": 0.1586783576984287
+   }
+  },
+  {
+   "fire": "Avis_21072020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.1022104729783941,
+    "uncalibrated": 1.0165693449002517,
+    "current": 1.0165693449002517,
+    "legacy": 1.0465827276255153
+   },
+   "sorensen": {
+    "best": 0.09003870278199257,
+    "uncalibrated": 0.08873764732722428,
+    "current": 0.08873764732722428,
+    "legacy": 0.06120146290357831
+   }
+  },
+  {
+   "fire": "Baiao_04092019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.1264323585201537,
+    "uncalibrated": 1.198015512326774,
+    "current": 1.198015512326774,
+    "legacy": 1.5344620314107047
+   },
+   "sorensen": {
+    "best": 0.135342608387011,
+    "uncalibrated": 0.13183701156804606,
+    "current": 0.13183701156804606,
+    "legacy": 0.07255992473086498
+   }
+  },
+  {
+   "fire": "Chaves_30072020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.2205634542239545,
+    "uncalibrated": 1.1472137165762635,
+    "current": 1.1472137165762635,
+    "legacy": 1.0189380427660362
+   },
+   "sorensen": {
+    "best": 0.16638508333570176,
+    "uncalibrated": 0.16202614748581373,
+    "current": 0.16202614748581373,
+    "legacy": 0.11219006274530118
+   }
+  },
+  {
+   "fire": "Fundao_06082020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.1139909844910014,
+    "uncalibrated": 1.0261711771161894,
+    "current": 1.0261711771161894,
+    "legacy": 1.211091002686687
+   },
+   "sorensen": {
+    "best": 0.5390276035147963,
+    "uncalibrated": 0.6002832094107371,
+    "current": 0.6002832094107371,
+    "legacy": 0.32266024995409254
+   }
+  },
+  {
+   "fire": "MirandadoCorvo_13092019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.9394724401368121,
+    "uncalibrated": 1.0388469018958089,
+    "current": 1.0388469018958089,
+    "legacy": 1.2992550681146422
+   },
+   "sorensen": {
+    "best": 0.4399979118311164,
+    "uncalibrated": 0.39480686596332726,
+    "current": 0.39480686596332726,
+    "legacy": 0.310889900383693
+   }
+  },
+  {
+   "fire": "Mogadouro_20072021",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.9195658438286511,
+    "uncalibrated": 1.0204401778216474,
+    "current": 1.0204401778216474,
+    "legacy": 1.465845771513076
+   },
+   "sorensen": {
+    "best": 0.16084572396894736,
+    "uncalibrated": 0.24933475617140913,
+    "current": 0.24933475617140913,
+    "legacy": 0.1401797577514851
+   }
+  },
+  {
+   "fire": "Nisa_01082019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.1998109307810996,
+    "uncalibrated": 1.0785339628200876,
+    "current": 1.0785339628200876,
+    "legacy": 1.308093311334405
+   },
+   "sorensen": {
+    "best": 0.36152448856769775,
+    "uncalibrated": 0.43991386235353397,
+    "current": 0.43991386235353397,
+    "legacy": 0.3506410138020104
+   }
+  },
+  {
+   "fire": "OliveiraFrades_07092020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.0767806570257275,
+    "uncalibrated": 1.1715347271231855,
+    "current": 1.1715347271231855,
+    "legacy": 1.4895717919317912
+   },
+   "sorensen": {
+    "best": 0.36786754547084516,
+    "uncalibrated": 0.358802389234385,
+    "current": 0.358802389234385,
+    "legacy": 0.21320396009297038
+   }
+  },
+  {
+   "fire": "Penedono_21072019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.9010113830159773,
+    "uncalibrated": 0.8327311188293625,
+    "current": 0.8327311188293625,
+    "legacy": 1.3039347167877744
+   },
+   "sorensen": {
+    "best": 0.18386598896592576,
+    "uncalibrated": 0.1396892627774581,
+    "current": 0.1396892627774581,
+    "legacy": 0.09354170764875036
+   }
+  },
+  {
+   "fire": "PortoMos_06092020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.1194334791546419,
+    "uncalibrated": 1.089153815123948,
+    "current": 1.089153815123948,
+    "legacy": 1.3860333938791036
+   },
+   "sorensen": {
+    "best": 0.3572603302486219,
+    "uncalibrated": 0.2789801386021272,
+    "current": 0.2789801386021272,
+    "legacy": 0.19643774993969534
+   }
+  },
+  {
+   "fire": "Sabugal_29082019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.9268812188382335,
+    "uncalibrated": 0.9983356973995394,
+    "current": 0.9983356973995394,
+    "legacy": 1.23434763907933
+   },
+   "sorensen": {
+    "best": 0.4646874038757086,
+    "uncalibrated": 0.6216394226199605,
+    "current": 0.6216394226199605,
+    "legacy": 0.3892569176139889
+   }
+  },
+  {
+   "fire": "SaoJoaoPesqueira_10072020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.902847242922682,
+    "uncalibrated": 0.9891511638608449,
+    "current": 0.9891511638608449,
+    "legacy": 1.5057710832322853
+   },
+   "sorensen": {
+    "best": 0.32792043906989654,
+    "uncalibrated": 0.35941175501652733,
+    "current": 0.35941175501652733,
+    "legacy": 0.20629334361655408
+   }
+  },
+  {
+   "fire": "Sernancelhe_06082020",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.9453588019471104,
+    "uncalibrated": 0.9882658263673305,
+    "current": 0.9882658263673305,
+    "legacy": 1.0447235547603437
+   },
+   "sorensen": {
+    "best": 0.4143663335013969,
+    "uncalibrated": 0.47776210716590733,
+    "current": 0.47776210716590733,
+    "legacy": 0.4237320930449601
+   }
+  },
+  {
+   "fire": "Serta_13092019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.2117343110314998,
+    "uncalibrated": 1.3581504049814226,
+    "current": 1.3581504049814226,
+    "legacy": 1.4536737818442007
+   },
+   "sorensen": {
+    "best": 0.422550848619664,
+    "uncalibrated": 0.366863285989114,
+    "current": 0.366863285989114,
+    "legacy": 0.3252150388678414
+   }
+  },
+  {
+   "fire": "Tomar_03082019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 0.9338470636235856,
+    "uncalibrated": 0.95114467122036,
+    "current": 0.95114467122036,
+    "legacy": 1.2470210099844194
+   },
+   "sorensen": {
+    "best": 0.37143488004025915,
+    "uncalibrated": 0.4585591408430633,
+    "current": 0.4585591408430633,
+    "legacy": 0.2871811037802638
+   }
+  },
+  {
+   "fire": "Valenca_04092019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.084716245051277,
+    "uncalibrated": 1.3303555914526466,
+    "current": 1.3303555914526466,
+    "legacy": 1.6137352131973755
+   },
+   "sorensen": {
+    "best": 0.5194742018838502,
+    "uncalibrated": 0.40037697537171213,
+    "current": 0.40037697537171213,
+    "legacy": 0.19018316277741829
+   }
+  },
+  {
+   "fire": "Valpacos_13092019",
+   "tier": "A",
+   "fitted": true,
+   "cost": {
+    "best": 1.0879873724650284,
+    "uncalibrated": 1.2032770596995233,
+    "current": 1.2032770596995233,
+    "legacy": 1.3255816866440024
+   },
+   "sorensen": {
+    "best": 0.37840678625318924,
+    "uncalibrated": 0.3244134507889239,
+    "current": 0.3244134507889239,
+    "legacy": 0.2409381053386201
+   }
+  }
+ ]
+}

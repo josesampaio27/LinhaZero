@@ -22,6 +22,17 @@ export const PT_CALIBRATION: Readonly<Partial<ModelParams>> = {
 };
 export const PT_CALIBRATION_ID = "pt-firesprd-2026-10-copas-limite";
 
+/** The fires PT_CALIBRATION was fitted on (ADR 0053): not held out for it. */
+export const PT_CALIBRATION_SEEN: readonly string[] = [
+  "Alijo_24072019",
+  "Baiao_04092019",
+  "CastroDaire_07092020",
+  "OliveiraFrades_07092020",
+  "SaoJoaoPesqueira_10072020",
+  "Valenca_04092019",
+  "Valpacos_13092019",
+];
+
 /** Parameter sets the ensemble draws (run k uses sample k mod n): the calibration's uncertainty. Empty = none. */
 export const PT_CALIBRATION_SAMPLES: readonly Partial<ModelParams>[] = [];
 
@@ -33,8 +44,45 @@ export const PT_CALIBRATION_SAMPLES: readonly Partial<ModelParams>[] = [];
  * the first observation). The share of runs that burn a cell is shown as is: the probability of burning
  * with no firefighting other than what the user draws.
  */
-export const BURN_CHANCE_ENSEMBLE: { windDirJitterDeg: number; windSpeedJitterPct: number; perturb: EnsemblePerturbation } = {
+export const BURN_CHANCE_ENSEMBLE: BurnChanceEnsemble = {
   windDirJitterDeg: 30,
   windSpeedJitterPct: 37.5,
   perturb: { deadMoisturePts: 0.04, fuelLogSd: 0.6, ignitionRadiusM: 400 },
 };
+
+export interface BurnChanceEnsemble {
+  windDirJitterDeg: number;
+  windSpeedJitterPct: number;
+  perturb: EnsemblePerturbation;
+}
+
+/**
+ * Calibration of the 30 m grid (ADR 0062): for now the same values as the 100 m grid, kept on 30 m
+ * evidence. A standalone 30 m fit from the physical values, on the 19 PT-FireSprd fires rebuilt at 30 m
+ * that make sense for the engine (engine/reports/selection-30m.json), did not beat the physical model by
+ * the pre-registered rule (report pt-firesprd-30m-2026-10-20-base.json). These values, never fitted on
+ * the 30 m cases, beat both on the 13 fires they never saw: Sørensen from the ignition 0.332 → 0.398
+ * against the physical model (paired +0.061, 90% +0.016 to +0.113), interval cost −0.021. A 30 m refit
+ * whose objective also rewards the Sørensen from the ignition is planned (docs/plano-refit-30m.md).
+ */
+export const PT_CALIBRATION_30M: Readonly<Partial<ModelParams>> = PT_CALIBRATION;
+export const PT_CALIBRATION_30M_ID = "pt-firesprd-2026-10-copas-limite@30m";
+/** Ensemble of the 30 m grid, checked on the same fires (reliability.ts). */
+export const BURN_CHANCE_ENSEMBLE_30M: BurnChanceEnsemble = BURN_CHANCE_ENSEMBLE;
+
+/** Grids with cells up to this size (m) use the 30 m calibration; coarser ones the 100 m one. */
+export const FINE_GRID_MAX_CELL_M = 50;
+
+export interface GridCalibration {
+  id: string;
+  params: Readonly<Partial<ModelParams>>;
+  samples: readonly Partial<ModelParams>[];
+  ensemble: BurnChanceEnsemble;
+}
+
+/** The calibration of a grid with this cell size: each resolution has its own (ADRs 0053-0058 and 0062). */
+export function calibrationFor(cellSize: number): GridCalibration {
+  return cellSize <= FINE_GRID_MAX_CELL_M
+    ? { id: PT_CALIBRATION_30M_ID, params: PT_CALIBRATION_30M, samples: [], ensemble: BURN_CHANCE_ENSEMBLE_30M }
+    : { id: PT_CALIBRATION_ID, params: PT_CALIBRATION, samples: PT_CALIBRATION_SAMPLES, ensemble: BURN_CHANCE_ENSEMBLE };
+}

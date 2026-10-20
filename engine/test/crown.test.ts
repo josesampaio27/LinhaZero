@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { activeCrownRate, criticalSurfaceIntensity, crownFire } from "../src/crown";
 import { ANDERSON_13 } from "../src/fuel-models";
 import { comparePaired } from "../src/metrics";
+import { headFire, prepareFuelBed, surfaceBase } from "../src/rothermel";
 import { simulate } from "../src/simulate";
+import { fuelBases, RothermelRates } from "../src/surface";
 import { makeGrid, scenario } from "./helpers";
 
 const pine = { cbhM: 4, cbdKgM3: 0.12, cflKgM2: 1 };
@@ -61,6 +63,26 @@ describe("crown fire in the engine", () => {
     expect(simulate(open, s({ crownFire: 1 })).arrivalMin).toEqual(simulate(open, s({ crownFire: 0 })).arrivalMin);
     const noCanopyParams = makeGrid({ rows: 81, cols: 81, cellSize: 30, rothermel: ANDERSON_13[10], canopy: () => 70 });
     expect(simulate(noCanopyParams, s({ crownFire: 1 })).arrivalMin).toEqual(simulate(noCanopyParams, s({ crownFire: 0 })).arrivalMin);
+  });
+
+  it("the intensity of a crown fire is physical: Cruz's rate times the surface and canopy heat, whatever crownAdj", () => {
+    const grid = makeGrid({ rows: 3, cols: 3, cellSize: 30, rothermel: fuel, canopy: () => 70 });
+    const moisture = { d1: 0.05, d10: 0.06, d100: 0.08, liveHerb: 0.6, liveWoody: 0.8 };
+    const headIntensity = (crownAdj: number, rosAdj: number) => {
+      const rates = new RothermelRates(grid, fuelBases(grid, moisture, rosAdj), 1, { enabled: true, rateAdj: crownAdj });
+      rates.setWind(10, 270);
+      // Head fire runs east (bearing 90°).
+      return { rate: rates.rate(4, 0, 1), intensity: rates.intensity(4, rates.rate(4, 0, 1)) };
+    };
+    const full = headIntensity(1, 1);
+    const adjusted = headIntensity(0.35, 0.5);
+    expect(adjusted.rate).toBeCloseTo(0.35 * full.rate, 6); // crown rate scaled by crownAdj
+    expect(adjusted.intensity).toBeCloseTo(full.intensity, 0); // intensity stays the physical one
+    // And it is Cruz's rate times (surface heat per area + canopy heat per area).
+    const bed = surfaceBase(prepareFuelBed(fuel, moisture), moisture);
+    const c = crownFire(pine, 1e9, 36, 5)!;
+    const surfaceHeatPerRate = headFire(bed, 0, 90, 0, 0).intensityKwM / headFire(bed, 0, 90, 0, 0).ros;
+    expect(full.intensity).toBeCloseTo(c.rate * (surfaceHeatPerRate + c.extraIntensityPerRate), -1);
   });
 
   it("keeps the ensemble paired", () => {

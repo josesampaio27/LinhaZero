@@ -10,6 +10,7 @@ import { fuelBases, RothermelRates } from "./surface";
 import type { CellRef, PreparedGrid, RunMetrics, Scenario, SimulationResult, WeatherStep } from "./types";
 
 const crownOf = (p: ModelParams) => ({ enabled: p.crownFire >= 0.5, rateAdj: p.crownAdj });
+const terrainOptionsOf = (p: ModelParams) => ({ crownRatio: p.crownRatio, demSmoothM: p.demSmoothM });
 
 /** Dead fuel moisture shifted by a calibration offset, never below 1%. */
 function withDeadOffset(m: FuelMoisture, offset: number): FuelMoisture {
@@ -64,7 +65,7 @@ export function simulate(grid: PreparedGrid, scenario: Scenario): SimulationResu
     windSpeedMs: first.wind.speedMs,
     durationMin: scenario.durationMin,
     params,
-    rates: firstBases && new RothermelRates(grid, firstBases, params.windAdj, crownOf(params), params.windLimit),
+    rates: firstBases && new RothermelRates(grid, firstBases, params.windAdj, crownOf(params), params.windLimit, terrainOptionsOf(params)),
     bases: firstBases,
     changes: steps.slice(1).map((s) => ({
       fromMin: s.fromMin,
@@ -88,9 +89,9 @@ export function simulate(grid: PreparedGrid, scenario: Scenario): SimulationResu
   // One rate cache per wind factor, reused by the runs (each run resets it with its own fuel behaviour).
   const ratesByWindAdj = new Map<string, RothermelRates>();
   const ratesFor = (p: ModelParams, b0: (SurfaceBase | null)[]) => {
-    const key = `${p.windAdj}|${p.crownFire}|${p.crownAdj}|${p.windLimit}`;
+    const key = `${p.windAdj}|${p.crownFire}|${p.crownAdj}|${p.windLimit}|${p.crownRatio}|${p.demSmoothM}`;
     let r = ratesByWindAdj.get(key);
-    if (!r) ratesByWindAdj.set(key, (r = new RothermelRates(grid, b0, p.windAdj, crownOf(p), p.windLimit)));
+    if (!r) ratesByWindAdj.set(key, (r = new RothermelRates(grid, b0, p.windAdj, crownOf(p), p.windLimit, terrainOptionsOf(p))));
     return r;
   };
   const buildInput = (p: ModelParams, tag: string): SpreadInput => {
@@ -135,9 +136,11 @@ export function simulate(grid: PreparedGrid, scenario: Scenario): SimulationResu
     const ang = 2 * Math.PI * hashRandom(ens.seed, run, RANDOM_PURPOSE.ignition, 1);
     const row = Math.round(base.ignition.row - dist * Math.cos(ang));
     const col = Math.round(base.ignition.col + dist * Math.sin(ang));
-    // Outside the grid or on something that cannot burn: keep the given point.
-    if (row < 0 || col < 0 || row >= rows || col >= cols || !(grid.baseRate[row * cols + col] > 0)) return base.ignition;
-    return { row, col };
+    // Outside the grid: keep the given point. On a road or something else that cannot burn: the nearest
+    // burnable cell (200 m), as for the given point, so the draws do not pile up on the given point.
+    if (row < 0 || col < 0 || row >= rows || col >= cols) return base.ignition;
+    if (grid.baseRate[row * cols + col] > 0) return { row, col };
+    return nearestBurnable(grid, { row, col }) ?? base.ignition;
   };
 
   const rng = createRng(ens.seed);

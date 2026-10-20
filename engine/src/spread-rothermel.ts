@@ -7,7 +7,7 @@ import { attackEffectiveness, DEFAULT_PARAMS, holdProbability } from "./params";
 import { hashRandom, RANDOM_PURPOSE } from "./random";
 import { flameLength } from "./rothermel";
 import { normals, spotDistribution } from "./spotting";
-import type { SpreadInput } from "./spread";
+import type { SpreadChange, SpreadInput } from "./spread";
 import type { PreparedGrid } from "./types";
 
 /** One move of the stencil: offset, direction and the cells its centre-to-centre line crosses. */
@@ -22,6 +22,12 @@ export interface StencilMove {
   length: number;
   /** Cells crossed, from the origin (0, 0) to the target (dr, dc), with the fraction of the line in each. */
   cells: { dr: number; dc: number; frac: number }[];
+  /**
+   * Where the line passes exactly through a cell corner (diagonal moves and their multiples): for the
+   * entry into cells[k], the two cells beside that corner. A fire cannot squeeze between them when both
+   * are barriers that hold (corners[k] undefined = an ordinary edge crossing).
+   */
+  corners?: ({ dr: number; dc: number }[] | undefined)[];
   /** A two-cell jump, used only across a breakable road in its middle cell (so a head fire can breach it head-on). */
   acrossRoad?: boolean;
   /**
@@ -44,6 +50,16 @@ export interface StencilMove {
  * (engine/test/stencil.test.ts).
  */
 export const SECTOR_FRACTION = 0.6;
+
+/**
+ * Share of the way to its edge that the fire has already covered in a cell given as burned at the start
+ * (Ignition.burned: an observed burned area). Its centre is known to have burned, not where the front
+ * is beyond it. Restarting from the centres (0) loses growth at every restart; from the edges (1) the
+ * whole front is credited the same progress and the fastest paths overshoot. 0.65 keeps the growth of
+ * the engine's own fires, observed every 30-120 minutes and restarted from what was observed, at 1.00
+ * on average (0.85-1.06 per interval) at 30 m, over winds of 1-10 m/s (engine/test/calibration.test.ts).
+ */
+export const SEED_SHARE = 0.65;
 
 /** Gives each move the sector halfway to its neighbouring directions, times `fraction`. */
 export function withSectors(moves: StencilMove[], fraction = SECTOR_FRACTION): StencilMove[] {
@@ -86,9 +102,23 @@ export function crossedCells(dr: number, dc: number): StencilMove["cells"] {
   return cells;
 }
 
+/** The two cells beside each corner the line of a move passes through (see StencilMove.corners). */
+export function cornerCells(cells: StencilMove["cells"]): StencilMove["corners"] {
+  const corners = cells.map((cell, k) => {
+    const prev = cells[k - 1];
+    if (!prev || prev.dr === cell.dr || prev.dc === cell.dc) return undefined;
+    return [
+      { dr: prev.dr, dc: cell.dc },
+      { dr: cell.dr, dc: prev.dc },
+    ];
+  });
+  return corners.some(Boolean) ? corners : undefined;
+}
+
 function move(dr: number, dc: number): StencilMove {
   const bearingDeg = ((Math.atan2(dc, -dr) * 180) / Math.PI + 360) % 360;
   const rad = (bearingDeg * Math.PI) / 180;
+  const cells = crossedCells(dr, dc);
   return {
     dr,
     dc,
@@ -96,7 +126,8 @@ function move(dr: number, dc: number): StencilMove {
     cosBearing: Math.cos(rad),
     sinBearing: Math.sin(rad),
     length: Math.hypot(dr, dc),
-    cells: crossedCells(dr, dc),
+    cells,
+    corners: cornerCells(cells),
   };
 }
 
@@ -155,10 +186,19 @@ export const ROAD_JUMPS: readonly StencilMove[] = [
 ].map(([dr, dc]) => ({ ...move(dr, dc), acrossRoad: true }));
 
 /**
- * Arrival minutes with the Rothermel rates of input.rates (see computeArrival for the shared rules on
- * weather changes). A step's time is the sum over the cells it crosses of the length in that cell
- * over that cell's rate in the step's direction. Every crossed cell after the origin must be burnable,
- * so a long step cannot jump a one-cell barrier.
+ * Arrival minutes with the Rothermel rates of input.rates. A step's time is the sum over the cells it
+ * crosses of the length in that cell over that cell's rate in the step's direction. Every crossed cell
+ * after the origin must be burnable, so a long step cannot jump a one-cell barrier, and a step through a
+ * cell corner cannot squeeze between two barrier cells that hold.
+ *
+ * Changing conditions: a step's time is computed with the weather (and interventions) at its departure.
+ * When the weather changes at minute T, or an "Ataque" / "Proteger zona" starts, the steps still under
+ * way are recomputed: every arrival not yet reached is forgotten, and each burning cell with unburned
+ * neighbours restarts its steps at T, keeping the share of each step it had already covered under the
+ * old conditions and covering the rest at the new rate. So a fire that started in calm weather speeds
+ * up when the wind rises, and steps launched on a dry afternoon slow down when the night is damp,
+ * whatever the cell size. Ignitions may start before minute 0 (t0Min < 0), e.g. a fire front that has
+ * already crossed part of its cells.
  *
  * Against an intense fire (params, Rothermel only):
  * - "Ataque" and "Proteger zona" keep their full slowdown up to attackFullKwM and lose it linearly up
@@ -171,7 +211,8 @@ export const ROAD_JUMPS: readonly StencilMove[] = [
  *
  * Spot fires (ensemble runs only): a cell burning above spotCriticalKwM launches an ember with
  * probability spotPerHa per hectare; it lands downwind at a Sardoy distance (spotting.ts) and, on
- * unburned fuel, ignites after spotDelayMin, whatever barriers or lines lie in between.
+ * unburned fuel that is not a containment line already in place, ignites after spotDelayMin, whatever
+ * barriers or lines lie in between.
  */
 export function computeArrivalRothermel(
   grid: PreparedGrid,
@@ -183,6 +224,7 @@ export function computeArrivalRothermel(
   const rates = input.rates!;
   const params = { ...DEFAULT_PARAMS, ...input.params };
   const { rows, cols, cellSize } = grid.header;
+  const n = rows * cols;
   const { baseRate, barrier } = grid;
   const { containStart, containWidth, slowFactor, slowStart } = layers;
   const duration = input.durationMin;
@@ -192,7 +234,7 @@ export function computeArrivalRothermel(
   const spotting = !!random && params.spotPerHa > 0;
   // Intensity as the fire arrives in each cell: the output, or a scratch copy when spot fires need it.
   const fireIntensity =
-    intensityOut ?? (spotting ? new Float32Array(rows * cols) : null);
+    intensityOut ?? (spotting ? new Float32Array(n) : null);
   const spotChance =
     1 - Math.pow(1 - params.spotPerHa, (cellSize * cellSize) / 10000);
   rates.setConditions(
@@ -200,21 +242,49 @@ export function computeArrivalRothermel(
     input.windDirectionDeg,
     input.bases ?? rates.currentBases,
   );
-  const changes = input.changes ?? [];
-  let next = 0;
-  const arrival = new Float64Array(rows * cols).fill(Infinity);
-  const result = new Float32Array(rows * cols).fill(Infinity);
+  const arrival = new Float64Array(n).fill(Infinity);
+  const result = new Float32Array(n).fill(Infinity);
+  /** 1 once a cell has burned (its arrival is final and its steps launched). */
+  const done = new Uint8Array(n);
+  /** Burned cells that may still have unburned neighbours (pruned at each change of conditions). */
+  let active: number[] = [];
+  /**
+   * Per burning cell, after a change of conditions: for each move, the virtual departure minute such
+   * that the step arrives at departure + its time under the current conditions. Absent = its arrival.
+   */
+  let departures = new Map<number, Float64Array>();
+  /** Cells given a tentative arrival since the last change of conditions. */
+  let touched: number[] = [];
+  /** Arrivals that do not come from a step (ignitions, spot fires): kept when conditions change. */
+  const forced: { i: number; t: number }[] = [];
+  /** 1 where an ignition says the whole cell is burned: its steps leave from its edges (no time in it). */
+  const burnedSeed = new Uint8Array(n);
+
+  // Changes of conditions in time order: weather changes, and the start of every slowdown zone.
+  const events: { t: number; change?: SpreadChange }[] = (input.changes ?? []).map((c) => ({ t: c.fromMin, change: c }));
+  const slowStarts = new Set<number>();
+  for (let x = 0; x < n; x++) if (slowStart[x] < Infinity && slowStart[x] > -Infinity) slowStarts.add(slowStart[x]);
+  for (const t of slowStarts) events.push({ t });
+  events.sort((a, b) => a.t - b.t);
+  let nextEvent = 0;
 
   heap.clear();
-  for (const { cell, t0Min } of input.ignitions ?? [
+  const setArrival = (j: number, ta: number) => {
+    if (arrival[j] === Infinity) touched.push(j);
+    arrival[j] = ta;
+    heap.push(ta, j);
+  };
+  for (const { cell, t0Min, burned } of input.ignitions ?? [
     { cell: input.ignition, t0Min: 0 },
   ]) {
     const { row, col } = cell;
     if (row < 0 || col < 0 || row >= rows || col >= cols) continue;
     const i = row * cols + col;
-    if (baseRate[i] <= 0 || !(t0Min >= 0) || t0Min >= arrival[i]) continue;
-    arrival[i] = t0Min;
-    heap.push(t0Min, i);
+    if (baseRate[i] <= 0 || !Number.isFinite(t0Min) || t0Min > arrival[i]) continue;
+    if (burned) burnedSeed[i] = 1;
+    if (t0Min === arrival[i]) continue;
+    setArrival(i, t0Min);
+    forced.push({ i, t: t0Min });
   }
 
   // Rate (m/min) of cell x in the move's direction at departure minute t, after any intervention.
@@ -240,20 +310,149 @@ export function computeArrivalRothermel(
       ? hashRandom(random.seed, random.run, RANDOM_PURPOSE.breach, x) >= p
       : p < 0.5;
   };
+  // A barrier cell that stops these flames: water always, a road or river unless they breach it.
+  const holdsAt = (i: number, originRate: number, x: number) =>
+    barrier[x] > 0 && baseRate[x] <= 0 && (barrier[x] < 2 || !breaches(i, originRate, x, barrier[x]));
 
-  while (heap.size > 0) {
-    const t = heap.peekKey();
-    const i = heap.pop();
-    if (t > arrival[i]) continue; // stale entry
-    if (t > duration) break;
-    while (next < changes.length && t >= changes[next].fromMin) {
-      const w = changes[next++];
-      rates.setConditions(
-        w.windSpeedMs,
-        w.windDirectionDeg,
-        w.bases ?? rates.currentBases,
-      );
+  // Time (min) of move m from cell i (row r, col c) leaving at minute t under the current conditions;
+  // Infinity when the move is blocked. Leaves the origin's and the target's rates in stepOrigin, stepTarget.
+  let stepOrigin = 0;
+  let stepTarget = 0;
+  const stepCost = (i: number, r: number, c: number, m: StencilMove, t: number): number => {
+    if (m.acrossRoad && barrier[(r + m.dr / 2) * cols + (c + m.dc / 2)] < 2) return Infinity;
+    const originRate = effectiveRate(i, m, t);
+    if (!(originRate > 0)) return Infinity;
+    const lengthM = m.length * cellSize;
+    const j = (r + m.dr) * cols + (c + m.dc);
+    let cost = 0;
+    let rateJ = 0;
+    for (let k = 0; k < m.cells.length; k++) {
+      const seg = m.cells[k];
+      const corner = m.corners?.[k];
+      if (corner) {
+        const a = (r + corner[0].dr) * cols + (c + corner[0].dc);
+        const b = (r + corner[1].dr) * cols + (c + corner[1].dc);
+        if (holdsAt(i, originRate, a) && holdsAt(i, originRate, b)) return Infinity;
+      }
+      const x = (r + seg.dr) * cols + (c + seg.dc);
+      const len = seg.frac * lengthM;
+      if (x === i) {
+        cost += (burnedSeed[i] ? 1 - SEED_SHARE : 1) * (len / originRate);
+        continue;
+      }
+      if (baseRate[x] <= 0) {
+        // A breakable road on the way is crossed at the origin's rate if the flames breach it.
+        if (barrier[x] < 2 || !breaches(i, originRate, x, barrier[x])) return Infinity;
+        cost += len / originRate;
+        continue;
+      }
+      const rate = effectiveRate(x, m, t);
+      if (!(rate > 0)) return Infinity;
+      cost += len / rate;
+      if (x === j) rateJ = rate;
     }
+    stepOrigin = originRate;
+    stepTarget = rateJ;
+    return cost;
+  };
+  // Accepts arrival ta at cell j by move m from cell i unless a containment line in place by then holds.
+  const relax = (i: number, r: number, c: number, m: StencilMove, j: number, ta: number) => {
+    if (ta >= arrival[j] || ta > duration) return;
+    for (const seg of m.cells) {
+      const x = (r + seg.dr) * cols + (c + seg.dc);
+      if (x === i || !(containStart[x] <= ta)) continue;
+      const width = Number.isNaN(containWidth[x])
+        ? params.lineWidthM
+        : containWidth[x];
+      if (!breaches(i, stepOrigin, x, width)) return; // the line holds
+    }
+    setArrival(j, ta);
+    if (fireIntensity) fireIntensity[j] = rates.intensity(j, stepTarget);
+  };
+  // Target of move m from (r, c) if it is an unburned, burnable cell inside the grid; else -1.
+  const target = (r: number, c: number, m: StencilMove) => {
+    const nr = r + m.dr;
+    const nc = c + m.dc;
+    if (nr < 0 || nc < 0 || nr >= rows || nc >= cols) return -1;
+    const j = nr * cols + nc;
+    return baseRate[j] > 0 && !done[j] ? j : -1;
+  };
+
+  // Conditions change at minute T: recompute the steps under way (see the comment above).
+  const restart = (T: number, change?: SpreadChange) => {
+    const frontier = active.filter((i) => {
+      const r = (i / cols) | 0;
+      const c = i - r * cols;
+      return stencil.some((m) => target(r, c, m) >= 0);
+    });
+    active = frontier;
+    const nm = stencil.length;
+    // Share of each step covered by T under the old conditions (NaN: no step to that neighbour). The old
+    // conditions are those just before T (a slowdown starting at T does not apply yet).
+    const before = T - 1e-9;
+    const covered = new Float64Array(frontier.length * nm).fill(NaN);
+    frontier.forEach((i, f) => {
+      const r = (i / cols) | 0;
+      const c = i - r * cols;
+      const dep = departures.get(i);
+      stencil.forEach((m, k) => {
+        if (target(r, c, m) < 0) return;
+        const cost = stepCost(i, r, c, m, before);
+        const from = dep ? dep[k] : arrival[i];
+        covered[f * nm + k] = cost > 0 && cost < Infinity ? Math.min(1, Math.max(0, (T - from) / cost)) : 0;
+      });
+    });
+    const nextDepartures = new Map<number, Float64Array>();
+    for (const x of touched) {
+      if (done[x]) continue;
+      arrival[x] = Infinity;
+      if (fireIntensity) fireIntensity[x] = 0;
+    }
+    touched = [];
+    heap.clear();
+    if (change)
+      rates.setConditions(
+        change.windSpeedMs,
+        change.windDirectionDeg,
+        change.bases ?? rates.currentBases,
+      );
+    for (const { i, t } of forced) {
+      if (done[i] || !(t < arrival[i])) continue;
+      setArrival(i, t);
+      if (fireIntensity) fireIntensity[i] = 0;
+    }
+    frontier.forEach((i, f) => {
+      const r = (i / cols) | 0;
+      const c = i - r * cols;
+      const dep = new Float64Array(nm).fill(T);
+      stencil.forEach((m, k) => {
+        const share = covered[f * nm + k];
+        if (Number.isNaN(share)) return;
+        const cost = stepCost(i, r, c, m, T);
+        if (!(cost < Infinity)) return; // blocked now: a later change starts this step afresh
+        dep[k] = T - share * cost;
+        relax(i, r, c, m, (r + m.dr) * cols + (c + m.dc), T + (1 - share) * cost);
+      });
+      nextDepartures.set(i, dep);
+    });
+    departures = nextDepartures;
+  };
+
+  for (;;) {
+    const tNext = heap.size > 0 ? heap.peekKey() : Infinity;
+    const ev = events[nextEvent];
+    if (ev && ev.t <= tNext && ev.t <= duration) {
+      nextEvent++;
+      restart(ev.t, ev.change);
+      continue;
+    }
+    if (heap.size === 0) break;
+    const t = tNext;
+    const i = heap.pop();
+    if (t > arrival[i] || done[i]) continue; // stale entry
+    if (t > duration) break;
+    done[i] = 1;
+    active.push(i);
     const r = (i / cols) | 0;
     const c = i - r * cols;
     if (
@@ -277,60 +476,21 @@ export function computeArrivalRothermel(
       const ts = t + params.spotDelayMin;
       if (sr >= 0 && sc >= 0 && sr < rows && sc < cols) {
         const k = sr * cols + sc;
-        if (baseRate[k] > 0 && ts < arrival[k] && ts <= duration) {
-          arrival[k] = ts;
+        // A containment line in place is bare ground: an ember landing on it goes out.
+        if (baseRate[k] > 0 && !done[k] && ts < arrival[k] && ts <= duration && !(containStart[k] <= ts)) {
+          setArrival(k, ts);
+          forced.push({ i: k, t: ts });
           fireIntensity![k] = 0; // a new spot fire starts small
-          heap.push(ts, k);
         }
       }
     }
-    moves: for (const m of stencil) {
-      const nr = r + m.dr;
-      const nc = c + m.dc;
-      if (nr < 0 || nc < 0 || nr >= rows || nc >= cols) continue;
-      const j = nr * cols + nc;
-      if (baseRate[j] <= 0 || arrival[j] <= t) continue;
-      if (m.acrossRoad && barrier[(r + m.dr / 2) * cols + (c + m.dc / 2)] < 2)
-        continue;
-      const lengthM = m.length * cellSize;
-      const originRate = effectiveRate(i, m, t);
-      if (!(originRate > 0)) continue;
-      let cost = 0;
-      let rateJ = 0;
-      for (const seg of m.cells) {
-        const x = (r + seg.dr) * cols + (c + seg.dc);
-        const len = seg.frac * lengthM;
-        if (x === i) {
-          cost += len / originRate;
-          continue;
-        }
-        if (baseRate[x] <= 0) {
-          // A breakable road on the way is crossed at the origin's rate if the flames breach it.
-          if (barrier[x] < 2 || !breaches(i, originRate, x, barrier[x]))
-            continue moves;
-          cost += len / originRate;
-          continue;
-        }
-        const rate = effectiveRate(x, m, t);
-        if (!(rate > 0)) continue moves;
-        cost += len / rate;
-        if (x === j) rateJ = rate;
-      }
-      const ta = t + cost;
-      if (ta >= arrival[j] || ta > duration) continue;
-      for (const seg of m.cells) {
-        const x = (r + seg.dr) * cols + (c + seg.dc);
-        if (x === i || !(containStart[x] <= ta)) continue;
-        const width = Number.isNaN(containWidth[x])
-          ? params.lineWidthM
-          : containWidth[x];
-        if (!breaches(i, originRate, x, width)) continue moves; // the line holds
-      }
-      arrival[j] = ta;
-      if (fireIntensity) fireIntensity[j] = rates.intensity(j, rateJ);
-      heap.push(ta, j);
+    for (const m of stencil) {
+      const j = target(r, c, m);
+      if (j < 0 || arrival[j] <= t) continue;
+      const cost = stepCost(i, r, c, m, t);
+      if (cost < Infinity) relax(i, r, c, m, j, t + cost);
     }
   }
-  result.set(arrival);
+  for (let x = 0; x < n; x++) result[x] = done[x] ? arrival[x] : Infinity;
   return result;
 }
