@@ -1,7 +1,7 @@
 name: Images
 
 # Builds the images the cluster runs (infra/k8s) and pushes them to GitHub's registry as
-# ghcr.io/<owner>/linhazero-<name>, tagged `main` and with the commit sha.
+# ghcr.io/<owner>/linhazero-<name>, tagged `main` and with the commit sha; then `deploy` puts them on the cluster.
 # The images hold no domain: the pages work out app./account. from their own address, and the servers read it from
 # the cluster's config (infra/k8s/config.env). Optional repository variable (Settings → Secrets and variables →
 # Actions → Variables): IMAGE_PLATFORMS, linux/amd64 by default; "linux/amd64,linux/arm64" for ARM nodes (slower).
@@ -63,3 +63,21 @@ jobs:
             ghcr.io/${{ github.repository_owner }}/linhazero-${{ matrix.name }}:${{ github.sha }}
           cache-from: type=gha,scope=${{ matrix.name }}
           cache-to: type=gha,mode=max,scope=${{ matrix.name }}
+
+  # Puts this commit's images on the homelab cluster: runs on the runner inside it (infra/runner), which reaches the
+  # cluster's API from within, so nothing is opened to the internet. Rollback: re-run this workflow on an older commit,
+  # or `infra/k8s/deploy.sh <sha>` by hand.
+  deploy:
+    needs: image
+    if: github.ref == 'refs/heads/main'
+    runs-on: homelab
+    concurrency: { group: deploy-homelab, cancel-in-progress: false }
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: kubectl
+        run: |
+          curl -fsSLo "$RUNNER_TEMP/kubectl" https://dl.k8s.io/release/v1.36.5/bin/linux/amd64/kubectl
+          chmod +x "$RUNNER_TEMP/kubectl"
+          echo "$RUNNER_TEMP" >> "$GITHUB_PATH"
+      - run: bash infra/k8s/deploy.sh "$GITHUB_SHA"

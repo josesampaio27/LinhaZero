@@ -1,0 +1,11 @@
+# The GitHub Actions runner on the cluster (Actions Runner Controller), which runs the deploy job of
+# .github/workflows/images.yml. Applied once, by hand: `kubectl apply -k infra/runner` (infra/k8s/README.md, step 7).
+# Installed with k3s's own helm-controller (the HelmChart resources), so no helm is needed on the laptop.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - namespace.yaml
+  - rbac.yaml
+  - controller.yaml
+  - scale-set.yaml

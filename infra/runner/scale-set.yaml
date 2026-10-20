@@ -1,0 +1,32 @@
+# The runners of this repository, under the label `homelab`. None idle (minRunners 0): a pod starts when a job asks
+# for one and goes away after it. One at a time, so two deploys never overlap.
+# The pods run as linhazero-deployer (rbac.yaml), which kubectl inside the job picks up on its own.
+# If this chart installs before the controller's CRDs exist, the helm-controller retries until they do.
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: homelab
+  namespace: kube-system
+spec:
+  chart: oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set
+  version: 0.15.0
+  targetNamespace: arc-runners
+  valuesContent: |-
+    githubConfigUrl: https://github.com/josesampaio27/LinhaZero
+    # Created by hand, with the key github_token (infra/k8s/README.md, step 7).
+    githubConfigSecret: arc-github
+    runnerScaleSetName: homelab
+    minRunners: 0
+    maxRunners: 1
+    controllerServiceAccount: { namespace: arc-systems, name: arc-gha-rs-controller }
+    template:
+      spec:
+        serviceAccountName: linhazero-deployer
+        containers:
+          - name: runner
+            # `latest` on purpose: GitHub stops accepting runner versions a few weeks after a newer one ships.
+            image: ghcr.io/actions/actions-runner:latest
+            command: ["/home/runner/run.sh"]
+            resources:
+              requests: { cpu: 100m, memory: 128Mi }
+              limits: { memory: 1Gi }

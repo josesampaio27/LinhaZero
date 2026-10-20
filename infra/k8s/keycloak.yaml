@@ -15,7 +15,7 @@ spec:
       containers:
         - name: keycloak
           image: linhazero-keycloak
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: LZ_DOMAIN
               valueFrom: { configMapKeyRef: { name: linhazero-config, key: LZ_DOMAIN } }
@@ -34,7 +34,7 @@ spec:
             - name: OIDC_CLIENT_SECRET
               valueFrom: { secretKeyRef: { name: linhazero-secrets, key: OIDC_CLIENT_SECRET } }
             - { name: OIDC_EXTRA_REDIRECT_URI, value: "https://app.$(LZ_DOMAIN)/api/auth/callback" }
-            - { name: OIDC_EXTRA_POST_LOGOUT_URI, value: "https://landing.$(LZ_DOMAIN)/" }
+            - { name: OIDC_EXTRA_POST_LOGOUT_URI, value: "https://$(LZ_DOMAIN)/" }
             - name: KEYCLOAK_ADMIN_CLIENT_SECRET
               valueFrom: { secretKeyRef: { name: linhazero-secrets, key: KEYCLOAK_ADMIN_CLIENT_SECRET } }
             # Email (realm import): invites and forgotten passwords.

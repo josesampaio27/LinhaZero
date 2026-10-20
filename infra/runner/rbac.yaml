@@ -1,0 +1,60 @@
+# What the deploy job may do (infra/k8s/deploy.sh): apply infra/ to the namespace linha-zero and watch the rollout.
+# Nothing else in the cluster, and no access to Secrets: linhazero-secrets is created by hand and never applied.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: linhazero-deployer
+  namespace: arc-runners
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: linhazero-deployer
+  namespace: linha-zero
+rules:
+  - apiGroups: ["apps"]
+    resources: [deployments, statefulsets]
+    verbs: [get, list, watch, create, patch, update]
+  - apiGroups: ["apps"]
+    resources: [replicasets, controllerrevisions]
+    verbs: [get, list, watch]
+  - apiGroups: [""]
+    resources: [services, configmaps]
+    verbs: [get, list, watch, create, patch, update]
+  - apiGroups: [""]
+    resources: [pods]
+    verbs: [get, list, watch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: linhazero-deployer
+  namespace: linha-zero
+subjects:
+  - { kind: ServiceAccount, name: linhazero-deployer, namespace: arc-runners }
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: linhazero-deployer
+---
+# infra/ also holds the Namespace itself: kubectl apply reads and patches it, and may touch no other namespace.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: linhazero-deployer-namespace
+rules:
+  - apiGroups: [""]
+    resources: [namespaces]
+    resourceNames: [linha-zero]
+    verbs: [get, patch]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: linhazero-deployer-namespace
+subjects:
+  - { kind: ServiceAccount, name: linhazero-deployer, namespace: arc-runners }
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: linhazero-deployer-namespace

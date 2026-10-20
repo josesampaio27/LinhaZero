@@ -1,0 +1,15 @@
+# Actions Runner Controller: watches GitHub for jobs with `runs-on: homelab` and starts a runner pod for each.
+# The release name (arc) fixes its service account, arc-gha-rs-controller, which scale-set.yaml names.
+apiVersion: helm.cattle.io/v1
+kind: HelmChart
+metadata:
+  name: arc
+  namespace: kube-system
+spec:
+  chart: oci://ghcr.io/actions/actions-runner-controller-charts/gha-runner-scale-set-controller
+  version: 0.15.0
+  targetNamespace: arc-systems
+  valuesContent: |-
+    resources:
+      requests: { cpu: 20m, memory: 64Mi }
+      limits: { memory: 256Mi }
