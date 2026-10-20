@@ -127,8 +127,12 @@ Automático: cada push para `main` corre o workflow Images, que constrói as ima
 - **Mudar a configuração** (`config.env`, réplicas, recursos, …): editar os ficheiros e fazer push para `main`, como para o código. `kubectl edit`/`scale` à mão são desfeitos pelo próximo *deploy*.
 - O Keycloak não muda o realm de um arranque para o outro (só o importa se não existir): alterações a `linhazero-realm.json` fazem-se também na consola.
 
+## Rede
+
+O [`network-policies.yaml`](network-policies.yaml) fecha tudo e abre só o necessário: a landing, a aplicação, a API e o Keycloak recebem só do `cloudflared`; o Keycloak também da API; o Postgres e o NATS só dos serviços que os usam. Para fora, só três chegam à internet (o `cloudflared` à Cloudflare, o `ingest` ao IPMA, Open-Meteo e fogos.pt, o `keycloak` ao SMTP do Brevo), e nenhum pod chega à rede de casa (`192.168.x.x`) nem a outros endereços privados. Um serviço novo que precise de falar com outro, ou com a internet, precisa de uma regra aqui.
+
 ## Escalar
 
-Mudar `replicas:` em `engine-worker.yaml` (a capacidade de simulação cresce com as réplicas) ou em `api.yaml` (as chaves das sessões estão no Postgres) e fazer push. O cluster de casa tem 2 nós de 2 CPU e ~4 GB: cada `engine-worker` reserva meio CPU.
+Mudar `replicas:` em `engine-worker.yaml` (a capacidade de simulação cresce com as réplicas) ou em `api.yaml` (as chaves das sessões estão no Postgres) e fazer push. O cluster de casa tem 2 nós de 2 CPU e ~4 GB: cada `engine-worker` reserva meio CPU e nunca usa mais de um (cada corrida usa um só *thread*). Todos os serviços têm um limite de CPU (`resources.limits.cpu`), para que nenhum ocupe um nó inteiro.
 
 O Keycloak fica com uma réplica (mais exigiria configurar a cache partilhada). Uma cópia de segurança diária da base (`pg_dump`) é o próximo passo recomendado: o Postgres guarda os utilizadores e as corridas num disco de casa.

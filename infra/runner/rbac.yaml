@@ -1,4 +1,5 @@
-# What the deploy job may do (infra/k8s/deploy.sh): apply infra/ to the namespace linha-zero and watch the rollout.
+# What the deploy job may do (infra/k8s/deploy.sh): apply infra/ to the namespace linha-zero (workloads, services,
+# config maps and network policies) and watch the rollout.
 # Nothing else in the cluster, and no access to Secrets: linhazero-secrets is created by hand and never applied.
 apiVersion: v1
 kind: ServiceAccount
@@ -24,6 +25,9 @@ rules:
   - apiGroups: [""]
     resources: [pods]
     verbs: [get, list, watch]
+  - apiGroups: ["networking.k8s.io"]
+    resources: [networkpolicies]
+    verbs: [get, list, watch, create, patch, update]
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

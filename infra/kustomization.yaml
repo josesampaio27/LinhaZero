@@ -15,6 +15,7 @@ resources:
   - k8s/web.yaml
   - k8s/landing.yaml
   - k8s/cloudflared.yaml
+  - k8s/network-policies.yaml
 
 configMapGenerator:
   # LZ_DOMAIN: the one place the domain is set.
