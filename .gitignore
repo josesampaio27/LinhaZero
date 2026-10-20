@@ -10,3 +10,4 @@ backend/**/obj/
 infra/.env
 .vs/
 data-prep/out/
+.taste-skill/

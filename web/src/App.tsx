@@ -176,11 +176,11 @@ export function App() {
   const [results, setResults] = useState<Results | null>(null);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [showOsm, setShowOsm] = useState(false);
+  const [showOsm, setShowOsm] = useState(true);
   // Replays of real fires: the observed perimeters, drawn over the simulation up to the time shown.
   const [observedFire, setObservedFire] = useState<ObservedFire | null>(null);
   const [showObserved, setShowObserved] = useState(true);
-  const [terrain3d, setTerrain3d] = useState(false);
+  const [terrain3d, setTerrain3d] = useState(true);
   const [contours, setContours] = useState(true);
   const [ensemble, setEnsemble] = useState(false);
   const [ensembleWhere, setEnsembleWhere] = useState<EnsembleWhere>("browser");

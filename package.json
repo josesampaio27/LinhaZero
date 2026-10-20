@@ -5,7 +5,8 @@
   "workspaces": [
     "engine",
     "engine-worker",
-    "web"
+    "web",
+    "landing"
   ],
   "scripts": {
     "dev": "npm run dev -w web",
@@ -13,7 +14,7 @@
     "test": "npm run test -w engine && npm run test -w web",
     "bench": "npm run bench -w engine",
     "grid:synthetic": "npm run grid:synthetic -w engine",
-    "typecheck": "npm run typecheck -w engine && npm run typecheck -w web && npm run typecheck -w engine-worker",
+    "typecheck": "npm run typecheck -w engine && npm run typecheck -w web && npm run typecheck -w engine-worker && npm run typecheck -w landing",
     "lint": "eslint .",
     "format": "prettier --write .",
     "test:worker": "npm run test -w engine-worker",
@@ -22,7 +23,9 @@
     "up": "docker compose up -d --build",
     "up:offline": "docker compose up -d --no-build",
     "down": "docker compose down",
-    "logs": "docker compose logs -f"
+    "logs": "docker compose logs -f",
+    "dev:landing": "npm run dev -w landing",
+    "build:landing": "npm run build -w landing"
   },
   "devDependencies": {
     "@eslint/js": "^9.14.0",
