@@ -222,7 +222,7 @@ input[type="range"] { width: 100%; min-height: 32px; margin: 0; }
 
 .pin { position: absolute; left: 0; top: 0; will-change: transform; }
 .village-label {
-  font-size: 12px; font-weight: 600; color: #18211f; background: rgba(255,255,255,.85); padding: 1px 5px; border-radius: 4px;
+  font-size: 12px; font-weight: 600; color: #18211f; background: rgba(255,255,255,.55); padding: 1px 5px; border-radius: 4px;
   pointer-events: none; white-space: nowrap;
 }
 .ignition-marker {

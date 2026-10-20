@@ -56,6 +56,7 @@ O `npm run dev` corre só a interface. Se os serviços estiverem a correr (`dock
 | Comando | O que faz |
 | --- | --- |
 | `npm run up` / `npm run down` | O mesmo que `docker compose up -d --build` / `docker compose down` |
+| `npm run dev:landing` / `npm run build:landing` | A página de apresentação (`landing/`), com o relevo 3D no topo; ver [o plano](docs/plano/landing.md) |
 | `npm run logs` | Logs de todos os serviços |
 | `npm run up:offline` | Arranca sem build nem pull (demo sem rede, ver `infra/README.md`) |
 | `npm run test` | Testes do motor (Vitest) |
