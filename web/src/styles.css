@@ -136,7 +136,16 @@ input[type="range"] { width: 100%; min-height: 32px; margin: 0; }
 .menu-item { width: 100%; justify-content: space-between; text-align: left; font-weight: 500; }
 a.button { color: inherit; text-decoration: none; }
 /* The account, at the foot of the menu, and "Entrar" in the app bar when nobody is signed in (the demo). */
-.account { display: grid; gap: 10px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+/* The account menu: initials in the app bar, then who it is, "Conta" and "Sair". */
+.avatar {
+  width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--a); color: var(--on-ink); font-size: 13px; font-weight: 700; letter-spacing: .02em;
+}
+.account { display: grid; gap: 10px; }
+.account .menu-item { justify-content: flex-start; }
+/* The panel hangs from the app bar's right edge (as the menu's does), not from the initials, so it fits on a phone. */
+.popover.account-menu { position: static; }
+.popover.account-menu > .popover-panel { right: max(8px, env(safe-area-inset-right)); }
 .account p { margin: 0; display: grid; line-height: 1.3; overflow-wrap: anywhere; }
 .account p span { font-size: 14px; color: var(--muted); }
 .signin { flex: none; }
