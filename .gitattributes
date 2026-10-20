@@ -2,3 +2,7 @@
 contracts/examples/*.json text eol=lf
 # Shell scripts run inside Linux containers (infra/db/*.sh by Postgres) or in bash: a CRLF checkout on Windows breaks them.
 *.sh text eol=lf
+# Files the cluster turns into ConfigMaps (infra/kustomization.yaml): kustomize names each ConfigMap after a hash of its
+# content, so a CRLF checkout on Windows would give a different name than CI and restart Postgres on every deploy.
+infra/db/* text eol=lf
+infra/k8s/*.env text eol=lf
