@@ -410,7 +410,7 @@ export function App() {
       : [x, y];
     setMessage(
       moved
-        ? `O ponto escolhido não arde (estrada, rio ou zona sem combustível): a ignição passou para a célula ardível mais próxima, a ${Math.round(Math.hypot(target.row - cell.row, target.col - cell.col) * cellSize)} m.`
+        ? `O ponto escolhido não arde (estrada, rio ou zona sem combustível): a ignição passou para a célula com combustível mais próxima, a ${Math.round(Math.hypot(target.row - cell.row, target.col - cell.col) * cellSize)} m.`
         : null,
     );
     setIgnition(point);
@@ -1046,7 +1046,11 @@ export function App() {
             <b>{KIND_LABEL[drawing.kind]}</b>
             <span className={`tag dec-${drawing.decision}`}>Decisão {drawing.decision}</span>
           </p>
-          <p>{spreadModel === "rothermel" ? info.rothermelEffect : info.effect}.</p>
+          <p>{info.meaning}</p>
+          <p>
+            <b>No simulador:</b> {info.rule}
+          </p>
+          <p>{info.where}</p>
           <p className="hint">
             {line ? "Toca no mapa para marcar os pontos da linha" : "Toca no mapa para marcar os cantos da zona"} ({points}{" "}
             {points === 1 ? "ponto" : "pontos"}). No computador: duplo clique ou Enter para terminar, Esc para cancelar.
@@ -1272,11 +1276,11 @@ export function App() {
         </DecisionTools>
         <div className="uncertainty">
           <Toggle checked={ensemble} onChange={setEnsemble}>
-            Considerar a incerteza do vento
+            Considerar a incerteza
             <small>
               {ensemble
-                ? `${ensembleRuns} cenários por decisão, com o vento, a humidade, a velocidade do combustível e o ponto de ignição a variar; incluem focos secundários e linhas e estradas que podem ceder`
-                : "Uma só corrida por decisão"}
+                ? `${ensembleRuns} cenários por decisão. Em cada um variam a direção e a força do vento, a humidade do combustível, a velocidade de cada combustível e o ponto de ignição; há faúlhas que acendem focos à frente, e linhas e estradas que podem ceder`
+                : "Uma só simulação por decisão, com os valores indicados, sem faúlhas"}
             </small>
           </Toggle>
           {ensemble && (

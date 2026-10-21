@@ -51,7 +51,7 @@ O que se pôs de lado, e porquê.
 | [0015](0015-ensemble-emparelhado.md) | Ensemble emparelhado | aceite | 2026-10-17 |
 | [0016](0016-zona-real.md) | Zona real | aceite | 2026-10-16 |
 | [0017](0017-overpass-com-curl.md) | Overpass com curl | aceite | 2026-10-16 |
-| [0018](0018-edificios-em-celulas-nao-ardiveis.md) | Edifícios em células não ardíveis | aceite | 2026-10-16 |
+| [0018](0018-edificios-em-celulas-nao-combustiveis.md) | Edifícios em células não combustíveis | aceite | 2026-10-16 |
 | [0019](0019-etiquetas-no-mapa.md) | Etiquetas no mapa | aceite | 2026-10-16 |
 | [0020](0020-ficheiros-de-cenario-tratados-no-motor.md) | Ficheiros de cenário tratados no motor | aceite | 2026-10-17 |
 | [0021](0021-lugares-salvos-na-mensagem-principal.md) | Lugares salvos na mensagem principal | aceite | 2026-10-17 |

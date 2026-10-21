@@ -122,7 +122,7 @@ const dataOk = (r: Row) => r.scorable >= 1 && r.nonBurnable <= MAX_NON_BURNABLE 
 const fit = rowsOut.filter((r) => r.tier === "A" && manifest.find((e) => e.fire === r.fire)!.fit && dataOk(r));
 const locked = rowsOut.filter((r) => r.tier === "B" && r.distanceKm <= LOCKED_KM && dataOk(r));
 const pct = (v: number) => `${Math.round(100 * v)}%`.padStart(4);
-console.log("fogo                          tier  km   ha      não ardível  comb. alvo  semelhança  intervalos  combustíveis   → papel");
+console.log("fogo                          tier  km   ha      não combustível  comb. alvo  semelhança  intervalos  combustíveis   → papel");
 for (const r of rowsOut.sort((a, b) => a.distanceKm - b.distanceKm)) {
   const role = fit.includes(r) ? "AJUSTE" : locked.includes(r) ? "FECHADO" : "—";
   console.log(

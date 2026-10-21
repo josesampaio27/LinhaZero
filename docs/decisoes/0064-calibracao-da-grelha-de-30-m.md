@@ -41,7 +41,7 @@ Decidido só com os dados (`engine/scripts/fire-selection.ts`), sem pontuar nenh
   - no máximo 25% da área ardida observada em células que o mapa diz não arderem (urbano, agrícola, água, rocha, estradas): aí o mapa e o fogo discordam, e o motor não o pode reproduzir;
   - pelo menos 60% da área ardida ardível em modelos de combustível com pelo menos 0,5% da área ardível de Guimarães: os combustíveis que o motor de facto queima em Guimarães.
 - **Sem fogos fechados.** O primeiro rascunho deste protocolo guardava os incêndios do tier B a menos de 80 km para uma leitura final.
-  - **Porquê não:** antes de pontuar qualquer modelo, a ficha de dados mostrou que o mapa de 2018 não descreve o que ardeu nesses fogos. As cicatrizes de 2016 aparecem a 85–98% como mato de regeneração (V-MH), e as de 2017 a 84–100% como não ardível.
+  - **Porquê não:** antes de pontuar qualquer modelo, a ficha de dados mostrou que o mapa de 2018 não descreve o que ardeu nesses fogos. As cicatrizes de 2016 aparecem a 85–98% como mato de regeneração (V-MH), e as de 2017 a 84–100% como não combustível.
   - **Consequência:** um teste nesses fogos mediria só o fator dos matos num combustível que não ardeu. A honestidade fica com a validação cruzada aninhada (ponto 6).
 
 ### 4. Objetivo

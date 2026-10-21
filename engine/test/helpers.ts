@@ -33,7 +33,7 @@ export function makeGrid(o: TestGridOptions): PreparedGrid {
       cols: o.cols,
       layers: { fuel: "", elevation: "", barrier: "", buildings: "", village: "" },
       villages: [{ id: 1, name: "Aldeia" }],
-      fuelTable: { 0: { label: "Não ardível", baseRate: 0 }, 1: { label: "Mato", baseRate: o.baseRate ?? 8, rothermel: o.rothermel } },
+      fuelTable: { 0: { label: "Não combustível", baseRate: 0 }, 1: { label: "Mato", baseRate: o.baseRate ?? 8, rothermel: o.rothermel } },
     },
     fuel: new Uint8Array(n).fill(1),
     elevation: new Float32Array(n),

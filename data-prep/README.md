@@ -102,4 +102,4 @@ Com os casos construídos, `npm run calibrate -w engine` calibra o motor (ver [C
 `fuel_rates.csv` tem a velocidade base (m/min, sem vento nem declive) de cada código FUMOD.
 **Os valores são provisórios** e têm de ser calibrados. As designações vêm da legenda `FMM_pallete.lyr`
 do repositório; o código 235 existe no mapa mas não na legenda, por isso a designação está por confirmar.
-Um código que não esteja no CSV fica não ardível e o script avisa.
+Um código que não esteja no CSV fica não combustível e o script avisa.

@@ -26,7 +26,7 @@ Uma revisão independente do motor, feita a partir do documento [O motor explica
    - No modelo simples, as linhas seguravam sempre e os ataques não perdiam efeito com a intensidade, o que fazia qualquer decisão desenhada parecer melhor do que é.
    - O código fica no motor só como referência dos testes.
 4. **Ignição numa estrada.**
-   - Uma ignição numa célula de estrada ou não ardível não ardia e não dava aviso. Isto acontecia em 13% das células da grelha de 100 m.
+   - Uma ignição numa célula de estrada ou não combustível não ardia e não dava aviso. Isto acontecia em 13% das células da grelha de 100 m.
    - Agora passa para a célula ardível mais próxima (até 200 m), no motor e na interface, que avisa.
 5. **A intensidade fica física.**
    - O fator de velocidade da calibração (`rosAdj` = 0,5) também cortava a intensidade e o comprimento de chama para metade, e isso tornava ataques e linhas mais eficazes do que a física diz.

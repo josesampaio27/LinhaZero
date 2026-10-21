@@ -1,4 +1,4 @@
-# ADR 0018: Edifícios em células não ardíveis
+# ADR 0018: Edifícios em células não combustíveis
 
 - Estado: aceite
 - Data: 2026-10-16
@@ -9,7 +9,7 @@ Aplicar a definição do enunciado à letra: um edifício só conta se a célula
 
 ## Porquê
 
-É simples e explicável; no FUMOD, os centros urbanos são "não ardível" (98), por isso só contam as casas na interface urbano-florestal.
+É simples e explicável; no FUMOD, os centros urbanos são "não combustível" (98), por isso só contam as casas na interface urbano-florestal.
 
 ## Alternativas consideradas
 

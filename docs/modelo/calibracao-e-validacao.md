@@ -180,7 +180,7 @@ A grelha de 30 m foi calibrada à parte, como se a de 100 m não existisse:
 - no máximo 25% da área ardida em células que o mapa diz não arderem;
 - pelo menos 60% nos combustíveis que existem em Guimarães.
 
-Ficam 19 fogos. O tier B saiu: as cicatrizes de 2016 e 2017 aparecem no mapa de 2018 como mato de regeneração ou como não ardível.
+Ficam 19 fogos. O tier B saiu: as cicatrizes de 2016 e 2017 aparecem no mapa de 2018 como mato de regeneração ou como não combustível.
 
 **Resultados nos fogos de teste (5 partes, 19 fogos):**
 

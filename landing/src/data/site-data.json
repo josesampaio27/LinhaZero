@@ -1000,7 +1000,7 @@
   "fuels": [
    {
     "code": 98,
-    "label": "Não ardível",
+    "label": "Não combustível",
     "burns": false,
     "share": 0.275
    },

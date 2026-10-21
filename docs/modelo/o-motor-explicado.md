@@ -81,7 +81,7 @@ O fogo depende sobretudo do que arde. O mapa FUMOD classifica cada hectare num *
 
 | Combustível em Guimarães | Área | Grupo |
 | --- | --- | --- |
-| Não ardível (áreas urbanas, agrícolas regadas, rocha) | 27,5% | — |
+| Não combustível (áreas urbanas, agrícolas regadas, rocha) | 27,5% | — |
 | Mato sob eucaliptal (M-EUC) | 25,1% | Sub-bosque |
 | Herbáceo alto (V-Ha) | 20,2% | Herbáceas |
 | Mato sob folhosas caducifólias (M-CAD) | 9,0% | Sub-bosque |
@@ -195,17 +195,17 @@ Fogos intensos (acima de 2000 kW/m) lançam faúlhas que podem acender focos à 
 
 **Sem nada desenhado, o fogo não é combatido.** Só há combate onde o utilizador o põe. Assim, a diferença entre a decisão A e a B mede só o efeito do que se desenhou.
 
-| Ação | O que faz |
-| --- | --- |
-| **Linha de contenção** | Uma faixa (por omissão com 4 m de largura) que o fogo não atravessa, a partir do minuto em que fica pronta, se a chama não for alta demais. Uma linha de 4 m só trava fogo fraco |
-| **Ataque** | Numa zona, a partir de um minuto, o fogo avança a 20% da velocidade |
-| **Proteger zona** | Numa zona, a partir de um minuto, o fogo avança a 10% da velocidade |
+| Ação | O que representa | O que o simulador faz |
+| --- | --- | --- |
+| **Linha de contenção** | Uma faixa sem combustível que os meios abrem à frente do fogo, à mão ou com máquinas, ou uma faixa de gestão que já existe. Desenha-se como uma linha (por omissão com 4 m de largura) | A partir do minuto em que fica pronta, o fogo para nela, se a faixa for larga o bastante para as chamas. Uma linha de 4 m só trava fogo fraco |
+| **Ataque** | Meios a combater o fogo diretamente, com água, ferramentas ou máquinas, na cabeça ou num flanco. Desenha-se a zona onde trabalham | A partir do minuto em que os meios chegam, o fogo nessa zona anda 5 vezes mais devagar (20% da velocidade). Atrasa o fogo, não o apaga |
+| **Proteger zona** | Meios já colocados junto a casas ou a uma aldeia, à espera do fogo para o travar ali. Desenha-se a zona à volta do que se defende | A partir do minuto em que lá estão, o fogo nessa zona anda 10 vezes mais devagar (10% da velocidade): mais do que num ataque, porque os meios estão no sítio e preparados |
 
 As ações dependem da **intensidade do fogo**, como na realidade:
 
-- **Ataques e zonas protegidas:** têm efeito total até 500 kW/m (o fogo que uma equipa com ferramentas manuais controla). Perdem efeito até 4000 kW/m, a partir do qual nenhum meio terrestre consegue atuar.
+- **Ataques e zonas protegidas:** têm efeito total até 500 kW/m, chamas de cerca de 1,4 m (o fogo que uma equipa com ferramentas manuais controla). Perdem efeito até 4000 kW/m, chamas de cerca de 3,5 m, a partir do qual nenhum meio terrestre consegue atuar.
 - **Linhas e estradas:** seguram ou cedem conforme a largura e o comprimento da chama.
-  - Uma linha com a largura de 5 comprimentos de chama segura em metade dos casos; mais estreita, cede quase sempre; mais larga, quase nunca.
+  - Uma linha com a largura de 5 comprimentos de chama segura em metade dos casos; mais estreita, cede quase sempre; mais larga, quase nunca. Assim, uma linha de 4 m só trava chamas até 80 cm, e uma faixa de 25 m trava chamas até 5 m.
   - O valor de 5 foi ajustado nos incêndios reais. As faixas são galgadas pelo calor radiante e pelas faúlhas muito antes de a chama ter a largura delas.
 - **Quando contam:** uma ação só conta se estiver ativa quando o fogo lá chega. Uma linha que fica pronta depois de o fogo passar não serve para nada.
 
