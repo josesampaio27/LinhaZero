@@ -135,7 +135,7 @@ const header: GridHeader = {
   // Rothermel parameters of FUMOD models (the only spread model of the app): herbáceo → V-Ha,
   // mato → V-MAa, folhada → F-EUC, agrícola → V-Hb.
   fuelTable: {
-    0: { label: "Não ardível", baseRate: 0 },
+    0: { label: "Não combustível", baseRate: 0 },
     1: { label: "Herbáceo", baseRate: 15, rothermel: FUEL_PARAMS["231"].rothermel },
     2: { label: "Mato", baseRate: 8, rothermel: FUEL_PARAMS["233"].rothermel },
     3: { label: "Floresta (folhada)", baseRate: 3, rothermel: FUEL_PARAMS["211"].rothermel },

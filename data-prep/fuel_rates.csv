@@ -2,7 +2,7 @@ code,label,baseRate,notes
 0,Sem dados,0,Fora do mapa FUMOD
 4,Mato alto denso / regeneração de pinheiro-bravo (NFFL 4),9,PROVISÓRIO: calibrar
 11,Resíduos de exploração florestal (NFFL 11),2,PROVISÓRIO: calibrar
-98,Não ardível,0,
+98,Não combustível,0,
 211,Folhada de eucalipto (F-EUC),2,PROVISÓRIO: calibrar
 212,Folhada de folhosas (F-FOL),1.5,PROVISÓRIO: calibrar (modelo legado)
 213,Folhada de pinhal (F-PIN),3,PROVISÓRIO: calibrar (modelo legado)

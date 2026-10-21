@@ -81,7 +81,7 @@ O fogo depende sobretudo do que arde. O mapa FUMOD classifica cada hectare num *
 
 | Combustível em Guimarães | Área | Grupo |
 | --- | --- | --- |
-| Não ardível (áreas urbanas, agrícolas regadas, rocha) | 27,5% | — |
+| Não combustível (áreas urbanas, agrícolas regadas, rocha) | 27,5% | — |
 | Mato sob eucaliptal (M-EUC) | 25,1% | Sub-bosque |
 | Herbáceo alto (V-Ha) | 20,2% | Herbáceas |
 | Mato sob folhosas caducifólias (M-CAD) | 9,0% | Sub-bosque |

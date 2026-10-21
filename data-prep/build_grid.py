@@ -172,7 +172,7 @@ def fuel_table(codes: np.ndarray) -> dict:
         if c in rates:
             table[c] = rates[c]
         else:
-            log(f"  aviso: código de combustível {c} não está em fuel_rates.csv; fica não ardível")
+            log(f"  aviso: código de combustível {c} não está em fuel_rates.csv; fica não combustível")
             table[c] = {"label": f"Modelo {c} (sem velocidade definida)", "baseRate": 0.0}
     missing = add_to_fuel_table(table, load_fuel_params())
     if missing:

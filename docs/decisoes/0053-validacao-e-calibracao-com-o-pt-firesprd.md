@@ -30,4 +30,4 @@
 
 - **Não calibrar:** deixaria o modelo a falhar a direção de fogos como os de Alijó e Baião.
 - **Fatores por modelo de combustível:** com sete fogos ficavam sobreajustados.
-- **Campos "não ardíveis" do FUMOD como erva:** testado, piorou o acerto.
+- **Campos "não combustíveis" do FUMOD como erva:** testado, piorou o acerto.

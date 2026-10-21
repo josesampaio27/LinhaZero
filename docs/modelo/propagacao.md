@@ -84,7 +84,7 @@ As regras estão na [ADR 0052](../decisoes/0052-intensidade-linhas-que-cedem-e-f
 
 ### Métricas
 
-Para cada decisão (`engine/src/metrics.ts`): hectares ardidos ao fim de cada hora, edifícios em células que ardem dentro da duração ([ADR 0018](../decisoes/0018-edificios-em-celulas-nao-ardiveis.md)), e o primeiro minuto de chegada a cada lugar.
+Para cada decisão (`engine/src/metrics.ts`): hectares ardidos ao fim de cada hora, edifícios em células que ardem dentro da duração ([ADR 0018](../decisoes/0018-edificios-em-celulas-nao-combustiveis.md)), e o primeiro minuto de chegada a cada lugar.
 
 O motor é uma **função pura**: `simulate(grid, scenario) → result`. Não chama APIs, não lê ficheiros por conta própria e não sabe nada de mapas.
 

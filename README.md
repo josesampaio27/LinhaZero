@@ -145,7 +145,7 @@ Um cenário em `web/public/scenarios/` (listado em `index.json`) abre com `https
 No botão **Editor de grelha** (ou `#/grelha`):
 
 1. Escolhe a grelha. Passa o rato sobre o mapa para ver o que a grelha diz em cada ponto: combustível, velocidade, altitude, declive, barreira, edifícios e lugar. **Ver** troca entre combustível, relevo e lugares.
-2. Para experimentar alterações: **Pintar combustível** numa área (por exemplo uma faixa não ardível), **Acrescentar barreira** ou **Tirar barreiras**; muda as velocidades por combustível ou os coeficientes do modelo. A grelha oficial nunca muda: o resultado é uma variante.
+2. Para experimentar alterações: **Pintar combustível** numa área (por exemplo uma faixa não combustível), **Acrescentar barreira** ou **Tirar barreiras**; muda as velocidades por combustível ou os coeficientes do modelo. A grelha oficial nunca muda: o resultado é uma variante.
 3. **Guardar** (neste browser), **Exportar** ou **Importar** a variante.
 4. **Testar na simulação**: abre a simulação com a decisão A na grelha oficial e a B na variante. Em cada decisão, "Grelha" escolhe a oficial ou uma variante guardada.
 

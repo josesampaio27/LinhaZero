@@ -95,7 +95,7 @@ sequenceDiagram
   participant M as Motor (browser ou servidor)
 
   U->>E: escolhe a grelha oficial de base
-  U->>E: desenha uma faixa e escolhe "não ardível"
+  U->>E: desenha uma faixa e escolhe "não combustível"
   U->>E: ajusta a velocidade do mato sob eucaliptal
   E->>E: applyVariant mostra as células alteradas
   U->>E: guarda a variante (browser ou ficheiro)

@@ -410,7 +410,7 @@ export function App() {
       : [x, y];
     setMessage(
       moved
-        ? `O ponto escolhido não arde (estrada, rio ou zona sem combustível): a ignição passou para a célula ardível mais próxima, a ${Math.round(Math.hypot(target.row - cell.row, target.col - cell.col) * cellSize)} m.`
+        ? `O ponto escolhido não arde (estrada, rio ou zona sem combustível): a ignição passou para a célula com combustível mais próxima, a ${Math.round(Math.hypot(target.row - cell.row, target.col - cell.col) * cellSize)} m.`
         : null,
     );
     setIgnition(point);

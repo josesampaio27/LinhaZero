@@ -219,7 +219,7 @@ export function CalibrationPage() {
         </p>
         <p>
           Pelo caminho encontrámos e corrigimos um erro: a 100 m, a zona de ignição observada de dois incêndios caía numa estrada,
-          e a simulação não tinha por onde começar. Agora parte da célula ardível mais próxima, como já fazia uma ignição marcada num
+          e a simulação não tinha por onde começar. Agora parte da célula com combustível mais próxima, como já fazia uma ignição marcada num
           ponto. A calibração correu de novo com a correção.
         </p>
       </Section>

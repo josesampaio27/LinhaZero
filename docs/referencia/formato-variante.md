@@ -39,7 +39,7 @@ O ficheiro que o Editor de grelha guarda: uma grelha oficial de base mais a list
 
 | `kind` | Campos | Efeito |
 | --- | --- | --- |
-| `setFuel` | `fuel` (código), `polygon` (pelo menos 3 pontos `[x, y]`) | As células da área passam a ter esse combustível (por exemplo 98, não ardível, numa faixa de gestão) |
+| `setFuel` | `fuel` (código), `polygon` (pelo menos 3 pontos `[x, y]`) | As células da área passam a ter esse combustível (por exemplo 98, não combustível, numa faixa de gestão) |
 | `addBarrier` | `line` (pelo menos 2 pontos `[x, y]`) | As células da linha, rasterizada 4-conexa, passam a barreira (uma estrada ou aceiro novo) |
 | `removeBarrier` | `polygon` | As células da área deixam de ser barreira |
 
