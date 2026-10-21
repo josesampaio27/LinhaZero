@@ -22,8 +22,11 @@ const MEASURE = `(() => {
   return sections.map((s) => {
     const r = s.getBoundingClientRect();
     // Visually hidden on purpose (a honeypot, .sr-only, a skip link at rest): clipped to 1 px somewhere up the tree,
-    // or placed wholly off the screen. Those are not spills.
+    // or placed wholly off the screen; or folded away in a closed <details> (a chart's table of numbers). Those are
+    // not spills.
     const hiddenOnPurpose = (el) => {
+      const folded = el.closest("details:not([open])");
+      if (folded && !el.closest("summary")) return true;
       for (let n = el; n && n !== s; n = n.parentElement) { const b = n.getBoundingClientRect(); if (b.width <= 1 && b.height <= 1) return true; }
       const e = el.getBoundingClientRect();
       return e.right <= 0 || e.left >= vw;
@@ -66,6 +69,16 @@ try {
       table.push(`${`${w}×${h}`.padEnd(10)} ${r.id.padEnd(14)} ${String(r.h).padStart(5)} / ${r.vh}  ${ok ? "ok" : "FAIL"}${r.spill.length ? "  spills: " + r.spill.slice(0, 3).join(" | ") : ""}`);
     }
   }
+  // The two article pages (/motor, /calibracao) are long and scroll; they must only never scroll sideways.
+  for (const path of ["/motor", "/calibracao"])
+    for (const w of [1440, 390]) {
+      await send("Emulation.setDeviceMetricsOverride", { width: w, height: 900, deviceScaleFactor: 1, mobile: w < 600 });
+      await send("Page.navigate", { url: base + path });
+      await sleep(1500);
+      const over = (await send("Runtime.evaluate", { expression: "document.documentElement.scrollWidth - document.documentElement.clientWidth", returnByValue: true })).result?.result?.value as number;
+      if (over > 0) failed = true;
+      table.push(`${`${w}`.padEnd(10)} ${path.padEnd(14)} ${over > 0 ? `FAIL  ${over} px sideways` : "ok (no sideways scroll)"}`);
+    }
   console.log(table.join("\n"));
   ws.close();
 } finally {

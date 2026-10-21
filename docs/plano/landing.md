@@ -189,3 +189,36 @@ As outras secções ficam lisas, para as texturadas se lerem. O texto mantém 4,
 
 Os avisos que ficam no detetor são decisões do utilizador: o texto em gradiente de "fogo" e "decisões", e as barras de 5 px dos títulos dos mapas e das frases (o estilo da aplicação).
 
+
+## 9. As páginas do motor e da calibração (outubro de 2026)
+
+O repositório é privado, por isso a landing deixou de ligar para o GitHub e explica-se a si própria.
+
+- **Três páginas,** escolhidas pelo caminho em `landing/src/App.tsx`:
+  - `/`: a página principal, uma secção por ecrã como antes;
+  - `/motor`: "Como funciona o motor";
+  - `/calibracao`: "Calibração e validação".
+
+  O nginx e o Vite já mandam qualquer caminho para o `index.html`. As subpáginas leem-se como um artigo (`components/Article.tsx`): título, índice fixo ao lado do texto no computador, secções, caixas "Para especialistas" com os termos exatos, referências e "A seguir".
+- **Barra e rodapé partilhados** (`components/Nav.tsx`, `components/Footer.tsx`).
+  - **Barra:** Como funciona, O motor, Calibração, Dados, Quem somos. As secções da página principal escrevem-se `/#id`, para funcionarem também nas subpáginas.
+  - **Rodapé:** a coluna "Documentação" liga às duas páginas. A proposta ao desafio e o "Código aberto" saíram.
+- **Números de um só script:** `engine/scripts/landing-data.ts` escreve `landing/src/data/site-data.json` (data e versão do código lá dentro). Volta a correr-se quando a calibração mudar; nenhuma página tem números escritos à mão. O script reúne:
+  - a validação desde a ignição com o motor de hoje: 34 incêndios, Norte, fora do ajuste, e o controlo com o vento invertido;
+  - os resultados da recalibração de 100 m (ADR 0069), com as alavancas;
+  - o mapa de cenários em uso;
+  - a composição da grelha.
+- **Validação na página principal:**
+  - a tabela tem os números novos (0,27 / 0,33 / 0,40; "27 destes 34");
+  - o retângulo provisório deu lugar a uma barra por incêndio, com quanto o LinhaZero ganha ao modelo simples. As 27 barras azuis acima da linha são os "27 destes 34" da frase ao lado, e as 7 laranja abaixo os casos em que perde. O gráfico fica escondido no telemóvel;
+  - uma linha diz a cobertura nos 19 incêndios de teste (calibrado 68%, sem calibrar 45%);
+  - duas ligações, para as páginas do motor e da calibração.
+- **Gráficos** (`components/charts`): SVG em React, à largura real para que o texto fique no seu tamanho.
+  - **Cores:** azul `#3987e5`, laranja `#d95926` e verde-água `#199e70`, validados no fundo `#111615`. O teal e o violeta ficam para as decisões A e B.
+  - **Leitura:** forma própria por série, legenda, dica ao passar o rato e "Ver os números" com a tabela.
+  - **No telemóvel:** os nomes longos encurtam.
+- **Diagramas** (`components/diagrams`): as camadas de uma célula, as 32 direções e a elipse, um intervalo pontuado (acerto, falta, a mais, flanco travado) e o peso de um hectare. No telemóvel, os mais largos deslizam dentro da figura, nunca a página.
+- **Mapas:** `landing/scripts/figures.ts` desenha, uma célula por pixel, as camadas de Guimarães e o incêndio de Alijó sem calibrar e calibrado. Escreve PNG com um codificador mínimo sobre `node:zlib`, e a página amplia-os sem suavizar.
+- **Verificação:**
+  - `landing/scripts/fit-check.ts` ignora o que está fechado num `<details>`;
+  - verifica também que `/motor` e `/calibracao` não deslizam para o lado a 1440 e a 390 px.

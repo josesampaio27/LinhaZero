@@ -1,5 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from "react";
 
+import { Nav } from "./Nav";
+
 const HeroMap = lazy(() => import("./HeroMap"));
 
 /**
@@ -17,20 +19,13 @@ export const DEMO_URL = (import.meta.env.VITE_DEMO_URL as string | undefined) ??
 /** The login: the app's API sends the browser to Keycloak (account.<domain>) and back into the app. */
 export const SIGNIN_URL = (import.meta.env.VITE_SIGNIN_URL as string | undefined) ?? `${APP_URL}api/auth/login`;
 /** The request form at the end of the page; it posts to the app's API (docs/decisoes/0062). */
-export const SIGNUP_URL = "#pedir-acesso";
+export const SIGNUP_URL = "/#pedir-acesso";
 /** Where the divider between A and B settles: through the head of the fire, where A and B differ. */
 export const SPLIT_START = 0.7;
 /** Where the load sweep starts: almost all of the frame is decision A. */
 const SPLIT_FROM = 0.97;
 const SPLIT_MIN = 0.06;
 
-const NAV = [
-  ["#como-funciona", "Como funciona"],
-  ["#validacao", "Validação"],
-  ["#dados", "Dados"],
-  ["#para-quem", "Para quem"],
-  ["#quem-somos", "Quem somos"],
-] as const;
 
 const reduced = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -199,35 +194,6 @@ function Scene({ follow, className = "" }: { follow: React.RefObject<HTMLElement
   );
 }
 
-/**
- * The bar stays at the top while the page scrolls (sticky on the page root, var(--nav) tall). Over the hero it sits on the
- * page ground; once the page scrolls it turns translucent and blurs what passes under it.
- * Once the hero's top has left the screen it steps one tone up, so it reads as a bar over the content.
- */
-function Nav({ stuck }: { stuck: boolean }) {
-  return (
-    <nav
-      aria-label="Principal"
-      className={`sticky top-0 z-30 flex h-(--nav) items-center justify-between gap-6 px-margin transition-[background-color,backdrop-filter] duration-200 ${stuck ? "nav-glass" : "bg-background"}`}
-    >
-      <a href="#conteudo" className="skip btn btn-solid">Saltar para o conteúdo</a>
-      <a href="#" className="flex min-h-11 items-center gap-2.5" aria-label="LinhaZero, início">
-        <img src="/logo-outline.png" alt="" width={85} height={99} className="h-8 w-auto" />
-        <span className="font-display text-statement leading-none">LinhaZero</span>
-      </a>
-      <ul className="hidden items-center gap-7 text-small font-medium lg:flex">
-        {NAV.map(([href, label]) => (
-          <li key={href}><a href={href} className="inline-block py-3 underline-offset-[0.3em] decoration-2 hover:underline">{label}</a></li>
-        ))}
-      </ul>
-      <div className="flex items-center gap-3 sm:gap-5">
-        {/* Phones keep one compact row: the wordmark and the request; "Entrar" is in the footer too. */}
-        <a href={SIGNIN_URL} className="link px-1 py-3 text-small font-medium max-sm:hidden">Entrar</a>
-        <a href={SIGNUP_URL} className="btn btn-line min-h-11 px-4 text-small">Pedir acesso</a>
-      </div>
-    </nav>
-  );
-}
 
 /**
  * The two words that carry the story: "fogo" in the map's own hour ramp with a heat shimmer, "decisões" in the two
