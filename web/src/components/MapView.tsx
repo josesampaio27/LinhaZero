@@ -412,6 +412,9 @@ export function MapView(props: Props) {
     // With animate off the texture is uploaded once; pause() re-uploads it while "playing".
     src.play();
     src.pause();
+    // In 3D every tile is drawn once to a texture and reused until the camera moves; a new canvas
+    // texture doesn't invalidate it (an image source does), so the fire would only show on the next pan.
+    map.terrain?.tileManager.freeRtt();
     map.triggerRepaint();
   }, [map, gridKey, fire]);
 
