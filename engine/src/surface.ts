@@ -24,7 +24,9 @@ interface Terrain {
   upslopeDeg: Float32Array;
 }
 
-const terrainCache = new WeakMap<PreparedGrid, Map<number, Terrain>>();
+// Keyed on the elevation array, not the grid: a grid copied with other fuel (a variant, or the spent
+// cells of an interval restart) shares its relief, and recomputing it was a large part of each run.
+const terrainCache = new WeakMap<Float32Array, Map<string, Terrain>>();
 
 /** Box mean of the elevation over cells within halfWidth cells (clamped at the edges). */
 function boxSmooth(z: Float32Array, rows: number, cols: number, halfWidth: number): Float32Array {
@@ -56,13 +58,14 @@ function boxSmooth(z: Float32Array, rows: number, cols: number, halfWidth: numbe
 }
 
 /**
- * Slope and upslope direction of every cell (Horn's method), cached per prepared grid; with
+ * Slope and upslope direction of every cell (Horn's method), cached per elevation raster; with
  * smoothM > 0 the elevation is first box-averaged over ±smoothM (ModelParams.demSmoothM).
  */
 export function terrainOf(grid: PreparedGrid, smoothM = 0): Terrain {
-  let byGrid = terrainCache.get(grid);
-  if (!byGrid) terrainCache.set(grid, (byGrid = new Map()));
-  let t = byGrid.get(smoothM);
+  let byGrid = terrainCache.get(grid.elevation);
+  if (!byGrid) terrainCache.set(grid.elevation, (byGrid = new Map()));
+  const key = `${smoothM}|${grid.header.cellSize}|${grid.header.cols}`;
+  let t = byGrid.get(key);
   if (!t) {
     const { rows, cols, cellSize } = grid.header;
     const half = Math.round(smoothM / cellSize);
@@ -79,7 +82,7 @@ export function terrainOf(grid: PreparedGrid, smoothM = 0): Terrain {
       upslopeDeg[i] = (aspectDeg[i] + 180) % 360;
     }
     t = { slopeTan, upslopeDeg };
-    byGrid.set(smoothM, t);
+    byGrid.set(key, t);
   }
   return t;
 }

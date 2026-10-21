@@ -98,3 +98,5 @@ O que se pôs de lado, e porquê.
 | [0062](0062-pedidos-de-acesso-e-convites-por-email.md) | Pedidos de acesso na landing e convites por email | aceite | 2026-10-20 |
 | [0063](0063-tempo-que-muda-cantos-e-estado-de-partida.md) | Passos que se recalculam quando o tempo muda, cantos, intensidade das copas e estado de partida | aceite | 2026-10-20 |
 | [0064](0064-calibracao-da-grelha-de-30-m.md) | Calibração da grelha de 30 m | aceite | 2026-10-20 |
+| [0065](0065-calibracao-por-cobertura-30-m.md) | Calibração da grelha de 30 m pela cobertura do fogo real | proposta | 2026-10-21 |
+| [0066](0066-recalibracao-da-grelha-de-100-m.md) | Recalibração da grelha de 100 m pela cobertura do fogo real | aceite; fica a calibração em uso | 2026-10-21 |

@@ -50,6 +50,20 @@ export const SPACES: Record<string, Dimension[]> = {
     logDim("holdWidthPerFlame"),
     logDim("crownAdj"),
   ],
+  /**
+   * groupsCrown plus a calibration-only firefighting layer (bgSuppression, ADR 0065 hypothesis): the
+   * firefighting of the real fires gets its own factor, fitted with the physics and never shipped. The
+   * prior pulls it to 1 (none), like every other factor.
+   */
+  groupsCrownSupp: [
+    logDim("rosAdjUnderstory"),
+    logDim("rosAdjShrub"),
+    logDim("rosAdjGrass"),
+    logDim("windAdj"),
+    logDim("holdWidthPerFlame"),
+    logDim("crownAdj"),
+    logDim("bgSuppression"),
+  ],
   /** The same without crown fire (crownFire=0): the crown on/off hypothesis. */
   groupsNoCrown: [logDim("rosAdjUnderstory"), logDim("rosAdjShrub"), logDim("rosAdjGrass"), logDim("windAdj"), logDim("holdWidthPerFlame")],
 

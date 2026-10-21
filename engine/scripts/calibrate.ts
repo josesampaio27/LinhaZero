@@ -26,7 +26,7 @@ import { PT_CALIBRATION, PT_CALIBRATION_SEEN } from "../src/calibration";
 import { SECTOR_FRACTION, SEED_SHARE } from "../src/spread-rothermel";
 import type { ModelParams } from "../src/params";
 import { createRng } from "../src/random";
-import { Pool, type CaseRef } from "./calibration-pool";
+import { defaultJobs, Pool, type CaseRef, type CoverageParts } from "./calibration-pool";
 import { fromParams, penalty, SPACES, toParams as toSpaceParams } from "./calibration-space";
 import { rateSummary } from "./intervals";
 import { cmaes } from "./cmaes";
@@ -74,6 +74,13 @@ const SPACE_NAME = text("space", "groups");
 const SPACE = SPACES[SPACE_NAME];
 if (!SPACE) throw new Error(`--space desconhecido: ${SPACE_NAME} (${Object.keys(SPACES).join(", ")})`);
 const OBJECTIVE = text("objective", "all");
+// "all" / "free": the interval cost (ADR 0054, 0057); "coverage" / "coverageMixed": the coverage score,
+// the second plus the Tversky index from the ignition (ADR 0065).
+const OBJECTIVES = ["all", "free", "coverage", "coverageMixed"];
+if (!OBJECTIVES.includes(OBJECTIVE)) throw new Error(`--objective ${OBJECTIVES.join(", ")}, não ${OBJECTIVE}`);
+const COVERAGE_OBJECTIVE = OBJECTIVE === "coverage" || OBJECTIVE === "coverageMixed";
+/** The pool metric of the objective: what is fitted and compared as "cost". */
+const METRIC = { metric: (COVERAGE_OBJECTIVE ? OBJECTIVE : "intervals") as "intervals" | "coverage" | "coverageMixed" };
 // Parameters held fixed in every evaluated set, e.g. --fixed crownFire=1,crownAdj=0.35
 const FIXED: Partial<ModelParams> = Object.fromEntries(
   text("fixed", "")
@@ -99,7 +106,8 @@ if (entries.length < (wanted ? wanted.size : manifest.length))
 const cellSizes = [...new Set(entries.map((e) => e.cellSize ?? 100))];
 const refs: CaseRef[] = entries.map((e) => ({ fire: e.fire, dir: CASES }));
 const all = entries.map((_, i) => i);
-const pool = new Pool(refs, undefined, { weather: WEATHER, moisture: MOISTURE, freeOnly: OBJECTIVE === "free" });
+// --jobs: worker threads (default every core).
+const pool = new Pool(refs, option("jobs", defaultJobs()), { weather: WEATHER, moisture: MOISTURE, freeOnly: OBJECTIVE === "free" });
 console.log(`casos ${CASES} (células de ${cellSizes.join(", ")} m), incumbente ${INCUMBENT}`);
 console.log(`tempo ${WEATHER}, humidade ${MOISTURE}, espaço ${SPACE_NAME}, objetivo ${OBJECTIVE}${Object.keys(FIXED).length ? `, fixos ${JSON.stringify(FIXED)}` : ""}`);
 
@@ -114,9 +122,9 @@ const UNCALIBRATED: Partial<ModelParams> = {};
 const CURRENT: Partial<ModelParams> = INCUMBENT === "pt" ? (PT_CALIBRATION as Partial<ModelParams>) : {};
 console.log(`${entries.length} casos; a pontuar as referências (${elapsed()})`);
 const [costUncal, costCurrent, costLegacy] = await Promise.all([
-  pool.scores(UNCALIBRATED, all),
-  pool.scores(CURRENT, all),
-  pool.scores(undefined, all, { metric: "intervals", model: "legacy" }),
+  pool.scores(UNCALIBRATED, all, METRIC),
+  pool.scores(CURRENT, all, METRIC),
+  pool.scores(undefined, all, { ...METRIC, model: "legacy" }),
 ]);
 // Fires with an interval to score in tier A are fitted; the rest only validate.
 const fitSet = all.filter(
@@ -128,39 +136,63 @@ const tierB = all.filter(
 );
 console.log(`ajuste em ${fitSet.length} fogos (tier A), validação extra em ${tierB.length} (tier B)`);
 
+// Stop a fit on a plateau (cmaes.ts tolFun); --no-tolfun runs every generation.
+const TOLFUN = flag("no-tolfun") ? undefined : { window: 10, gain: 1e-3, step: 0.05 };
+type Trace = { gen: number; f: number; sigma: number }[];
+
 /** Fits on `fires` (bootstrap: with multiplicities `weights`), from x0. */
-async function fit(fires: number[], generations: number, x0: number[], sigma: number, seed: number, weights?: number[], trace?: { gen: number; f: number; sigma: number }[]) {
+async function fit(fires: number[], generations: number, x0: number[], sigma: number, seed: number, weights?: number[], trace?: Trace) {
   const w = weights ?? fires.map(() => 1);
   const wSum = w.reduce((a, b) => a + b, 0);
   return cmaes(
     async (xs) => {
-      const costs = await Promise.all(xs.map((x) => pool.scores(toParams(x), fires)));
+      const costs = await Promise.all(xs.map((x) => pool.scores(toParams(x), fires, METRIC)));
       return costs.map((c, k) => c.reduce((s, v, j) => s + w[j] * v, 0) / wSum + penalty(xs[k], SPACE));
     },
     x0,
-    { sigma, maxGenerations: generations, seed, lambda: 12, onGeneration: trace && ((gen, b, sg) => trace.push({ gen, f: b.f, sigma: sg })) },
+    {
+      sigma,
+      maxGenerations: generations,
+      seed,
+      lambda: 12,
+      tolFun: TOLFUN,
+      onGeneration: trace && ((gen, b, sg) => trace.push({ gen, f: b.f, sigma: sg })),
+    },
   );
 }
 
-// Every fit starts from the physical defaults, not from the current calibration: that one was fitted on
-// some of these fires, and starting there would leak it into the held-out folds (ADR 0058).
-const xStart = fromParams({}, SPACE);
+// Starting points (--starts, pre-registered). Never the current calibration: that one was fitted on some
+// of these fires, and starting there would leak it into the held-out folds (ADR 0058).
+//   physical: the engine's defaults;
+//   wind2: the midflame wind ×2, the rest physical (ADR 0065: from the physical values alone, CMA-ES
+//          with σ 0.7 did not reach the high-wind region).
+const STARTS: Record<string, Partial<ModelParams>> = { physical: {}, wind2: { windAdj: 2 } };
+const startNames = text("starts", "physical").split(",");
+for (const s of startNames) if (!STARTS[s]) throw new Error(`--starts desconhecido: ${s} (${Object.keys(STARTS).join(", ")})`);
+const xStarts = startNames.map((s) => fromParams(STARTS[s], SPACE));
+
+/** fit from every starting point, keeping the best; start k > 0 has its own seed. */
+async function fitBest(fires: number[], generations: number, seed: number, weights?: number[], traces?: Trace[]) {
+  const runs = await Promise.all(
+    xStarts.map((x0, k) => fit(fires, generations, x0, 0.7, seed + 7919 * k, weights, traces && (traces[k] = []))),
+  );
+  const k = runs.reduce((b, r, i) => (r.f < runs[b].f ? i : b), 0);
+  return { ...runs[k], start: startNames[k], byStart: runs.map((r, i) => ({ start: startNames[i], f: r.f, generations: r.generations })) };
+}
+
 const show = (p: Partial<ModelParams>) =>
   SPACE.map((d) => `${d.name} ${(p[d.name] as number).toFixed(d.kind === "log" ? 2 : 3)}`).join(", ");
 
-// 1. The fit on every tier A fire.
-console.log(`\n[1] ajuste em todos os fogos tier A (${GENERATIONS} gerações)`);
-const convergence: { gen: number; f: number; sigma: number }[] = [];
-const best = await fit(fitSet, GENERATIONS, xStart, 0.7, SEED, undefined, convergence);
-const bestParams = toParams(best.x);
-console.log(`  J ${f2(best.f)}: ${show(bestParams)} (${elapsed()})`);
+// 1. The fit on every tier A fire. It, the held-out fits (2) and the bootstrap (3) are independent, so
+// they all run at once on the pool: each has its own seed, and the results do not depend on the order.
+console.log(`\n[1] ajuste em todos os fogos tier A (${GENERATIONS} gerações; partida ${startNames.join(" e ")})`);
+const traces: Trace[] = [];
+const bestRun = fitBest(fitSet, GENERATIONS, SEED, undefined, traces).then((r) => {
+  console.log(`  J ${f2(r.f)}: ${show(toParams(r.x))}, partida ${r.start} (${elapsed()})`);
+  return r;
+});
 
 // 2. Held-out splits.
-interface Split {
-  name: string;
-  test: number[];
-  fitted: Partial<ModelParams>;
-}
 const rng = createRng(SEED + 100);
 // Fisher–Yates with the seeded generator (sorting by a random comparator is biased).
 const shuffled = [...fitSet];
@@ -176,20 +208,56 @@ if (SPLITS === "all") {
   splits.push({ name: "sem Norte", test: fitSet.filter((i) => entries[i].region === "Norte") });
 }
 
-const done: Split[] = [];
-console.log(`\n[2] testes com fogos deixados de fora (${FOLD_GENERATIONS} gerações cada)`);
-for (const s of splits) {
-  const train = fitSet.filter((i) => !s.test.includes(i));
-  if (!s.test.length) continue;
-  if (train.length < 3) {
-    console.warn(`  aviso: ${s.name} ignorado (só ${train.length} fogos para ajustar)`);
-    continue;
+console.log(`[2] testes com fogos deixados de fora (${FOLD_GENERATIONS} gerações cada)`);
+const runnable = splits.filter((s) => {
+  const train = fitSet.length - s.test.length;
+  if (!s.test.length) return false;
+  if (train < 3) console.warn(`  aviso: ${s.name} ignorado (só ${train} fogos para ajustar)`);
+  return train >= 3;
+});
+// Seeds as when the splits ran one after the other: SEED + 1 for the first, and so on.
+const splitRuns = Promise.all(
+  runnable.map((s, k) =>
+    fitBest(
+      fitSet.filter((i) => !s.test.includes(i)),
+      FOLD_GENERATIONS,
+      SEED + k + 1,
+    ).then((r) => {
+      console.log(`  ${s.name.padEnd(12)} ${s.test.length} fogos de teste, partida ${r.start} (${elapsed()})`);
+      return { ...s, fitted: toParams(r.x), start: r.start, byStart: r.byStart };
+    }),
+  ),
+);
+
+// 3. Bootstrap: refit on fires drawn with replacement, each from the starting points like the main fit
+// (starting at the best fit shrank the samples towards it and understated the uncertainty). The draws
+// are made first, in order, so they are the same as when the refits ran one after the other.
+console.log(`[3] bootstrap: ${BOOTSTRAP} reajustes (${BOOT_GENERATIONS} gerações cada)`);
+const brng = createRng(SEED + 200);
+const draws: Map<number, number>[] = [];
+for (let b = 0; b < BOOTSTRAP; b++) {
+  const counts = new Map<number, number>();
+  for (let k = 0; k < fitSet.length; k++) {
+    const i = fitSet[Math.floor(brng() * fitSet.length)];
+    counts.set(i, (counts.get(i) ?? 0) + 1);
   }
-  const r = await fit(train, FOLD_GENERATIONS, xStart, 0.7, SEED + done.length + 1);
-  done.push({ ...s, fitted: toParams(r.x) });
-  console.log(`  ${s.name.padEnd(12)} ${s.test.length} fogos de teste (${elapsed()})`);
+  draws.push(counts);
 }
-const testCost = await Promise.all(done.map((s) => pool.scores(s.fitted, s.test)));
+let bootDone = 0;
+const bootRuns = Promise.all(
+  draws.map((counts, b) => {
+    const fires = [...counts.keys()];
+    return fitBest(fires, BOOT_GENERATIONS, SEED + 300 + b, fires.map((i) => counts.get(i)!)).then((r) => {
+      if (++bootDone % 5 === 0 || bootDone === BOOTSTRAP) console.log(`  bootstrap ${bootDone}/${BOOTSTRAP} (${elapsed()})`);
+      return toParams(r.x);
+    });
+  }),
+);
+
+const [best, done, samples] = await Promise.all([bestRun, splitRuns, bootRuns]);
+const bestParams = toParams(best.x);
+const convergence = traces[startNames.indexOf(best.start)];
+const testCost = await Promise.all(done.map((s) => pool.scores(s.fitted, s.test, METRIC)));
 const testCum = await Promise.all(done.map((s) => pool.scores(s.fitted, s.test, { metric: "cumulative" })));
 // Free-running physics (ADR 0057): Sørensen at the first observation, and fast / slow spread rates.
 type Rates = [number, number, number][];
@@ -263,34 +331,75 @@ const heldOut = {
   newFires: pooledOn((i) => !OLD_FIT.has(entries[i].fire)),
 };
 
-// 3. Bootstrap: refit on fires drawn with replacement, each from the physical defaults like the main fit
-// (starting at the best fit shrank the samples towards it and understated the uncertainty).
-console.log(`\n[3] bootstrap: ${BOOTSTRAP} reajustes (${BOOT_GENERATIONS} gerações cada)`);
-const brng = createRng(SEED + 200);
-const samples: Partial<ModelParams>[] = [];
-for (let b = 0; b < BOOTSTRAP; b++) {
-  const counts = new Map<number, number>();
-  for (let k = 0; k < fitSet.length; k++) {
-    const i = fitSet[Math.floor(brng() * fitSet.length)];
-    counts.set(i, (counts.get(i) ?? 0) + 1);
-  }
-  const fires = [...counts.keys()];
-  const r = await fit(fires, BOOT_GENERATIONS, xStart, 0.7, SEED + 300 + b, fires.map((i) => counts.get(i)!));
-  samples.push(toParams(r.x));
-  if ((b + 1) % 5 === 0 || b === BOOTSTRAP - 1) console.log(`  ${b + 1}/${BOOTSTRAP} (${elapsed()})`);
-}
-
 // 4. Tier B and the probabilistic score, with the final parameters.
 const brier = (p: Partial<ModelParams>, s?: Partial<ModelParams>[]) =>
   BRIER_RUNS > 0 ? pool.scores(p, fitSet, { metric: "brier", runs: BRIER_RUNS, samples: s }) : Promise.resolve([NaN]);
 const [costBestAll, brierBest, brierSamples, brierCurrent] = await Promise.all([
-  pool.scores(bestParams, all),
+  pool.scores(bestParams, all, METRIC),
   brier(bestParams),
   brier(bestParams, samples.length ? samples : undefined),
   brier(CURRENT),
 ]);
+
+// The coverage score's parts (ADR 0065): each 5-fold test fire with the fit that did not see it, and
+// every fire with the incumbent and the physical model.
+const partsOf = (p: Partial<ModelParams>, fires: number[]) =>
+  Promise.all(fires.map((fire) => pool.runAny<CoverageParts | null>({ metric: "coverageParts", params: p, fire })));
+const coverageParts = COVERAGE_OBJECTIVE
+  ? await Promise.all([Promise.all(foldIdx.map(([s]) => partsOf(s.fitted, s.test))), partsOf(CURRENT, all), partsOf(UNCALIBRATED, all)])
+  : undefined;
 await pool.close();
 const on = (xs: number[], idx: number[]) => mean(idx.map((i) => xs[i]));
+
+/**
+ * Adoption under the coverage score (ADR 0065), paired fire by fire on the 5-fold held-out fires (all of
+ * them decide; the ones the incumbent never saw are reported too): the combined cost lower by at least
+ * 0.02 with a 90% bootstrap interval below 0, the coverage from the ignition (recall) not lower by more
+ * than 0.01, and the head-speed error of the fast runs not worse by more than 0.05.
+ */
+const coverageVerdict = (() => {
+  if (!coverageParts) return undefined;
+  const [test, current, physical] = coverageParts;
+  const rows: { fire: string; seen: boolean; fitted: CoverageParts; current: CoverageParts; physical: CoverageParts }[] = [];
+  foldIdx.forEach(([s], k) =>
+    s.test.forEach((i, j) => {
+      if (test[k][j] && current[i] && physical[i])
+        rows.push({ fire: entries[i].fire, seen: OLD_FIT.has(entries[i].fire), fitted: test[k][j]!, current: current[i]!, physical: physical[i]! });
+    }),
+  );
+  const pairedOn = (rs: typeof rows, seed: number) => {
+    const dc = rs.map((r) => r.fitted.mixed - r.current.mixed);
+    const dr = rs.map((r) => r.fitted.recall - r.current.recall);
+    const da = rs.filter((r) => r.fitted.anchorN > 0).map((r) => r.fitted.anchor - r.current.anchor);
+    const prng = createRng(seed);
+    const boot = Array.from({ length: 4000 }, () => {
+      let a = 0;
+      for (let k = 0; k < dc.length; k++) a += dc[Math.floor(prng() * dc.length)];
+      return a / dc.length;
+    }).sort((a, b) => a - b);
+    return { fires: rs.length, cost: mean(dc), costP05: boot[200], costP95: boot[3799], recall: mean(dr), anchor: da.length ? mean(da) : 0, anchorFires: da.length };
+  };
+  const decide = pairedOn(rows, SEED + 500);
+  const unseen = pairedOn(rows.filter((r) => !r.seen), SEED + 501);
+  const avg = (k: "fitted" | "current" | "physical", f: keyof CoverageParts) => mean(rows.map((r) => r[k][f]));
+  const summary = (k: "fitted" | "current" | "physical") => ({
+    mixed: avg(k, "mixed"),
+    coverage: avg(k, "coverage"),
+    tversky: avg(k, "tversky"),
+    recall: avg(k, "recall"),
+    sorensen: avg(k, "sorensen"),
+    anchor: mean(rows.filter((r) => r[k].anchorN > 0).map((r) => r[k].anchor)),
+    maskedShare: avg(k, "maskedShare"),
+  });
+  return {
+    rule: "paired held-out combined cost ≤ −0.02 with 90% interval < 0, recall from ignition ≥ −0.01, head-speed error ≤ +0.05, on every 5-fold test fire (ADR 0065)",
+    adopt: decide.cost <= -0.02 && decide.costP95 < 0 && decide.recall >= -0.01 && decide.anchor <= 0.05,
+    paired: decide,
+    pairedUnseen: unseen,
+    heldOut: { fitted: summary("fitted"), current: summary("current"), physical: summary("physical") },
+    perFire: rows,
+  };
+})();
 
 const quantiles = Object.fromEntries(
   SPACE.map((d) => {
@@ -359,7 +468,7 @@ const adoptOld =
       physics.early.fitted >= physics.early.current - 0.005
     : heldOut.newFires.cost.fitted < heldOut.newFires.cost.current &&
       heldOut.newFires.sorensen.fitted > heldOut.newFires.sorensen.current;
-const adopt = OBJECTIVE === "free" ? adoptOld : adoptPaired;
+const adopt = coverageVerdict ? coverageVerdict.adopt : OBJECTIVE === "free" ? adoptOld : adoptPaired;
 
 console.log(`\nParâmetros: ${show(bestParams)}`);
 console.log("Intervalo 90% (bootstrap): " + SPACE.map((d) => `${d.name} ${quantiles[d.name].p05.toFixed(2)}–${quantiles[d.name].p95.toFixed(2)}`).join(", "));
@@ -393,14 +502,26 @@ console.log(
     `(90%: ${f2(paired.costP05)} a ${f2(paired.costP95)}), Sørensen ${paired.sorensen >= 0 ? "+" : ""}${f2(paired.sorensen)}` +
     (lockedCost ? `; fogos fechados (${tierB.length}): custo ${f2(lockedCost.fitted)} contra ${f2(lockedCost.current)}` : ""),
 );
-console.log(adopt ? "\nADOTAR: melhor que o incumbente nos fogos que nenhum viu." : "\nNÃO ADOTAR: não melhora o incumbente nos fogos que nenhum viu.");
+if (coverageVerdict) {
+  const { paired: d, pairedUnseen: u, heldOut: h } = coverageVerdict;
+  const sg = (v: number) => `${v >= 0 ? "+" : ""}${f2(v)}`;
+  const label = { fitted: "ajustado", current: "incumbente", physical: "físico" };
+  console.log("\nCobertura nos fogos de teste (5 partes): custo combinado; desde a ignição Tversky, cobertura e Sørensen; erro da cabeça; extra fora (flancos travados)");
+  for (const k of ["fitted", "current", "physical"] as const)
+    console.log(
+      `  ${label[k].padEnd(11)} ${f2(h[k].mixed)}  Tversky ${f2(h[k].tversky)}  cobertura ${f2(h[k].recall)}  Sørensen ${f2(h[k].sorensen)}  cabeça ${f2(h[k].anchor)}  extra fora ${f2(h[k].maskedShare)}`,
+    );
+  console.log(`Emparelhado nos ${d.fires} fogos de teste: custo ${sg(d.cost)} (90%: ${f2(d.costP05)} a ${f2(d.costP95)}), cobertura ${sg(d.recall)}, cabeça ${sg(d.anchor)} (${d.anchorFires} fogos)`);
+  console.log(`  nos ${u.fires} que o incumbente não viu: custo ${sg(u.cost)} (90%: ${f2(u.costP05)} a ${f2(u.costP95)}), cobertura ${sg(u.recall)}, cabeça ${sg(u.anchor)}`);
+}
+console.log(adopt ? "\nADOTAR: melhor que o incumbente nos fogos de teste." : "\nNÃO ADOTAR: não melhora o incumbente nos fogos de teste.");
 
 const date = new Date().toISOString().slice(0, 10);
 const cellTag = cellSizes.length === 1 && cellSizes[0] !== 100 ? `${cellSizes[0]}m-` : "";
 const id = `pt-firesprd-${cellTag}${date}`;
 const git = (() => {
   try {
-    const dirty = execSync("git status --porcelain -- src scripts", { encoding: "utf8", cwd: import.meta.dirname }).trim() ? "+changes" : "";
+    const dirty = execSync("git status --porcelain -- src scripts", { encoding: "utf8", cwd: join(import.meta.dirname, "..") }).trim() ? "+changes" : "";
     return execSync("git rev-parse --short HEAD", { encoding: "utf8" }).trim() + dirty;
   } catch {
     return "?";
@@ -414,6 +535,8 @@ const out = {
   git,
   adopt,
   adoption: { rule: "paired held-out cost ≤ −0.02, 90% bootstrap interval < 0, Sørensen ≥ −0.01, locked set not worse (ADR 0064)", incumbent: INCUMBENT, incumbentParams: CURRENT, paired, locked: lockedCost, oldRule: adoptOld },
+  /** Under the coverage objectives, the rule that decides (ADR 0065). */
+  coverage: coverageVerdict ?? null,
   provenance: {
     cases: CASES,
     cellSizes,
@@ -427,7 +550,20 @@ const out = {
   intervals: OBJECTIVE === "free" ? "free-running only" : "all, slow at 0.25",
   fixed: FIXED,
   physics,
-  settings: { generations: GENERATIONS, foldGenerations: FOLD_GENERATIONS, bootstrap: BOOTSTRAP, bootGenerations: BOOT_GENERATIONS, seed: SEED, weather: WEATHER, moisture: MOISTURE },
+  settings: {
+    generations: GENERATIONS,
+    foldGenerations: FOLD_GENERATIONS,
+    bootstrap: BOOTSTRAP,
+    bootGenerations: BOOT_GENERATIONS,
+    seed: SEED,
+    weather: WEATHER,
+    moisture: MOISTURE,
+    starts: startNames,
+    tolFun: TOLFUN ?? null,
+  },
+  /** Which starting point won each fit, and the objective of each. */
+  starts: { main: best.byStart, splits: done.map((s) => ({ name: s.name, byStart: s.byStart })) },
+  minutes: (performance.now() - t0) / 60_000,
   best: round(bestParams),
   bestObjective: best.f,
   samples: samples.map(round),

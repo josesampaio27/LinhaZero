@@ -68,10 +68,14 @@ const PARAM_LABEL: Record<keyof ModelParams, string> = {
   windLimit: "Limite do vento de Rothermel (1 original, 2 revisto em 2013, 0 sem)",
   crownRatio: "Razão de copa no abrigo do vento (0,1 a 1; Rothermel)",
   demSmoothM: "Suavização do relevo antes do declive (m, 0 = nenhuma)",
+  bgSuppression: "Combate de fundo (só calibração)",
 };
 
-/** Coefficients of the retired simple model (ADR 0058): not shown, kept so older variant files still load. */
-const RETIRED_PARAMS = new Set<keyof ModelParams>(["kWind", "kSlope", "minSlopeFactor"]);
+/**
+ * Not shown: the coefficients of the retired simple model (ADR 0058), kept so older variant files still
+ * load, and the calibration-only firefighting layer (ADR 0065), which the app never uses.
+ */
+const HIDDEN_PARAMS = new Set<keyof ModelParams>(["kWind", "kSlope", "minSlopeFactor", "bgSuppression"]);
 
 const EDITED_CELLS: [number, number, number] = [217, 70, 239];
 
@@ -559,7 +563,7 @@ export function GridEditor() {
         <div>
           <p className="field-label">Coeficientes do modelo</p>
           <p className="hint">Os valores usados pelo modelo de Rothermel, calibrados com incêndios reais. Vazio = valor oficial.</p>
-          {(Object.keys(PARAM_LABEL) as (keyof ModelParams)[]).filter((k) => !RETIRED_PARAMS.has(k)).map((k) => (
+          {(Object.keys(PARAM_LABEL) as (keyof ModelParams)[]).filter((k) => !HIDDEN_PARAMS.has(k)).map((k) => (
             <label key={k} className={`param ${variant && k in variant.params ? "changed" : ""}`}>
               <span>{PARAM_LABEL[k]}</span>
               <input

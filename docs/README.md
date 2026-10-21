@@ -10,7 +10,7 @@ Esta pasta explica o que é o LinhaZero, como está construído e para onde vai.
 | Quem vai programar | [README do projeto](../README.md) | [Estratégia](arquitetura/04-estrategia.md), [Blocos](arquitetura/05-blocos.md), [Referência](#referência) |
 | Quem prepara dados | [data-prep](../data-prep/README.md) | [Formato da grelha](referencia/formato-grelha.md), [Fontes de dados](referencia/fontes-de-dados.md) |
 | Quem avalia a instalação numa entidade | [Implantação](arquitetura/07-implantacao.md) | [Conceitos transversais](arquitetura/08-conceitos.md), [Do protótipo à produção](plano/caminho-para-producao.md) |
-| Quem trabalha no modelo do fogo | [Modelo de propagação](modelo/propagacao.md) | [Incerteza](modelo/incerteza.md), [Calibração e validação](modelo/calibracao-e-validacao.md) |
+| Quem trabalha no modelo do fogo | [Modelo de propagação](modelo/propagacao.md) | [Incerteza](modelo/incerteza.md), [Calibração e validação](modelo/calibracao-e-validacao.md), [Como calibramos](modelo/como-calibramos.md) |
 
 ## O que está onde
 
@@ -48,6 +48,7 @@ docs/
 - [Modelo de propagação](modelo/propagacao.md): como o motor calcula o tempo de chegada do fogo, e como vai evoluir.
 - [Incerteza](modelo/incerteza.md): o ensemble emparelhado e o que mais se vai perturbar.
 - [Calibração e validação](modelo/calibracao-e-validacao.md): testes atuais, casos de referência e calibração com incêndios reais.
+- [Como calibramos](modelo/como-calibramos.md): o método (pontuação de cobertura para incêndios combatidos) e os resultados de cada grelha, com gráficos.
 - [O motor explicado](modelo/o-motor-explicado.md): o motor de ponta a ponta para o júri, os mentores e a comunidade científica: a grelha de Guimarães, a física, todos os parâmetros e a validação.
 - [O motor contra incêndios reais](modelo/validacao-resumo.md): resumo de uma página da validação em 80 incêndios e da probabilidade calibrada.
 
