@@ -1,5 +1,6 @@
 import {
   AccessRequestsClient,
+  FeedbackClient,
   HealthClient,
   IncidentsClient,
   MeClient,
@@ -52,6 +53,8 @@ async function apiFetch(
     new Headers(init?.headers).get("accept") ?? "application/json";
   const type = res.headers.get("content-type") ?? "";
   if (res.ok && type.startsWith(expected)) return res;
+  // 202/204 with no body (e.g. POST /feedback): nothing to check.
+  if ((res.status === 202 || res.status === 204) && type === "") return res;
   // No session (never signed in, or it expired): outside the demo, go and sign in, then come back here.
   if (res.status === 401 && !isDemo()) location.assign(loginUrl());
   if (!type.startsWith("application/json"))
@@ -63,6 +66,7 @@ async function apiFetch(
 const http = { fetch: apiFetch };
 
 export const accessRequestsApi = new AccessRequestsClient("", http);
+export const feedbackApi = new FeedbackClient("", http);
 export const healthApi = new HealthClient("", http);
 export const incidentsApi = new IncidentsClient("", http);
 export const meApi = new MeClient("", http);

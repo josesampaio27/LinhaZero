@@ -42,6 +42,9 @@ public static class AuthSetup
     /// <summary>The rate limit on access requests: ACCESS_REQUESTS_PER_HOUR (5 by default) from one address.</summary>
     public const string AccessRequestLimit = "access-requests";
 
+    /// <summary>The rate limit on problem reports and suggestions: FEEDBACK_PER_HOUR (20 by default) per user.</summary>
+    public const string FeedbackLimit = "feedback";
+
     /// <summary>Our users.id for the signed-in person (null for the test user, who is not in the table).</summary>
     public static Guid? UserId(ClaimsPrincipal user) => Guid.TryParse(user.FindFirst(UserIdClaim)?.Value, out var id) ? id : null;
 
@@ -195,17 +198,23 @@ public static class AuthSetup
             policy.WithOrigins(landingOrigins).WithMethods("POST").WithHeaders("content-type", CsrfHeader)));
 
         var perHour = int.TryParse(config["ACCESS_REQUESTS_PER_HOUR"], out var limit) && limit > 0 ? limit : 5;
+        var feedbackPerHour = int.TryParse(config["FEEDBACK_PER_HOUR"], out var feedbackLimit) && feedbackLimit > 0 ? feedbackLimit : 20;
         services.AddRateLimiter(limiter =>
         {
             limiter.AddPolicy(AccessRequestLimit, context => RateLimitPartition.GetFixedWindowLimiter(
                 context.Connection.RemoteIpAddress?.ToString() ?? "?",
                 _ => new FixedWindowRateLimiterOptions { PermitLimit = perHour, Window = TimeSpan.FromHours(1) }));
+            // Per signed-in user (the rate limiter runs after authentication); by name for test sessions without a users row.
+            limiter.AddPolicy(FeedbackLimit, context => RateLimitPartition.GetFixedWindowLimiter(
+                UserId(context.User)?.ToString() ?? context.User.Identity?.Name ?? "?",
+                _ => new FixedWindowRateLimiterOptions { PermitLimit = feedbackPerHour, Window = TimeSpan.FromHours(1) }));
             limiter.OnRejected = (context, _) =>
                 new ValueTask(WriteError(context.HttpContext.Response, StatusCodes.Status429TooManyRequests, "Demasiados pedidos. Tente mais tarde."));
         });
 
         services.AddSingleton<UserRepository>();
         services.AddSingleton<AccessRequestRepository>();
+        services.AddSingleton<FeedbackRepository>();
         services.Configure<KeycloakAdminOptions>(keycloak =>
         {
             keycloak.BaseUrl = config["KEYCLOAK_URL"] ?? keycloak.BaseUrl;

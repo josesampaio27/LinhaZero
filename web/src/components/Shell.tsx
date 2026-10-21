@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { FeedbackDialog } from "./FeedbackDialog";
 import { Icon, Mark, type IconName } from "./Icon";
 import { ACCOUNT_URL, loginUrl, logout, useSession } from "../lib/session";
 
@@ -40,6 +41,7 @@ export function Shell<T extends string>({ title, menu, stage, tabs, tab, onTab, 
           <span title={title}>{title}</span>
         </span>
         <SignIn />
+        <FeedbackButton />
         <AccountMenu />
         <Popover icon="menu" label="Menu" className="menu">
           {menu}
@@ -95,33 +97,57 @@ export function initials(name: string): string {
   return (first + last).toUpperCase();
 }
 
+/** "Reportar" in the app bar, next to the initials, for whoever is signed in: opens the problem/suggestion form. */
+function FeedbackButton() {
+  const session = useSession();
+  const [reporting, setReporting] = useState(false);
+  if (session.state !== "signed-in") return null;
+  const label = "Reportar problema ou sugestão";
+  return (
+    <>
+      <button className="feedback-btn" aria-label={label} title={label} onClick={() => setReporting(true)}>
+        <Icon name="feedback" />
+        <span>Reportar</span>
+      </button>
+      {reporting && <FeedbackDialog onClose={() => setReporting(false)} />}
+    </>
+  );
+}
+
 /** The signed-in person's initials in the app bar; opens who it is, the account (on account.<domain>) and "Sair". */
 function AccountMenu() {
   const session = useSession();
   if (session.state !== "signed-in") return null;
   const { name, email, isAdmin } = session.me;
   return (
-    <Popover label={`Conta de ${name}`} face={<span className="avatar">{initials(name)}</span>} className="account-menu">
-      {(close) => (
-        <div className="account">
-          <p>
-            <b>{name}</b>
-            {email && email !== name && <span>{email}</span>}
-          </p>
-          {isAdmin && (
-            <a className="button menu-item" href="#/pedidos" onClick={close}>
-              Pedidos de acesso
+    <>
+      <Popover label={`Conta de ${name}`} face={<span className="avatar">{initials(name)}</span>} className="account-menu">
+        {(close) => (
+          <div className="account">
+            <p>
+              <b>{name}</b>
+              {email && email !== name && <span>{email}</span>}
+            </p>
+            {isAdmin && (
+              <a className="button menu-item" href="#/pedidos" onClick={close}>
+                Pedidos de acesso
+              </a>
+            )}
+            {isAdmin && (
+              <a className="button menu-item" href="#/relatorios" onClick={close}>
+                Relatórios
+              </a>
+            )}
+            <a className="button menu-item" href={ACCOUNT_URL}>
+              Conta
             </a>
-          )}
-          <a className="button menu-item" href={ACCOUNT_URL}>
-            Conta
-          </a>
-          <button className="menu-item" onClick={() => void logout()}>
-            Sair
-          </button>
-        </div>
-      )}
-    </Popover>
+            <button className="menu-item" onClick={() => void logout()}>
+              Sair
+            </button>
+          </div>
+        )}
+      </Popover>
+    </>
   );
 }
 

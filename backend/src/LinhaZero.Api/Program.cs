@@ -36,6 +36,7 @@ services.Configure<NatsOptions>(nats => nats.Url = config["NATS_URL"] ?? nats.Ur
 
 // Infrastructure: one Postgres pool and one NATS connection for the whole process
 services.AddSingleton(_ => Pg.CreateDataSource());
+services.AddHostedService<MigrateOnStart>(); // first: the schema is up to date before anything else starts
 services.AddSingleton(provider =>
 {
     var nats = provider.GetRequiredService<IOptions<NatsOptions>>().Value;

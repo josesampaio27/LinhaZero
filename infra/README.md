@@ -11,7 +11,7 @@ cp infra/.env.example infra/.env   # opcional; os valores por omissão chegam pa
 docker compose up -d --build       # build + arranque de tudo (precisa de rede na primeira vez); o mesmo que `npm run up`
                                    # https://linhazero.localhost (landing), https://app.… (interface), https://account.… (login)
 docker compose logs -f             # logs JSON de todos os serviços (`npm run logs`)
-docker compose down                # pára e mantém os volumes; `-v` apaga-os (obrigatório depois de mudar infra/db/*.sql)
+docker compose down                # pára e mantém os volumes; `-v` apaga-os (as mudanças ao esquema não precisam: a API aplica-as ao arrancar, ADR 0065)
 infra/smoke.sh --fresh             # teste ponta a ponta, incluindo escalar e matar um worker
 TEST_PG=1 npm run test:backend    # os testes de Postgres e NATS correm contra este compose (sem TEST_PG são saltados)
 ```
@@ -29,7 +29,7 @@ O nome do projeto é `linha-zero`, por isso os volumes chamam-se `linha-zero_pgd
 | `landing` | `landing/` (build Node 24, servida por `nginx-unprivileged:1.28.0-alpine`) | — | A página de apresentação compilada, em https://linhazero.localhost; serve a grelha do relevo de `web/public/grids` |
 | `keycloak` | `infra/keycloak/` (Keycloak 26.8.1, tema e realm `linhazero`) | — | O login, em https://account.linhazero.localhost; base própria `keycloak` no mesmo Postgres; envia os emails (convites, recuperação de palavra-passe) |
 | `mailpit` | `axllent/mailpit:v1.31.3` | 127.0.0.1:8025 | Caixa de correio falsa: recebe todos os emails do Keycloak, para os ver em http://localhost:8025. No cluster usa-se um serviço de email a sério |
-| `postgres` | `postgres:16.12-alpine` | 5432 | `snapshots`, `source_status`, `runs`, `run_rasters`, `users`, `data_protection_keys`, e a base `keycloak` (`infra/db/*`, aplicado quando o volume `pgdata` está vazio) |
+| `postgres` | `postgres:16.12-alpine` | 5432 | `snapshots`, `source_status`, `runs`, `run_rasters`, `users`, `data_protection_keys`, `access_requests`, `feedback`, `schema_migrations`, e a base `keycloak` (`infra/db/*` quando o volume `pgdata` está vazio; as mudanças depois disso, `backend/src/LinhaZero.Core/Database/Migrations/`, aplica-as a API ao arrancar) |
 | `nats` | `nats:2.10.29-alpine` (JetStream) | 4222, 8222 (monitor) | Stream `RUNS` = `runs.jobs` (fila de trabalho); eventos `runs.<id>.events` em NATS core |
 | `ingest` | `backend/src/LinhaZero.Ingest` (.NET 10) | 127.0.0.1:8081 | Recolhe IPMA, Open-Meteo e fogos.pt em intervalos fixos; um líder por advisory lock; `GET /health/ready` |
 | `api` | `backend/src/LinhaZero.Api` (.NET 10) | 127.0.0.1:8080 | REST + SSE em `/api/v1`: `weather`, `incidents/active`, `runs`, `runs/{id}`, `runs/{id}/events`, `runs/{id}/rasters/{A\|B}/{arrival\|probability}`, `me`, `health`; login em `/api/auth/{login,callback,logout}`; OpenAPI em `/api/openapi/v1.json` e Swagger UI em `/api/docs`. Tudo pede sessão, exceto `health` e `auth` |

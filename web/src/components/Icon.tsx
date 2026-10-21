@@ -16,6 +16,7 @@ const PATHS = {
   trash: "M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3",
   check: "M5 12l5 5 9-10",
   chevron: "M9 6l6 6-6 6",
+  feedback: "M4 5h16v11H9l-5 4zM9 9.5h6M9 12.5h4",
 } as const;
 
 export type IconName = keyof typeof PATHS;

@@ -220,6 +220,171 @@ export class AccessRequestsClient {
     }
 }
 
+export class FeedbackClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * A report from the signed-in user.
+     * @param body (optional) 
+     * @return Accepted
+     */
+    create(body?: FeedbackCreate | null | undefined, signal?: AbortSignal): Promise<void> {
+        let url_ = this.baseUrl + "/api/v1/feedback";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            signal,
+            headers: {
+                "Content-Type": "application/json",
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processCreate(_response);
+        });
+    }
+
+    protected processCreate(response: Response): Promise<void> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 202) {
+            return response.text().then((_responseText) => {
+            return;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ErrorResponse;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            let result403: any = null;
+            result403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ErrorResponse;
+            return throwException("Forbidden", status, _responseText, _headers, result403);
+            });
+        } else if (status === 429) {
+            return response.text().then((_responseText) => {
+            let result429: any = null;
+            result429 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ErrorResponse;
+            return throwException("Too Many Requests", status, _responseText, _headers, result429);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<void>(null as any);
+    }
+
+    /**
+     * Every report, open first. Admins only.
+     * @return OK
+     */
+    list(signal?: AbortSignal): Promise<FeedbackResponse[]> {
+        let url_ = this.baseUrl + "/api/v1/feedback";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            signal,
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processList(_response);
+        });
+    }
+
+    protected processList(response: Response): Promise<FeedbackResponse[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FeedbackResponse[];
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FeedbackResponse[]>(null as any);
+    }
+
+    /**
+     * Marks a report done or dismissed, or opens it again. Admins only.
+     * @param body (optional) 
+     * @return OK
+     */
+    setStatus(id: string, body?: FeedbackStatusChange | null | undefined, signal?: AbortSignal): Promise<FeedbackResponse> {
+        let url_ = this.baseUrl + "/api/v1/feedback/{id}/status";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            signal,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processSetStatus(_response);
+        });
+    }
+
+    protected processSetStatus(response: Response): Promise<FeedbackResponse> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as FeedbackResponse;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ErrorResponse;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ErrorResponse;
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<FeedbackResponse>(null as any);
+    }
+}
+
 export class HealthClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -729,6 +894,43 @@ export interface Ensemble {
 /** Every 4xx/5xx body: a message in Portuguese, shown to the user as is. */
 export interface ErrorResponse {
     error: string;
+}
+
+/** Where the person was when they wrote, filled in by the web; every field optional. */
+export interface FeedbackContext {
+    page: string | null;
+    scenario: string | null;
+    variant: string | null;
+    appVersion: string | null;
+    userAgent: string | null;
+    viewport: string | null;
+}
+
+/** The POST /api/v1/feedback body: a problem or a suggestion from a signed-in user. Kind: bug, suggestion or other. `MayContact`: the team may answer by email (the address comes from the session). */
+export interface FeedbackCreate {
+    kind: string | null;
+    message: string | null;
+    mayContact: boolean;
+    context: FeedbackContext | null;
+}
+
+/** A report as the admin page shows it, with who sent it. */
+export interface FeedbackResponse {
+    id: string;
+    kind: string;
+    message: string;
+    mayContact: boolean;
+    context: FeedbackContext;
+    status: string;
+    createdAt: string;
+    closedAt: string | null;
+    userName: string;
+    userEmail: string | null;
+}
+
+/** The POST /api/v1/feedback/{id}/status body. Status: open, done or dismissed. */
+export interface FeedbackStatusChange {
+    status: string | null;
 }
 
 /** IPMA fire risk (1 Reduzido to 5 Máximo) for the municipality nearest to the point. */
