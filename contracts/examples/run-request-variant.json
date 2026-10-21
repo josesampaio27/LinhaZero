@@ -28,7 +28,7 @@
       "description": "Faixa de 200 m sem combustível, no traçado da linha de contenção do cenário de demonstração",
       "base": {
         "grid": "sintetica",
-        "sha256": "664932e5bd22a8995511a0f8f8aa039cc5e7c620d213319bbbdbbd132d5b36e8"
+        "sha256": "930612cec5ed145d29184fb20ea1101d1c55eaed5e8dee60e14c9e062c1d1638"
       },
       "fuelRates": {},
       "params": {},
