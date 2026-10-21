@@ -159,12 +159,27 @@ export interface EnsemblePerturbation {
   ignitionRadiusM: number;
 }
 
+/**
+ * A firefighting action, in cells. Each acts from startMin until endMin (absent = to the end of the run);
+ * ADR 0070 for the backfire, the aerial drop and the end times.
+ */
 export type Intervention =
-  | { kind: "containmentLine"; cells: CellRef[]; startMin: number; widthM?: number } // cells stop burning from startMin; widthM: Rothermel breach (default params.lineWidthM)
-  | { kind: "suppression"; cells: CellRef[]; startMin: number; rateFactor: number } // e.g. 0.2 = fire 5x slower
-  | { kind: "protectZone"; cells: CellRef[]; startMin: number; rateFactor: number };
+  // The cells stop burning from startMin; widthM: Rothermel breach (default params.lineWidthM). After endMin
+  // the line is no longer held and the fire crosses it as if it were not there.
+  | { kind: "containmentLine"; cells: CellRef[]; startMin: number; endMin?: number; widthM?: number }
+  | { kind: "suppression"; cells: CellRef[]; startMin: number; endMin?: number; rateFactor: number } // e.g. 0.2 = fire 5x slower
+  | { kind: "protectZone"; cells: CellRef[]; startMin: number; endMin?: number; rateFactor: number }
+  // Water or retardant on a strip: holds the fire while it lasts, if the fire is not too intense
+  // (params.aerialFullKwM / aerialNoneKwM).
+  | { kind: "aerialDrop"; cells: CellRef[]; startMin: number; endMin?: number }
+  // A backfire: `cells` is the control line it is lit from (held like a containment line), `litCells` the
+  // cells set alight at startMin, on the side of the line facing the fire.
+  | { kind: "backfire"; cells: CellRef[]; litCells: CellRef[]; startMin: number; endMin?: number; widthM?: number };
 
 export type InterventionKind = Intervention["kind"];
+
+/** Every intervention kind, in the order the app lists them. */
+export const INTERVENTION_KINDS: readonly InterventionKind[] = ["containmentLine", "suppression", "protectZone", "aerialDrop", "backfire"];
 
 export interface SimulationResult {
   arrivalMin: Float32Array; // fire arrival minute per cell; Infinity = does not burn

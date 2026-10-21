@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import type { DecisionId, DrawnIntervention, InterventionKind } from "@linha-zero/engine";
+import { AERIAL_DEFAULT_MIN, type AerialAgent, type DecisionId, type DrawnIntervention, type InterventionKind } from "@linha-zero/engine";
 import { KIND_LABEL } from "../lib/scenario";
 import { Icon, type IconName } from "./Icon";
 
@@ -24,11 +24,17 @@ const LINE_WIDTHS: { m: number; label: string }[] = [
   { m: 25, label: "25 m · faixa larga" },
 ];
 
+const AGENTS: { value: AerialAgent; label: string }[] = [
+  { value: "water", label: `Água · ${AERIAL_DEFAULT_MIN.water} min` },
+  { value: "retardant", label: `Retardante · ${AERIAL_DEFAULT_MIN.retardant / 60} h` },
+];
+
 /**
  * What each action stands for on the ground and what the engine does with it (Rothermel model:
- * engine/src/spread-rothermel.ts, params.ts). Flame lengths are Byram's for the attack thresholds
- * (500 kW/m ≈ 1.4 m, 4000 kW/m ≈ 3.5 m); a line holds in the deterministic run when it is at least 5
- * times as wide as the flames are long (holdWidthPerFlame of PT_CALIBRATION). Update these if they change.
+ * engine/src/spread-rothermel.ts, params.ts, ADR 0070). Flame lengths are Byram's: the attack thresholds
+ * (500 kW/m ≈ 1.4 m, 4000 kW/m ≈ 3.5 m), the aerial drop's (2000 kW/m ≈ 2.5 m, 4000 kW/m ≈ 3.5 m). A line
+ * holds in the deterministic run when it is at least 5 times as wide as the flames are long
+ * (holdWidthPerFlame of PT_CALIBRATION). Update these if they change.
  */
 export const TOOLS: {
   kind: InterventionKind;
@@ -50,7 +56,7 @@ export const TOOLS: {
     meaning:
       "Uma faixa sem combustível que os meios abrem à frente do fogo, à mão ou com máquinas. Também serve para uma faixa de gestão que já existe.",
     rule:
-      "A partir do minuto em que fica pronta, o fogo para na linha se ela for pelo menos 5 vezes mais larga do que as chamas são compridas, porque o calor e as faúlhas passam faixas mais largas do que a chama. Uma linha de 4 m só trava chamas até 80 cm; uma faixa de 25 m trava chamas até 5 m. Se o fogo lá chegar antes de ela estar pronta, passa.",
+      "A partir do minuto em que fica pronta, o fogo para na linha se ela for pelo menos 5 vezes mais larga do que as chamas são compridas, porque o calor e as faúlhas passam faixas mais largas do que a chama. Uma linha de 4 m só trava chamas até 80 cm; uma faixa de 25 m trava chamas até 5 m. Se o fogo lá chegar antes de ela estar pronta, passa. Se lhe deres um fim, a partir daí deixa de ser defendida e o fogo passa-a.",
     where: "Desenha-a onde os meios a abririam, entre o fogo e o que queres proteger.",
   },
   {
@@ -60,7 +66,7 @@ export const TOOLS: {
     effect: "O fogo anda 5 vezes mais devagar na zona, menos se as chamas forem altas",
     meaning: "Meios a combater o fogo diretamente, com água, ferramentas ou máquinas, na cabeça ou num flanco.",
     rule:
-      "A partir do minuto em que os meios chegam, o fogo nessa zona anda 5 vezes mais devagar. Atrasa o fogo, não o apaga. Com chamas acima de 1,4 m perde efeito, e acima de 3,5 m já não tem nenhum.",
+      "A partir do minuto em que os meios chegam, o fogo nessa zona anda 5 vezes mais devagar, até eles saírem, se lhe deres um fim. Atrasa o fogo, não o apaga. Com chamas acima de 1,4 m perde efeito, e acima de 3,5 m já não tem nenhum.",
     where: "Desenha a zona onde os meios vão trabalhar.",
   },
   {
@@ -71,14 +77,64 @@ export const TOOLS: {
     meaning:
       "Meios já colocados junto a casas ou a uma aldeia, à espera do fogo para o travar ali. Têm mais efeito do que um ataque, porque estão no sítio e preparados.",
     rule:
-      "A partir do minuto em que lá estão, o fogo nessa zona anda 10 vezes mais devagar. Com chamas acima de 1,4 m perde efeito, e acima de 3,5 m já não tem nenhum.",
+      "A partir do minuto em que lá estão, o fogo nessa zona anda 10 vezes mais devagar, até eles saírem, se lhe deres um fim. Com chamas acima de 1,4 m perde efeito, e acima de 3,5 m já não tem nenhum.",
     where: "Desenha a zona à volta do que queres defender.",
+  },
+  {
+    kind: "aerialDrop",
+    icon: "drop",
+    summary: "Água ou retardante largado por um meio aéreo",
+    effect: "Trava o fogo enquanto faz efeito, se as chamas não forem altas demais",
+    meaning: "Um helicóptero ou um avião larga água ou retardante numa faixa, à frente ou no flanco do fogo.",
+    rule: `Do minuto da descarga até deixar de fazer efeito, a faixa trava o fogo: sempre com chamas até cerca de 2,5 m, nunca com chamas acima de 3,5 m, e umas vezes sim, outras não, entre as duas. A água dura cerca de ${AERIAL_DEFAULT_MIN.water} minutos e o retardante cerca de ${AERIAL_DEFAULT_MIN.retardant / 60} horas; podes mudar o fim.`,
+    where: "Desenha o percurso da descarga, por onde o fogo vai passar.",
+  },
+  {
+    kind: "backfire",
+    icon: "flame",
+    summary: "Fogo posto a partir de uma linha, contra o fogo",
+    effect: "Queima o terreno entre a linha e o fogo, que fica sem combustível para avançar",
+    meaning:
+      "Os meios queimam de propósito o combustível entre uma linha de apoio (uma estrada, um caminho ou uma linha aberta) e o fogo que se aproxima, para que a frente chegue a terreno já ardido.",
+    rule:
+      "No minuto indicado, o simulador acende o lado da linha virado para a ignição. Esse fogo arde como qualquer outro e conta como área ardida. A linha segura-o como uma linha de contenção, se for larga o bastante para as chamas. Aceso tarde, ou com o vento a empurrá-lo contra a linha, pode escapar.",
+    where: "Desenha a linha de apoio entre o fogo e o que queres proteger, de preferência sobre uma estrada ou um caminho.",
   },
 ];
 
 const STEP = 5;
 
-/** Actions of one decision: a card per action with its start minute, and the tools to add one. */
+/** A minute stepper: − and + by STEP minutes, and the number typed in between. */
+function Stepper(p: { label: string; value: number; min: number; onChange: (v: number) => void; onBlur?: () => void }) {
+  return (
+    <span className="stepper" role="group" aria-label={p.label}>
+      <button aria-label="Mais cedo" disabled={p.value <= p.min} onClick={() => p.onChange(p.value - STEP)}>
+        <Icon name="minus" size={16} />
+      </button>
+      <label>
+        <input
+          type="number"
+          inputMode="numeric"
+          min={p.min}
+          step={STEP}
+          value={p.value}
+          aria-label={p.label}
+          onChange={(e) => {
+            const v = Number(e.target.value);
+            if (Number.isFinite(v)) p.onChange(v);
+          }}
+          onBlur={p.onBlur}
+        />
+        <span>min</span>
+      </label>
+      <button aria-label="Mais tarde" onClick={() => p.onChange(p.value + STEP)}>
+        <Icon name="plus" size={16} />
+      </button>
+    </span>
+  );
+}
+
+/** Actions of one decision: a card per action with its start and end minutes, and the tools to add one. */
 export function DecisionTools(p: Props) {
   const [confirmClear, setConfirmClear] = useState(false);
   // The second tap must come soon: touch browsers may never blur the button.
@@ -87,7 +143,16 @@ export function DecisionTools(p: Props) {
     const t = window.setTimeout(() => setConfirmClear(false), 4000);
     return () => window.clearTimeout(t);
   }, [confirmClear]);
-  const setStart = (iv: DrawnIntervention, v: number) => p.onUpdate(iv.id, { startMin: Math.max(0, Math.round(v)) });
+  // The end moves with the start, so the action keeps its duration.
+  const setStart = (iv: DrawnIntervention, v: number) => {
+    const startMin = Math.max(0, Math.round(v));
+    p.onUpdate(iv.id, { startMin, ...(iv.endMin !== undefined && { endMin: startMin + (iv.endMin - iv.startMin) }) });
+  };
+  // While typing the end may pass through values before the start; leaving the field puts it right.
+  const setEnd = (iv: DrawnIntervention, v: number) => p.onUpdate(iv.id, { endMin: Math.max(0, Math.round(v)) });
+  const fixEnd = (iv: DrawnIntervention) => {
+    if (iv.endMin !== undefined && iv.endMin <= iv.startMin) p.onUpdate(iv.id, { endMin: iv.startMin + STEP });
+  };
   return (
     <div className="decision">
       {p.children}
@@ -97,39 +162,68 @@ export function DecisionTools(p: Props) {
         <ul className="actions">
           {p.items.map((iv) => {
             const tool = TOOLS.find((t) => t.kind === iv.kind)!;
+            const label = KIND_LABEL[iv.kind];
+            const hasWidth = (iv.kind === "containmentLine" || iv.kind === "backfire") && p.defaultLineWidthM !== undefined;
             return (
               <li key={iv.id} className={`action dec-${p.decision}`}>
                 <span className="action-icon">
                   <Icon name={tool.icon} size={18} />
                 </span>
                 <span className="action-text">
-                  <b>{KIND_LABEL[iv.kind]}</b>
+                  <b>{label}</b>
                   <small>{tool.effect}</small>
                 </span>
                 <span className="action-start">
-                  Começa aos
-                  <span className="stepper" role="group" aria-label={`Início de ${KIND_LABEL[iv.kind]}, em minutos`}>
-                    <button aria-label="Mais cedo" disabled={iv.startMin <= 0} onClick={() => setStart(iv, iv.startMin - STEP)}>
-                      <Icon name="minus" size={16} />
-                    </button>
-                    <label>
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        min={0}
-                        step={STEP}
-                        value={iv.startMin}
-                        aria-label="Minuto de início"
-                        onChange={(e) => setStart(iv, Number(e.target.value))}
-                      />
-                      <span>min</span>
-                    </label>
-                    <button aria-label="Mais tarde" onClick={() => setStart(iv, iv.startMin + STEP)}>
-                      <Icon name="plus" size={16} />
-                    </button>
-                  </span>
+                  <span>{iv.kind === "aerialDrop" ? "Descarga aos" : iv.kind === "backfire" ? "Aceso aos" : "Começa aos"}</span>
+                  <Stepper label={`Início de ${label}, em minutos`} value={iv.startMin} min={0} onChange={(v) => setStart(iv, v)} />
                 </span>
-                {iv.kind === "containmentLine" && p.defaultLineWidthM !== undefined && (
+                <span className="action-end">
+                  <span>{iv.kind === "aerialDrop" ? "Efeito até" : "Acaba aos"}</span>
+                  {iv.endMin === undefined ? (
+                    <>
+                      <span>sem fim</span>
+                      <button className="link" onClick={() => p.onUpdate(iv.id, { endMin: iv.startMin + 60 })}>
+                        Definir fim
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <Stepper
+                        label={`Fim de ${label}, em minutos`}
+                        value={iv.endMin}
+                        min={iv.startMin + STEP}
+                        onChange={(v) => setEnd(iv, v)}
+                        onBlur={() => fixEnd(iv)}
+                      />
+                      {iv.kind !== "aerialDrop" && (
+                        <button className="icon-btn" aria-label={`Tirar o fim de ${label}`} title="Sem fim" onClick={() => p.onUpdate(iv.id, { endMin: undefined })}>
+                          <Icon name="close" size={16} />
+                        </button>
+                      )}
+                      {iv.endMin <= iv.startMin && <span className="warn">O fim tem de ser depois do início.</span>}
+                    </>
+                  )}
+                </span>
+                {iv.kind === "aerialDrop" && (
+                  <label className="action-width">
+                    Agente
+                    <select
+                      value={iv.agent ?? "water"}
+                      title="Muda também o fim para a duração habitual deste agente"
+                      onChange={(e) => {
+                        const agent = e.target.value as AerialAgent;
+                        p.onUpdate(iv.id, { agent, endMin: iv.startMin + AERIAL_DEFAULT_MIN[agent] });
+                      }}
+                    >
+                      {AGENTS.map((a) => (
+                        <option key={a.value} value={a.value}>
+                          {a.label}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                )}
+                {hasWidth && (
                   <label className="action-width">
                     Largura
                     <select
@@ -137,7 +231,7 @@ export function DecisionTools(p: Props) {
                       title="Chamas mais compridas do que a largura podem galgar a linha"
                       onChange={(e) => p.onUpdate(iv.id, { widthM: Number(e.target.value) })}
                     >
-                      {[...new Set([...LINE_WIDTHS.map((w) => w.m), iv.widthM ?? p.defaultLineWidthM])]
+                      {[...new Set([...LINE_WIDTHS.map((w) => w.m), iv.widthM ?? p.defaultLineWidthM!])]
                         .sort((a, b) => a - b)
                         .map((m) => (
                           <option key={m} value={m}>
@@ -147,7 +241,7 @@ export function DecisionTools(p: Props) {
                     </select>
                   </label>
                 )}
-                <button className="icon-btn" aria-label={`Apagar ${KIND_LABEL[iv.kind]}`} title="Apagar" onClick={() => p.onRemove(iv.id)}>
+                <button className="icon-btn" aria-label={`Apagar ${label}`} title="Apagar" onClick={() => p.onRemove(iv.id)}>
                   <Icon name="trash" size={18} />
                 </button>
               </li>

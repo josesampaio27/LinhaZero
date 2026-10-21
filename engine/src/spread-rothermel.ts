@@ -3,7 +3,7 @@
 // each direction stands for part of the angular sector around it (SECTOR_FRACTION).
 import type { MinHeap } from "./heap";
 import type { InterventionLayers } from "./interventions";
-import { attackEffectiveness, DEFAULT_PARAMS, holdProbability } from "./params";
+import { aerialHoldProbability, attackEffectiveness, DEFAULT_PARAMS, holdProbability } from "./params";
 import { hashRandom, RANDOM_PURPOSE } from "./random";
 import { flameLength } from "./rothermel";
 import { normals, spotDistribution } from "./spotting";
@@ -192,7 +192,8 @@ export const ROAD_JUMPS: readonly StencilMove[] = [
  * cell corner cannot squeeze between two barrier cells that hold.
  *
  * Changing conditions: a step's time is computed with the weather (and interventions) at its departure.
- * When the weather changes at minute T, or an "Ataque" / "Proteger zona" starts, the steps still under
+ * When the weather changes at minute T, an "Ataque" / "Proteger zona" starts or ends, or a line or an
+ * aerial drop stops acting, the steps still under
  * way are recomputed: every arrival not yet reached is forgotten, and each burning cell with unburned
  * neighbours restarts its steps at T, keeping the share of each step it had already covered under the
  * old conditions and covering the rest at the new rate. So a fire that started in calm weather speeds
@@ -207,12 +208,17 @@ export const ROAD_JUMPS: readonly StencilMove[] = [
  *   holdProbability(width, flame length of the burning origin). The deterministic run takes the line
  *   as holding when that probability is at least 50%; an ensemble run draws hashRandom per cell. A
  *   breached road is crossed at the origin's rate. Two-cell jumps (ROAD_JUMPS) let a fire face a
- *   one-cell road head-on; they are taken only across such a road.
+ *   one-cell road head-on; they are taken only across such a road;
+ * - an aerial drop holds with aerialHoldProbability(intensity of the burning origin), drawn the same way.
+ * Every action works from its start minute to its end (ADR 0070): after it, the fire goes on as if it
+ * had never been there.
+ *
+ * Backfires: input.litIgnitions are set alight at their minute, like the fire's own ignitions.
  *
  * Spot fires (ensemble runs only): a cell burning above spotCriticalKwM launches an ember with
  * probability spotPerHa per hectare; it lands downwind at a Sardoy distance (spotting.ts) and, on
- * unburned fuel that is not a containment line already in place, ignites after spotDelayMin, whatever
- * barriers or lines lie in between.
+ * unburned fuel that is not a containment line or an aerial drop in force, ignites after spotDelayMin,
+ * whatever barriers or lines lie in between.
  */
 export function computeArrivalRothermel(
   grid: PreparedGrid,
@@ -226,7 +232,10 @@ export function computeArrivalRothermel(
   const { rows, cols, cellSize } = grid.header;
   const n = rows * cols;
   const { baseRate, barrier } = grid;
-  const { containStart, containWidth, slowFactor, slowStart } = layers;
+  const { containStart, containEnd, containWidth, slowFactor, slowStart, slowEnd, dropStart, dropEnd } = layers;
+  // A line or an aerial drop stops a fire arriving at minute ta only while it is in force.
+  const lineAt = (x: number, ta: number) => containStart[x] <= ta && ta < containEnd[x];
+  const dropAt = (x: number, ta: number) => dropStart[x] <= ta && ta < dropEnd[x];
   const duration = input.durationMin;
   const intensityOut = input.intensityOut;
   intensityOut?.fill(0);
@@ -260,11 +269,21 @@ export function computeArrivalRothermel(
   /** 1 where an ignition says the whole cell is burned: its steps leave from its edges (no time in it). */
   const burnedSeed = new Uint8Array(n);
 
-  // Changes of conditions in time order: weather changes, and the start of every slowdown zone.
+  // Changes of conditions in time order: weather changes, the start and end of every slowdown zone, and
+  // the end of every line and aerial drop (the steps they blocked set off again). A line or a drop
+  // starting needs no event: whether it blocks a step is judged on the minute the step arrives.
   const events: { t: number; change?: SpreadChange }[] = (input.changes ?? []).map((c) => ({ t: c.fromMin, change: c }));
-  const slowStarts = new Set<number>();
-  for (let x = 0; x < n; x++) if (slowStart[x] < Infinity && slowStart[x] > -Infinity) slowStarts.add(slowStart[x]);
-  for (const t of slowStarts) events.push({ t });
+  const eventTimes = new Set<number>();
+  const addTime = (t: number) => {
+    if (Number.isFinite(t)) eventTimes.add(t);
+  };
+  for (let x = 0; x < n; x++) {
+    addTime(slowStart[x]);
+    if (slowStart[x] < Infinity) addTime(slowEnd[x]);
+    if (containStart[x] < Infinity) addTime(containEnd[x]);
+    if (dropStart[x] < Infinity) addTime(dropEnd[x]);
+  }
+  for (const t of eventTimes) events.push({ t });
   events.sort((a, b) => a.t - b.t);
   let nextEvent = 0;
 
@@ -274,8 +293,10 @@ export function computeArrivalRothermel(
     arrival[j] = ta;
     heap.push(ta, j);
   };
-  for (const { cell, t0Min, burned } of input.ignitions ?? [
-    { cell: input.ignition, t0Min: 0 },
+  // The fire's own start, then the cells people set alight (backfires), each from its own minute.
+  for (const { cell, t0Min, burned } of [
+    ...(input.ignitions ?? [{ cell: input.ignition, t0Min: 0 }]),
+    ...(input.litIgnitions ?? []),
   ]) {
     const { row, col } = cell;
     if (row < 0 || col < 0 || row >= rows || col >= cols) continue;
@@ -290,7 +311,7 @@ export function computeArrivalRothermel(
   // Rate (m/min) of cell x in the move's direction at departure minute t, after any intervention.
   const effectiveRate = (x: number, m: StencilMove, t: number) => {
     const rate = rates.rate(x, m.cosBearing, m.sinBearing, m.sectorCwRad, m.sectorCcwRad, m.bearingRad);
-    if (!(slowStart[x] <= t) || rate <= 0) return rate;
+    if (!(slowStart[x] <= t && t < slowEnd[x]) || rate <= 0) return rate;
     const e = attackEffectiveness(rates.intensity(x, rate), params);
     return rate * (1 - e * (1 - slowFactor[x]));
   };
@@ -309,6 +330,13 @@ export function computeArrivalRothermel(
     return random
       ? hashRandom(random.seed, random.run, RANDOM_PURPOSE.breach, x) >= p
       : p < 0.5;
+  };
+  // Whether an aerial drop on cell x holds the fire coming from cell i (burning at originRate): always up
+  // to params.aerialFullKwM, never from aerialNoneKwM; in between the main run holds at 50% or more and
+  // an ensemble run draws it per cell.
+  const dropHolds = (i: number, originRate: number, x: number) => {
+    const p = aerialHoldProbability(rates.intensity(i, originRate), params);
+    return random ? hashRandom(random.seed, random.run, RANDOM_PURPOSE.dropHold, x) < p : p >= 0.5;
   };
   // A barrier cell that stops these flames: water always, a road or river unless they breach it.
   const holdsAt = (i: number, originRate: number, x: number) =>
@@ -355,16 +383,20 @@ export function computeArrivalRothermel(
     stepTarget = rateJ;
     return cost;
   };
-  // Accepts arrival ta at cell j by move m from cell i unless a containment line in place by then holds.
+  // Accepts arrival ta at cell j by move m from cell i unless a containment line or an aerial drop in
+  // force at ta holds on a cell the step crosses.
   const relax = (i: number, r: number, c: number, m: StencilMove, j: number, ta: number) => {
     if (ta >= arrival[j] || ta > duration) return;
     for (const seg of m.cells) {
       const x = (r + seg.dr) * cols + (c + seg.dc);
-      if (x === i || !(containStart[x] <= ta)) continue;
-      const width = Number.isNaN(containWidth[x])
-        ? params.lineWidthM
-        : containWidth[x];
-      if (!breaches(i, stepOrigin, x, width)) return; // the line holds
+      if (x === i) continue;
+      if (lineAt(x, ta)) {
+        const width = Number.isNaN(containWidth[x])
+          ? params.lineWidthM
+          : containWidth[x];
+        if (!breaches(i, stepOrigin, x, width)) return; // the line holds
+      }
+      if (dropAt(x, ta) && dropHolds(i, stepOrigin, x)) return; // the drop holds
     }
     setArrival(j, ta);
     if (fireIntensity) fireIntensity[j] = rates.intensity(j, stepTarget);
@@ -476,8 +508,8 @@ export function computeArrivalRothermel(
       const ts = t + params.spotDelayMin;
       if (sr >= 0 && sc >= 0 && sr < rows && sc < cols) {
         const k = sr * cols + sc;
-        // A containment line in place is bare ground: an ember landing on it goes out.
-        if (baseRate[k] > 0 && !done[k] && ts < arrival[k] && ts <= duration && !(containStart[k] <= ts)) {
+        // A containment line in place is bare ground, and a drop in force is wet: an ember landing on them goes out.
+        if (baseRate[k] > 0 && !done[k] && ts < arrival[k] && ts <= duration && !lineAt(k, ts) && !dropAt(k, ts)) {
           setArrival(k, ts);
           forced.push({ i: k, t: ts });
           fireIntensity![k] = 0; // a new spot fire starts small

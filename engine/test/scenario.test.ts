@@ -39,7 +39,7 @@ describe("scenario files", () => {
     );
     const rate = (d: "A" | "B") => {
       const iv = buildScenario(header, saved, d).interventions[0];
-      return iv.kind === "containmentLine" ? null : iv.rateFactor;
+      return iv.kind === "suppression" || iv.kind === "protectZone" ? iv.rateFactor : null;
     };
     expect(rate("A")).toBe(DEFAULT_SUPPRESSION_FACTOR);
     expect(rate("B")).toBe(DEFAULT_PROTECT_FACTOR);

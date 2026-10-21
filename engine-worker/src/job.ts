@@ -13,6 +13,7 @@ import {
   rothermelEnsemble,
   parseWeatherSteps,
   parseIgnitions,
+  checkInterventions,
   fuelBases,
   DEFAULT_MOISTURE,
   prepareGrid,
@@ -93,6 +94,13 @@ export function variantProblem(grid: PreparedGrid, gridHash: string, request: Ru
     fuelBases(grid, model.moisture ?? DEFAULT_MOISTURE);
   } catch (e) {
     return e instanceof Error ? e.message : String(e);
+  }
+  for (const d of DECISIONS) {
+    try {
+      checkInterventions(request.decisions?.[d], grid.header.rows, grid.header.cols);
+    } catch (e) {
+      return `decisão ${d}: ${e instanceof Error ? e.message : String(e)}`;
+    }
   }
   for (const d of DECISIONS) {
     const raw = request.variants?.[d];

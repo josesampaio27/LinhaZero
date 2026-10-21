@@ -1328,9 +1328,25 @@
             "type": "number",
             "format": "double",
             "nullable": true
+          },
+          "kind": {
+            "type": "string",
+            "nullable": true
+          },
+          "endMin": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "litCells": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Cell"
+            },
+            "nullable": true
           }
         },
-        "description": "One intervention, already rasterised into cells by the browser."
+        "description": "One intervention, already rasterised into cells by the browser. `kind`: containmentLine, suppression, protectZone,\naerialDrop or backfire. `endMin`: when it stops acting (absent = never). `litCells`: the cells a backfire\nsets alight (docs/decisoes/0070)."
       },
       "JsonElement": { },
       "MeResponse": {

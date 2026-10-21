@@ -23,6 +23,14 @@ export const ATTACK_FULL_KWM = 500;
 /** Fireline intensity (kW/m) from which ground crews have no effect (uncontrollable); linear in between. */
 export const ATTACK_NONE_KWM = 4000;
 
+/**
+ * Fireline intensity (kW/m) up to which an aerial drop (water or retardant) always holds the fire, and from
+ * which it never does; linear in between (ADR 0070). Alexander (2000): aircraft and heavy equipment work up
+ * to about 2000 kW/m and control efforts at the head fail above about 4000 kW/m.
+ */
+export const AERIAL_FULL_KWM = 2000; // PROVISÓRIO
+export const AERIAL_NONE_KWM = 4000; // PROVISÓRIO
+
 /** Width (m) of a drawn containment line when it does not set its own: a line cut by machinery. */
 export const DEFAULT_LINE_WIDTH_M = 4; // PROVISÓRIO
 
@@ -62,6 +70,9 @@ export interface ModelParams {
   protectFactor: number;
   attackFullKwM: number;
   attackNoneKwM: number;
+  /** Aerial drops: always hold up to this intensity (kW/m), never from aerialNoneKwM, linear in between. */
+  aerialFullKwM: number;
+  aerialNoneKwM: number;
   lineWidthM: number;
   holdWidthPerFlame: number;
   holdSteepness: number;
@@ -114,6 +125,8 @@ export const DEFAULT_PARAMS: ModelParams = {
   protectFactor: DEFAULT_PROTECT_FACTOR,
   attackFullKwM: ATTACK_FULL_KWM,
   attackNoneKwM: ATTACK_NONE_KWM,
+  aerialFullKwM: AERIAL_FULL_KWM,
+  aerialNoneKwM: AERIAL_NONE_KWM,
   lineWidthM: DEFAULT_LINE_WIDTH_M,
   holdWidthPerFlame: HOLD_WIDTH_PER_FLAME,
   holdSteepness: HOLD_STEEPNESS,
@@ -161,6 +174,13 @@ export function attackEffectiveness(intensityKwM: number, p: Pick<ModelParams, "
   return (p.attackNoneKwM - intensityKwM) / (p.attackNoneKwM - p.attackFullKwM);
 }
 
+/** Probability that an aerial drop holds a fire of this intensity (1 = always, 0 = never). */
+export function aerialHoldProbability(intensityKwM: number, p: Pick<ModelParams, "aerialFullKwM" | "aerialNoneKwM">): number {
+  if (intensityKwM <= p.aerialFullKwM) return 1;
+  if (intensityKwM >= p.aerialNoneKwM) return 0;
+  return (p.aerialNoneKwM - intensityKwM) / (p.aerialNoneKwM - p.aerialFullKwM);
+}
+
 /** Probability that a line or road of this width (m) stops flames of this length (m). */
 export function holdProbability(widthM: number, flameLengthM: number, p: Pick<ModelParams, "holdWidthPerFlame" | "holdSteepness">): number {
   if (!(flameLengthM > 0)) return 1;
@@ -176,6 +196,8 @@ export const PARAM_RANGES: Record<keyof ModelParams, [number, number]> = {
   protectFactor: [0, 1],
   attackFullKwM: [0, 20000],
   attackNoneKwM: [1, 50000],
+  aerialFullKwM: [0, 20000],
+  aerialNoneKwM: [1, 50000],
   lineWidthM: [0.5, 100],
   holdWidthPerFlame: [0.1, 10],
   holdSteepness: [0.1, 20],

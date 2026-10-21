@@ -163,8 +163,33 @@ public static class RunRequestParser
             return $"rateFactor de uma intervenção da decisão {decision} tem de estar entre 0 e 1";
         }
 
+        if (intervention.EndMin is { } endMin && !(endMin > intervention.StartMin && endMin <= MaxDurationMin))
+        {
+            return $"endMin de uma intervenção da decisão {decision} tem de ser depois de startMin e no máximo {MaxDurationMin}";
+        }
+
+        if (intervention.LitCells is { } lit
+            && (lit.Count > grid.Rows * grid.Cols || lit.Any(cell => cell is null || !IsInside(cell, grid))))
+        {
+            return $"litCells de uma intervenção da decisão {decision} tem células nulas ou fora da grelha";
+        }
+
+        if (intervention.Kind is not { } kind || !InterventionKinds.Contains(kind))
+        {
+            return $"uma intervenção da decisão {decision} tem um tipo desconhecido ({intervention.Kind ?? "em falta"})";
+        }
+
+        if (kind == "backfire" && intervention.LitCells is not { Count: > 0 })
+        {
+            return $"um contrafogo da decisão {decision} não tem litCells";
+        }
+
         return null;
     }
+
+    /// <summary>The intervention kinds the engine knows (engine/src/types.ts, INTERVENTION_KINDS).</summary>
+    public static readonly IReadOnlySet<string> InterventionKinds =
+        new HashSet<string>(["containmentLine", "suppression", "protectZone", "aerialDrop", "backfire"]);
 
     private static (string Name, List<InterventionCells> Interventions)[] Decisions(RunRequest request) =>
         [("A", request.Decisions.A), ("B", request.Decisions.B)];

@@ -18,9 +18,13 @@ public class ContractsTests
         Assert.Equal(240, request.DurationMin);
         Assert.Equal(200, request.Ensemble.Runs);
         Assert.Equal(2035, request.Ensemble.Seed);
-        Assert.Equal(2, request.Decisions.A.Count);
+        Assert.Equal(4, request.Decisions.A.Count);
         Assert.Equal(8, request.Decisions.A[0].Cells.Count);
+        Assert.Equal("containmentLine", request.Decisions.A[0].Kind);
+        Assert.Equal(65, request.Decisions.A[2].EndMin);
+        Assert.Equal(4, request.Decisions.A[3].LitCells!.Count);
         Assert.Empty(request.Decisions.B);
+        Assert.Null(RunRequestParser.Validate(request, new("guimaraes", -20700, 205700, 100, 157, 152)));
         Assert.Equal("ipma", request.Weather!.Value.GetProperty("source").GetString());
     }
 

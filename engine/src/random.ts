@@ -36,6 +36,8 @@ export const RANDOM_PURPOSE = {
   moisture: 5,
   fuelGroup: 6,
   ignition: 7,
+  /** Whether an aerial drop holds the fire crossing a cell (ensemble runs). */
+  dropHold: 8,
 } as const;
 
 /** Standard normal from two counter-based draws (Box-Muller), stream `purpose`, index k. */
