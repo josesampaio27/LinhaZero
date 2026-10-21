@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text.Json.Serialization;
 using LinhaZero.Api.Auth;
 using LinhaZero.Api.Messaging;
@@ -36,6 +37,12 @@ services.Configure<NatsOptions>(nats => nats.Url = config["NATS_URL"] ?? nats.Ur
 
 // Infrastructure: one Postgres pool and one NATS connection for the whole process
 services.AddSingleton(_ => Pg.CreateDataSource());
+// First: the schema is up to date before anything else starts. Not when the build starts the app only to write
+// contracts/openapi.json (the GetDocument.Insider tool): there is no database there, e.g. in CI.
+if (Assembly.GetEntryAssembly()?.GetName().Name != "GetDocument.Insider")
+{
+    services.AddHostedService<MigrateOnStart>();
+}
 services.AddSingleton(provider =>
 {
     var nats = provider.GetRequiredService<IOptions<NatsOptions>>().Value;

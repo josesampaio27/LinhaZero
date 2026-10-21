@@ -425,3 +425,39 @@ tr.changed td, label.changed span { color: var(--b); font-weight: 600; }
 .status { margin: 0; font-size: 14px; font-weight: 600; }
 .status.approved { color: var(--good); }
 .status.rejected { color: var(--bad); }
+
+/* ---------- Problem reports and suggestions: the dialog (account menu) and #/relatorios (admins only) ---------- */
+.feedback-dialog {
+  width: min(520px, calc(100vw - 32px)); max-height: calc(100dvh - 32px); padding: 0;
+  background: var(--panel); color: var(--ink); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+}
+.feedback-dialog::backdrop { background: rgb(0 0 0 / .45); }
+.feedback-form { display: grid; gap: 14px; padding: 18px; }
+.feedback-form h2 { margin: 0; font-family: var(--display); font-size: 22px; }
+.feedback-form p { margin: 0; }
+.feedback-form textarea { width: 100%; resize: vertical; font: inherit; padding: 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: inherit; }
+.feedback-kinds { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 0; padding: 0; border: none; }
+.feedback-kinds legend { padding: 0; }
+.feedback-kinds label {
+  display: flex; align-items: center; justify-content: center; min-height: var(--tap); padding: 0 8px;
+  border: 1px solid var(--line); border-radius: 10px; font-weight: 600; cursor: pointer;
+}
+.feedback-kinds label.on { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+.feedback-kinds input { position: absolute; opacity: 0; pointer-events: none; }
+.feedback-kinds label:has(input:focus-visible) { outline: 2px solid var(--a); outline-offset: 2px; }
+.feedback-contact { display: flex; align-items: center; gap: 10px; min-height: var(--tap); cursor: pointer; }
+.feedback-contact input { width: 20px; height: 20px; margin: 0; }
+.feedback-actions { display: grid; grid-template-columns: auto 1fr; gap: 10px; }
+.kind { display: inline-block; padding: 1px 8px; border-radius: 999px; font-size: 13px; font-weight: 700; background: var(--sunk); }
+.kind.bug { background: var(--bad-soft); color: var(--bad); }
+.kind.suggestion { background: var(--good-soft); color: var(--good); }
+.request details summary { cursor: pointer; font-size: 14px; }
+.request details p { font-size: 14px; overflow-wrap: anywhere; }
+.status.done { color: var(--good); }
+.status.dismissed { color: var(--muted); }
+/* "Reportar" in the app bar, next to the initials: icon and word; just the icon on narrow phones. */
+.feedback-btn { flex: none; gap: 6px; padding: 6px 12px; border-radius: 10px; font-weight: 600; }
+@media (max-width: 479px) {
+  .feedback-btn { min-width: var(--tap); padding: 6px; }
+  .feedback-btn span { display: none; }
+}

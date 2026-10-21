@@ -10,6 +10,9 @@ RUN npm ci -w web -w engine --include-workspace-root
 COPY engine/src engine/src
 COPY engine/tsconfig.json engine/
 COPY web/ web/
+# The commit, sent with problem reports (web/src/lib/feedback.ts); set by .github/workflows/images.yml.
+ARG APP_VERSION=dev
+ENV VITE_APP_VERSION=$APP_VERSION
 RUN npm run build -w web
 
 FROM nginxinc/nginx-unprivileged:1.28.0-alpine

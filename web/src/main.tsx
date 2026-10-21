@@ -4,6 +4,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./styles.css";
 import { AccessRequests } from "./AccessRequests";
 import { App } from "./App";
+import { Feedback } from "./Feedback";
 import { GridEditor } from "./GridEditor";
 import { ApiError, meApi } from "./lib/api";
 import { useRoute, type Page } from "./lib/route";
@@ -29,6 +30,11 @@ function Root() {
       {page === "pedidos" && (
         <div className="page">
           <AccessRequests />
+        </div>
+      )}
+      {page === "relatorios" && (
+        <div className="page">
+          <Feedback />
         </div>
       )}
     </>

@@ -1,4 +1,5 @@
--- Applied once by the postgres image when the pgdata volume is empty. A schema change means `npm run down -- -v`.
+-- Applied once by the postgres image when the pgdata volume is empty. infra/db/000-003 are the baseline: schema changes
+-- from 004 on go in backend/src/LinhaZero.Core/Database/Migrations/, applied by the API on start (docs/decisoes/0065).
 
 create table snapshots (
   id          bigserial primary key,

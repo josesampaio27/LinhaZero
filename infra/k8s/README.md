@@ -90,7 +90,7 @@ kubectl -n linha-zero get pods -w   # o keycloak demora um ou dois minutos no pr
 
 O [`deploy.sh`](deploy.sh) aplica `infra/` com as imagens do commit indicado (por omissão o de `origin/main`; as imagens desse commit têm de existir) e espera que tudo arranque. É o mesmo script que o *deploy* automático corre.
 
-Os volumes do Postgres (5 GB) e do NATS (1 GB) usam a *storage class* por omissão do cluster (no k3s, `local-path`, um disco de um dos nós). Os scripts de `infra/db/` correm só no primeiro arranque do Postgres, com o volume vazio.
+Os volumes do Postgres (5 GB) e do NATS (1 GB) usam a *storage class* por omissão do cluster (no k3s, `local-path`, um disco de um dos nós). Os scripts de `infra/db/` correm só no primeiro arranque do Postgres, com o volume vazio. As mudanças ao esquema depois desses (`backend/src/LinhaZero.Core/Database/Migrations/`) aplica-as a API ao arrancar, por isso chegam ao cluster com o deploy ([ADR 0065](../../docs/decisoes/0065-migracoes-aplicadas-pela-api.md)): se uma falhar, o pod novo da API não fica pronto e o deploy falha.
 
 ## 6. Primeiro utilizador
 
