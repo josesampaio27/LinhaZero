@@ -18,7 +18,8 @@ As tabelas do PostgreSQL. Guardam cenários, o registo das simulações, os snap
 | Tabela | Conteúdo |
 | --- | --- |
 | `organizations` | As entidades: ANEPC/CDOS, corpo de bombeiros, GNR, INEM, câmara/SMPC, investigação |
-| `users` | O utilizador, identificado pelo fornecedor de identidade |
+| `users` | O utilizador, identificado pelo fornecedor de identidade e se tinha o papel `linhazero-admin` no último login (`is_admin`, quem recebe os avisos de pedidos de acesso) |
+| `access_requests` | Os pedidos de "Pedir acesso": quem, entidade, mensagem, estado, e quando e a quantos administradores foi enviado o aviso (`notified_at`, `notified_count`, que contam para o limite diário de emails, [ADR 0067](../decisoes/0067-email-aos-administradores-por-pedido-de-acesso.md)) |
 | `memberships` | Utilizador, entidade e papel |
 | `incidents` | As ocorrências: cache do fogos.pt e, depois, do feed oficial da ANEPC (id externo, posição, estado, última atualização) |
 | `incident_members` | Que entidades participam em cada incidente |

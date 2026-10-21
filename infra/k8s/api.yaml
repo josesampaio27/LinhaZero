@@ -46,6 +46,25 @@ spec:
             - { name: KEYCLOAK_ADMIN_CLIENT_ID, value: linhazero-api-admin }
             - name: KEYCLOAK_ADMIN_CLIENT_SECRET
               valueFrom: { secretKeyRef: { name: linhazero-secrets, key: KEYCLOAK_ADMIN_CLIENT_SECRET } }
+            # Each access request emails every admin (docs/decisoes/0067), through the same SMTP relay as Keycloak, at most
+            # ACCESS_REQUEST_EMAILS_PER_DAY emails a day (Brevo allows 300, shared with Keycloak's invites and resets).
+            - name: SMTP_HOST
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_HOST } }
+            - name: SMTP_PORT
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_PORT } }
+            - name: SMTP_FROM
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_FROM } }
+            - name: SMTP_USER
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_USER } }
+            - name: SMTP_AUTH
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_AUTH } }
+            - name: SMTP_STARTTLS
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_STARTTLS } }
+            - name: SMTP_SSL
+              valueFrom: { configMapKeyRef: { name: linhazero-config, key: SMTP_SSL } }
+            - name: SMTP_PASSWORD
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: SMTP_PASSWORD } }
+            - { name: ACCESS_REQUEST_EMAILS_PER_DAY, value: "100" }
           ports:
             - { name: http, containerPort: 8080 }
           readinessProbe:

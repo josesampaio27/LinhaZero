@@ -16,7 +16,11 @@ namespace LinhaZero.Api.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/access-requests")]
-public sealed class AccessRequestsController(AccessRequestRepository requests, IKeycloakAdmin keycloak, ILogger<AccessRequestsController> log)
+public sealed class AccessRequestsController(
+    AccessRequestRepository requests,
+    AccessRequestNotifier notifier,
+    IKeycloakAdmin keycloak,
+    ILogger<AccessRequestsController> log)
     : ControllerBase
 {
     /// <summary>A request from the landing. 202 whatever happens next: the answer never says whether an email is known.</summary>
@@ -42,8 +46,14 @@ public sealed class AccessRequestsController(AccessRequestRepository requests, I
             return BadRequest(new ErrorResponse(error!));
         }
 
-        await requests.InsertAsync(request, ct);
+        if (await requests.InsertAsync(request, ct) is not { } id)
+        {
+            log.LogInformation("Pedido de acesso repetido (já há um pendente para este email): descartado");
+            return Accepted();
+        }
+
         log.LogInformation("Pedido de acesso de {Organization} ({Type})", request.Organization, request.OrganizationType);
+        await notifier.NotifyAsync(id, request, ct);
         return Accepted();
     }
 

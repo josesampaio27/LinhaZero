@@ -44,6 +44,7 @@ public sealed class ApiFactory : WebApplicationFactory<HealthController>
             services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, TestUser>(TestUser.SchemeName, _ => { });
             services.Configure<AuthenticationOptions>(auth => auth.DefaultAuthenticateScheme = TestUser.SchemeName);
             services.AddSingleton<IKeycloakAdmin, FakeKeycloakAdmin>();
+            services.AddSingleton<IEmailSender, FakeEmailSender>();
         });
     }
 
@@ -104,6 +105,27 @@ public sealed class TestUser(IOptionsMonitor<AuthenticationSchemeOptions> option
         var roles = Request.Headers[RolesHeader].ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(r => new Claim("role", r.Trim()));
         var identity = new ClaimsIdentity([new Claim("name", name), new Claim("email", "teste@linhazero.localhost"), .. roles], SchemeName, "name", "role");
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName)));
+    }
+}
+
+/// <summary>Email, for tests: records each message instead of sending it; <see cref="Fail"/> makes the next ones throw.</summary>
+public sealed class FakeEmailSender : IEmailSender
+{
+    public sealed record Sent(IReadOnlyList<string> To, string Subject, string Text, string? ReplyTo);
+
+    public List<Sent> Messages { get; } = [];
+
+    public bool Fail { get; set; }
+
+    public Task<bool> SendAsync(IReadOnlyList<string> to, string subject, string text, string? replyTo, CancellationToken ct)
+    {
+        if (Fail)
+        {
+            throw new InvalidOperationException("SMTP em baixo (teste)");
+        }
+
+        Messages.Add(new Sent(to, subject, text, replyTo));
+        return Task.FromResult(true);
     }
 }
 

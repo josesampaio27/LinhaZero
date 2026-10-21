@@ -141,7 +141,8 @@ public static class AuthSetup
                     var name = Claim("name") ?? email ?? subject;
 
                     var users = context.HttpContext.RequestServices.GetRequiredService<UserRepository>();
-                    var userId = await users.UpsertOnLoginAsync(issuer, subject, email, name, context.HttpContext.RequestAborted);
+                    var isAdmin = principal.FindAll("roles").Any(role => role.Value == AdminRole);
+                    var userId = await users.UpsertOnLoginAsync(issuer, subject, email, name, isAdmin, context.HttpContext.RequestAborted);
 
                     // Only what the API needs goes in the cookie: who it is, and the id_token for a clean logout.
                     var identity = new ClaimsIdentity(
@@ -223,6 +224,16 @@ public static class AuthSetup
             keycloak.AppUrl = config["APP_URL"] ?? keycloak.AppUrl;
         });
         services.AddHttpClient<IKeycloakAdmin, KeycloakAdmin>(http => http.Timeout = TimeSpan.FromSeconds(20));
+
+        // The email to every admin on each access request (docs/decisoes/0067).
+        services.Configure<SmtpOptions>(smtp => smtp.ReadFrom(config));
+        services.Configure<AccessRequestEmailOptions>(email =>
+        {
+            email.PerDay = int.TryParse(config["ACCESS_REQUEST_EMAILS_PER_DAY"], out var perDay) && perDay >= 0 ? perDay : email.PerDay;
+            email.AppUrl = config["APP_URL"] ?? email.AppUrl;
+        });
+        services.AddSingleton<IEmailSender, SmtpEmailSender>();
+        services.AddSingleton<AccessRequestNotifier>();
         return services;
     }
 
