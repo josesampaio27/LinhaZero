@@ -27,7 +27,8 @@ Before (planning and training), during (first minutes) and after (debriefing) an
 ## Capabilities and Constraints
 
 - Comparison sentences on the landing are templates with slots (X, aldeia, hh:mm, N, mm), never real numbers.
-- The validation chart is a placeholder until the real image arrives.
+- Every number about the engine comes from `landing/src/data/site-data.json`, written by `engine/scripts/landing-data.ts`; rerun it when the calibration changes.
+- No links to the GitHub repository (it is private): the engine and its calibration are explained on `/motor` and `/calibracao`.
 - No claims about working offline on the landing.
 - Data: FUMOD, Copernicus, IPMA, OpenStreetMap, Censos 2021, fogos.pt (ANEPC); a Guimarães grid of about 12 000 buildings and 88 places.
 - The engine simulates without suppression in validation; it does not replace the commander's judgement.
@@ -40,7 +41,7 @@ Before (planning and training), during (first minutes) and after (debriefing) an
 
 ## Evidence on Hand
 
-Validation on 80 PT-FireSprd fires (Sørensen table, "28 of 34"), `docs/modelo/validacao-resumo.md`. Photos in `landing/public/photos` with credits. No testimonials, customers or pilots exist yet; do not fabricate them.
+Validation on the PT-FireSprd fires with today's engine (Sørensen 0.27 / 0.33 / 0.40 on 34 fires, "27 of 34"; coverage of the real burned area 68% calibrated vs 45% physical on 19 test fires), from `site-data.json`. Photos in `landing/public/photos` with credits. No testimonials, customers or pilots exist yet; do not fabricate them.
 
 ## Product Principles
 

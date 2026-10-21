@@ -1,0 +1,1093 @@
+{
+ "generated": "2026-10-21",
+ "git": "1b4f62a",
+ "calibration": {
+  "id": "pt-firesprd-2026-10-copas-limite",
+  "params": {
+   "rosAdj": 0.5,
+   "windAdj": 2.5,
+   "holdWidthPerFlame": 5,
+   "crownFire": 1,
+   "crownAdj": 0.35
+  }
+ },
+ "validation": {
+  "scope": "Sørensen médio nas horas observadas, desde a ignição observada, com o tempo hora a hora e sem combate; grelha de 100 m",
+  "sets": {
+   "all": {
+    "fires": 34,
+    "simple": 0.266,
+    "physical": 0.331,
+    "calibrated": 0.404
+   },
+   "norte": {
+    "fires": 8,
+    "simple": 0.201,
+    "physical": 0.274,
+    "calibrated": 0.402
+   },
+   "unseen": {
+    "fires": 27,
+    "simple": 0.28,
+    "physical": 0.328,
+    "calibrated": 0.401
+   }
+  },
+  "winsOverSimple": 27,
+  "windReversed": 0.079,
+  "perFire": [
+   {
+    "fire": "Agueda_05092019",
+    "year": 2019,
+    "region": "Centro",
+    "simple": 0.237,
+    "physical": 0.228,
+    "calibrated": 0.166
+   },
+   {
+    "fire": "Alijo_24072019",
+    "year": 2019,
+    "region": "Norte",
+    "simple": 0.165,
+    "physical": 0.295,
+    "calibrated": 0.516
+   },
+   {
+    "fire": "Aljezur_19062020",
+    "year": 2020,
+    "region": "Sul",
+    "simple": 0.291,
+    "physical": 0.483,
+    "calibrated": 0.543
+   },
+   {
+    "fire": "Avis_21072020",
+    "year": 2020,
+    "region": "Sul",
+    "simple": 0.058,
+    "physical": 0.079,
+    "calibrated": 0.286
+   },
+   {
+    "fire": "Baiao_04092019",
+    "year": 2019,
+    "region": "Norte",
+    "simple": 0.059,
+    "physical": 0.12,
+    "calibrated": 0.325
+   },
+   {
+    "fire": "CasteloBranco_29082020",
+    "year": 2020,
+    "region": "Centro",
+    "simple": 0.398,
+    "physical": 0.448,
+    "calibrated": 0.524
+   },
+   {
+    "fire": "CastroDaire_07092020",
+    "year": 2020,
+    "region": "Centro",
+    "simple": 0.398,
+    "physical": 0.479,
+    "calibrated": 0.51
+   },
+   {
+    "fire": "CastroMarim_16082021",
+    "year": 2021,
+    "region": "Sul",
+    "simple": 0.206,
+    "physical": 0.231,
+    "calibrated": 0.308
+   },
+   {
+    "fire": "Chaves_30072020",
+    "year": 2020,
+    "region": "Norte",
+    "simple": 0.111,
+    "physical": 0.153,
+    "calibrated": 0.422
+   },
+   {
+    "fire": "FreixoEspadaaCinta_20082021",
+    "year": 2021,
+    "region": "Norte",
+    "simple": 0.367,
+    "physical": 0.203,
+    "calibrated": 0.257
+   },
+   {
+    "fire": "Fundao_06082020",
+    "year": 2020,
+    "region": "Centro",
+    "simple": 0.563,
+    "physical": 0.666,
+    "calibrated": 0.675
+   },
+   {
+    "fire": "Fundao_07082020",
+    "year": 2020,
+    "region": "Centro",
+    "simple": 0.206,
+    "physical": 0.272,
+    "calibrated": 0.42
+   },
+   {
+    "fire": "IdanhaaNova_30062020",
+    "year": 2020,
+    "region": "Centro",
+    "simple": 0.182,
+    "physical": 0.234,
+    "calibrated": 0.311
+   },
+   {
+    "fire": "MirandadoCorvo_13092019",
+    "year": 2019,
+    "region": "Centro",
+    "simple": 0.321,
+    "physical": 0.349,
+    "calibrated": 0.393
+   },
+   {
+    "fire": "Mogadouro_20072021",
+    "year": 2021,
+    "region": "Norte",
+    "simple": 0.248,
+    "physical": 0.29,
+    "calibrated": 0.493
+   },
+   {
+    "fire": "Monchique_03082018",
+    "year": 2018,
+    "region": "Sul",
+    "simple": 0.295,
+    "physical": 0.345,
+    "calibrated": 0.325
+   },
+   {
+    "fire": "Monchique_17072021",
+    "year": 2021,
+    "region": "Sul",
+    "simple": 0.366,
+    "physical": 0.458,
+    "calibrated": 0.483
+   },
+   {
+    "fire": "Nisa_01082019",
+    "year": 2019,
+    "region": "Sul",
+    "simple": 0.354,
+    "physical": 0.437,
+    "calibrated": 0.545
+   },
+   {
+    "fire": "Odemira_18082021",
+    "year": 2021,
+    "region": "Sul",
+    "simple": 0.187,
+    "physical": 0.278,
+    "calibrated": 0.284
+   },
+   {
+    "fire": "Oleiros_25072020",
+    "year": 2020,
+    "region": "Centro",
+    "simple": 0.316,
+    "physical": 0.302,
+    "calibrated": 0.171
+   },
+   {
+    "fire": "OliveiraFrades_07092020",
+    "year": 2020,
+    "region": "Centro",
+    "simple": 0.216,
+    "physical": 0.36,
+    "calibrated": 0.361
+   },
+   {
+    "fire": "Ourique_10062019",
+    "year": 2019,
+    "region": "Sul",
+    "simple": 0.32,
+    "physical": 0.412,
+    "calibrated": 0.512
+   },
+   {
+    "fire": "Penedono_21072019",
+    "year": 2019,
+    "region": "Centro",
+    "simple": 0.161,
+    "physical": 0.198,
+    "calibrated": 0.154
+   },
+   {
+    "fire": "PortoMos_06092020",
+    "year": 2020,
+    "region": "Centro",
+    "simple": 0.187,
+    "physical": 0.26,
+    "calibrated": 0.172
+   },
+   {
+    "fire": "ProencaaNova_13092020",
+    "year": 2020,
+    "region": "Centro",
+    "simple": 0.528,
+    "physical": 0.634,
+    "calibrated": 0.562
+   },
+   {
+    "fire": "Sabugal_29082019",
+    "year": 2019,
+    "region": "Centro",
+    "simple": 0,
+    "physical": 0,
+    "calibrated": 0.675
+   },
+   {
+    "fire": "SaoJoaoPesqueira_10072020",
+    "year": 2020,
+    "region": "Norte",
+    "simple": 0.207,
+    "physical": 0.357,
+    "calibrated": 0.406
+   },
+   {
+    "fire": "Sernancelhe_06082020",
+    "year": 2020,
+    "region": "Centro",
+    "simple": 0.451,
+    "physical": 0.518,
+    "calibrated": 0.438
+   },
+   {
+    "fire": "Serta_13092019",
+    "year": 2019,
+    "region": "Centro",
+    "simple": 0.33,
+    "physical": 0.408,
+    "calibrated": 0.392
+   },
+   {
+    "fire": "Silves_06072020",
+    "year": 2020,
+    "region": "Sul",
+    "simple": 0.416,
+    "physical": 0.352,
+    "calibrated": 0.386
+   },
+   {
+    "fire": "Tomar_03082019",
+    "year": 2019,
+    "region": "Centro",
+    "simple": 0.156,
+    "physical": 0.216,
+    "calibrated": 0.514
+   },
+   {
+    "fire": "Valenca_04092019",
+    "year": 2019,
+    "region": "Norte",
+    "simple": 0.199,
+    "physical": 0.439,
+    "calibrated": 0.4
+   },
+   {
+    "fire": "Valpacos_13092019",
+    "year": 2019,
+    "region": "Norte",
+    "simple": 0.249,
+    "physical": 0.339,
+    "calibrated": 0.394
+   },
+   {
+    "fire": "ViladeRei_20072019",
+    "year": 2019,
+    "region": "Centro",
+    "simple": 0.299,
+    "physical": 0.401,
+    "calibrated": 0.404
+   }
+  ]
+ },
+ "coverage": {
+  "report": "pt-firesprd-2026-10-21.json",
+  "fires": 19,
+  "paired": {
+   "fires": 19,
+   "cost": -0.006855497059146507,
+   "costP05": -0.09148213268952304,
+   "costP95": 0.08083221424342962,
+   "recall": 0.008577425272540021,
+   "anchor": -0.02585069447498815,
+   "anchorFires": 12
+  },
+  "pairedUnseen": {
+   "fires": 13,
+   "cost": -0.0550522306160894,
+   "costP05": -0.14931403019446063,
+   "costP95": 0.04921068433343328,
+   "recall": 0.024194225847962658,
+   "anchor": -0.0340249612787262,
+   "anchorFires": 11
+  },
+  "heldOut": {
+   "fitted": {
+    "mixed": 1.5505628535483593,
+    "coverage": 0.9667339414463528,
+    "tversky": 0.4161710878979936,
+    "recall": 0.6913801997919278,
+    "sorensen": 0.3027346519680168,
+    "anchor": 0.6157971907025813,
+    "maskedShare": 0.5324424671337772
+   },
+   "current": {
+    "mixed": 1.5574183506075054,
+    "coverage": 1.0542062871612898,
+    "tversky": 0.49678793655378434,
+    "recall": 0.6828027745193881,
+    "sorensen": 0.4066782986060796,
+    "anchor": 0.6416478851775694,
+    "maskedShare": 0.6100104720148866
+   },
+   "physical": {
+    "mixed": 1.7433449848964675,
+    "coverage": 1.0965650153741473,
+    "tversky": 0.35322003047768014,
+    "recall": 0.4538870877711644,
+    "sorensen": 0.300636655662524,
+    "anchor": 0.7753935893616545,
+    "maskedShare": 0.6103441246999721
+   }
+  },
+  "perFire": [
+   {
+    "fire": "Alijo_24072019",
+    "seen": true,
+    "fitted": {
+     "recall": 0.761,
+     "areaRatio": 3.861,
+     "tversky": 0.547,
+     "sorensen": 0.392
+    },
+    "current": {
+     "recall": 0.849,
+     "areaRatio": 3.46,
+     "tversky": 0.665,
+     "sorensen": 0.516
+    },
+    "physical": {
+     "recall": 0.249,
+     "areaRatio": 0.811,
+     "tversky": 0.265,
+     "sorensen": 0.295
+    }
+   },
+   {
+    "fire": "Sernancelhe_06082020",
+    "seen": false,
+    "fitted": {
+     "recall": 0.698,
+     "areaRatio": 2.681,
+     "tversky": 0.518,
+     "sorensen": 0.375
+    },
+    "current": {
+     "recall": 0.614,
+     "areaRatio": 1.92,
+     "tversky": 0.527,
+     "sorensen": 0.438
+    },
+    "physical": {
+     "recall": 0.702,
+     "areaRatio": 1.492,
+     "tversky": 0.611,
+     "sorensen": 0.518
+    }
+   },
+   {
+    "fire": "Valpacos_13092019",
+    "seen": true,
+    "fitted": {
+     "recall": 0.953,
+     "areaRatio": 8.904,
+     "tversky": 0.447,
+     "sorensen": 0.251
+    },
+    "current": {
+     "recall": 0.787,
+     "areaRatio": 4.796,
+     "tversky": 0.553,
+     "sorensen": 0.394
+    },
+    "physical": {
+     "recall": 0.691,
+     "areaRatio": 2.936,
+     "tversky": 0.485,
+     "sorensen": 0.339
+    }
+   },
+   {
+    "fire": "Penedono_21072019",
+    "seen": false,
+    "fitted": {
+     "recall": 0.723,
+     "areaRatio": 11.781,
+     "tversky": 0.192,
+     "sorensen": 0.114
+    },
+    "current": {
+     "recall": 0.713,
+     "areaRatio": 8.076,
+     "tversky": 0.258,
+     "sorensen": 0.154
+    },
+    "physical": {
+     "recall": 0.648,
+     "areaRatio": 3.974,
+     "tversky": 0.307,
+     "sorensen": 0.198
+    }
+   },
+   {
+    "fire": "Chaves_30072020",
+    "seen": false,
+    "fitted": {
+     "recall": 0.552,
+     "areaRatio": 4.018,
+     "tversky": 0.476,
+     "sorensen": 0.438
+    },
+    "current": {
+     "recall": 0.415,
+     "areaRatio": 2.393,
+     "tversky": 0.404,
+     "sorensen": 0.422
+    },
+    "physical": {
+     "recall": 0.11,
+     "areaRatio": 0.897,
+     "tversky": 0.123,
+     "sorensen": 0.153
+    }
+   },
+   {
+    "fire": "Serta_13092019",
+    "seen": false,
+    "fitted": {
+     "recall": 0.955,
+     "areaRatio": 12.115,
+     "tversky": 0.367,
+     "sorensen": 0.207
+    },
+    "current": {
+     "recall": 0.856,
+     "areaRatio": 7.015,
+     "tversky": 0.547,
+     "sorensen": 0.392
+    },
+    "physical": {
+     "recall": 0.525,
+     "areaRatio": 1.408,
+     "tversky": 0.466,
+     "sorensen": 0.408
+    }
+   },
+   {
+    "fire": "PortoMos_06092020",
+    "seen": false,
+    "fitted": {
+     "recall": 0.875,
+     "areaRatio": 9.974,
+     "tversky": 0.279,
+     "sorensen": 0.14
+    },
+    "current": {
+     "recall": 0.818,
+     "areaRatio": 8.237,
+     "tversky": 0.323,
+     "sorensen": 0.172
+    },
+    "physical": {
+     "recall": 0.875,
+     "areaRatio": 4.808,
+     "tversky": 0.444,
+     "sorensen": 0.26
+    }
+   },
+   {
+    "fire": "OliveiraFrades_07092020",
+    "seen": true,
+    "fitted": {
+     "recall": 0.99,
+     "areaRatio": 5.203,
+     "tversky": 0.362,
+     "sorensen": 0.192
+    },
+    "current": {
+     "recall": 0.902,
+     "areaRatio": 4.303,
+     "tversky": 0.561,
+     "sorensen": 0.361
+    },
+    "physical": {
+     "recall": 0.766,
+     "areaRatio": 3.012,
+     "tversky": 0.523,
+     "sorensen": 0.36
+    }
+   },
+   {
+    "fire": "Nisa_01082019",
+    "seen": false,
+    "fitted": {
+     "recall": 0.812,
+     "areaRatio": 4.246,
+     "tversky": 0.614,
+     "sorensen": 0.468
+    },
+    "current": {
+     "recall": 0.803,
+     "areaRatio": 3.892,
+     "tversky": 0.655,
+     "sorensen": 0.545
+    },
+    "physical": {
+     "recall": 0.59,
+     "areaRatio": 3.007,
+     "tversky": 0.503,
+     "sorensen": 0.437
+    }
+   },
+   {
+    "fire": "MirandadoCorvo_13092019",
+    "seen": false,
+    "fitted": {
+     "recall": 0.586,
+     "areaRatio": 1.787,
+     "tversky": 0.532,
+     "sorensen": 0.476
+    },
+    "current": {
+     "recall": 0.349,
+     "areaRatio": 0.883,
+     "tversky": 0.365,
+     "sorensen": 0.393
+    },
+    "physical": {
+     "recall": 0.28,
+     "areaRatio": 0.714,
+     "tversky": 0.304,
+     "sorensen": 0.349
+    }
+   },
+   {
+    "fire": "Mogadouro_20072021",
+    "seen": false,
+    "fitted": {
+     "recall": 0.713,
+     "areaRatio": 3.377,
+     "tversky": 0.54,
+     "sorensen": 0.4
+    },
+    "current": {
+     "recall": 0.726,
+     "areaRatio": 2.494,
+     "tversky": 0.609,
+     "sorensen": 0.493
+    },
+    "physical": {
+     "recall": 0.401,
+     "areaRatio": 2.328,
+     "tversky": 0.346,
+     "sorensen": 0.29
+    }
+   },
+   {
+    "fire": "SaoJoaoPesqueira_10072020",
+    "seen": true,
+    "fitted": {
+     "recall": 0.742,
+     "areaRatio": 8.47,
+     "tversky": 0.493,
+     "sorensen": 0.354
+    },
+    "current": {
+     "recall": 0.665,
+     "areaRatio": 6.785,
+     "tversky": 0.503,
+     "sorensen": 0.406
+    },
+    "physical": {
+     "recall": 0.595,
+     "areaRatio": 5.868,
+     "tversky": 0.449,
+     "sorensen": 0.357
+    }
+   },
+   {
+    "fire": "Valenca_04092019",
+    "seen": true,
+    "fitted": {
+     "recall": 0.983,
+     "areaRatio": 4.387,
+     "tversky": 0.556,
+     "sorensen": 0.338
+    },
+    "current": {
+     "recall": 0.833,
+     "areaRatio": 4,
+     "tversky": 0.576,
+     "sorensen": 0.4
+    },
+    "physical": {
+     "recall": 0.983,
+     "areaRatio": 3.4,
+     "tversky": 0.657,
+     "sorensen": 0.439
+    }
+   },
+   {
+    "fire": "Baiao_04092019",
+    "seen": true,
+    "fitted": {
+     "recall": 0.137,
+     "areaRatio": 3.853,
+     "tversky": 0.104,
+     "sorensen": 0.081
+    },
+    "current": {
+     "recall": 0.681,
+     "areaRatio": 5.341,
+     "tversky": 0.446,
+     "sorensen": 0.325
+    },
+    "physical": {
+     "recall": 0.137,
+     "areaRatio": 3.075,
+     "tversky": 0.124,
+     "sorensen": 0.12
+    }
+   },
+   {
+    "fire": "Tomar_03082019",
+    "seen": false,
+    "fitted": {
+     "recall": 0.195,
+     "areaRatio": 0.538,
+     "tversky": 0.204,
+     "sorensen": 0.221
+    },
+    "current": {
+     "recall": 0.53,
+     "areaRatio": 1.199,
+     "tversky": 0.522,
+     "sorensen": 0.514
+    },
+    "physical": {
+     "recall": 0.17,
+     "areaRatio": 0.458,
+     "tversky": 0.186,
+     "sorensen": 0.216
+    }
+   },
+   {
+    "fire": "Avis_21072020",
+    "seen": false,
+    "fitted": {
+     "recall": 0.044,
+     "areaRatio": 0.219,
+     "tversky": 0.053,
+     "sorensen": 0.075
+    },
+    "current": {
+     "recall": 0.178,
+     "areaRatio": 0.367,
+     "tversky": 0.21,
+     "sorensen": 0.286
+    },
+    "physical": {
+     "recall": 0.044,
+     "areaRatio": 0.09,
+     "tversky": 0.054,
+     "sorensen": 0.079
+    }
+   },
+   {
+    "fire": "Sabugal_29082019",
+    "seen": false,
+    "fitted": {
+     "recall": 0.855,
+     "areaRatio": 4.69,
+     "tversky": 0.687,
+     "sorensen": 0.571
+    },
+    "current": {
+     "recall": 0.708,
+     "areaRatio": 2.275,
+     "tversky": 0.681,
+     "sorensen": 0.675
+    },
+    "physical": {
+     "recall": 0,
+     "areaRatio": 0.137,
+     "tversky": 0,
+     "sorensen": 0
+    }
+   },
+   {
+    "fire": "Agueda_05092019",
+    "seen": false,
+    "fitted": {
+     "recall": 0.628,
+     "areaRatio": 2.232,
+     "tversky": 0.292,
+     "sorensen": 0.183
+    },
+    "current": {
+     "recall": 0.724,
+     "areaRatio": 3.92,
+     "tversky": 0.294,
+     "sorensen": 0.166
+    },
+    "physical": {
+     "recall": 0.187,
+     "areaRatio": 0.116,
+     "tversky": 0.199,
+     "sorensen": 0.228
+    }
+   },
+   {
+    "fire": "Fundao_06082020",
+    "seen": false,
+    "fitted": {
+     "recall": 0.938,
+     "areaRatio": 5.44,
+     "tversky": 0.642,
+     "sorensen": 0.475
+    },
+    "current": {
+     "recall": 0.823,
+     "areaRatio": 2.043,
+     "tversky": 0.741,
+     "sorensen": 0.675
+    },
+    "physical": {
+     "recall": 0.67,
+     "areaRatio": 1.023,
+     "tversky": 0.665,
+     "sorensen": 0.666
+    }
+   }
+  ],
+  "best": {
+   "crownFire": 1,
+   "rosAdjUnderstory": 1.9125,
+   "rosAdjShrub": 0.729,
+   "rosAdjGrass": 0.5668,
+   "windAdj": 2.3052,
+   "holdWidthPerFlame": 2.3019,
+   "crownAdj": 0.4699
+  },
+  "quantiles": {
+   "rosAdjUnderstory": {
+    "p05": 0.6593051484661427,
+    "p50": 1.8593715281039065,
+    "p95": 2.4831611322879277
+   },
+   "rosAdjShrub": {
+    "p05": 0.5376921228457537,
+    "p50": 0.9464030362238508,
+    "p95": 1.1977668344529877
+   },
+   "rosAdjGrass": {
+    "p05": 0.40552804071570764,
+    "p50": 0.5790316293922493,
+    "p95": 0.975054746622829
+   },
+   "windAdj": {
+    "p05": 1.5841415001939065,
+    "p50": 2.556533271419672,
+    "p95": 3.1631676804581432
+   },
+   "holdWidthPerFlame": {
+    "p05": 0.7787304597289769,
+    "p50": 2.793841134282638,
+    "p95": 4.077282336399733
+   },
+   "crownAdj": {
+    "p05": 0.46623095919561597,
+    "p50": 0.5918747904087017,
+    "p95": 0.9812194494184955
+   }
+  },
+  "incumbent": {
+   "rosAdj": 0.5,
+   "windAdj": 2.5,
+   "holdWidthPerFlame": 5,
+   "crownFire": 1,
+   "crownAdj": 0.35
+  },
+  "bootstrap": 10,
+  "adopted": false
+ },
+ "levers": [
+  {
+   "lever": "best",
+   "mixed": 1.415,
+   "recall": 0.792
+  },
+  {
+   "lever": "windAdj",
+   "mixed": 1.837,
+   "recall": 0.493
+  },
+  {
+   "lever": "holdWidthPerFlame",
+   "mixed": 1.54,
+   "recall": 0.607
+  },
+  {
+   "lever": "crownAdj",
+   "mixed": 1.437,
+   "recall": 0.804
+  }
+ ],
+ "reliability": {
+  "runs": 30,
+  "perturbation": {
+   "windDirJitterDeg": 30,
+   "windSpeedJitterPct": 37.5,
+   "perturb": {
+    "deadMoisturePts": 0.04,
+    "fuelLogSd": 0.6,
+    "ignitionRadiusM": 400
+   }
+  },
+  "fires": 19,
+  "brier": 0.028,
+  "coverage10": 0.705,
+  "bins": [
+   {
+    "from": 0,
+    "n": 581858,
+    "predicted": 0.002,
+    "observed": 0.008
+   },
+   {
+    "from": 0.05,
+    "n": 19861,
+    "predicted": 0.067,
+    "observed": 0.029
+   },
+   {
+    "from": 0.1,
+    "n": 20808,
+    "predicted": 0.113,
+    "observed": 0.053
+   },
+   {
+    "from": 0.15,
+    "n": 7590,
+    "predicted": 0.167,
+    "observed": 0.067
+   },
+   {
+    "from": 0.2,
+    "n": 8412,
+    "predicted": 0.215,
+    "observed": 0.099
+   },
+   {
+    "from": 0.25,
+    "n": 3191,
+    "predicted": 0.267,
+    "observed": 0.126
+   },
+   {
+    "from": 0.3,
+    "n": 5481,
+    "predicted": 0.316,
+    "observed": 0.143
+   },
+   {
+    "from": 0.35,
+    "n": 2164,
+    "predicted": 0.367,
+    "observed": 0.181
+   },
+   {
+    "from": 0.4,
+    "n": 3858,
+    "predicted": 0.416,
+    "observed": 0.206
+   },
+   {
+    "from": 0.45,
+    "n": 1786,
+    "predicted": 0.467,
+    "observed": 0.23
+   },
+   {
+    "from": 0.5,
+    "n": 3180,
+    "predicted": 0.515,
+    "observed": 0.261
+   },
+   {
+    "from": 0.55,
+    "n": 1235,
+    "predicted": 0.567,
+    "observed": 0.291
+   },
+   {
+    "from": 0.6,
+    "n": 2377,
+    "predicted": 0.616,
+    "observed": 0.324
+   },
+   {
+    "from": 0.65,
+    "n": 2201,
+    "predicted": 0.683,
+    "observed": 0.323
+   },
+   {
+    "from": 0.7,
+    "n": 981,
+    "predicted": 0.733,
+    "observed": 0.366
+   },
+   {
+    "from": 0.75,
+    "n": 930,
+    "predicted": 0.767,
+    "observed": 0.368
+   },
+   {
+    "from": 0.8,
+    "n": 1729,
+    "predicted": 0.817,
+    "observed": 0.375
+   },
+   {
+    "from": 0.85,
+    "n": 1499,
+    "predicted": 0.883,
+    "observed": 0.412
+   },
+   {
+    "from": 0.9,
+    "n": 950,
+    "predicted": 0.933,
+    "observed": 0.413
+   },
+   {
+    "from": 0.95,
+    "n": 5502,
+    "predicted": 0.992,
+    "observed": 0.441
+   }
+  ]
+ },
+ "grid": {
+  "cellSize": 100,
+  "rows": 157,
+  "cols": 152,
+  "areaKm2": 238.64,
+  "buildings": 11979,
+  "places": 88,
+  "fuels": [
+   {
+    "code": 98,
+    "label": "Não ardível",
+    "burns": false,
+    "share": 0.275
+   },
+   {
+    "code": 223,
+    "label": "Mato sob eucaliptal (M-EUC)",
+    "burns": true,
+    "share": 0.251
+   },
+   {
+    "code": 231,
+    "label": "Herbáceo alto (V-Ha)",
+    "burns": true,
+    "share": 0.202
+   },
+   {
+    "code": 221,
+    "label": "Mato sob folhosas caducifólias (M-CAD)",
+    "burns": true,
+    "share": 0.09
+   },
+   {
+    "code": 235,
+    "label": "Mato (V-MH; confirmar designação na documentação FUMOD)",
+    "burns": true,
+    "share": 0.08
+   },
+   {
+    "code": 233,
+    "label": "Mato atlântico alto (V-MAa)",
+    "burns": true,
+    "share": 0.061
+   },
+   {
+    "code": 234,
+    "label": "Mato atlântico baixo (V-MAb)",
+    "burns": true,
+    "share": 0.015
+   },
+   {
+    "code": 237,
+    "label": "Mato mediterrâneo baixo (V-MMb)",
+    "burns": true,
+    "share": 0.01
+   },
+   {
+    "code": 227,
+    "label": "Mato sob pinhal (M-PIN)",
+    "burns": true,
+    "share": 0.01
+   },
+   {
+    "code": 211,
+    "label": "Folhada de eucalipto (F-EUC)",
+    "burns": true,
+    "share": 0.004
+   },
+   {
+    "code": 4,
+    "label": "Mato alto denso / regeneração de pinheiro-bravo (NFFL 4)",
+    "burns": true,
+    "share": 0.002
+   },
+   {
+    "code": 224,
+    "label": "Mato sob eucaliptal descontínuo (M-EUCd)",
+    "burns": true,
+    "share": 0.002
+   },
+   {
+    "code": 11,
+    "label": "Resíduos de exploração florestal (NFFL 11)",
+    "burns": true,
+    "share": 0
+   },
+   {
+    "code": 222,
+    "label": "Mato sob esclerófilas (M-ESC)",
+    "burns": true,
+    "share": 0
+   },
+   {
+    "code": 232,
+    "label": "Herbáceo baixo (V-Hb)",
+    "burns": true,
+    "share": 0
+   }
+  ]
+ }
+}
