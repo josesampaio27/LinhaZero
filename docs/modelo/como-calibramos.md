@@ -1,6 +1,6 @@
 # Como calibramos o motor
 
-Como se ajustam os fatores do motor aos incêndios reais, e porquê assim. Os protocolos completos estão nas ADRs [0065](../decisoes/0065-calibracao-por-cobertura-30-m.md) (30 m) e [0066](../decisoes/0066-recalibracao-da-grelha-de-100-m.md) (100 m). O histórico está em [Calibração e validação](calibracao-e-validacao.md).
+Como se ajustam os fatores do motor aos incêndios reais, e porquê assim. Os protocolos completos estão nas ADRs [0068](../decisoes/0068-calibracao-por-cobertura-30-m.md) (30 m) e [0069](../decisoes/0069-recalibracao-da-grelha-de-100-m.md) (100 m). O histórico está em [Calibração e validação](calibracao-e-validacao.md).
 
 ## O que se ajusta
 
@@ -76,7 +76,7 @@ npx tsx engine/scripts/calibrate.ts --cases ../data-prep/out/reference --select 
 npx tsx engine/scripts/plot-calibration.ts reports/pt-firesprd-<data>.json ../docs/modelo/calibracao-100m --grid "100 m"
 ```
 
-## Grelha de 100 m ([ADR 0066](../decisoes/0066-recalibracao-da-grelha-de-100-m.md))
+## Grelha de 100 m ([ADR 0069](../decisoes/0069-recalibracao-da-grelha-de-100-m.md))
 
 **Resultado: os valores em uso ficam.** Um ajuste novo, com esta pontuação, empata com eles nos incêndios de teste (custo −0,007, intervalo de 90% de −0,091 a +0,081). Os dois cobrem muito mais do fogo real do que o modelo físico.
 
@@ -132,6 +132,6 @@ Cobertura média nas horas observadas e área simulada sobre a real na última o
 
 </details>
 
-## Grelha de 30 m ([ADR 0065](../decisoes/0065-calibracao-por-cobertura-30-m.md))
+## Grelha de 30 m ([ADR 0068](../decisoes/0068-calibracao-por-cobertura-30-m.md))
 
-Por correr. O protocolo está registado na ADR 0065.
+Por correr. O protocolo está registado na ADR 0068.

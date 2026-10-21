@@ -71,7 +71,7 @@ export interface IntervalScore {
 export const MAX_GROWTH_ERROR = Math.log(5);
 
 /**
- * The coverage score (ADR 0065). The engine simulates fire with no firefighting and the observed fires
+ * The coverage score (ADR 0068). The engine simulates fire with no firefighting and the observed fires
  * were fought, so burning less than the real fire is wrong, while burning more is expected where crews
  * held it: misses weigh more than extra burn, extra burn costs only beyond a plausible share and only
  * while the fire ran freely, and the head speed of fast runs no crew could hold anchors the rate.
@@ -264,7 +264,7 @@ function startDistance(c: ReferenceCase, startMin: number, endMin: number, weath
 }
 
 /**
- * Cells beyond a held flank during an interval, from the observation alone (ADR 0065): the burning
+ * Cells beyond a held flank during an interval, from the observation alone (ADR 0068): the burning
  * edge the fire restarts from (the cells observed burning by the start that are not spent) is held
  * where no cell observed burning during the interval lies within COVERAGE.heldRadiusM of it. A cell
  * closer to a held part of the edge than to an active one is in the zone: the engine has no

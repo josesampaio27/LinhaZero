@@ -76,9 +76,9 @@ kubectl -n linha-zero rollout restart deployment
 
 ### Email
 
-O Keycloak envia os convites dos pedidos de acesso e as ligações de recuperação de palavra-passe, pelo [Brevo](https://www.brevo.com) (plano gratuito, 300 emails por dia), como `linhazero@linhazero.dev`. O domínio está autenticado no Brevo com registos na DNS da Cloudflare (`brevo-code`, DKIM `brevo1`/`brevo2._domainkey` em *DNS only*, DMARC); o login SMTP está no `config.env` e a chave SMTP em `SMTP_PASSWORD` no segredo.
+O Keycloak envia os convites dos pedidos de acesso e as ligações de recuperação de palavra-passe, e a API avisa os administradores de cada pedido de acesso novo (no máximo `ACCESS_REQUEST_EMAILS_PER_DAY`, 100 por dia, em `api.yaml`; [ADR 0067](../../docs/decisoes/0067-email-aos-administradores-por-pedido-de-acesso.md)), pelo [Brevo](https://www.brevo.com) (plano gratuito, 300 emails por dia), como `linhazero@linhazero.dev`. O domínio está autenticado no Brevo com registos na DNS da Cloudflare (`brevo-code`, DKIM `brevo1`/`brevo2._domainkey` em *DNS only*, DMARC); o login SMTP está no `config.env` e a chave SMTP em `SMTP_PASSWORD` no segredo.
 
-Para o configurar de novo (outra conta ou outro serviço): no Brevo, verificar o domínio (ou um endereço) como remetente, e em SMTP & API criar uma chave SMTP. O realm só é importado no **primeiro** arranque do Keycloak, por isso, com ele já a correr, configura-se na consola (passo 6): realm `linhazero` → Realm settings → Email → host `smtp-relay.brevo.com`, porta `587`, *From* = o endereço verificado, *Enable StartTLS*, *Authentication* com o login SMTP e a chave → *Test connection*. Para que uma instalação nova já nasça com email, pôr os mesmos valores no `config.env` (`SMTP_HOST`, `SMTP_USER`, `SMTP_AUTH=true`, `SMTP_STARTTLS=true`) e a chave em `SMTP_PASSWORD` no segredo.
+Para o configurar de novo (outra conta ou outro serviço): no Brevo, verificar o domínio (ou um endereço) como remetente, e em SMTP & API criar uma chave SMTP. O realm só é importado no **primeiro** arranque do Keycloak, por isso, com ele já a correr, configura-se na consola (passo 6): realm `linhazero` → Realm settings → Email → host `smtp-relay.brevo.com`, porta `587`, *From* = o endereço verificado, *Enable StartTLS*, *Authentication* com o login SMTP e a chave → *Test connection*. A API lê sempre o `config.env` e o segredo: mudar de conta é mudar os dois e reiniciar a API (`kubectl -n linha-zero rollout restart deployment/api`). Só recebe os avisos quem tem o papel `linhazero-admin` **e já entrou uma vez depois de o ter**. Para que uma instalação nova já nasça com email, pôr os mesmos valores no `config.env` (`SMTP_HOST`, `SMTP_USER`, `SMTP_AUTH=true`, `SMTP_STARTTLS=true`) e a chave em `SMTP_PASSWORD` no segredo.
 
 ## 5. Primeiro deploy
 
@@ -90,7 +90,7 @@ kubectl -n linha-zero get pods -w   # o keycloak demora um ou dois minutos no pr
 
 O [`deploy.sh`](deploy.sh) aplica `infra/` com as imagens do commit indicado (por omissão o de `origin/main`; as imagens desse commit têm de existir) e espera que tudo arranque. É o mesmo script que o *deploy* automático corre.
 
-Os volumes do Postgres (5 GB) e do NATS (1 GB) usam a *storage class* por omissão do cluster (no k3s, `local-path`, um disco de um dos nós). Os scripts de `infra/db/` correm só no primeiro arranque do Postgres, com o volume vazio.
+Os volumes do Postgres (5 GB) e do NATS (1 GB) usam a *storage class* por omissão do cluster (no k3s, `local-path`, um disco de um dos nós). Os scripts de `infra/db/` correm só no primeiro arranque do Postgres, com o volume vazio. As mudanças ao esquema depois desses (`backend/src/LinhaZero.Core/Database/Migrations/`) aplica-as a API ao arrancar, por isso chegam ao cluster com o deploy ([ADR 0065](../../docs/decisoes/0065-migracoes-aplicadas-pela-api.md)): se uma falhar, o pod novo da API não fica pronto e o deploy falha.
 
 ## 6. Primeiro utilizador
 
@@ -129,7 +129,7 @@ Automático: cada push para `main` corre o workflow Images, que constrói as ima
 
 ## Rede
 
-O [`network-policies.yaml`](network-policies.yaml) fecha tudo e abre só o necessário: a landing, a aplicação, a API e o Keycloak recebem só do `cloudflared`; o Keycloak também da API; o Postgres e o NATS só dos serviços que os usam. Para fora, só três chegam à internet (o `cloudflared` à Cloudflare, o `ingest` ao IPMA, Open-Meteo e fogos.pt, o `keycloak` ao SMTP do Brevo), e nenhum pod chega à rede de casa (`192.168.x.x`) nem a outros endereços privados. Um serviço novo que precise de falar com outro, ou com a internet, precisa de uma regra aqui.
+O [`network-policies.yaml`](network-policies.yaml) fecha tudo e abre só o necessário: a landing, a aplicação, a API e o Keycloak recebem só do `cloudflared`; o Keycloak também da API; o Postgres e o NATS só dos serviços que os usam. Para fora, só quatro chegam à internet (o `cloudflared` à Cloudflare, o `ingest` ao IPMA, Open-Meteo e fogos.pt, o `keycloak` e a `api` ao SMTP do Brevo), e nenhum pod chega à rede de casa (`192.168.x.x`) nem a outros endereços privados. Um serviço novo que precise de falar com outro, ou com a internet, precisa de uma regra aqui.
 
 ## Escalar
 

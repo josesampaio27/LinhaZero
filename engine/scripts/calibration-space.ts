@@ -51,7 +51,7 @@ export const SPACES: Record<string, Dimension[]> = {
     logDim("crownAdj"),
   ],
   /**
-   * groupsCrown plus a calibration-only firefighting layer (bgSuppression, ADR 0065 hypothesis): the
+   * groupsCrown plus a calibration-only firefighting layer (bgSuppression, ADR 0068 hypothesis): the
    * firefighting of the real fires gets its own factor, fitted with the physics and never shipped. The
    * prior pulls it to 1 (none), like every other factor.
    */

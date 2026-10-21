@@ -15,7 +15,7 @@ import { simulate } from "../src/simulate";
 import type { Scenario } from "../src/types";
 import { makeGrid } from "./helpers";
 
-// The coverage score (ADR 0065): the engine has no firefighting and the real fires were fought, so it
+// The coverage score (ADR 0068): the engine has no firefighting and the real fires were fought, so it
 // must pay more for missing burned ground than for burning more, and nothing for spreading where the
 // crews held the real fire.
 

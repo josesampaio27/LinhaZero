@@ -73,7 +73,7 @@ const PARAM_LABEL: Record<keyof ModelParams, string> = {
 
 /**
  * Not shown: the coefficients of the retired simple model (ADR 0058), kept so older variant files still
- * load, and the calibration-only firefighting layer (ADR 0065), which the app never uses.
+ * load, and the calibration-only firefighting layer (ADR 0068), which the app never uses.
  */
 const HIDDEN_PARAMS = new Set<keyof ModelParams>(["kWind", "kSlope", "minSlopeFactor", "bgSuppression"]);
 

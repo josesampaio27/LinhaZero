@@ -29,6 +29,7 @@ public sealed class ApiFactory : WebApplicationFactory<HealthController>
         builder.UseSetting("GRIDS_DIR", RepoGrids());
         builder.UseSetting("CORS_ORIGINS", LandingOrigin);
         builder.UseSetting("ACCESS_REQUESTS_PER_HOUR", "1000"); // AccessRequestsHttpTests checks the real limit on its own
+        builder.UseSetting("FEEDBACK_PER_HOUR", "1000"); // and FeedbackHttpTests its own
         builder.ConfigureServices(services =>
         {
             services.AddSingleton(_ => Pg.CreateDataSource("Host=127.0.0.1;Port=1;Username=x;Password=x;Database=x;Timeout=2"));
@@ -36,11 +37,14 @@ public sealed class ApiFactory : WebApplicationFactory<HealthController>
         });
         builder.ConfigureTestServices(services =>
         {
+            // No Postgres here, so no migrations (Integration/MigratorTests.cs covers them).
+            services.Remove(services.Single(s => s.ImplementationType == typeof(MigrateOnStart)));
             // The cookie keys in memory (the real ones are in Postgres), and the test user read from a header.
             services.AddSingleton<IDataProtectionProvider>(new EphemeralDataProtectionProvider());
             services.AddAuthentication().AddScheme<AuthenticationSchemeOptions, TestUser>(TestUser.SchemeName, _ => { });
             services.Configure<AuthenticationOptions>(auth => auth.DefaultAuthenticateScheme = TestUser.SchemeName);
             services.AddSingleton<IKeycloakAdmin, FakeKeycloakAdmin>();
+            services.AddSingleton<IEmailSender, FakeEmailSender>();
         });
     }
 
@@ -101,6 +105,27 @@ public sealed class TestUser(IOptionsMonitor<AuthenticationSchemeOptions> option
         var roles = Request.Headers[RolesHeader].ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(r => new Claim("role", r.Trim()));
         var identity = new ClaimsIdentity([new Claim("name", name), new Claim("email", "teste@linhazero.localhost"), .. roles], SchemeName, "name", "role");
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName)));
+    }
+}
+
+/// <summary>Email, for tests: records each message instead of sending it; <see cref="Fail"/> makes the next ones throw.</summary>
+public sealed class FakeEmailSender : IEmailSender
+{
+    public sealed record Sent(IReadOnlyList<string> To, string Subject, string Text, string? ReplyTo);
+
+    public List<Sent> Messages { get; } = [];
+
+    public bool Fail { get; set; }
+
+    public Task<bool> SendAsync(IReadOnlyList<string> to, string subject, string text, string? replyTo, CancellationToken ct)
+    {
+        if (Fail)
+        {
+            throw new InvalidOperationException("SMTP em baixo (teste)");
+        }
+
+        Messages.Add(new Sent(to, subject, text, replyTo));
+        return Task.FromResult(true);
     }
 }
 

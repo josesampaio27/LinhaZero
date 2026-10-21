@@ -31,4 +31,4 @@ Com a ADR 0061 só havia contas criadas à mão na consola do Keycloak, e o "Ped
 
 - Mudanças no realm (papéis, clientes, email) só entram num realm novo: localmente refaz-se a base do Keycloak (README, "Primeira vez", passo 3); no cluster, com contas reais, mudam-se na consola.
 - O primeiro administrador do cluster cria-se à mão (infra/k8s/README.md); os outros são pessoas a quem se dá o papel `linhazero-admin`.
-- A equipa não recebe aviso de pedidos novos: vê-os na página. Um email para os administradores fica para depois.
+- ~~A equipa não recebe aviso de pedidos novos.~~ Desde a [ADR 0067](0067-email-aos-administradores-por-pedido-de-acesso.md), cada pedido novo envia um email aos administradores.

@@ -1,6 +1,6 @@
 # Plano: recalibrar a grelha de 30 m
 
-> **Estado (2026-10-21):** substituído pela [ADR 0065](decisoes/0065-calibracao-por-cobertura-30-m.md).
+> **Estado (2026-10-21):** substituído pela [ADR 0068](decisoes/0068-calibracao-por-cobertura-30-m.md).
 >
 > - **O objetivo combinado** usa a pontuação de cobertura em vez do Sørensen, que é simétrico.
 > - **A regra de adoção** muda: decidem os 19 fogos, pelo custo combinado, a cobertura desde a ignição e a velocidade da cabeça.

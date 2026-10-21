@@ -4,8 +4,15 @@ import { useSyncExternalStore } from "react";
 //   #/            simulation (optionally #/?variante=<id> to open a grid variant)
 //   #/grelha      grid editor
 //   #/pedidos     access requests (admins only)
+//   #/relatorios  problem reports and suggestions (admins only)
 
-export type Page = "simulacao" | "grelha" | "pedidos";
+export type Page = "simulacao" | "grelha" | "pedidos" | "relatorios";
+
+const PAGES: Record<string, Page> = {
+  "/grelha": "grelha",
+  "/pedidos": "pedidos",
+  "/relatorios": "relatorios",
+};
 
 export interface Route {
   page: Page;
@@ -14,7 +21,7 @@ export interface Route {
 
 function parse(hash: string): Route {
   const [path, query = ""] = hash.replace(/^#/, "").split("?");
-  const page: Page = path === "/grelha" ? "grelha" : path === "/pedidos" ? "pedidos" : "simulacao";
+  const page: Page = PAGES[path] ?? "simulacao";
   return { page, params: new URLSearchParams(query) };
 }
 

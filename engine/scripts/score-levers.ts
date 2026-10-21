@@ -1,4 +1,4 @@
-// Which lever gives a calibration its result (ADR 0065, phase E3): the best fit of a report, scored again
+// Which lever gives a calibration its result (ADR 0068, phase E3): the best fit of a report, scored again
 // with one parameter at a time set back to its physical value, on the same fires.
 //   tsx scripts/score-levers.ts <report.json> [--cases <dir>] [--select <selection.json>] [--jobs n]
 // Prints, per variant, the coverage score's parts averaged over the fit fires, and the paired difference

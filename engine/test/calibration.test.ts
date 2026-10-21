@@ -335,7 +335,7 @@ describe("calibration report (engine/reports)", () => {
   it("has the fit, the samples and the held-out scores", () => {
     expect(latest.samples.length).toBeGreaterThanOrEqual(10);
     if (latest.coverage) {
-      // ADR 0066: the coverage score on the selected fires, each held out once (5-fold).
+      // ADR 0069: the coverage score on the selected fires, each held out once (5-fold).
       expect(latest.provenance.cellSizes).toEqual([100]);
       expect(latest.coverage.paired.fires).toBeGreaterThanOrEqual(15);
       const h = latest.coverage.heldOut;

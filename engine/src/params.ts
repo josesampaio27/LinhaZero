@@ -97,7 +97,7 @@ export interface ModelParams {
    */
   demSmoothM: number;
   /**
-   * Calibration only (ADR 0065): firefighting everywhere from minute 0, as an "Ataque" with this rate
+   * Calibration only (ADR 0068): firefighting everywhere from minute 0, as an "Ataque" with this rate
    * factor on every cell, losing its effect with the fire's intensity as an attack does. It stands for
    * the firefighting of the real fires the calibration compares with, so the physical parameters need
    * not absorb it. 1 = none; the app and the server never set it (the engine simulates fire with no

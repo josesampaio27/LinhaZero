@@ -26,7 +26,7 @@ export interface Task {
   /**
    * "intervals": weighted interval cost (lower is better); "cumulative": mean Sørensen from the ignition;
    * "brier": Brier score of `runs` random realisations on the intervals (run k with samples[k % n]).
-   * "coverage": the coverage cost of the intervals (ADR 0065, lower is better); "coverageMixed": plus
+   * "coverage": the coverage cost of the intervals (ADR 0068, lower is better); "coverageMixed": plus
    * 1 − the Tversky index from the ignition; "coverageParts": both and their parts (CoverageParts, via runAny).
    */
   metric: "intervals" | "cumulative" | "brier" | "ensemble" | "early" | "rates" | "coverage" | "coverageMixed" | "coverageParts";
@@ -41,7 +41,7 @@ export interface Task {
   moisture?: MoistureModel;
 }
 
-/** One fire under the coverage score (ADR 0065). */
+/** One fire under the coverage score (ADR 0068). */
 export interface CoverageParts {
   /** Coverage cost of the intervals, with the head-speed term. */
   coverage: number;

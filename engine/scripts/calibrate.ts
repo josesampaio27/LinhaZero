@@ -75,7 +75,7 @@ const SPACE = SPACES[SPACE_NAME];
 if (!SPACE) throw new Error(`--space desconhecido: ${SPACE_NAME} (${Object.keys(SPACES).join(", ")})`);
 const OBJECTIVE = text("objective", "all");
 // "all" / "free": the interval cost (ADR 0054, 0057); "coverage" / "coverageMixed": the coverage score,
-// the second plus the Tversky index from the ignition (ADR 0065).
+// the second plus the Tversky index from the ignition (ADR 0068).
 const OBJECTIVES = ["all", "free", "coverage", "coverageMixed"];
 if (!OBJECTIVES.includes(OBJECTIVE)) throw new Error(`--objective ${OBJECTIVES.join(", ")}, não ${OBJECTIVE}`);
 const COVERAGE_OBJECTIVE = OBJECTIVE === "coverage" || OBJECTIVE === "coverageMixed";
@@ -164,7 +164,7 @@ async function fit(fires: number[], generations: number, x0: number[], sigma: nu
 // Starting points (--starts, pre-registered). Never the current calibration: that one was fitted on some
 // of these fires, and starting there would leak it into the held-out folds (ADR 0058).
 //   physical: the engine's defaults;
-//   wind2: the midflame wind ×2, the rest physical (ADR 0065: from the physical values alone, CMA-ES
+//   wind2: the midflame wind ×2, the rest physical (ADR 0068: from the physical values alone, CMA-ES
 //          with σ 0.7 did not reach the high-wind region).
 const STARTS: Record<string, Partial<ModelParams>> = { physical: {}, wind2: { windAdj: 2 } };
 const startNames = text("starts", "physical").split(",");
@@ -341,7 +341,7 @@ const [costBestAll, brierBest, brierSamples, brierCurrent] = await Promise.all([
   brier(CURRENT),
 ]);
 
-// The coverage score's parts (ADR 0065): each 5-fold test fire with the fit that did not see it, and
+// The coverage score's parts (ADR 0068): each 5-fold test fire with the fit that did not see it, and
 // every fire with the incumbent and the physical model.
 const partsOf = (p: Partial<ModelParams>, fires: number[]) =>
   Promise.all(fires.map((fire) => pool.runAny<CoverageParts | null>({ metric: "coverageParts", params: p, fire })));
@@ -352,7 +352,7 @@ await pool.close();
 const on = (xs: number[], idx: number[]) => mean(idx.map((i) => xs[i]));
 
 /**
- * Adoption under the coverage score (ADR 0065), paired fire by fire on the 5-fold held-out fires (all of
+ * Adoption under the coverage score (ADR 0068), paired fire by fire on the 5-fold held-out fires (all of
  * them decide; the ones the incumbent never saw are reported too): the combined cost lower by at least
  * 0.02 with a 90% bootstrap interval below 0, the coverage from the ignition (recall) not lower by more
  * than 0.01, and the head-speed error of the fast runs not worse by more than 0.05.
@@ -392,7 +392,7 @@ const coverageVerdict = (() => {
     maskedShare: avg(k, "maskedShare"),
   });
   return {
-    rule: "paired held-out combined cost ≤ −0.02 with 90% interval < 0, recall from ignition ≥ −0.01, head-speed error ≤ +0.05, on every 5-fold test fire (ADR 0065)",
+    rule: "paired held-out combined cost ≤ −0.02 with 90% interval < 0, recall from ignition ≥ −0.01, head-speed error ≤ +0.05, on every 5-fold test fire (ADR 0068)",
     adopt: decide.cost <= -0.02 && decide.costP95 < 0 && decide.recall >= -0.01 && decide.anchor <= 0.05,
     paired: decide,
     pairedUnseen: unseen,
@@ -535,7 +535,7 @@ const out = {
   git,
   adopt,
   adoption: { rule: "paired held-out cost ≤ −0.02, 90% bootstrap interval < 0, Sørensen ≥ −0.01, locked set not worse (ADR 0064)", incumbent: INCUMBENT, incumbentParams: CURRENT, paired, locked: lockedCost, oldRule: adoptOld },
-  /** Under the coverage objectives, the rule that decides (ADR 0065). */
+  /** Under the coverage objectives, the rule that decides (ADR 0068). */
   coverage: coverageVerdict ?? null,
   provenance: {
     cases: CASES,

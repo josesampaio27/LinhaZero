@@ -6,7 +6,7 @@ import { terrainOf } from "../src/surface";
 import { intervalBounds, intervalScenario, scoreIntervals } from "../scripts/intervals";
 import { loadCase, weatherStepsOf } from "../scripts/reference";
 
-// The shortcuts that make the calibration faster (ADR 0065, phase A) must give exactly what the slow
+// The shortcuts that make the calibration faster (ADR 0068, phase A) must give exactly what the slow
 // way gave, on a real 30 m fire with hourly weather.
 const DIR = new URL("./reference-30m", import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, "$1");
 const c = loadCase("Valpacos_13092019", DIR);

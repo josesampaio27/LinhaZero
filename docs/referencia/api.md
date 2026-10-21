@@ -14,6 +14,9 @@ Os endpoints da API do LinhaZero (`backend/src/LinhaZero.Api`, .NET 10). A API s
 | `GET /api/v1/runs/{id}` | Estado da corrida (`queued`, `running`, `done`, `failed`), progresso e resultado | `200`; `404` corrida desconhecida |
 | `GET /api/v1/runs/{id}/events` | Progresso por Server-Sent Events: `progress`, `done`, `failed`, e um `ping` a cada 15 s | `200 text/event-stream` |
 | `GET /api/v1/runs/{id}/rasters/{A\|B}/{arrival\|probability}` | Um raster do resultado: Float32 little-endian, `rows × cols × 4` bytes, guardado em cache um ano | `200 application/octet-stream`; `400`; `404` |
+| `POST /api/v1/feedback` | Um problema ou sugestão de quem tem sessão, com a página, a versão e o browser ([ADR 0066](../decisoes/0066-relatorios-de-problemas-e-sugestoes.md)); no máximo 20 por hora por utilizador | `202`; `400` tipo ou mensagem inválidos; `429` |
+| `GET /api/v1/feedback` | Todos os relatórios, os abertos primeiro (papel `linhazero-admin`) | `200`; `403` |
+| `POST /api/v1/feedback/{id}/status` | `{ "status": "open" \| "done" \| "dismissed" }` (papel `linhazero-admin`) | `200`; `400`; `403`; `404` |
 | `GET /api/v1/health` | PostgreSQL e NATS respondem? Quantos workers estão livres? | `200`; `503` se o PostgreSQL ou o NATS falharem |
 
 Todos os erros têm o corpo `{ "error": "..." }`, com a mensagem em português que a interface mostra.

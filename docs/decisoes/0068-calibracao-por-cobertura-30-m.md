@@ -1,4 +1,4 @@
-# ADR 0065: Calibração da grelha de 30 m pela cobertura do fogo real
+# ADR 0068: Calibração da grelha de 30 m pela cobertura do fogo real
 
 - Estado: proposta (protocolo registado antes de pontuar qualquer modelo com esta pontuação nos fogos de ajuste; os resultados entram no fim)
 - Data: 2026-10-21

@@ -1,4 +1,4 @@
-// Speed and exact results of what the calibration scores (ADR 0065, phase A).
+// Speed and exact results of what the calibration scores (ADR 0068, phase A).
 //   npx tsx scripts/bench-calibration.ts [--cases <dir>] [--select <selection.json>] [--quick]
 //
 // Scores three parameter sets (physical, PT_CALIBRATION, the ADR 0064 30 m fit) on every selected fire,

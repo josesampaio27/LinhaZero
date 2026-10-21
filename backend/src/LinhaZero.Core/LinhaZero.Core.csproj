@@ -15,4 +15,9 @@
     <PackageReference Include="ProjNET" Version="2.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <!-- Schema changes after the infra/db baseline, applied by the API on start (Database/Migrator.cs). -->
+    <EmbeddedResource Include="Database/Migrations/*.sql" />
+  </ItemGroup>
+
 </Project>

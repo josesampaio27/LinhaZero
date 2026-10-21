@@ -9,6 +9,18 @@ x-pg: &pg
   PGPASSWORD: ${POSTGRES_PASSWORD:-dois}
   PGDATABASE: dois
 
+# Email, sent by Keycloak (invites, forgotten passwords) and by the API (new access requests, to the admins). Locally
+# every message goes to Mailpit: http://localhost:8025
+x-smtp: &smtp
+  SMTP_HOST: ${SMTP_HOST:-mailpit}
+  SMTP_PORT: ${SMTP_PORT:-1025}
+  SMTP_FROM: ${SMTP_FROM:-linhazero@linhazero.localhost}
+  SMTP_AUTH: ${SMTP_AUTH:-false}
+  SMTP_USER: ${SMTP_USER:-}
+  SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+  SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
+  SMTP_SSL: ${SMTP_SSL:-false}
+
 services:
   postgres:
     image: postgres:16.12-alpine
@@ -75,7 +87,7 @@ services:
       dockerfile: src/LinhaZero.Api/Dockerfile
     restart: unless-stopped
     environment:
-      <<: *pg
+      <<: [*pg, *smtp]
       NATS_URL: nats://nats:4222
       GRIDS_DIR: /grids
       # The login (infra/keycloak): the public issuer the browser sees, and the same document read inside the network.
@@ -91,6 +103,8 @@ services:
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_ADMIN_CLIENT_ID: linhazero-api-admin
       KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-dev-admin-secret-change-me}
+      # Each access request emails every admin (docs/decisoes/0067), at most this many emails a day (SMTP_* from x-smtp).
+      ACCESS_REQUEST_EMAILS_PER_DAY: ${ACCESS_REQUEST_EMAILS_PER_DAY:-100}
     ports:
       # Loopback only: for `npm run dev` (Vite proxies /api here) and smoke.sh. The browser goes through proxy.
       - "127.0.0.1:8080:8080"
@@ -163,15 +177,8 @@ services:
       OIDC_EXTRA_REDIRECT_URI: http://localhost:5173/api/auth/callback
       OIDC_EXTRA_POST_LOGOUT_URI: http://localhost:5173/
       KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-dev-admin-secret-change-me}
-      # Email (invites, forgotten passwords). Locally every message goes to Mailpit: http://localhost:8025
-      SMTP_HOST: ${SMTP_HOST:-mailpit}
-      SMTP_PORT: ${SMTP_PORT:-1025}
-      SMTP_FROM: ${SMTP_FROM:-linhazero@linhazero.localhost}
-      SMTP_AUTH: ${SMTP_AUTH:-false}
-      SMTP_USER: ${SMTP_USER:-}
-      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
-      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
-      SMTP_SSL: ${SMTP_SSL:-false}
+      # Email (invites, forgotten passwords).
+      <<: *smtp
     volumes:
       # The dev user (dev@linhazero.localhost), only in this compose file.
       - ./keycloak/dev/linhazero-users-0.json:/opt/keycloak/data/import/linhazero-users-0.json:ro

@@ -1,8 +1,8 @@
 # Who may talk to whom in linha-zero. Everything is closed (default-deny), then opened service by service:
 # - in: the public pages and the API only from cloudflared (the tunnel); Keycloak also from the API; Postgres and NATS
 #   only from the services that use them.
-# - out: DNS and the other pods of this namespace for everyone; the internet only for the three that need it
-#   (cloudflared → Cloudflare, ingest → IPMA/Open-Meteo/fogos.pt, keycloak → the SMTP relay), and never the home
+# - out: DNS and the other pods of this namespace for everyone; the internet only for the four that need it
+#   (cloudflared → Cloudflare, ingest → IPMA/Open-Meteo/fogos.pt, keycloak and api → the SMTP relay), and never the home
 #   network or other private addresses. The kubelet's probes come from the pod's own node, which k3s always allows.
 # Enforced by k3s's built-in network policy controller.
 apiVersion: networking.k8s.io/v1
@@ -134,9 +134,12 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: keycloak-to-smtp
+  name: smtp-relay
 spec:
-  podSelector: { matchLabels: { app: keycloak } }
+  # Keycloak (invites, forgotten passwords) and the API (new access requests, to the admins).
+  podSelector:
+    matchExpressions:
+      - { key: app, operator: In, values: [keycloak, api] }
   policyTypes: [Egress]
   egress:
     - to:

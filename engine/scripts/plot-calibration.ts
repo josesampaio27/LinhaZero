@@ -1,4 +1,4 @@
-// Charts of a coverage calibration report (ADR 0065/0066) for the docs, as SVG (no dependencies; GitHub
+// Charts of a coverage calibration report (ADR 0068/0069) for the docs, as SVG (no dependencies; GitHub
 // renders them in the markdown).
 //   tsx scripts/plot-calibration.ts <report.json> <out-prefix> [--grid "100 m"]
 // Writes <out-prefix>-cobertura.svg (per held-out fire, the share of the real burned area the simulation

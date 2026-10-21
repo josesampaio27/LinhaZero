@@ -1,8 +1,8 @@
-# ADR 0066: Recalibração da grelha de 100 m pela cobertura do fogo real
+# ADR 0069: Recalibração da grelha de 100 m pela cobertura do fogo real
 
 - Estado: aceite (o protocolo foi registado antes de pontuar qualquer modelo nos casos de 100 m reconstruídos; a calibração nova não passou a regra e a grelha de 100 m fica com os valores em uso)
 - Data: 2026-10-21
-- Usa a pontuação e as regras da [ADR 0065](0065-calibracao-por-cobertura-30-m.md); substitui a calibração das ADRs [0053](0053-validacao-e-calibracao-com-o-pt-firesprd.md), [0054](0054-calibracao-por-intervalo-e-por-grupo.md) e [0056](0056-fogo-de-copas.md) se passar a regra
+- Usa a pontuação e as regras da [ADR 0068](0068-calibracao-por-cobertura-30-m.md); substitui a calibração das ADRs [0053](0053-validacao-e-calibracao-com-o-pt-firesprd.md), [0054](0054-calibracao-por-intervalo-e-por-grupo.md) e [0056](0056-fogo-de-copas.md) se passar a regra
 
 ## Contexto
 
@@ -14,11 +14,11 @@
   - a largura das linhas (5) está fora de todas as estimativas (1,0 a 2,3);
   - o ×0,5 sobre todos os combustíveis também abranda o sub-bosque, cerca de 47% do que arde em Guimarães, que os ajustes por grupo põem perto de ×1;
   - o relatório no repositório não descreve o motor de hoje.
-- **Fogos combatidos:** como a 30 m, o motor sem combate deve arder mais do que o fogo real onde os meios o travaram (ADR 0065).
+- **Fogos combatidos:** como a 30 m, o motor sem combate deve arder mais do que o fogo real onde os meios o travaram (ADR 0068).
 
 ## Protocolo (registado antes de ver resultados)
 
-O da ADR 0065, a 100 m. Só muda o que segue.
+O da ADR 0068, a 100 m. Só muda o que segue.
 
 ### 1. Casos
 
@@ -36,7 +36,7 @@ O da ADR 0065, a 100 m. Só muda o que segue.
 
 ### 3. Pontuação, objetivo, parâmetros, ajuste
 
-Iguais aos da ADR 0065:
+Iguais aos da ADR 0068:
 - **Pontuação de cobertura:**
   - Tversky com 0,2 para a área a mais e 0,8 para a área em falta;
   - a área a mais só conta acima de 3 vezes e nos intervalos livres;
@@ -53,7 +53,7 @@ Iguais aos da ADR 0065:
 ### 4. Incumbente e regra de adoção
 
 - O incumbente é `PT_CALIBRATION`. Foi ajustado em 7 destes fogos (ADR 0053), o que o favorece.
-- **A regra da ADR 0065:** nos fogos de teste das 5 partes, emparelhados, todos decidem:
+- **A regra da ADR 0068:** nos fogos de teste das 5 partes, emparelhados, todos decidem:
   - o custo combinado desce pelo menos 0,02, com o intervalo de 90% abaixo de 0;
   - a cobertura desde a ignição não desce mais de 0,01;
   - o erro da velocidade da cabeça não sobe mais de 0,05.
@@ -71,16 +71,16 @@ Iguais aos da ADR 0065:
 ### 6. Se for adotada
 
 - **Os valores novos:** `PT_CALIBRATION`, com as amostras do bootstrap se ganharem no Brier.
-- **A grelha de 30 m fica com os valores de hoje**, copiados à parte em `PT_CALIBRATION_30M`, até à sua própria calibração (ADR 0065). O incumbente da ADR 0065 não muda.
+- **A grelha de 30 m fica com os valores de hoje**, copiados à parte em `PT_CALIBRATION_30M`, até à sua própria calibração (ADR 0068). O incumbente da ADR 0068 não muda.
 - **A CI:** os valores registados dos 9 incêndios em `engine/test/reference.test.ts` registam-se de novo, com a razão.
 
 ### 7. Declaração
 
-Nesta sessão nenhum modelo foi pontuado nos casos de 100 m reconstruídos. Os números de 30 m que motivaram a ADR 0065 conhecem-se, e os pesos da pontuação foram escolhidos depois de os ver (ADR 0065, ponto 8).
+Nesta sessão nenhum modelo foi pontuado nos casos de 100 m reconstruídos. Os números de 30 m que motivaram a ADR 0068 conhecem-se, e os pesos da pontuação foram escolhidos depois de os ver (ADR 0068, ponto 8).
 
 ## Resultados
 
-Relatório `engine/reports/pt-firesprd-2026-10-21.json` (82 min, 8 núcleos). Gráficos e tabela por incêndio em [Como calibramos](../modelo/como-calibramos.md#grelha-de-100-m-adr-0066).
+Relatório `engine/reports/pt-firesprd-2026-10-21.json` (82 min, 8 núcleos). Gráficos e tabela por incêndio em [Como calibramos](../modelo/como-calibramos.md#grelha-de-100-m-adr-0069).
 
 ### Seleção
 
@@ -161,7 +161,7 @@ O melhor ajuste, com um fator de cada vez no valor físico, nos 19 fogos (`score
 ### O que muda
 
 - **Nada na aplicação:** `PT_CALIBRATION` fica.
-- **A grelha de 30 m** continua com os mesmos valores, e o incumbente da ADR 0065 não muda.
+- **A grelha de 30 m** continua com os mesmos valores, e o incumbente da ADR 0068 não muda.
 - **O mapa de cenários** não se refaz, porque os valores não mudaram (relatório `reliability-2026-10-19.json`).
 - **A CI:**
   - `calibration.test.ts` lê este relatório;

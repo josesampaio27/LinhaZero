@@ -23,7 +23,7 @@
   "oldRule": false
  },
  "coverage": {
-  "rule": "paired held-out combined cost ≤ −0.02 with 90% interval < 0, recall from ignition ≥ −0.01, head-speed error ≤ +0.05, on every 5-fold test fire (ADR 0065)",
+  "rule": "paired held-out combined cost ≤ −0.02 with 90% interval < 0, recall from ignition ≥ −0.01, head-speed error ≤ +0.05, on every 5-fold test fire (ADR 0068)",
   "adopt": false,
   "paired": {
    "fires": 19,

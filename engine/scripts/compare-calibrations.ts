@@ -1,11 +1,11 @@
 // Paired comparison of two calibration reports on the same held-out fires: a structural hypothesis
-// against the base (ADR 0064, and ADR 0065 for the coverage score).
+// against the base (ADR 0064, and ADR 0068 for the coverage score).
 //   tsx scripts/compare-calibrations.ts <base.json> <hypothesis.json>
 // Both must come from calibrate.ts with the same cases, selection and seed, so the 5 folds are the same
 // fires; each fire's held-out score is the one of the fit on the other four folds.
 // Interval cost (ADR 0064): the hypothesis replaces the base only if its cost is lower by at least 0.02
 // with a 90% bootstrap interval below 0, and the Sørensen from the ignition is not lower by more than 0.01.
-// Coverage score (ADR 0065, both reports with --objective coverage or coverageMixed): the combined cost
+// Coverage score (ADR 0068, both reports with --objective coverage or coverageMixed): the combined cost
 // lower by at least 0.02 with a 90% interval below 0, the coverage from the ignition not lower by more
 // than 0.01, and the head-speed error of the fast runs not worse by more than 0.05. A tie keeps the base.
 import { readFileSync } from "node:fs";
