@@ -107,7 +107,7 @@ Com email ligado, as outras contas nascem dos pedidos: a pessoa usa "Pedir acess
 
 ## 7. Runner (o *deploy* automático)
 
-Um runner do GitHub Actions dentro do cluster ([`infra/runner/`](../runner/), o Actions Runner Controller, instalado pelo próprio k3s): o GitHub não precisa de chegar a casa, é o runner que se liga para fora. Só pode aplicar `infra/` no namespace `linha-zero` e ver o rollout; não lê segredos.
+Um runner do GitHub Actions dentro do cluster ([`infra/runner/`](../runner/), o Actions Runner Controller, instalado pelo próprio k3s): o GitHub não precisa de chegar a casa, é o runner que se liga para fora. Só pode aplicar `infra/` no namespace `linha-zero` e ver o rollout; não lê segredos. Na rede ([`network-policies.yaml`](../runner/network-policies.yaml)) só chega ao GitHub e à internet (porta 443) e à API do Kubernetes, não aos pods da aplicação nem à rede de casa. Depois de mudar algo em `infra/runner/`, aplicar à mão: `kubectl apply -k infra/runner` (o *deploy* automático só aplica `infra/`).
 
 1. GitHub → Settings → Developer settings → Personal access tokens → **Fine-grained tokens** → Generate: *Repository access* só `LinhaZero`, *Permissions* → *Administration*: **Read and write** (é o que regista runners num repositório). Validade à escolha: quando expirar, repetir o passo 2 com um novo.
 2. ```bash

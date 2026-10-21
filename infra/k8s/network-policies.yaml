@@ -59,6 +59,13 @@ spec:
         - podSelector: { matchLabels: { app: api } }
       ports:
         - { protocol: TCP, port: 8080 }
+    # Keycloak's own cluster (JGroups, found through the database): during a rollout the new pod joins the old one to
+    # take over its caches; without this it ends up alone ("split-brain"), stays not ready and the rollout never ends.
+    - from:
+        - podSelector: { matchLabels: { app: keycloak } }
+      ports:
+        - { protocol: TCP, port: 7800 }
+        - { protocol: TCP, port: 57800 }
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
