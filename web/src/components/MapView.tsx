@@ -32,6 +32,8 @@ interface Props {
   /** Pixels drawn over the terrain, one per grid cell: the fire, or the edited cells in the grid editor. */
   fire: ImageData | null;
   showOsm: boolean;
+  /** The satellite image under the grid (DGT, needs internet). */
+  showSatellite?: boolean;
   /** A real fire's observed perimeters: those observed up to `upToMin` are drawn, the latest one bold. */
   observed?: { features: { type: "Feature"; properties: { minute: number }; geometry: unknown }[]; upToMin: number } | null;
   /** Tilted camera over the grid elevation. */
@@ -63,10 +65,22 @@ const STYLE: StyleSpecification = {
       maxzoom: 19,
       attribution: "© Contribuidores do OpenStreetMap",
     },
+    // DGT's 2023 satellite orthoimage of mainland Portugal (30 cm), open data, no fees: a WMS asked for
+    // Web Mercator tiles. It serves CORS, which the WebGL map needs.
+    satellite: {
+      type: "raster",
+      tiles: [
+        "https://ortos.dgterritorio.gov.pt/wms/ortosat2023?service=WMS&request=GetMap&version=1.3.0&layers=ortoSat2023-CorVerdadeira&styles=&crs=EPSG:3857&bbox={bbox-epsg-3857}&width=256&height=256&format=image/jpeg",
+      ],
+      tileSize: 256,
+      maxzoom: 18,
+      attribution: "OrtoSat 2023 © DGT",
+    },
   },
   layers: [
     { id: "bg", type: "background", paint: { "background-color": "#e9e7e1" } },
     { id: "osm", type: "raster", source: "osm", layout: { visibility: "none" } },
+    { id: "satellite", type: "raster", source: "satellite", layout: { visibility: "none" } },
   ],
 };
 
@@ -315,7 +329,7 @@ export function MapView(props: Props) {
       features: shown.map((f, i) => ({ ...f, properties: { ...f.properties, latest: i === shown.length - 1 } })),
     } as GeoJSON.FeatureCollection);
   }, [map, observed]);
-  const { grid, terrainUrl, fire, showOsm, terrain3d, contours, ignition, shapes, draft, interactive, incidents } = props;
+  const { grid, terrainUrl, fire, showOsm, showSatellite = false, terrain3d, contours, ignition, shapes, draft, interactive, incidents } = props;
   // The fire layer is a canvas source: drawing into the canvas and re-uploading it skips the PNG
   // encode + fetch + decode an image source costs on every time step.
   const fireCanvas = useRef<HTMLCanvasElement>(null!);
@@ -418,8 +432,10 @@ export function MapView(props: Props) {
   useEffect(() => {
     if (!map || !map.getLayer("terrain")) return;
     map.setLayoutProperty("osm", "visibility", showOsm ? "visible" : "none");
-    map.setPaintProperty("terrain", "raster-opacity", showOsm ? 0.35 : 1);
-  }, [map, gridKey, showOsm]);
+    map.setLayoutProperty("satellite", "visibility", showSatellite ? "visible" : "none");
+    // With a base map under it, the grid's own image turns see-through.
+    map.setPaintProperty("terrain", "raster-opacity", showOsm || showSatellite ? 0.35 : 1);
+  }, [map, gridKey, showOsm, showSatellite]);
 
   useEffect(() => {
     const grid = gridRef.current;
