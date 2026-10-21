@@ -461,3 +461,7 @@ tr.changed td, label.changed span { color: var(--b); font-weight: 600; }
   .feedback-btn { min-width: var(--tap); padding: 6px; }
   .feedback-btn span { display: none; }
 }
+
+/* The result's two ways on, side by side: "Alterar decisões" and "Nova simulação". */
+.cta-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.cta-pair > button { min-width: 0; padding: 6px 10px; }
