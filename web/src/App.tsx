@@ -1276,11 +1276,11 @@ export function App() {
         </DecisionTools>
         <div className="uncertainty">
           <Toggle checked={ensemble} onChange={setEnsemble}>
-            Considerar a incerteza do vento
+            Considerar a incerteza
             <small>
               {ensemble
-                ? `${ensembleRuns} cenários por decisão, com o vento, a humidade, a velocidade do combustível e o ponto de ignição a variar; incluem focos secundários e linhas e estradas que podem ceder`
-                : "Uma só corrida por decisão"}
+                ? `${ensembleRuns} cenários por decisão. Em cada um variam a direção e a força do vento, a humidade do combustível, a velocidade de cada combustível e o ponto de ignição; há faúlhas que acendem focos à frente, e linhas e estradas que podem ceder`
+                : "Uma só simulação por decisão, com os valores indicados, sem faúlhas"}
             </small>
           </Toggle>
           {ensemble && (
