@@ -734,6 +734,40 @@ export function App() {
     else fetchAt(gridToLngLat(h, h.cols / 2, h.rows / 2), "centre");
   };
 
+  /**
+   * "Nova simulação": back to an empty situation in the same zone, with live weather. The fire, the drawn decisions, the
+   * burned area, the variants, a loaded scenario and the result go; the zone and the settings (duration, view) stay.
+   */
+  const newSimulation = () => {
+    if (
+      decisions.A.length + decisions.B.length > 0 &&
+      !confirm("Começar uma simulação nova? O fogo, as decisões desenhadas e o resultado desta são apagados.")
+    )
+      return;
+    runSeq.current++; // a run in flight must not land on the new simulation
+    setBusy(false);
+    setPlaying(false);
+    setT(0);
+    setDraft(null);
+    setResults(null);
+    setRunNote(null);
+    setMessage(null);
+    setHover(null);
+    setIgnition(null);
+    setBurnedArea(null);
+    setDecisions({ A: [], B: [] });
+    setVariantIds(NO_VARIANTS);
+    setFileSteps(null);
+    setScenarioTitle(null);
+    setDecisionTab("A");
+    setMapsView("A");
+    // Live weather again, at the zone's centre until a new ignition asks for its own point.
+    weather.resetAll();
+    if (grid) fetchAt(gridToLngLat(grid.header, grid.header.cols / 2, grid.header.rows / 2), "centre");
+    setStep("situacao");
+    setTool({ type: "ignite" });
+  };
+
   const changeGrid = (name: string) => {
     if (name === gridName) return;
     const lost = variantIds.A || variantIds.B;
@@ -1074,9 +1108,14 @@ export function App() {
   } else if (results && !stale && !busy) {
     cta =
       step === "resultado" ? (
-        <button className="primary secondary" onClick={() => goTo("decisoes")}>
-          Alterar decisões
-        </button>
+        <div className="cta-pair">
+          <button className="primary secondary" onClick={() => goTo("decisoes")}>
+            Alterar decisões
+          </button>
+          <button className="primary secondary" onClick={newSimulation}>
+            <Icon name="refresh" size={18} /> Nova simulação
+          </button>
+        </div>
       ) : (
         <button className="primary" onClick={() => goTo("resultado")}>
           Ver resultado <Icon name="chevron" size={18} />
