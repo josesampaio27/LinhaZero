@@ -128,7 +128,11 @@ export function buildScenario(header: GridHeader, inputs: ScenarioInputs, decisi
  * 100 m or 30 m), then a grid variant's own values.
  */
 export function rothermelParams(variantParams: Partial<ModelParams> = {}, cellSize = 100): Partial<ModelParams> {
-  return { ...calibrationFor(cellSize).params, ...variantParams };
+  // The calibration-only firefighting layer (ADR 0068) never reaches the app, even from a variant file:
+  // the only firefighting simulated is what the user draws (ADR 0057).
+  const { bgSuppression: _calibrationOnly, ...own } = variantParams;
+  void _calibrationOnly;
+  return { ...calibrationFor(cellSize).params, ...own };
 }
 
 /**

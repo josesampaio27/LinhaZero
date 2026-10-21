@@ -20,6 +20,8 @@ Como sabemos que o motor faz o que dizemos, e como o vamos aproximar dos incênd
 | `calibration.test.ts` | CMA-ES encontra o mínimo de uma função de teste; espaço de parâmetros; fator por grupo de combustível e correção da humidade; amostras de calibração no ensemble com emparelhamento; pontuação por intervalo num fogo sintético; o motor segue o veredicto do relatório de calibração |
 | `reference.test.ts` | Os nove incêndios reais da CI (ver abaixo) |
 | `reference-30m.test.ts` | Três incêndios reais a 30 m (Baião, Valença, Valpaços), com a calibração da grelha de 30 m: Sørensen desde a ignição e custo por intervalo |
+| `coverage-objective.test.ts` | Pontuação de cobertura ([ADR 0068](../decisoes/0068-calibracao-por-cobertura-30-m.md)): falhar área custa mais do que arder a mais; a área a mais só conta acima de 3 vezes e nos intervalos livres; os flancos travados encontram-se só com a observação e deixam de contar; os intervalos de cabeça rápida não dependem dos parâmetros; o combate de fundo da calibração abranda só o fogo que se pode atacar e nunca chega à aplicação |
+| `calibration-speed.test.ts` | Os atalhos que tornam a calibração mais rápida dão os mesmos números: um ensemble lido em várias horas é igual a um ensemble por hora; uma grelha com combustível já ardido partilha o relevo; voltar a pontuar os mesmos intervalos dá o mesmo |
 | `changing-conditions.test.ts` | Passos recalculados quando o tempo muda ou começa um ataque; cantos entre barreiras; opções `crownRatio` e `demSmoothM` ([ADR 0063](../decisoes/0063-tempo-que-muda-cantos-e-estado-de-partida.md)) |
 | `demo-scenario.test.ts` | Nos cenários de demonstração (incluindo `faixa`, com uma variante de grelha), a decisão B arde menos e atinge menos edifícios e, com incerteza, ganha na maioria dos cenários de vento; a grelha real de Guimarães carrega e simula em menos de 100 ms |
 
@@ -96,6 +98,13 @@ O objetivo é o custo médio por intervalo, com uma prior fraca para os valores 
 - **Relatório:** `engine/reports/pt-firesprd-2026-10-19.json`.
 
 ### Resultado: a calibração atual fica
+
+> **Revisto em 2026-10-21 ([ADR 0069](../decisoes/0069-recalibracao-da-grelha-de-100-m.md)):** os casos foram reconstruídos a 100 m com o motor de hoje, e a grelha foi recalibrada com a pontuação de cobertura, que tem em conta que os incêndios reais foram combatidos.
+>
+> - Nos 19 incêndios de teste, um ajuste novo empata com a calibração atual (custo −0,007, 90% de −0,091 a +0,081).
+> - A calibração atual fica.
+>
+> O método e os gráficos estão em [Como calibramos](como-calibramos.md). O que segue é a calibração original (ADRs 0053 e 0054).
 
 A calibração atual (`PT_CALIBRATION` em `engine/src/calibration.ts`: velocidade ×0,5, vento ×2,5, linhas que seguram a 50% com cinco comprimentos de chama) foi ajustada em 7 destes fogos. Por isso, a comparação justa usa os outros 26:
 

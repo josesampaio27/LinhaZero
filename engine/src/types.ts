@@ -116,6 +116,12 @@ export interface Scenario {
    * when present. Each step holds from its minute until the next one; the first should start at 0.
    */
   weatherSteps?: WeatherStep[];
+  /**
+   * Ensemble only: also the burn probability at each of these minutes (≤ durationMin), from the same
+   * runs. Arrivals before a minute do not depend on how long the run goes on, so one run to the last
+   * minute gives what a separate ensemble to each minute would (validation scripts).
+   */
+  probabilityAtMin?: number[];
 }
 
 /** The weather from minute fromMin until the next step. */
@@ -163,6 +169,8 @@ export type InterventionKind = Intervention["kind"];
 export interface SimulationResult {
   arrivalMin: Float32Array; // fire arrival minute per cell; Infinity = does not burn
   burnProbability?: Float32Array; // 0..1, only with ensemble
+  /** With Scenario.probabilityAtMin: the burn probability at each of those minutes, in the same order. */
+  burnProbabilityAt?: Float32Array[];
   /** Fireline intensity (kW/m) as the fire arrived in each cell, main run; 0 = not burned. Rothermel only. */
   intensityKwM?: Float32Array;
   /** One entry per perturbed run, in run order; only with ensemble. Run k of two scenarios with the same ensemble options and base wind used the same wind. */

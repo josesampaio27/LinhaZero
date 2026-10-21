@@ -12,6 +12,11 @@ export interface CmaesOptions {
   seed?: number;
   /** Stop when the step size times the largest axis falls below this. */
   tolX?: number;
+  /**
+   * Stop on a plateau: the best has improved by less than `gain` over the last `window` generations and
+   * the step size times the largest axis is below `step` (both, so a fit still moving is not cut).
+   */
+  tolFun?: { window: number; gain: number; step: number };
   onGeneration?: (gen: number, best: { x: number[]; f: number }, sigma: number) => void;
 }
 
@@ -97,6 +102,8 @@ export async function cmaes(
   const ps = new Array(n).fill(0);
   let best = { x: [...x0], f: Infinity };
   let evaluations = 0;
+  /** The best value after each generation (for tolFun). */
+  const bestByGen: number[] = [];
   const maxGen = opts.maxGenerations ?? 100;
   let gen = 0;
   for (; gen < maxGen; gen++) {
@@ -144,7 +151,13 @@ export async function cmaes(
     B = e.vectors;
     D = e.values.map(Math.sqrt);
     opts.onGeneration?.(gen, best, sigma);
+    bestByGen.push(best.f);
     if (sigma * Math.max(...D) < (opts.tolX ?? 1e-4)) {
+      gen++;
+      break;
+    }
+    const tf = opts.tolFun;
+    if (tf && gen >= tf.window && bestByGen[gen - tf.window] - best.f < tf.gain && sigma * Math.max(...D) < tf.step) {
       gen++;
       break;
     }

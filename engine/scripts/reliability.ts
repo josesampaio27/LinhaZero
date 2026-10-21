@@ -18,7 +18,7 @@ import { PT_CALIBRATION } from "../src/calibration";
 import { createRng } from "../src/random";
 import { DEFAULT_ENSEMBLE } from "../src/scenario";
 import type { EnsembleOptions } from "../src/types";
-import { Pool } from "./calibration-pool";
+import { defaultJobs, Pool } from "./calibration-pool";
 import { addTally, emptyTally, TALLY_BINS, type EnsembleTally } from "./intervals";
 import { FULL_REFERENCE_DIR, REFERENCE_DIR } from "./reference";
 
@@ -64,7 +64,7 @@ const tierB = entries
   .map((e, i) => [e, i] as const)
   .filter(([e]) => (selection ? (selection.locked ?? []).includes(e.fire) : e.tier === "B"))
   .map(([, i]) => i);
-const pool = new Pool(entries.map((e) => ({ fire: e.fire, dir: CASES })));
+const pool = new Pool(entries.map((e) => ({ fire: e.fire, dir: CASES })), Number(text("jobs", String(defaultJobs()))));
 
 const configs = WIND_SCALES.flatMap((w) => SCALES.map((s) => ({ s, w })));
 const ensembleOf = ({ s, w }: { s: number; w: number }): EnsembleOptions => ({

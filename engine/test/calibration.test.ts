@@ -334,6 +334,17 @@ describe("calibration report (engine/reports)", () => {
 
   it("has the fit, the samples and the held-out scores", () => {
     expect(latest.samples.length).toBeGreaterThanOrEqual(10);
+    if (latest.coverage) {
+      // ADR 0069: the coverage score on the selected fires, each held out once (5-fold).
+      expect(latest.provenance.cellSizes).toEqual([100]);
+      expect(latest.coverage.paired.fires).toBeGreaterThanOrEqual(15);
+      const h = latest.coverage.heldOut;
+      for (const k of ["fitted", "current", "physical"])
+        for (const m of ["mixed", "recall", "tversky"]) expect(Number.isFinite(h[k][m])).toBe(true);
+      // Calibrated, the engine covers more of the real fires than the physical model does.
+      expect(h.current.recall).toBeGreaterThan(h.physical.recall);
+      return;
+    }
     expect(latest.heldOut.newFires.fires).toBeGreaterThanOrEqual(20);
     for (const k of ["fitted", "uncalibrated", "current", "legacy"]) {
       expect(Number.isFinite(latest.heldOut.newFires.cost[k])).toBe(true);

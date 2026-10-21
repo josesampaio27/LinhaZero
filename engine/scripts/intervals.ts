@@ -7,7 +7,7 @@
 // assimilation, instead of compounding.
 import type { ModelParams } from "../src/params";
 import { simulate } from "../src/simulate";
-import type { EnsembleOptions, Ignition, PreparedGrid, Scenario, SpreadModel } from "../src/types";
+import type { EnsembleOptions, Ignition, PreparedGrid, Scenario, SpreadModel, WeatherStep } from "../src/types";
 import {
   scenarioOf,
   weatherStepsOf,
@@ -58,9 +58,77 @@ export interface IntervalScore {
   /** True when the fire was spreading freely (fast growth): such intervals weigh 1, the others slowWeight. */
   freeRunning: boolean;
   weight: number;
+  /** New cells burned in both, only in the simulation, only in the observation. */
+  tp: number;
+  fp: number;
+  fn: number;
+  /** Of fp, the cells beyond a held flank (heldFlankZone): not counted by the coverage score. */
+  fpHeld: number;
+  /** A fast run the firefighters could not hold (COVERAGE.anchor): its head speed is scored. */
+  anchor: boolean;
 }
 
 export const MAX_GROWTH_ERROR = Math.log(5);
+
+/**
+ * The coverage score (ADR 0068). The engine simulates fire with no firefighting and the observed fires
+ * were fought, so burning less than the real fire is wrong, while burning more is expected where crews
+ * held it: misses weigh more than extra burn, extra burn costs only beyond a plausible share and only
+ * while the fire ran freely, and the head speed of fast runs no crew could hold anchors the rate.
+ * Fixed before scoring any model with it.
+ */
+export const COVERAGE = {
+  /** Tversky weights of extra burn (fp) and misses (fn): misses cost 4 times as much. */
+  alpha: 0.2,
+  beta: 0.8,
+  /** Weight of the area terms, as the growth error of the interval cost. */
+  areaWeight: 0.5,
+  /** Extra burn beyond this ratio of the observed new area costs (free-running intervals only). */
+  overRatio: 3,
+  /** Fast runs: a PT-FireSprd rate above this (m/min) with a quality flag of at least anchorMinQc. */
+  anchorMinRateMMin: 15,
+  anchorMinQc: 3,
+  /** Weight of the head-speed error |ln(simulated / observed rate)| of the fast runs, per fire. */
+  anchorWeight: 0.5,
+  /** A burning edge with no observed growth within this distance (m) during the interval was held. */
+  heldRadiusM: 150,
+} as const;
+
+/** Tversky index: tp / (tp + α·fp + β·fn); with α = β = ½ it is the Sørensen index. */
+export const tversky = (tp: number, fp: number, fn: number, alpha: number = COVERAGE.alpha, beta: number = COVERAGE.beta) =>
+  tp + alpha * fp + beta * fn > 0 ? tp / (tp + alpha * fp + beta * fn) : 1;
+
+/**
+ * Coverage cost of an interval (0 = perfect): 1 − Tversky of the new cells, plus the area missed and,
+ * in a free-running interval, the extra area beyond COVERAGE.overRatio, each as a capped log ratio
+ * with one hectare added to both sides. Extra burn beyond a held flank is not counted.
+ */
+export function coverageCost(s: IntervalScore, cellHa: number): number {
+  const fp = s.fp - s.fpHeld;
+  const obs = s.tp + s.fn + 1 / cellHa;
+  const sim = s.tp + fp + 1 / cellHa;
+  const miss = Math.min(MAX_GROWTH_ERROR, Math.max(0, Math.log(obs / sim)));
+  const over = s.freeRunning ? Math.min(MAX_GROWTH_ERROR, Math.max(0, Math.log(sim / obs) - Math.log(COVERAGE.overRatio))) : 0;
+  return 1 - tversky(s.tp, fp, s.fn) + COVERAGE.areaWeight * (miss + over);
+}
+
+/** Head-speed error of a fast run: |ln(simulated / observed rate)|, capped at ln 5. */
+export const anchorError = (s: IntervalScore) =>
+  Math.min(MAX_GROWTH_ERROR, Math.abs(Math.log(Math.max(s.simulatedRateMMin, 1e-6) / s.observedRateMMin)));
+
+/** A fire's coverage cost: the weighted mean over its intervals plus the head-speed error of its fast runs. */
+export function weightedCoverageCost(scores: IntervalScore[], cellHa: number): number {
+  let w = 0,
+    sum = 0;
+  for (const s of scores) {
+    w += s.weight;
+    sum += s.weight * coverageCost(s, cellHa);
+  }
+  if (!w) return NaN;
+  const fast = scores.filter((s) => s.anchor);
+  const anchor = fast.length ? fast.reduce((a, s) => a + anchorError(s), 0) / fast.length : 0;
+  return sum / w + COVERAGE.anchorWeight * anchor;
+}
 
 /** Interval cost: (1 − Sørensen of the new cells) + 0.5 × growth error. 0 = perfect. */
 export const intervalCost = (s: IntervalScore) =>
@@ -75,6 +143,12 @@ export function weightedCost(scores: IntervalScore[]): number {
     sum += s.weight * intervalCost(s);
   }
   return w ? sum / w : NaN;
+}
+
+/** From the ignition, over the observation times: mean Tversky (COVERAGE weights) and mean share of the observed burned area also burned (recall). */
+export function fromIgnitionCoverage(at: { tp: number; fp: number; fn: number }[]): { tversky: number; recall: number } {
+  const mean = (f: (a: { tp: number; fp: number; fn: number }) => number) => at.reduce((s, a) => s + f(a), 0) / at.length;
+  return { tversky: mean((a) => tversky(a.tp, a.fp, a.fn)), recall: mean((a) => (a.tp + a.fn ? a.tp / (a.tp + a.fn) : 1)) };
 }
 
 /** Chamfer distance (cells, weights 1 and √2) from every cell to the nearest `source` cell. */
@@ -125,6 +199,22 @@ export function intervalBounds(c: ReferenceCase): [number, number][] {
   return t.slice(1).map((end, k) => [t[k], end]);
 }
 
+/** What an interval restart needs that does not depend on the parameters (cached per case). */
+interface IntervalSetup {
+  ignitions: Ignition[];
+  burnedAtStart: Uint8Array;
+  grid: PreparedGrid;
+  weatherSteps: WeatherStep[];
+  durationMin: number;
+  /** Chamfer distance (cells) from the area burned at the start, computed on first use. */
+  dist?: Float32Array;
+  /** heldFlankZone, computed on first use (null: no held flank). */
+  held?: Uint8Array | null;
+}
+// Per case (one per worker thread): calibration scores the same intervals thousands of times with
+// different parameters, and rebuilding the restart (spent fuel, weather, distances) was a large part of it.
+const setupCache = new WeakMap<ReferenceCase, Map<string, IntervalSetup>>();
+
 /** The scenario that restarts the fire at `startMin` from the area observed burned by then. */
 export function intervalScenario(
   c: ReferenceCase,
@@ -135,8 +225,90 @@ export function intervalScenario(
   weather: WeatherSource = "era5",
   moisture: MoistureModel = "nfdrs",
 ): { scenario: Scenario; burnedAtStart: Uint8Array; grid: PreparedGrid } {
+  const s = intervalSetup(c, startMin, endMin, weather, moisture);
+  return {
+    scenario: {
+      ignition: s.ignitions[0].cell,
+      ignitions: s.ignitions,
+      wind: s.weatherSteps[0].wind,
+      weatherSteps: s.weatherSteps,
+      durationMin: s.durationMin,
+      interventions: [],
+      spreadModel,
+      params,
+    },
+    burnedAtStart: s.burnedAtStart,
+    grid: s.grid,
+  };
+}
+
+const newCellsCache = new WeakMap<ReferenceCase, number[]>();
+/** Cells observed to burn during each interval (intervalBounds), cached per case. */
+export function observedNewCells(c: ReferenceCase): number[] {
+  let k = newCellsCache.get(c);
+  if (!k) {
+    k = intervalBounds(c).map(([a, b]) => {
+      let m = 0;
+      for (let i = 0; i < c.observed.length; i++) if (c.observed[i] > a && c.observed[i] <= b) m++;
+      return m;
+    });
+    newCellsCache.set(c, k);
+  }
+  return k;
+}
+
+/** Distance (cells) of every cell from the area burned at the start of the interval (cached). */
+function startDistance(c: ReferenceCase, startMin: number, endMin: number, weather: WeatherSource, moisture: MoistureModel): Float32Array {
+  const s = intervalSetup(c, startMin, endMin, weather, moisture);
+  return (s.dist ??= distanceFrom(s.burnedAtStart, c.grid.header.rows, c.grid.header.cols));
+}
+
+/**
+ * Cells beyond a held flank during an interval, from the observation alone (ADR 0068): the burning
+ * edge the fire restarts from (the cells observed burning by the start that are not spent) is held
+ * where no cell observed burning during the interval lies within COVERAGE.heldRadiusM of it. A cell
+ * closer to a held part of the edge than to an active one is in the zone: the engine has no
+ * firefighting, so its spread there is not an error. Null when no part of the edge was held.
+ */
+export function heldFlankZone(c: ReferenceCase, startMin: number, endMin: number, weather: WeatherSource = "era5", moisture: MoistureModel = "nfdrs"): Uint8Array | null {
+  const s = intervalSetup(c, startMin, endMin, weather, moisture);
+  if (s.held !== undefined) return s.held;
+  const { rows, cols, cellSize } = c.grid.header;
+  const n = rows * cols;
+  const grown = new Uint8Array(n);
+  for (let i = 0; i < n; i++) if (c.observed[i] > startMin && c.observed[i] <= endMin) grown[i] = 1;
+  const toGrowth = distanceFrom(grown, rows, cols);
+  const radius = COVERAGE.heldRadiusM / cellSize;
+  const held = new Uint8Array(n);
+  const active = new Uint8Array(n);
+  let anyHeld = false;
+  for (const { cell } of s.ignitions) {
+    const i = cell.row * cols + cell.col;
+    if (toGrowth[i] > radius) {
+      held[i] = 1;
+      anyHeld = true;
+    } else active[i] = 1;
+  }
+  if (!anyHeld) return (s.held = null);
+  const toHeld = distanceFrom(held, rows, cols);
+  const toActive = distanceFrom(active, rows, cols);
+  const zone = new Uint8Array(n);
+  for (let i = 0; i < n; i++) if (toHeld[i] < toActive[i]) zone[i] = 1;
+  return (s.held = zone);
+}
+
+function intervalSetup(c: ReferenceCase, startMin: number, endMin: number, weather: WeatherSource, moisture: MoistureModel): IntervalSetup {
+  let byCase = setupCache.get(c);
+  if (!byCase) setupCache.set(c, (byCase = new Map()));
+  const key = `${startMin}|${endMin}|${weather}|${moisture}`;
+  let s = byCase.get(key);
+  if (!s) byCase.set(key, (s = buildIntervalSetup(c, startMin, endMin, weather, moisture)));
+  return s;
+}
+
+function buildIntervalSetup(c: ReferenceCase, startMin: number, endMin: number, weather: WeatherSource, moisture: MoistureModel): IntervalSetup {
   const { header } = c.grid;
-  const base = scenarioOf(c, spreadModel, params);
+  const base = scenarioOf(c, "rothermel");
   const n = header.rows * header.cols;
   // The fire restarts from its active front: the cells observed burning during the previous interval.
   // Ground burned before that is spent: it neither re-ignites nor lets the fire through, so flanks and
@@ -172,18 +344,7 @@ export function intervalScenario(
   }
   const durationMin = endMin - startMin;
   const weatherSteps = weatherStepsOf(c, durationMin, startMin, weather, moisture);
-  return {
-    scenario: {
-      ...base,
-      ignition: ignitions[0].cell,
-      ignitions,
-      wind: weatherSteps[0].wind,
-      weatherSteps,
-      durationMin,
-    },
-    burnedAtStart,
-    grid,
-  };
+  return { ignitions, burnedAtStart, grid, weatherSteps, durationMin };
 }
 
 /** Scores every interval of a fire (see the header of this file). */
@@ -202,18 +363,13 @@ export function scoreIntervals(
     freeOnly = false,
   } = opts;
   const slowWeight = freeOnly ? 0 : (opts.slowWeight ?? 0.25);
-  const { rows, cols, cellSize } = c.grid.header;
+  const { cellSize } = c.grid.header;
   const cellHa = (cellSize * cellSize) / 10_000;
   const bounds = intervalBounds(c);
 
   // Observed growth per interval decides which intervals ran freely: growth (ha/h) at or above the
   // fire's median, or an L2 rate above 5 m/min.
-  const obsNew = bounds.map(([a, b]) => {
-    let k = 0;
-    for (let i = 0; i < c.observed.length; i++)
-      if (c.observed[i] > a && c.observed[i] <= b) k++;
-    return k;
-  });
+  const obsNew = observedNewCells(c);
   const growth = bounds.map(([a, b], k) => (obsNew[k] * cellHa) / ((b - a) / 60));
   const scored = bounds.map((_, k) => obsNew[k] * cellHa >= minNewHa);
   const medianGrowth = percentile(
@@ -238,10 +394,12 @@ export function scoreIntervals(
       g,
       run === undefined ? scenario : { ...scenario, realisation: { seed, run } },
     );
-    const dist = distanceFrom(burnedAtStart, rows, cols);
+    const dist = startDistance(c, startMin, endMin, weather, moisture);
+    const held = heldFlankZone(c, startMin, endMin, weather, moisture);
     let tp = 0,
       fp = 0,
-      fn = 0;
+      fn = 0,
+      fpHeld = 0;
     const dObs: number[] = [],
       dSim: number[] = [];
     for (let i = 0; i < c.observed.length; i++) {
@@ -250,8 +408,10 @@ export function scoreIntervals(
       const s = r.arrivalMin[i] <= dt;
       const b = o > startMin && o <= endMin;
       if (s && b) tp++;
-      else if (s) fp++;
-      else if (b) fn++;
+      else if (s) {
+        fp++;
+        if (held?.[i]) fpHeld++;
+      } else if (b) fn++;
       if (s) dSim.push(dist[i] * cellSize);
       if (b) dObs.push(dist[i] * cellSize);
     }
@@ -277,6 +437,11 @@ export function scoreIntervals(
       l2RateMMin: l2Rate,
       freeRunning,
       weight: freeRunning ? 1 : slowWeight,
+      tp,
+      fp,
+      fn,
+      fpHeld,
+      anchor: l2Rate !== null && l2Rate > COVERAGE.anchorMinRateMMin && (l2?.qc ?? 0) >= COVERAGE.anchorMinQc,
     });
   });
   return out;
@@ -317,8 +482,8 @@ export function brierIntervals(
       const r = simulate(built.grid, { ...built.scenario, realisation: { seed, run } });
       for (let i = 0; i < counts.length; i++) if (r.arrivalMin[i] <= dt) counts[i]++;
     }
-    const { rows, cols, cellSize } = c.grid.header;
-    const dist = distanceFrom(burnedAtStart!, rows, cols);
+    const { cellSize } = c.grid.header;
+    const dist = startDistance(c, startMin, endMin, weather, moisture);
     let reach = 0;
     for (let i = 0; i < counts.length; i++)
       if (c.observed[i] > startMin && c.observed[i] <= endMin) reach = Math.max(reach, dist[i]);
@@ -388,7 +553,7 @@ export function ensembleIntervals(
   // Free-running intervals as in scoreIntervals: growth at or above the fire's median, or L2 > 5 m/min.
   const { cellSize: cs } = c.grid.header;
   const bounds = intervalBounds(c);
-  const obsNew = bounds.map(([a, b]) => c.observed.reduce((k, o) => (o > a && o <= b ? k + 1 : k), 0));
+  const obsNew = observedNewCells(c);
   const growth = bounds.map(([a, b], k) => (obsNew[k] * cs * cs) / ((b - a) / 60));
   const csHa = (cs * cs) / 10_000;
   const scoredGrowth = growth.filter((_, k) => obsNew[k] * csHa >= minNewHa).sort((x, y) => x - y);
@@ -401,8 +566,8 @@ export function ensembleIntervals(
     const { scenario, burnedAtStart, grid: g } = intervalScenario(c, startMin, endMin, opts.spreadModel ?? "rothermel", params, weather, moisture);
     const r = simulate(g, { ...scenario, ensemble });
     const p = r.burnProbability!;
-    const { rows, cols, cellSize } = c.grid.header;
-    const dist = distanceFrom(burnedAtStart, rows, cols);
+    const { cellSize } = c.grid.header;
+    const dist = startDistance(c, startMin, endMin, weather, moisture);
     let reach = 0;
     for (let i = 0; i < p.length; i++)
       if (c.observed[i] > startMin && c.observed[i] <= endMin) reach = Math.max(reach, dist[i]);
@@ -480,21 +645,34 @@ export function ensembleFromIgnition(
   ensemble: EnsembleOptions,
   opts: IntervalOptions & { maxTimes?: number; firstOnly?: boolean } = {},
 ): EnsembleTally {
+  const parts = ensembleFromIgnitionParts(c, params, ensemble, opts);
+  return opts.firstOnly ? parts.early : parts.fromIgnition;
+}
+
+/**
+ * ensembleFromIgnition at the picked times and at the first observation ("early", firstOnly), from one
+ * ensemble run to the last of them: arrivals before a time do not depend on how long the runs go on.
+ */
+export function ensembleFromIgnitionParts(
+  c: ReferenceCase,
+  params: Partial<ModelParams> | undefined,
+  ensemble: EnsembleOptions,
+  opts: IntervalOptions & { maxTimes?: number } = {},
+): { fromIgnition: EnsembleTally; early: EnsembleTally } {
   const { weather = "era5", moisture = "nfdrs", maxTimes = 4 } = opts;
   const times = c.observationMinutes;
-  const pick = opts.firstOnly
-    ? times.slice(0, 1)
-    : times.length <= maxTimes
-      ? times
-      : Array.from({ length: maxTimes }, (_, k) => times[Math.round(((k + 1) * times.length) / maxTimes) - 1]);
+  const pick =
+    times.length <= maxTimes ? times : Array.from({ length: maxTimes }, (_, k) => times[Math.round(((k + 1) * times.length) / maxTimes) - 1]);
   const { scenario: first, burnedAtStart } = intervalScenario(c, 0, times[0], opts.spreadModel ?? "rothermel", params, weather, moisture);
-  const { rows, cols, cellSize } = c.grid.header;
-  const dist = distanceFrom(burnedAtStart, rows, cols);
-  let t = emptyTally();
-  for (const atMin of pick) {
-    const weatherSteps = weatherStepsOf(c, atMin, 0, weather, moisture);
-    const r = simulate(c.grid, { ...first, durationMin: atMin, weatherSteps, wind: weatherSteps[0].wind, ensemble });
-    const p = r.burnProbability!;
+  const { cellSize } = c.grid.header;
+  const dist = startDistance(c, 0, times[0], weather, moisture);
+  const at = [times[0], ...pick];
+  const lastMin = Math.max(...at);
+  const weatherSteps = weatherStepsOf(c, lastMin, 0, weather, moisture);
+  const r = simulate(c.grid, { ...first, durationMin: lastMin, weatherSteps, wind: weatherSteps[0].wind, ensemble, probabilityAtMin: at });
+  const tallyAt = (k: number) => {
+    const atMin = at[k];
+    const p = r.burnProbabilityAt![k];
     let reach = 0;
     for (let i = 0; i < p.length; i++) if (c.observed[i] > 0 && c.observed[i] <= atMin) reach = Math.max(reach, dist[i]);
     const domain = 2 * reach + 500 / cellSize;
@@ -515,9 +693,11 @@ export function ensembleFromIgnition(
       }
       if (p[i] >= 0.5) u.likely++;
     }
-    t = addTally(t, u);
-  }
-  return t;
+    return u;
+  };
+  let fromIgnition = emptyTally();
+  for (let k = 1; k < at.length; k++) fromIgnition = addTally(fromIgnition, tallyAt(k));
+  return { fromIgnition, early: addTally(emptyTally(), tallyAt(0)) };
 }
 
 

@@ -20,12 +20,14 @@ export function buildInterventionLayers(
   interventions: Intervention[],
   rows: number,
   cols: number,
+  /** A slowdown of every cell (calibration only, ModelParams.bgSuppression); drawn zones still win where stronger. */
+  background?: { factor: number; startMin: number },
 ): InterventionLayers {
   const n = rows * cols;
   const containStart = new Float32Array(n).fill(Infinity);
   const containWidth = new Float32Array(n).fill(NaN);
-  const slowFactor = new Float32Array(n).fill(1);
-  const slowStart = new Float32Array(n).fill(Infinity);
+  const slowFactor = new Float32Array(n).fill(background ? Math.max(0, background.factor) : 1);
+  const slowStart = new Float32Array(n).fill(background ? background.startMin : Infinity);
   for (const iv of interventions) {
     for (const { row, col } of iv.cells) {
       if (row < 0 || col < 0 || row >= rows || col >= cols) continue;

@@ -96,6 +96,14 @@ export interface ModelParams {
    * (Copernicus GLO-30) is a surface model: tree and building edges add slope that is not terrain.
    */
   demSmoothM: number;
+  /**
+   * Calibration only (ADR 0068): firefighting everywhere from minute 0, as an "Ataque" with this rate
+   * factor on every cell, losing its effect with the fire's intensity as an attack does. It stands for
+   * the firefighting of the real fires the calibration compares with, so the physical parameters need
+   * not absorb it. 1 = none; the app and the server never set it (the engine simulates fire with no
+   * firefighting other than what is drawn, ADR 0057).
+   */
+  bgSuppression: number;
 }
 
 export const DEFAULT_PARAMS: ModelParams = {
@@ -125,6 +133,7 @@ export const DEFAULT_PARAMS: ModelParams = {
   windLimit: 1,
   crownRatio: 1,
   demSmoothM: 0,
+  bgSuppression: 1,
 };
 
 /** The spread factor of a fuel group (no group: rosAdj alone). */
@@ -186,4 +195,5 @@ export const PARAM_RANGES: Record<keyof ModelParams, [number, number]> = {
   windLimit: [0, 2],
   crownRatio: [0.1, 1],
   demSmoothM: [0, 500],
+  bgSuppression: [0.05, 1],
 };

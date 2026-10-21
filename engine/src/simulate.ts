@@ -7,7 +7,7 @@ import { createRng, hashNormal, hashRandom, RANDOM_PURPOSE } from "./random";
 import { DEFAULT_MOISTURE, type FuelMoisture, type SurfaceBase } from "./rothermel";
 import { computeArrival, type SpreadInput } from "./spread";
 import { fuelBases, RothermelRates } from "./surface";
-import type { CellRef, PreparedGrid, RunMetrics, Scenario, SimulationResult, WeatherStep } from "./types";
+import type { CellRef, Ignition, PreparedGrid, RunMetrics, Scenario, SimulationResult, WeatherStep } from "./types";
 
 const crownOf = (p: ModelParams) => ({ enabled: p.crownFire >= 0.5, rateAdj: p.crownAdj });
 const terrainOptionsOf = (p: ModelParams) => ({ crownRatio: p.crownRatio, demSmoothM: p.demSmoothM });
@@ -17,6 +17,22 @@ function withDeadOffset(m: FuelMoisture, offset: number): FuelMoisture {
   if (!offset) return m;
   const d = (v: number) => Math.max(0.01, v + offset);
   return { ...m, d1: d(m.d1), d10: d(m.d10), d100: d(m.d100) };
+}
+
+/**
+ * The ignited cells a run starts from. When none of the given cells can burn (an observed ignition
+ * zone that falls on a road at a coarse grid, a burned area drawn over one), the fire starts on the
+ * burnable cell nearest the reference ignition (200 m), as a point ignition does: otherwise there would
+ * be no fire at all.
+ */
+function startingIgnitions(grid: PreparedGrid, scenario: Scenario): Ignition[] | undefined {
+  const list = scenario.ignitions;
+  if (!list?.length) return list;
+  const { rows, cols } = grid.header;
+  const burns = ({ cell: { row, col } }: Ignition) => row >= 0 && col >= 0 && row < rows && col < cols && grid.baseRate[row * cols + col] > 0;
+  if (list.some(burns)) return list;
+  const near = nearestBurnable(grid, scenario.ignition);
+  return near ? [{ cell: near, t0Min: Math.min(...list.map((x) => x.t0Min)) }] : list;
 }
 
 /**
@@ -35,7 +51,13 @@ function withDeadOffset(m: FuelMoisture, offset: number): FuelMoisture {
  */
 export function simulate(grid: PreparedGrid, scenario: Scenario): SimulationResult {
   const { rows, cols } = grid.header;
-  const layers = buildInterventionLayers(scenario.interventions, rows, cols);
+  const bg = scenario.params?.bgSuppression;
+  const layers = buildInterventionLayers(
+    scenario.interventions,
+    rows,
+    cols,
+    scenario.spreadModel === "rothermel" && bg !== undefined && bg < 1 ? { factor: bg, startMin: 0 } : undefined,
+  );
   const heap = new MinHeap(rows * cols);
   const gustShare = scenario.params?.gustShare ?? DEFAULT_PARAMS.gustShare;
   // Effective wind: the mean plus a share of the gust, where the weather has one.
@@ -60,7 +82,7 @@ export function simulate(grid: PreparedGrid, scenario: Scenario): SimulationResu
   const base: SpreadInput = {
     // A point ignition on a road or a non-burnable cell starts on the nearest burnable cell (200 m).
     ignition: scenario.ignitions?.length ? scenario.ignition : (nearestBurnable(grid, scenario.ignition) ?? scenario.ignition),
-    ignitions: scenario.ignitions,
+    ignitions: startingIgnitions(grid, scenario),
     windDirectionDeg: first.wind.directionDeg,
     windSpeedMs: first.wind.speedMs,
     durationMin: scenario.durationMin,
@@ -145,6 +167,8 @@ export function simulate(grid: PreparedGrid, scenario: Scenario): SimulationResu
 
   const rng = createRng(ens.seed);
   const counts = new Uint16Array(rows * cols);
+  const atMin = scenario.probabilityAtMin ?? [];
+  const countsAt = atMin.map(() => new Uint16Array(rows * cols));
   const runs: RunMetrics[] = [];
   const cellHa = (grid.header.cellSize * grid.header.cellSize) / 10000;
   for (let run = 0; run < ens.runs; run++) {
@@ -168,6 +192,7 @@ export function simulate(grid: PreparedGrid, scenario: Scenario): SimulationResu
     let burned = 0;
     let buildingsReached = 0;
     for (let i = 0; i < a.length; i++) {
+      for (let k = 0; k < atMin.length; k++) if (a[i] <= atMin[k]) countsAt[k][i]++;
       if (!(a[i] <= base.durationMin)) continue;
       counts[i]++;
       burned++;
@@ -178,5 +203,12 @@ export function simulate(grid: PreparedGrid, scenario: Scenario): SimulationResu
   }
   const burnProbability = new Float32Array(rows * cols);
   for (let i = 0; i < counts.length; i++) burnProbability[i] = counts[i] / ens.runs;
-  return { arrivalMin, burnProbability, runs, metrics, ...(intensityKwM && { intensityKwM }) };
+  const burnProbabilityAt = atMin.length
+    ? countsAt.map((ck) => {
+        const p = new Float32Array(ck.length);
+        for (let i = 0; i < ck.length; i++) p[i] = ck[i] / ens.runs;
+        return p;
+      })
+    : undefined;
+  return { arrivalMin, burnProbability, runs, metrics, ...(burnProbabilityAt && { burnProbabilityAt }), ...(intensityKwM && { intensityKwM }) };
 }

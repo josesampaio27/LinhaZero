@@ -1,5 +1,13 @@
 # Plano: recalibrar a grelha de 30 m
 
+> **Estado (2026-10-21):** substituído pela [ADR 0068](decisoes/0068-calibracao-por-cobertura-30-m.md).
+>
+> - **O objetivo combinado** usa a pontuação de cobertura em vez do Sørensen, que é simétrico.
+> - **A regra de adoção** muda: decidem os 19 fogos, pelo custo combinado, a cobertura desde a ignição e a velocidade da cabeça.
+> - **O segundo ponto de partida** é o vento ×2, não os valores de 100 m.
+>
+> O resto deste plano (mesmos fogos, partes e semente; separar as alavancas; mapa de cenários) mantém-se.
+
 Para fazer mais tarde. Hoje (2026-10-20) a grelha de 30 m usa os mesmos valores da de 100 m (`PT_CALIBRATION_30M = PT_CALIBRATION`), mantidos com provas a 30 m ([ADR 0064](decisoes/0064-calibracao-da-grelha-de-30-m.md), Resultados). Este plano diz o que falta para a grelha de 30 m ter uma calibração própria.
 
 ## Porque é preciso

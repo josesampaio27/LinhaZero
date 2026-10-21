@@ -27,6 +27,9 @@
 
 - **O que isto mostra:**
   - Recalibrar só no fogo livre deixa a velocidade em ×0,53. Logo, o ×0,5 da calibração não é sobretudo combate absorvido.
+    - **Nota (2026-10-21, [ADR 0068](0068-calibracao-por-cobertura-30-m.md)):** a prova é fraca.
+      - Os intervalos "livres" eram os de crescimento acima da mediana do próprio fogo, e não os que o combate não travou.
+      - Dentro deles os flancos também eram travados, e a pontuação era simétrica. Um ajuste assim continua a imitar o combate.
   - Os fogos reais pedem uma cabeça mais rápida e flancos mais lentos (mais alongados) do que o modelo dá.
   - Tudo o que acelera a cabeça acelera também os flancos e as horas calmas. O ganho nas corridas rápidas paga-se no resto.
 
