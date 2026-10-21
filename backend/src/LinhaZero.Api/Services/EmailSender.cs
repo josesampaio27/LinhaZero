@@ -64,7 +64,11 @@ public sealed class SmtpEmailSender(IOptions<SmtpOptions> options, ILogger<SmtpE
         message.Subject = subject;
         message.Body = new TextPart("plain") { Text = text };
 
-        using var smtp = new SmtpClient { Timeout = 10_000 };
+        // No certificate revocation check: it fetches the CA's revocation list over plain HTTP (port 80), which the
+        // cluster's network rules don't open (only 587, infra/k8s/network-policies.yaml). With it on, every TLS handshake
+        // with Brevo failed after ~15 s. The certificate itself is still validated, as Keycloak does (it doesn't check
+        // revocation either).
+        using var smtp = new SmtpClient { Timeout = 10_000, CheckCertificateRevocation = false };
         var security = _smtp.Ssl ? SecureSocketOptions.SslOnConnect : _smtp.StartTls ? SecureSocketOptions.StartTls : SecureSocketOptions.None;
         await smtp.ConnectAsync(_smtp.Host, _smtp.Port, security, ct);
         if (_smtp.Auth)
