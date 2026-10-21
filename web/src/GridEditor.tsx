@@ -49,6 +49,8 @@ const PARAM_LABEL: Record<keyof ModelParams, string> = {
   protectFactor: "Fator de Proteger zona",
   attackFullKwM: "Ataque eficaz até (kW/m, Rothermel)",
   attackNoneKwM: "Ataque sem efeito a partir de (kW/m, Rothermel)",
+  aerialFullKwM: "Descarga aérea segura sempre até (kW/m, Rothermel)",
+  aerialNoneKwM: "Descarga aérea nunca segura a partir de (kW/m, Rothermel)",
   lineWidthM: "Largura das linhas de contenção (m, Rothermel)",
   holdWidthPerFlame: "Linha segura a 50% com largura = N × chama (Rothermel)",
   holdSteepness: "Inclinação da probabilidade de a linha segurar (Rothermel)",

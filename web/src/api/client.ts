@@ -983,11 +983,14 @@ export interface IncidentsResponse {
     source: SourceStatus;
 }
 
-/** One intervention, already rasterised into cells by the browser. */
+/** One intervention, already rasterised into cells by the browser. `kind`: containmentLine, suppression, protectZone, aerialDrop or backfire. `endMin`: when it stops acting (absent = never). `litCells`: the cells a backfire sets alight (docs/decisoes/0070). */
 export interface InterventionCells {
     cells: Cell[];
     startMin?: number;
     rateFactor?: number | null;
+    kind?: string | null;
+    endMin?: number | null;
+    litCells?: Cell[] | null;
 
     [key: string]: any;
 }

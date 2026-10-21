@@ -232,13 +232,26 @@ export function MapView(props: Props) {
           "line-width": 2,
         },
       });
+      // Lines by kind: containment lines dark blue, water drops light blue, retardant red; a backfire's
+      // control line dashed orange (dashes cannot vary per feature, so it has its own layer).
       map.addLayer({
         id: "drawings-line",
         type: "line",
         source: "drawings",
-        filter: ["==", ["geometry-type"], "LineString"],
+        filter: ["all", ["==", ["geometry-type"], "LineString"], ["!=", ["get", "kind"], "backfire"]],
         layout: { "line-cap": "round", "line-join": "round" },
-        paint: { "line-color": ["match", ["get", "kind"], "addBarrier", "#334155", "#1e3a8a"], "line-width": 4 },
+        paint: {
+          "line-color": ["match", ["get", "kind"], "addBarrier", "#334155", "aerialDrop", "#0ea5e9", "aerialDropRetardant", "#dc2626", "#1e3a8a"],
+          "line-width": ["match", ["get", "kind"], "aerialDrop", 7, "aerialDropRetardant", 7, 4],
+          "line-opacity": ["match", ["get", "kind"], "aerialDrop", 0.85, "aerialDropRetardant", 0.85, 1],
+        },
+      });
+      map.addLayer({
+        id: "drawings-backfire",
+        type: "line",
+        source: "drawings",
+        filter: ["all", ["==", ["geometry-type"], "LineString"], ["==", ["get", "kind"], "backfire"]],
+        paint: { "line-color": "#ea580c", "line-width": 4, "line-dasharray": [1.5, 1] },
       });
       map.addLayer({
         id: "draft-line",

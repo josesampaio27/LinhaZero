@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type maplibregl from "maplibre-gl";
 import {
+  AERIAL_DEFAULT_MIN,
   applyVariant,
   buildScenario,
   cellAt,
@@ -341,7 +342,9 @@ export function App() {
   }, [grid, results, t, durationMin, viewMode]);
 
   const shapes = useMemo(() => {
-    const of = (items: DrawnIntervention[]): MapShape[] => items.map((iv) => ({ kind: iv.kind, line: isLineKind(iv.kind), coords: iv.coords }));
+    // Retardant drops get their own colour on the map.
+    const mapKind = (iv: DrawnIntervention) => (iv.kind === "aerialDrop" && iv.agent === "retardant" ? "aerialDropRetardant" : iv.kind);
+    const of = (items: DrawnIntervention[]): MapShape[] => items.map((iv) => ({ kind: mapKind(iv), line: isLineKind(iv.kind), coords: iv.coords }));
     const burned: MapShape[] = burnedArea ? [{ kind: "burned", line: false, coords: burnedArea }] : [];
     return { A: [...burned, ...of(decisions.A)], B: [...burned, ...of(decisions.B)] };
   }, [decisions, burnedArea]);
@@ -368,7 +371,15 @@ export function App() {
     }
     const d = tool.decision;
     // No rateFactor: zones take the default of their kind when simulated, which a grid variant can change.
-    const item: DrawnIntervention = { id: newId(), kind: draft.kind as InterventionKind, startMin: 0, coords };
+    // A drop starts as water, with its default duration (changed on its card).
+    const kind = draft.kind as InterventionKind;
+    const item: DrawnIntervention = {
+      id: newId(),
+      kind,
+      startMin: 0,
+      ...(kind === "aerialDrop" && { agent: "water" as const, endMin: AERIAL_DEFAULT_MIN.water }),
+      coords,
+    };
     setDecisions((prev) => ({ ...prev, [d]: [...prev[d], item] }));
     setDraft(null);
     setTool({ type: "none" });

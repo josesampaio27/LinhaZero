@@ -71,7 +71,7 @@ public class RunsValidationTests
     {
         Assert.Contains("fora da grelha", RunRequestParser.Validate(Ok with { Decisions = new([], [new([new(-5, 99999)])]) }, Grid));
         Assert.Contains("fora da grelha", RunRequestParser.Validate(Ok with { Decisions = new([new([new(0, 0), new(157, 0)])], []) }, Grid));
-        Assert.Null(RunRequestParser.Validate(Ok with { Decisions = new([new([new(0, 0), new(156, 151)], 30, 0.2)], []) }, Grid));
+        Assert.Null(RunRequestParser.Validate(Ok with { Decisions = new([new([new(0, 0), new(156, 151)], 30, 0.2, "suppression")], []) }, Grid));
         Assert.Contains("rateFactor", RunRequestParser.Validate(Ok with { Decisions = new([new([new(0, 0)], 30, 1.5)], []) }, Grid));
         Assert.Contains("startMin", RunRequestParser.Validate(Ok with { Decisions = new([new([new(0, 0)], -1)], []) }, Grid));
     }
@@ -94,8 +94,26 @@ public class RunsValidationTests
     {
         var huge = new InterventionCells(Enumerable.Repeat(new Cell(0, 0), 157 * 152 + 1).ToList());
         Assert.Contains("mais células", RunRequestParser.Validate(Ok with { Decisions = new([], [huge]) }, Grid));
-        var many = Enumerable.Repeat(new InterventionCells([new(0, 0)]), 51).ToList();
+        var many = Enumerable.Repeat(new InterventionCells([new(0, 0)], Kind: "containmentLine"), 51).ToList();
         Assert.Contains("mais de 50", RunRequestParser.Validate(Ok with { Decisions = new(many, []) }, Grid));
         Assert.Null(RunRequestParser.Validate(Ok with { Decisions = new(many.Take(50).ToList(), []) }, Grid));
+    }
+
+    [Fact]
+    public void Kind_end_and_backfire_cells_are_checked()
+    {
+        string? Check(InterventionCells iv) => RunRequestParser.Validate(Ok with { Decisions = new([iv], []) }, Grid);
+        List<Cell> cells = [new(10, 10), new(10, 11)];
+        Assert.Contains("tipo desconhecido", Check(new(cells)));
+        Assert.Contains("tipo desconhecido", Check(new(cells, Kind: "napalm")));
+        Assert.Null(Check(new(cells, 30, Kind: "aerialDrop", EndMin: 50)));
+        Assert.Null(Check(new(cells, 30, 0.2, "suppression", EndMin: 90)));
+        Assert.Contains("endMin", Check(new(cells, 30, Kind: "aerialDrop", EndMin: 30)));
+        Assert.Contains("endMin", Check(new(cells, 30, Kind: "aerialDrop", EndMin: 481)));
+        Assert.Contains("endMin", Check(new(cells, 30, Kind: "aerialDrop", EndMin: double.NaN)));
+        Assert.Null(Check(new(cells, 30, Kind: "backfire", LitCells: [new(9, 10), new(9, 11)])));
+        Assert.Contains("litCells", Check(new(cells, 30, Kind: "backfire")));
+        Assert.Contains("litCells", Check(new(cells, 30, Kind: "backfire", LitCells: [new(157, 0)])));
+        Assert.Contains("litCells", Check(new(cells, 30, Kind: "backfire", LitCells: [null!])));
     }
 }

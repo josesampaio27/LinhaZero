@@ -61,6 +61,35 @@ const exampleRequest = {
           { row: 105, col: 93 },
         ],
       },
+      // Water dropped across the fire's path, wearing off after 20 minutes.
+      {
+        kind: "aerialDrop",
+        startMin: 45,
+        endMin: 65,
+        cells: [
+          { row: 108, col: 87 },
+          { row: 108, col: 88 },
+          { row: 108, col: 89 },
+          { row: 108, col: 90 },
+        ],
+      },
+      // A backfire lit from a line further south, on its north side (toward the fire).
+      {
+        kind: "backfire",
+        startMin: 90,
+        cells: [
+          { row: 112, col: 84 },
+          { row: 112, col: 85 },
+          { row: 112, col: 86 },
+          { row: 112, col: 87 },
+        ],
+        litCells: [
+          { row: 111, col: 84 },
+          { row: 111, col: 85 },
+          { row: 111, col: 86 },
+          { row: 111, col: 87 },
+        ],
+      },
     ],
     B: [],
   },

@@ -289,7 +289,7 @@ a.button { color: inherit; text-decoration: none; }
 .decision-tabs button.active { background: var(--sunk); color: var(--ink); box-shadow: inset 0 -3px 0 var(--ink); }
 .actions { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
 .action {
-  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "icon text del" ". start start" ". width width";
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; grid-template-areas: "icon text del" ". start start" ". end end" ". width width";
   align-items: center; gap: 6px 10px; padding: 8px 4px 10px 10px; border: 1px solid var(--line); border-radius: 12px;
 }
 .action > .action-icon { grid-area: icon; }
@@ -297,6 +297,9 @@ a.button { color: inherit; text-decoration: none; }
 .action-text small, .add-action small { font-size: 14px; font-weight: 400; color: var(--muted); }
 .action > .icon-btn { grid-area: del; color: var(--muted); }
 .action-start { grid-area: start; display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+.action-end { grid-area: end; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
+.action-start > span:first-child, .action-end > span:first-child { min-width: 5.5em; }
+.action-end .warn { flex-basis: 100%; color: var(--bad); }
 .action-width { grid-area: width; display: flex; align-items: center; gap: 10px; font-size: 14px; color: var(--muted); }
 .action-width select { min-height: 40px; }
 .action-icon { width: 34px; height: 34px; flex: none; display: grid; place-items: center; border-radius: 8px; }

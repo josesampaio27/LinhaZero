@@ -83,6 +83,11 @@ export function simulate(grid: PreparedGrid, scenario: Scenario): SimulationResu
     // A point ignition on a road or a non-burnable cell starts on the nearest burnable cell (200 m).
     ignition: scenario.ignitions?.length ? scenario.ignition : (nearestBurnable(grid, scenario.ignition) ?? scenario.ignition),
     ignitions: startingIgnitions(grid, scenario),
+    // Backfires: their cells are set alight at the backfire's start, in every run (no random draw, so
+    // the pairing of A and B holds).
+    litIgnitions: scenario.interventions.flatMap((iv) =>
+      iv.kind === "backfire" ? iv.litCells.map((cell) => ({ cell, t0Min: iv.startMin })) : [],
+    ),
     windDirectionDeg: first.wind.directionDeg,
     windSpeedMs: first.wind.speedMs,
     durationMin: scenario.durationMin,

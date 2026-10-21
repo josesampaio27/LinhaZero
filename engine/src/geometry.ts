@@ -53,6 +53,57 @@ function traverseSegment(p0: GridPoint, p1: GridPoint, visit: (c: number, r: num
   }
 }
 
+/**
+ * Which side of a polyline a point is on: +1 or -1 by the cross product with the nearest segment, 0 on
+ * the line (or with fewer than 2 points).
+ */
+export function sideOfPolyline(points: GridPoint[], p: GridPoint): number {
+  let best = Infinity;
+  let side = 0;
+  for (let i = 1; i < points.length; i++) {
+    const a = points[i - 1];
+    const b = points[i];
+    const dx = b.x - a.x;
+    const dy = b.y - a.y;
+    const len2 = dx * dx + dy * dy;
+    if (len2 === 0) continue;
+    const t = Math.max(0, Math.min(1, ((p.x - a.x) * dx + (p.y - a.y) * dy) / len2));
+    const ex = a.x + t * dx - p.x;
+    const ey = a.y + t * dy - p.y;
+    const d2 = ex * ex + ey * ey;
+    if (d2 < best) {
+      best = d2;
+      side = Math.sign(dx * (p.y - a.y) - dy * (p.x - a.x));
+    }
+  }
+  return side;
+}
+
+/**
+ * The cells a backfire sets alight (ADR 0070): the 4-neighbours of its control line's cells that are not
+ * on the line and lie on the same side of the drawn line as `toward` (the fire). Empty when `toward`
+ * is on the line itself.
+ */
+export function backfireLitCells(lineCells: CellRef[], points: GridPoint[], toward: GridPoint, rows: number, cols: number): CellRef[] {
+  const side = sideOfPolyline(points, toward);
+  if (side === 0) return [];
+  const onLine = new Set(lineCells.map((c) => c.row * cols + c.col));
+  const seen = new Set<number>();
+  const out: CellRef[] = [];
+  for (const { row, col } of lineCells) {
+    for (const [dr, dc] of [[-1, 0], [1, 0], [0, -1], [0, 1]] as const) {
+      const r = row + dr;
+      const c = col + dc;
+      if (r < 0 || c < 0 || r >= rows || c >= cols) continue;
+      const key = r * cols + c;
+      if (onLine.has(key) || seen.has(key)) continue;
+      seen.add(key);
+      if (sideOfPolyline(points, { x: c + 0.5, y: r + 0.5 }) === side) out.push({ row: r, col: c });
+    }
+  }
+  return out;
+}
+
 /** Rasterizes a polygon into the cells whose centre lies inside it, plus the cells its outline crosses. */
 export function rasterizePolygon(ring: GridPoint[], rows: number, cols: number): CellRef[] {
   if (ring.length === 0) return [];

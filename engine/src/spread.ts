@@ -16,6 +16,11 @@ export interface SpreadInput {
   ignition: CellRef;
   /** Several ignited cells, each from its own minute (e.g. an observed perimeter); replaces `ignition`. */
   ignitions?: Ignition[];
+  /**
+   * Cells people set alight (backfires), each from its own minute, on top of `ignitions` / `ignition`.
+   * Kept apart so an ensemble run can still move the fire's own ignition point.
+   */
+  litIgnitions?: Ignition[];
   /** Direction the wind blows FROM, degrees clockwise from north. */
   windDirectionDeg: number;
   /** Wind speed, m/s. */
@@ -78,7 +83,7 @@ export function computeArrival(
 ): Float32Array {
   const { rows, cols, cellSize } = grid.header;
   const { baseRate, elevation } = grid;
-  const { containStart, slowFactor, slowStart } = layers;
+  const { containStart, containEnd, slowFactor, slowStart, slowEnd, dropStart, dropEnd } = layers;
   const duration = input.durationMin;
   const { kWind, kSlope, minSlopeFactor } = { ...DEFAULT_PARAMS, ...input.params };
   if (input.rates) return computeArrivalRothermel(grid, input, layers, heap);
@@ -103,7 +108,7 @@ export function computeArrival(
   let next = 0; // index of the next weather change
 
   heap.clear();
-  for (const { cell, t0Min } of input.ignitions ?? [{ cell: input.ignition, t0Min: 0 }]) {
+  for (const { cell, t0Min } of [...(input.ignitions ?? [{ cell: input.ignition, t0Min: 0 }]), ...(input.litIgnitions ?? [])]) {
     const { row, col } = cell;
     if (row < 0 || col < 0 || row >= rows || col >= cols) continue;
     const i = row * cols + col;
@@ -133,11 +138,12 @@ export function computeArrival(
       const tanPhi = (elevation[j] - zi) / dist[k];
       const slopeF = Math.max(minSlopeFactor, Math.exp(kSlope * tanPhi));
       let rate = base * windF[k] * slopeF;
-      if (slowStart[j] <= t) rate *= slowFactor[j];
+      if (slowStart[j] <= t && t < slowEnd[j]) rate *= slowFactor[j];
       if (rate <= 0) continue;
       const ta = t + dist[k] / rate;
       if (ta >= arrival[j] || ta > duration) continue;
-      if (containStart[j] <= ta) continue;
+      // The legacy model has no intensity: a line or an aerial drop in force always holds.
+      if ((containStart[j] <= ta && ta < containEnd[j]) || (dropStart[j] <= ta && ta < dropEnd[j])) continue;
       arrival[j] = ta;
       heap.push(ta, j);
     }

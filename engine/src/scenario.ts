@@ -1,12 +1,12 @@
 // Scenario files ("Guardar cenário", web/public/scenarios/*.json) and their conversion into engine
 // scenarios. The web app, the Node scripts and the tests all use this module, so they simulate the
 // same thing. Errors are user-facing, so their messages are in Portuguese.
-import { rasterizePolygon, rasterizePolyline } from "./geometry";
+import { backfireLitCells, rasterizePolygon, rasterizePolyline } from "./geometry";
 import { gridToProjected, projectedToGrid } from "./grid";
 import { calibrationFor } from "./calibration";
 import { DEFAULT_PARAMS, type ModelParams } from "./params";
 import { SIZE_CLASSES, type FuelMoisture } from "./rothermel";
-import type { CellRef, EnsembleOptions, GridHeader, Intervention, InterventionKind, Scenario, SpreadModel, WeatherStep, Wind } from "./types";
+import { INTERVENTION_KINDS, type CellRef, type EnsembleOptions, type GridHeader, type Intervention, type InterventionKind, type Scenario, type SpreadModel, type WeatherStep, type Wind } from "./types";
 import { parseGridVariant, type GridVariant } from "./variant";
 
 export type DecisionId = "A" | "B";
@@ -19,11 +19,26 @@ export interface DrawnIntervention {
   id: string;
   kind: InterventionKind;
   startMin: number;
+  /** Minute the action stops (a line is no longer held, the crews leave, a drop wears off); absent = never. */
+  endMin?: number;
   rateFactor?: number;
-  /** Containment lines: width in metres (Rothermel breach); absent = the default width. */
+  /** Containment lines and backfire control lines: width in metres (Rothermel breach); absent = the default width. */
   widthM?: number;
+  /** Aerial drops: what is dropped; sets the default end (AERIAL_DEFAULT_MIN). Absent = water. */
+  agent?: AerialAgent;
   coords: ProjectedPoint[];
 }
+
+export type AerialAgent = "water" | "retardant";
+
+/**
+ * How long an aerial drop acts when it does not set its own end, minutes (ADR 0070): water evaporates
+ * within tens of minutes in fire weather; long-term retardant keeps working after it dries.
+ */
+export const AERIAL_DEFAULT_MIN: Record<AerialAgent, number> = { water: 20, retardant: 120 }; // PROVISÓRIO
+
+/** Actions drawn as a line (the rest are zones, drawn as polygons). */
+export const isLineKind = (k: InterventionKind) => k === "containmentLine" || k === "backfire" || k === "aerialDrop";
 
 /** Everything a comparison needs besides the grid. */
 export interface ScenarioInputs {
@@ -64,8 +79,6 @@ export interface SavedScenario extends ScenarioInputs {
 /** Ensemble used when uncertainty is on. The fixed seed is what pairs run k of A with run k of B. */
 export const DEFAULT_ENSEMBLE: EnsembleOptions = { runs: 30, windDirJitterDeg: 20, windSpeedJitterPct: 25, seed: 2035 };
 
-const KINDS: InterventionKind[] = ["containmentLine", "suppression", "protectZone"];
-
 /** Rate factor a zone gets when it does not set its own; a grid variant can change it. */
 export function defaultRateFactor(kind: InterventionKind, params: Partial<ModelParams> = {}): number | undefined {
   if (kind === "suppression") return params.suppressionFactor ?? DEFAULT_PARAMS.suppressionFactor;
@@ -80,23 +93,61 @@ export function cellAt(header: GridHeader, x: number, y: number): CellRef | null
   return row >= 0 && col >= 0 && row < header.rows && col < header.cols ? { row, col } : null;
 }
 
-/** Converts a drawn intervention into the engine's cell-based form; params give the default zone factors. */
-export function toEngineIntervention(header: GridHeader, d: DrawnIntervention, params: Partial<ModelParams> = {}): Intervention {
+/**
+ * Converts a drawn intervention into the engine's cell-based form; params give the default zone factors.
+ * A backfire needs `fire`, the point it burns toward (the ignition): its cells on that side of the line
+ * are the ones set alight.
+ */
+export function toEngineIntervention(
+  header: GridHeader,
+  d: DrawnIntervention,
+  params: Partial<ModelParams> = {},
+  fire?: ProjectedPoint,
+): Intervention {
   const pts = d.coords.map(([x, y]) => projectedToGrid(header, x, y));
-  if (d.kind === "containmentLine") {
-    return {
-      kind: d.kind,
-      startMin: d.startMin,
-      cells: rasterizePolyline(pts, header.rows, header.cols),
-      ...(d.widthM !== undefined && { widthM: d.widthM }),
-    };
+  if (d.endMin !== undefined && !(d.endMin > d.startMin)) throw new Error("O fim de uma ação tem de ser depois do início");
+  const end = d.endMin !== undefined ? { endMin: d.endMin } : {};
+  switch (d.kind) {
+    case "containmentLine":
+      return {
+        kind: d.kind,
+        startMin: d.startMin,
+        ...end,
+        cells: rasterizePolyline(pts, header.rows, header.cols),
+        ...(d.widthM !== undefined && { widthM: d.widthM }),
+      };
+    case "backfire": {
+      if (!fire) throw new Error("O contrafogo precisa da ignição, para saber de que lado está o fogo");
+      const cells = rasterizePolyline(pts, header.rows, header.cols);
+      const toward = projectedToGrid(header, fire[0], fire[1]);
+      const litCells = backfireLitCells(cells, pts, toward, header.rows, header.cols);
+      if (!litCells.length) throw new Error("O contrafogo passa sobre a ignição: desenha-o entre o fogo e o que queres proteger");
+      return {
+        kind: d.kind,
+        startMin: d.startMin,
+        ...end,
+        cells,
+        litCells,
+        ...(d.widthM !== undefined && { widthM: d.widthM }),
+      };
+    }
+    case "aerialDrop":
+      return {
+        kind: d.kind,
+        startMin: d.startMin,
+        endMin: d.endMin ?? d.startMin + AERIAL_DEFAULT_MIN[d.agent ?? "water"],
+        cells: rasterizePolyline(pts, header.rows, header.cols),
+      };
+    case "suppression":
+    case "protectZone":
+      return {
+        kind: d.kind,
+        startMin: d.startMin,
+        ...end,
+        rateFactor: d.rateFactor ?? defaultRateFactor(d.kind, params) ?? 1,
+        cells: rasterizePolygon(pts, header.rows, header.cols),
+      };
   }
-  return {
-    kind: d.kind,
-    startMin: d.startMin,
-    rateFactor: d.rateFactor ?? defaultRateFactor(d.kind, params) ?? 1,
-    cells: rasterizePolygon(pts, header.rows, header.cols),
-  };
 }
 
 /**
@@ -113,7 +164,7 @@ export function buildScenario(header: GridHeader, inputs: ScenarioInputs, decisi
     ignition,
     wind: inputs.wind,
     durationMin: inputs.durationMin,
-    interventions: inputs.decisions[decision].map((d) => toEngineIntervention(header, d, params)),
+    interventions: inputs.decisions[decision].map((d) => toEngineIntervention(header, d, params, inputs.ignition!)),
     ensemble: inputs.ensemble ? rothermelEnsemble(DEFAULT_ENSEMBLE, params, header.cellSize) : undefined,
     params: Object.keys(modelParams).length ? modelParams : undefined,
     spreadModel: "rothermel" as const,
@@ -183,15 +234,21 @@ export function savedScenarioGrid(raw: unknown): string {
 function parseIntervention(raw: unknown, where: string, fallbackId: string): DrawnIntervention {
   if (!isObject(raw)) invalid(`${where} não é um objeto`);
   const kind = raw.kind as InterventionKind;
-  if (!KINDS.includes(kind)) invalid(`${where} tem um tipo desconhecido (${String(raw.kind)})`);
+  if (!INTERVENTION_KINDS.includes(kind)) invalid(`${where} tem um tipo desconhecido (${String(raw.kind)})`);
   if (!Number.isFinite(raw.startMin) || (raw.startMin as number) < 0) invalid(`${where} tem um minuto de início inválido`);
+  if (raw.endMin !== undefined && (!Number.isFinite(raw.endMin) || (raw.endMin as number) <= (raw.startMin as number))) {
+    invalid(`${where} tem um minuto de fim inválido (tem de ser depois do início)`);
+  }
+  if (raw.agent !== undefined && (kind !== "aerialDrop" || (raw.agent !== "water" && raw.agent !== "retardant"))) {
+    invalid(`${where} tem um agente inválido (só "water" ou "retardant", numa descarga aérea)`);
+  }
   if (raw.rateFactor !== undefined && (!Number.isFinite(raw.rateFactor) || (raw.rateFactor as number) < 0)) {
     invalid(`${where} tem um fator de velocidade inválido`);
   }
   if (raw.widthM !== undefined && (!Number.isFinite(raw.widthM) || (raw.widthM as number) <= 0)) {
     invalid(`${where} tem uma largura inválida`);
   }
-  const needed = kind === "containmentLine" ? 2 : 3;
+  const needed = isLineKind(kind) ? 2 : 3;
   if (!Array.isArray(raw.coords) || raw.coords.length < needed || !raw.coords.every(isPoint)) {
     invalid(`${where} precisa de pelo menos ${needed} pontos [x, y] em metros`);
   }
@@ -199,8 +256,10 @@ function parseIntervention(raw: unknown, where: string, fallbackId: string): Dra
     id: typeof raw.id === "string" ? raw.id : fallbackId,
     kind,
     startMin: raw.startMin as number,
+    ...(raw.endMin !== undefined && { endMin: raw.endMin as number }),
     rateFactor: raw.rateFactor as number | undefined,
     ...(raw.widthM !== undefined && { widthM: raw.widthM as number }),
+    ...(raw.agent !== undefined && { agent: raw.agent as AerialAgent }),
     coords: raw.coords,
   };
 }
@@ -285,6 +344,35 @@ export function parseIgnitions(raw: unknown, rows: number, cols: number): { cell
     const okCell = cell && Number.isInteger(cell.row) && Number.isInteger(cell.col) && cell.row! >= 0 && cell.col! >= 0 && cell.row! < rows && cell.col! < cols;
     if (!okCell || typeof t0Min !== "number" || !Number.isFinite(t0Min) || t0Min < 0) throw new Error(`ignição ${i + 1} inválida`);
     return { cell: { row: cell.row!, col: cell.col! }, t0Min };
+  });
+}
+
+/**
+ * Checks the interventions of a run request (already in cells) before the engine runs them: a known kind,
+ * cells inside the grid, a start of 0 or more, an end after the start, and a backfire's lit cells.
+ * Throws with a Portuguese message.
+ */
+export function checkInterventions(raw: unknown, rows: number, cols: number): void {
+  if (!Array.isArray(raw)) throw new Error("as intervenções não são uma lista");
+  const inside = (c: unknown) => {
+    const cell = c as Partial<CellRef> | null;
+    return !!cell && Number.isInteger(cell.row) && Number.isInteger(cell.col) && cell.row! >= 0 && cell.col! >= 0 && cell.row! < rows && cell.col! < cols;
+  };
+  raw.forEach((iv, k) => {
+    const where = `intervenção ${k + 1}`;
+    const it = iv as Partial<Record<string, unknown>> | null;
+    if (!it || !INTERVENTION_KINDS.includes(it.kind as InterventionKind)) throw new Error(`${where}: tipo desconhecido (${String(it?.kind)})`);
+    if (!Array.isArray(it.cells) || !it.cells.every(inside)) throw new Error(`${where}: células inválidas`);
+    if (typeof it.startMin !== "number" || !Number.isFinite(it.startMin) || it.startMin < 0) throw new Error(`${where}: minuto de início inválido`);
+    if (it.endMin !== undefined && (typeof it.endMin !== "number" || !Number.isFinite(it.endMin) || it.endMin <= it.startMin)) {
+      throw new Error(`${where}: minuto de fim inválido (tem de ser depois do início)`);
+    }
+    if ((it.kind === "suppression" || it.kind === "protectZone") && !(typeof it.rateFactor === "number" && it.rateFactor >= 0 && it.rateFactor <= 1)) {
+      throw new Error(`${where}: fator de velocidade inválido`);
+    }
+    if (it.kind === "backfire" && (!Array.isArray(it.litCells) || it.litCells.length === 0 || !it.litCells.every(inside))) {
+      throw new Error(`${where}: o contrafogo não tem células a acender válidas`);
+    }
   });
 }
 
