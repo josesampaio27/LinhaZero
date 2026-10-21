@@ -176,7 +176,12 @@ export function App() {
   const [results, setResults] = useState<Results | null>(null);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [showOsm, setShowOsm] = useState(true);
+  // Two base maps under the grid, one at a time: turning one on turns the other off.
+  const [baseMap, setBaseMap] = useState<"osm" | "satellite" | null>("osm");
+  const showOsm = baseMap === "osm";
+  const showSatellite = baseMap === "satellite";
+  const setShowOsm = (on: boolean) => setBaseMap(on ? "osm" : null);
+  const setShowSatellite = (on: boolean) => setBaseMap(on ? "satellite" : null);
   // Replays of real fires: the observed perimeters, drawn over the simulation up to the time shown.
   const [observedFire, setObservedFire] = useState<ObservedFire | null>(null);
   const [showObserved, setShowObserved] = useState(true);
@@ -874,6 +879,7 @@ export function App() {
             terrainUrl={terrainUrls[d]}
             fire={fireImages[d]}
             showOsm={showOsm}
+            showSatellite={showSatellite}
             observed={observedOverlay}
             terrain3d={terrain3d}
             contours={contours}
@@ -918,6 +924,10 @@ export function App() {
             <Toggle checked={showOsm} onChange={setShowOsm}>
               Mapa de ruas (OpenStreetMap)
               <small>Precisa de internet</small>
+            </Toggle>
+            <Toggle checked={showSatellite} onChange={setShowSatellite}>
+              Imagem de satélite
+              <small>Portugal continental em 2023 (DGT). Precisa de internet</small>
             </Toggle>
             <Toggle checked={contours} onChange={setContours}>
               Curvas de nível

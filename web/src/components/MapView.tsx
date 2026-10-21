@@ -8,6 +8,7 @@ import { placeStats } from "../lib/places";
 import { contourSegments, contourStep } from "../lib/contours";
 import type { Incident } from "../api/client";
 import { dayHour } from "../lib/weather";
+import { createTileStore, fetchTile, SATELLITE_PROTOCOL, SATELLITE_TILE_SIZE, SATELLITE_TILES } from "../lib/satellite";
 
 /** A shape being drawn: a line or a polygon ring, in EPSG:3763. */
 export interface Draft {
@@ -32,6 +33,8 @@ interface Props {
   /** Pixels drawn over the terrain, one per grid cell: the fire, or the edited cells in the grid editor. */
   fire: ImageData | null;
   showOsm: boolean;
+  /** The satellite image under the grid (DGT, needs internet). */
+  showSatellite?: boolean;
   /** A real fire's observed perimeters: those observed up to `upToMin` are drawn, the latest one bold. */
   observed?: { features: { type: "Feature"; properties: { minute: number }; geometry: unknown }[]; upToMin: number } | null;
   /** Tilted camera over the grid elevation. */
@@ -63,10 +66,20 @@ const STYLE: StyleSpecification = {
       maxzoom: 19,
       attribution: "© Contribuidores do OpenStreetMap",
     },
+    // DGT's 2023 satellite orthoimage, through a store both maps share (lib/satellite.ts). A 512 px tile
+    // at zoom 17 has about 0.45 m per pixel here (the image has 0.3 m); closer, the map enlarges it.
+    satellite: {
+      type: "raster",
+      tiles: [SATELLITE_TILES],
+      tileSize: SATELLITE_TILE_SIZE,
+      maxzoom: 17,
+      attribution: "OrtoSat 2023 © DGT",
+    },
   },
   layers: [
     { id: "bg", type: "background", paint: { "background-color": "#e9e7e1" } },
     { id: "osm", type: "raster", source: "osm", layout: { visibility: "none" } },
+    { id: "satellite", type: "raster", source: "satellite", layout: { visibility: "none" } },
   ],
 };
 
@@ -97,6 +110,8 @@ const dems = new Map<string, GridData>();
 const DEM_TILE = 256;
 const demTiles = new Map<string, ArrayBuffer>();
 const DEM_TILES_MAX = 512; // ponytail: FIFO cap, ~20 MB of PNG; an LRU if a session ever thrashes it
+maplibregl.addProtocol(SATELLITE_PROTOCOL, createTileStore(fetchTile).handler);
+
 maplibregl.addProtocol("griddem", async ({ url }) => {
   const hit = demTiles.get(url);
   if (hit) return { data: hit.slice(0) }; // a copy: MapLibre transfers the buffer to its worker
@@ -315,7 +330,7 @@ export function MapView(props: Props) {
       features: shown.map((f, i) => ({ ...f, properties: { ...f.properties, latest: i === shown.length - 1 } })),
     } as GeoJSON.FeatureCollection);
   }, [map, observed]);
-  const { grid, terrainUrl, fire, showOsm, terrain3d, contours, ignition, shapes, draft, interactive, incidents } = props;
+  const { grid, terrainUrl, fire, showOsm, showSatellite = false, terrain3d, contours, ignition, shapes, draft, interactive, incidents } = props;
   // The fire layer is a canvas source: drawing into the canvas and re-uploading it skips the PNG
   // encode + fetch + decode an image source costs on every time step.
   const fireCanvas = useRef<HTMLCanvasElement>(null!);
@@ -421,8 +436,10 @@ export function MapView(props: Props) {
   useEffect(() => {
     if (!map || !map.getLayer("terrain")) return;
     map.setLayoutProperty("osm", "visibility", showOsm ? "visible" : "none");
-    map.setPaintProperty("terrain", "raster-opacity", showOsm ? 0.35 : 1);
-  }, [map, gridKey, showOsm]);
+    map.setLayoutProperty("satellite", "visibility", showSatellite ? "visible" : "none");
+    // With a base map under it, the grid's own image turns see-through.
+    map.setPaintProperty("terrain", "raster-opacity", showOsm || showSatellite ? 0.35 : 1);
+  }, [map, gridKey, showOsm, showSatellite]);
 
   useEffect(() => {
     const grid = gridRef.current;
