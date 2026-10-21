@@ -8,6 +8,7 @@ import { placeStats } from "../lib/places";
 import { contourSegments, contourStep } from "../lib/contours";
 import type { Incident } from "../api/client";
 import { dayHour } from "../lib/weather";
+import { createTileStore, fetchTile, SATELLITE_PROTOCOL, SATELLITE_TILE_SIZE, SATELLITE_TILES } from "../lib/satellite";
 
 /** A shape being drawn: a line or a polygon ring, in EPSG:3763. */
 export interface Draft {
@@ -65,15 +66,13 @@ const STYLE: StyleSpecification = {
       maxzoom: 19,
       attribution: "© Contribuidores do OpenStreetMap",
     },
-    // DGT's 2023 satellite orthoimage of mainland Portugal (30 cm), open data, no fees: a WMS asked for
-    // Web Mercator tiles. It serves CORS, which the WebGL map needs.
+    // DGT's 2023 satellite orthoimage, through a store both maps share (lib/satellite.ts). A 512 px tile
+    // at zoom 17 has about 0.45 m per pixel here (the image has 0.3 m); closer, the map enlarges it.
     satellite: {
       type: "raster",
-      tiles: [
-        "https://ortos.dgterritorio.gov.pt/wms/ortosat2023?service=WMS&request=GetMap&version=1.3.0&layers=ortoSat2023-CorVerdadeira&styles=&crs=EPSG:3857&bbox={bbox-epsg-3857}&width=256&height=256&format=image/jpeg",
-      ],
-      tileSize: 256,
-      maxzoom: 18,
+      tiles: [SATELLITE_TILES],
+      tileSize: SATELLITE_TILE_SIZE,
+      maxzoom: 17,
       attribution: "OrtoSat 2023 © DGT",
     },
   },
@@ -111,6 +110,8 @@ const dems = new Map<string, GridData>();
 const DEM_TILE = 256;
 const demTiles = new Map<string, ArrayBuffer>();
 const DEM_TILES_MAX = 512; // ponytail: FIFO cap, ~20 MB of PNG; an LRU if a session ever thrashes it
+maplibregl.addProtocol(SATELLITE_PROTOCOL, createTileStore(fetchTile).handler);
+
 maplibregl.addProtocol("griddem", async ({ url }) => {
   const hit = demTiles.get(url);
   if (hit) return { data: hit.slice(0) }; // a copy: MapLibre transfers the buffer to its worker
