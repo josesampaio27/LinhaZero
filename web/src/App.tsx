@@ -1046,7 +1046,11 @@ export function App() {
             <b>{KIND_LABEL[drawing.kind]}</b>
             <span className={`tag dec-${drawing.decision}`}>Decisão {drawing.decision}</span>
           </p>
-          <p>{spreadModel === "rothermel" ? info.rothermelEffect : info.effect}.</p>
+          <p>{info.meaning}</p>
+          <p>
+            <b>No simulador:</b> {info.rule}
+          </p>
+          <p>{info.where}</p>
           <p className="hint">
             {line ? "Toca no mapa para marcar os pontos da linha" : "Toca no mapa para marcar os cantos da zona"} ({points}{" "}
             {points === 1 ? "ponto" : "pontos"}). No computador: duplo clique ou Enter para terminar, Esc para cancelar.

@@ -24,24 +24,55 @@ const LINE_WIDTHS: { m: number; label: string }[] = [
   { m: 25, label: "25 m · faixa larga" },
 ];
 
-export const TOOLS: { kind: InterventionKind; icon: IconName; effect: string; rothermelEffect: string }[] = [
+/**
+ * What each action stands for on the ground and what the engine does with it (Rothermel model:
+ * engine/src/spread-rothermel.ts, params.ts). Flame lengths are Byram's for the attack thresholds
+ * (500 kW/m ≈ 1.4 m, 4000 kW/m ≈ 3.5 m); a line holds in the deterministic run when it is at least 5
+ * times as wide as the flames are long (holdWidthPerFlame of PT_CALIBRATION). Update these if they change.
+ */
+export const TOOLS: {
+  kind: InterventionKind;
+  icon: IconName;
+  /** On the add button: what it is, in a few words. */
+  summary: string;
+  /** On a placed action: what it does to the fire. */
+  effect: string;
+  /** While drawing: what it stands for on the ground, what the simulator does, where to draw it. */
+  meaning: string;
+  rule: string;
+  where: string;
+}[] = [
   {
     kind: "containmentLine",
     icon: "line",
-    effect: "O fogo não a atravessa",
-    rothermelEffect: "Segura se for larga para a chama: 5 vezes o comprimento da chama dá metade das vezes. Uma linha de 4 m só trava fogo fraco",
+    summary: "Faixa sem combustível que trava o fogo",
+    effect: "Trava o fogo a partir do minuto em que fica pronta, se for larga o bastante para as chamas",
+    meaning:
+      "Uma faixa sem combustível que os meios abrem à frente do fogo, à mão ou com máquinas. Também serve para uma faixa de gestão que já existe.",
+    rule:
+      "A partir do minuto em que fica pronta, o fogo para na linha se ela for pelo menos 5 vezes mais larga do que as chamas são compridas, porque o calor e as faúlhas passam faixas mais largas do que a chama. Uma linha de 4 m só trava chamas até 80 cm; uma faixa de 25 m trava chamas até 5 m. Se o fogo lá chegar antes de ela estar pronta, passa.",
+    where: "Desenha-a onde os meios a abririam, entre o fogo e o que queres proteger.",
   },
   {
     kind: "suppression",
     icon: "attack",
-    effect: "O fogo anda 5× mais devagar na zona",
-    rothermelEffect: "5× mais devagar; perde efeito acima de 500 kW/m, nenhum acima de 4000",
+    summary: "Meios a combater o fogo numa zona",
+    effect: "O fogo anda 5 vezes mais devagar na zona, menos se as chamas forem altas",
+    meaning: "Meios a combater o fogo diretamente, com água, ferramentas ou máquinas, na cabeça ou num flanco.",
+    rule:
+      "A partir do minuto em que os meios chegam, o fogo nessa zona anda 5 vezes mais devagar. Atrasa o fogo, não o apaga. Com chamas acima de 1,4 m perde efeito, e acima de 3,5 m já não tem nenhum.",
+    where: "Desenha a zona onde os meios vão trabalhar.",
   },
   {
     kind: "protectZone",
     icon: "shield",
-    effect: "O fogo anda 10× mais devagar na zona",
-    rothermelEffect: "10× mais devagar; perde efeito acima de 500 kW/m, nenhum acima de 4000",
+    summary: "Meios à espera do fogo junto às casas",
+    effect: "O fogo anda 10 vezes mais devagar na zona, menos se as chamas forem altas",
+    meaning:
+      "Meios já colocados junto a casas ou a uma aldeia, à espera do fogo para o travar ali. Têm mais efeito do que um ataque, porque estão no sítio e preparados.",
+    rule:
+      "A partir do minuto em que lá estão, o fogo nessa zona anda 10 vezes mais devagar. Com chamas acima de 1,4 m perde efeito, e acima de 3,5 m já não tem nenhum.",
+    where: "Desenha a zona à volta do que queres defender.",
   },
 ];
 
@@ -73,7 +104,7 @@ export function DecisionTools(p: Props) {
                 </span>
                 <span className="action-text">
                   <b>{KIND_LABEL[iv.kind]}</b>
-                  <small>{p.defaultLineWidthM !== undefined ? tool.rothermelEffect : tool.effect}</small>
+                  <small>{tool.effect}</small>
                 </span>
                 <span className="action-start">
                   Começa aos
@@ -131,7 +162,7 @@ export function DecisionTools(p: Props) {
             <Icon name={t.icon} size={18} />
             <span>
               <b>{KIND_LABEL[t.kind]}</b>
-              <small>{p.defaultLineWidthM !== undefined ? t.rothermelEffect : t.effect}</small>
+              <small>{t.summary}</small>
             </span>
           </button>
         ))}

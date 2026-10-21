@@ -182,20 +182,32 @@ export function EnginePage() {
           <strong>Sem nada desenhado, o fogo não é combatido.</strong> Só há combate onde se desenha. Assim, a diferença entre a
           decisão A e a B mede só o efeito do que se desenhou.
         </p>
-        <table>
-          <thead>
-            <tr><th scope="col">Ação</th><th scope="col">O que faz</th></tr>
-          </thead>
-          <tbody>
-            <tr><td>Linha de contenção</td><td>Uma faixa que o fogo não atravessa a partir do minuto em que fica pronta, se a chama não for alta demais.</td></tr>
-            <tr><td>Ataque</td><td>Numa zona, a partir de um minuto, o fogo avança a 20% da velocidade.</td></tr>
-            <tr><td>Proteger zona</td><td>Numa zona, o fogo avança a 10% da velocidade.</td></tr>
-          </tbody>
-        </table>
         <p>
-          Como na realidade, tudo depende da intensidade do fogo. Um ataque tem efeito total até 500 kW/m, o fogo que uma equipa
-          com ferramentas manuais controla, e perde-o por completo aos 4000 kW/m, onde nenhum meio terrestre atua. Uma linha só conta
-          se estiver pronta antes de o fogo lá chegar.
+          Cada decisão junta uma ou mais ações, desenhadas no mapa, cada uma com o minuto em que começa. Há três:
+        </p>
+        <ul className="actions-list">
+          <li>
+            <strong>Linha de contenção.</strong> No terreno: uma faixa sem combustível que os meios abrem à frente do fogo, à mão
+            ou com máquinas, ou uma faixa de gestão que já existe. Desenha-se como uma linha. No simulador: a partir do minuto em
+            que fica pronta, o fogo para nela, se a faixa for larga o bastante para as chamas.
+          </li>
+          <li>
+            <strong>Ataque.</strong> No terreno: meios a combater o fogo diretamente, com água, ferramentas ou máquinas, na cabeça
+            ou num flanco. Desenha-se a zona onde trabalham. No simulador: a partir do minuto em que os meios chegam, o fogo nessa
+            zona anda 5 vezes mais devagar. Atrasa o fogo, não o apaga.
+          </li>
+          <li>
+            <strong>Proteger zona.</strong> No terreno: meios já colocados junto a casas ou a uma aldeia, à espera do fogo para o
+            travar ali. Desenha-se a zona à volta do que se defende. No simulador: a partir do minuto em que lá estão, o fogo nessa
+            zona anda 10 vezes mais devagar, mais do que num ataque, porque os meios estão no sítio e preparados.
+          </li>
+        </ul>
+        <p>
+          Como na realidade, tudo depende da força do fogo. Um ataque, ou uma zona protegida, tem efeito total até chamas de cerca de
+          1,4 m (500 kW/m), o fogo que uma equipa com ferramentas manuais controla, e perde-o por completo com chamas de 3,5 m
+          (4000 kW/m), onde nenhum meio terrestre atua. Uma linha trava o fogo se for pelo menos 5 vezes mais larga do que as chamas
+          são compridas, porque o calor e as faúlhas passam faixas mais largas do que a chama: uma linha de 4 m só trava chamas até
+          80 cm, uma faixa de 25 m trava chamas até 5 m. Qualquer ação só conta se estiver no terreno antes de o fogo lá chegar.
         </p>
       </Section>
 

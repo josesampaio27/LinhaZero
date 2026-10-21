@@ -6,7 +6,7 @@ Siglas e termos usados na documentação, por ordem alfabética.
 
 | Termo | Significado |
 | --- | --- |
-| Ataque | Intervenção que torna o fogo 5 vezes mais lento numa zona (fator 0,2) |
+| Ataque | Meios a combater o fogo diretamente numa zona: a partir do minuto em que chegam, o fogo anda 5 vezes mais devagar nessa zona (fator 0,2), menos com chamas altas |
 | Cenário | Uma ignição, o vento, a duração e as intervenções das decisões A e B; guarda-se num ficheiro JSON ([formato](../referencia/formato-cenario.md)) |
 | Corrida | Uma simulação com um vento concreto; um ensemble tem várias |
 | Decisão A / B | Os dois conjuntos de intervenções que se comparam sobre o mesmo cenário |
@@ -17,8 +17,8 @@ Siglas e termos usados na documentação, por ordem alfabética.
 | Grelha | A zona dividida em células quadradas (por exemplo de 100 m), com combustível, relevo, barreiras, edifícios e lugares ([formato](../referencia/formato-grelha.md)) |
 | Grelha oficial | Uma grelha publicada pelos scripts de `data-prep/`, com versão; nunca se altera no browser |
 | Ignição | O ponto onde o fogo começa |
-| Linha de contenção | Intervenção que impede o fogo de passar a partir de um minuto |
-| Proteger zona | Intervenção que torna o fogo 10 vezes mais lento numa zona (fator 0,1) |
+| Linha de contenção | Faixa sem combustível aberta à frente do fogo, ou uma faixa de gestão: a partir do minuto em que fica pronta, o fogo não a passa se ela for larga o bastante para as chamas |
+| Proteger zona | Meios já colocados junto a casas ou a uma aldeia, à espera do fogo: a partir do minuto em que lá estão, o fogo anda 10 vezes mais devagar nessa zona (fator 0,1), menos com chamas altas |
 | Snapshot meteorológico | Uma resposta de uma fonte meteorológica, guardada com a data e hora |
 | Tempo de chegada | O minuto em que o fogo chega a cada célula |
 | Variante de grelha | Uma grelha oficial de base mais uma lista de alterações (combustível, barreiras, velocidades, coeficientes), com um hash próprio ([formato](../referencia/formato-variante.md)) |
