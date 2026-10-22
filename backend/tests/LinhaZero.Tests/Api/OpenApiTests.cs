@@ -30,9 +30,11 @@ public class OpenApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             "GET /api/v1/health",
             "GET /api/v1/incidents/active",
             "GET /api/v1/me",
+            "GET /api/v1/runs",
             "GET /api/v1/runs/{id}",
             "GET /api/v1/runs/{id}/events",
             "GET /api/v1/runs/{id}/rasters/{decision}/{layer}",
+            "GET /api/v1/runs/{id}/scenario",
             "GET /api/v1/weather",
             "POST /api/v1/access-requests",
             "POST /api/v1/access-requests/{id}/approve",
@@ -65,7 +67,7 @@ public class OpenApiTests(ApiFactory factory) : IClassFixture<ApiFactory>
             .ToList();
         Assert.Equal(new[]
         {
-            "AccessRequests_Approve", "AccessRequests_Create", "AccessRequests_List", "AccessRequests_Reject", "Feedback_Create", "Feedback_List", "Feedback_SetStatus", "Health_Get", "Incidents_Active", "Me_Get", "Runs_Create", "Runs_Events", "Runs_Get", "Runs_Raster", "Weather_Get",
+            "AccessRequests_Approve", "AccessRequests_Create", "AccessRequests_List", "AccessRequests_Reject", "Feedback_Create", "Feedback_List", "Feedback_SetStatus", "Health_Get", "Incidents_Active", "Me_Get", "Runs_Create", "Runs_Events", "Runs_Get", "Runs_List", "Runs_Raster", "Runs_Scenario", "Weather_Get",
         }.Order(), ids);
     }
 

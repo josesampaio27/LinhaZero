@@ -471,6 +471,16 @@ tr.changed td, label.changed span { color: var(--b); font-weight: 600; }
 .request details p { font-size: 14px; overflow-wrap: anywhere; }
 .status.done { color: var(--good); }
 .status.dismissed { color: var(--muted); }
+/* "Histórico de simulações" (app bar menu): the same dialog, wider, with one card per stored run. */
+.history-dialog { width: min(640px, calc(100vw - 32px)); }
+.history-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.history-item { display: grid; gap: 4px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.history-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 4px 12px; }
+.history-head span { color: var(--muted); font-size: 14px; }
+.history-meta { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+.history-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 12px; margin-top: 4px; }
+.history-numbers { font-size: 14px; font-variant-numeric: tabular-nums; }
+.history-actions { display: flex; justify-content: flex-end; gap: 10px; }
 /* "Reportar" in the app bar, next to the initials: icon and word; just the icon on narrow phones. */
 .feedback-btn { flex: none; gap: 6px; padding: 6px 12px; border-radius: 10px; font-weight: 600; }
 @media (max-width: 479px) {

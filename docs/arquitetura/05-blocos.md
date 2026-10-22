@@ -80,7 +80,8 @@ As grelhas são ficheiros estáticos (ver [Formato da grelha](../referencia/form
 | `GridEditor.tsx` | O Editor de grelha: ver cada camada (combustível, relevo, lugares), inspecionar cada ponto, pintar combustível, acrescentar ou tirar barreiras, velocidades, coeficientes, guardar, exportar e importar, "Testar na simulação" |
 | `components/` | Mapas (`MapView`, com as ocorrências), ferramentas de cada decisão, vento, cartão do tempo real (`WeatherPanel`), inspetor (`CellInspector`), barra de tempo, legenda, painel de comparação |
 | `lib/weather.ts` | Meteorologia e ocorrências pela API; texto da idade dos dados |
-| `lib/server-run.ts` | Ensemble no servidor: `POST /runs`, SSE, rasters, prazos e volta ao browser |
+| `lib/server-run.ts` | Ensemble no servidor: `POST /runs`, SSE, rasters, prazos e volta ao browser ; o histórico (`GET /runs`) e o resultado guardado de uma corrida |
+| `components/RunHistoryDialog.tsx` | "Histórico de simulações": as corridas guardadas de quem tem sessão; "Abrir" repõe o cenário e mostra o resultado guardado ([ADR 0073](../decisoes/0073-historico-de-simulacoes.md)) |
 | `lib/load-grid.ts` | Descarregar grelhas (com o hash) e cenários, e validar cenários contra a grelha |
 | `lib/variants.ts` | As variantes guardadas neste browser (`localStorage`), partilhadas pelas duas páginas |
 | `lib/render.ts` | Desenhar o mapa de fundo e as camadas da grelha, as camadas do fogo e as células alteradas |

@@ -620,6 +620,108 @@ export class RunsClient {
     }
 
     /**
+     * The simulation history: the signed-in user's runs, newest first.
+     * @param all (optional) Everyone's runs (admins).
+     * @param limit (optional) How many, at most.
+     * @return OK
+     */
+    list(all?: boolean | undefined, limit?: number | undefined, signal?: AbortSignal): Promise<RunSummary[]> {
+        let url_ = this.baseUrl + "/api/v1/runs?";
+        if (all === null)
+            throw new globalThis.Error("The parameter 'all' cannot be null.");
+        else if (all !== undefined)
+            url_ += "all=" + encodeURIComponent("" + all) + "&";
+        if (limit === null)
+            throw new globalThis.Error("The parameter 'limit' cannot be null.");
+        else if (limit !== undefined)
+            url_ += "limit=" + encodeURIComponent("" + limit) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            signal,
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processList(_response);
+        });
+    }
+
+    protected processList(response: Response): Promise<RunSummary[]> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as RunSummary[];
+            return result200;
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            let result403: any = null;
+            result403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ErrorResponse;
+            return throwException("Forbidden", status, _responseText, _headers, result403);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<RunSummary[]>(null as any);
+    }
+
+    /**
+     * The drawn scenario sent with a run: a saved-scenario file (docs/referencia/formato-cenario.md).
+     * @param id The run id.
+     * @return OK
+     */
+    scenario(id: string, signal?: AbortSignal): Promise<JsonElement> {
+        let url_ = this.baseUrl + "/api/v1/runs/{id}/scenario";
+        if (id === undefined || id === null)
+            throw new globalThis.Error("The parameter 'id' must be defined.");
+        url_ = url_.replace("{id}", encodeURIComponent("" + id));
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            signal,
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processScenario(_response);
+        });
+    }
+
+    protected processScenario(response: Response): Promise<JsonElement> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as JsonElement;
+            return result200;
+            });
+        } else if (status === 404) {
+            return response.text().then((_responseText) => {
+            let result404: any = null;
+            result404 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ErrorResponse;
+            return throwException("Not Found", status, _responseText, _headers, result404);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<JsonElement>(null as any);
+    }
+
+    /**
      * State of a run, and its result once done.
      * @param id The run id returned by POST /runs.
      * @return OK
@@ -1072,6 +1174,31 @@ export interface RunStatusResponse {
     startedAt: string | null;
     finishedAt: string | null;
     worker: string | null;
+}
+
+/** One row of GET /api/v1/runs, the simulation history: what the list shows, read from the stored request and result without sending either. `status` is queued, running, done or failed; the burned hectares are at the end of the run and, with the buildings reached, null until it is done. `userName` is who started it. */
+export interface RunSummary {
+    id: string;
+    status: string;
+    createdAt: string;
+    finishedAt: string | null;
+    error: string | null;
+    grid: string;
+    title: string | null;
+    durationMin: number;
+    windDirectionDeg: number;
+    windSpeedMs: number;
+    ensembleRuns: number;
+    interventionsA: number;
+    interventionsB: number;
+    variantA: string | null;
+    variantB: string | null;
+    station: string | null;
+    burnedHaA: number | null;
+    burnedHaB: number | null;
+    buildingsA: number | null;
+    buildingsB: number | null;
+    userName: string | null;
 }
 
 /** How fresh one data source is, as shown next to the data: when it was fetched, whether it is stale, and the last error. */
