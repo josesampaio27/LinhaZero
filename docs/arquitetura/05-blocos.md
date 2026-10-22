@@ -82,7 +82,7 @@ As grelhas são ficheiros estáticos (ver [Formato da grelha](../referencia/form
 | `lib/weather.ts` | Meteorologia e ocorrências pela API; texto da idade dos dados |
 | `lib/server-run.ts` | Ensemble no servidor: `POST /runs`, SSE, rasters, prazos e volta ao browser ; o histórico (`GET /runs`) e o resultado guardado de uma corrida |
 | `components/RunHistoryDialog.tsx` | "Histórico de simulações": as corridas guardadas de quem tem sessão; "Abrir" repõe o cenário e mostra o resultado guardado ([ADR 0073](../decisoes/0073-historico-de-simulacoes.md)) |
-| `assistant/`, `components/AssistantPanel.tsx` | O assistente ([ADR 0074](../decisoes/0074-assistente-com-claude-haiku.md)): a conversa com o SDK da Anthropic através da API (`client.ts`), o estado em texto (`digest.ts`), as ferramentas que leem e mudam a aplicação (`tools.ts`), a geometria das ações a partir do caminho do fogo (`shapes.ts`) e as verificações de um plano (`plan-check.ts`) |
+| `assistant/`, `components/AssistantPanel.tsx` | O assistente ([ADR 0079](../decisoes/0079-assistente-com-claude-haiku.md)): a conversa com o SDK da Anthropic através da API (`client.ts`), o estado em texto (`digest.ts`), as ferramentas que leem e mudam a aplicação (`tools.ts`), a geometria das ações a partir do caminho do fogo (`shapes.ts`) e as verificações de um plano (`plan-check.ts`) |
 | `lib/load-grid.ts` | Descarregar grelhas (com o hash) e cenários, e validar cenários contra a grelha |
 | `lib/variants.ts` | As variantes guardadas neste browser (`localStorage`), partilhadas pelas duas páginas |
 | `lib/render.ts` | Desenhar o mapa de fundo e as camadas da grelha, as camadas do fogo e as células alteradas |
@@ -102,7 +102,7 @@ Os projetos estão em `backend/src/` e os testes em `backend/tests/`; cada pasta
 | | `Grids/` | Grelhas montadas (`GridCatalog`, `GridOptions`) e rede de pontos do Open-Meteo (`Lattice`) |
 | | `Geo/`, `Json/` | Pontos, caixas e distâncias; leitura tolerante dos ficheiros das fontes (-99 como "sem valor", números em texto) |
 | `LinhaZero.Api` | `Controllers/` | Os endpoints `/api/v1`: `Weather`, `Incidents`, `Runs`, `Health`, `Assistant` |
-| | `Assistant/` | O prompt de sistema e as ferramentas do assistente, embutidos no binário; `Services/AssistantProxy.cs` junta-os à conversa e reencaminha-a para a Anthropic ([ADR 0074](../decisoes/0074-assistente-com-claude-haiku.md)) |
+| | `Assistant/` | O prompt de sistema e as ferramentas do assistente, embutidos no binário; `Services/AssistantProxy.cs` junta-os à conversa e reencaminha-a para a Anthropic ([ADR 0079](../decisoes/0079-assistente-com-claude-haiku.md)) |
 | | `Models/` | Corpos dos pedidos e respostas (`RunRequest`, `RunStatusResponse`, `ErrorResponse`, ...) |
 | | `Services/` | A lógica de cada endpoint: meteorologia, ocorrências, corridas, eventos SSE, saúde; `SnapshotReader` lê e guarda em cache o snapshot mais recente de cada fonte |
 | | `Repositories/` | O SQL das tabelas `runs` e `run_rasters`, com Dapper |

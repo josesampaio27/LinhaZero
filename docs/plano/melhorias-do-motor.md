@@ -108,6 +108,7 @@ Cada mudança é testada nos incêndios do PT-FireSprd **com a calibração em u
 - **Trabalho:** uma segunda distribuição de distâncias, de longo alcance, para os combustíveis de eucaliptal, só nas simulações com incerteza, como os focos atuais.
 - **Como se mede:** a área que arde do outro lado de barreiras largas, nos incêndios que as saltaram.
 - **Depende de:** M6 ajuda (copas e eucaliptal mais bem mapeados).
+- **Estado: estudado, não adotado** ([ADR 0075](../decisoes/0075-faulhas-de-longo-alcance-nao-adotadas.md)): o único modelo quantitativo (Storey et al. 2020) dá a distância máxima e não a distribuição, precisa de dados que não temos e não se pode validar com o PT-FireSprd.
 
 ### M8. Vento no relevo
 
@@ -129,6 +130,7 @@ Produto construído sobre o motor. Pode avançar em paralelo com a etapa B ou fi
 - **Trabalho:** meios com base, velocidade na rede viária do OpenStreetMap e ritmo de construção por combustível e declive; linhas construídas por troços ao longo do tempo (desenho em [Modelo de propagação](../modelo/propagacao.md#intervenções-e-meios-planeado)).
 - **Como se mede:** testes do motor com tempos de chegada conhecidos; revisão com quem comanda.
 - **Depende de:** nada.
+- **Estado: não se faz** (decisão de 22 de outubro de 2026). A sugestão do M10 diz quando a linha fica pronta em vez de o calcular.
 
 ### M10. Sugerir uma terceira decisão
 
@@ -136,6 +138,7 @@ Produto construído sobre o motor. Pode avançar em paralelo com a etapa B ou fi
 - **Trabalho:** linhas candidatas perpendiculares ao caminho crítico (M1), avaliadas pelo motor; mais tarde, um corte mínimo no grafo de tempos de chegada ([Modelo de propagação](../modelo/propagacao.md#sugerir-um-terceiro-caminho-planeado)).
 - **Como se mede:** a sugestão protege mais edifícios do que as decisões desenhadas, nos cenários de demonstração.
 - **Depende de:** M1; M9 torna as sugestões realistas.
+- **Estado: feito** ([ADR 0076](../decisoes/0076-sugerir-uma-terceira-decisao.md)): linhas perpendiculares ao caminho do fogo, simuladas uma a uma; sem logística, quem usa diz o minuto e a largura.
 
 ## Etapa D: calibração e validação
 
@@ -147,6 +150,7 @@ No fim, de uma vez, com o motor já completo. São os passos que mais tempo de c
 - **Trabalho:** recalibrar com o protocolo das ADRs [0068](../decisoes/0068-calibracao-por-cobertura-30-m.md) e [0069](../decisoes/0069-recalibracao-da-grelha-de-100-m.md): protocolo registado antes de pontuar, validação cruzada em 5 partes, incêndios deixados de fora.
 - **Como se mede:** a calibração nova só é adotada se passar a regra. Objetivo: velocidade e vento mais perto de 1 do que ×0,5 e ×2,5, sem perder acerto.
 - **Depende de:** etapa B.
+- **Estado: corrido, não adotado** ([ADR 0077](../decisoes/0077-recalibracao-com-matos-e-forma-do-fogo.md)): com o modelo de matos e a forma do fogo, o ajuste novo resolve as corridas rápidas (1,07 contra 0,66) e baixa o vento para ×1,6, mas o ganho no custo (−0,048) tem um intervalo de 90% que passa o 0.
 
 ### M12. Valores provisórios
 
@@ -160,6 +164,7 @@ No fim, de uma vez, com o motor já completo. São os passos que mais tempo de c
 
 - **Como se mede:** cada valor fica com a sua origem registada numa ADR.
 - **Depende de:** M11.
+- **Estado: verificado, sem mudanças** ([ADR 0078](../decisoes/0078-verificacao-dos-valores-das-acoes-de-combate.md)): as estradas dos incêndios reais põem o ponto de 50% das linhas perto de 2,3 comprimentos de chama (em uso 5), e os limites de intensidade publicados (Andrews e Rothermel 1982) são um pouco mais baixos do que os em uso; não há fonte publicada para o quanto o ataque abranda o fogo nem para a duração das descargas. Nada se mudou; fica para rever com peritos.
 
 ### M13. Validação completa e publicação
 
@@ -170,3 +175,14 @@ No fim, de uma vez, com o motor já completo. São os passos que mais tempo de c
   - atualizar a ficha técnica, as páginas `/motor` e `/calibracao`, e a [documentação do modelo](../modelo/o-motor-explicado.md).
 - **Como se mede:** o teste do M3 passa; nenhum número publicado sem origem.
 - **Depende de:** M11 e M12.
+- **Estado: não é preciso:** nenhuma mudança foi adotada, por isso os números publicados continuam certos.
+
+## Conclusão (22 de outubro de 2026)
+
+**Com os dados de hoje, nenhuma das mudanças testadas bate a calibração em uso com fiabilidade suficiente para ser ligada.** Isso não quer dizer que o motor esteja no seu melhor:
+
+- **O limite são os dados, não a prova de um ótimo.** Decide-se com 19 a 27 incêndios, e por isso mesmo uma melhoria real do tamanho medido cabe dentro da incerteza. O modelo de matos com a forma do fogo ia no sentido certo (resolveu as corridas rápidas e precisou de menos calibração), mas não se conseguiu confirmar ([ADR 0077](../decisoes/0077-recalibracao-com-matos-e-forma-do-fogo.md)).
+- **Ficam fraquezas conhecidas:** a propagação lenta é sobrestimada, e o vento é o mesmo em toda a zona (o ajuste do vento ao relevo que se testou quase não mudou nada a 100 m).
+- **Algumas melhorias nem se testaram,** porque os dados ainda não existem (M5 por satélite, M6).
+- **O que fica feito:** a etapa A (explicação do resultado, o mapa pelo modelo da simulação, validação automática) e o M10 (sugerir uma terceira decisão) estão na aplicação; as mudanças da física (`shrubModel`, `shapeModel`, `terrainWind`) ficam no código, desligadas, prontas para voltar a ser testadas com mais incêndios ou dados novos.
+

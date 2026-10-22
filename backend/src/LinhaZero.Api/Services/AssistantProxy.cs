@@ -12,7 +12,7 @@ namespace LinhaZero.Api.Services;
 public sealed record AssistantFailure(int Status, string Message);
 
 /// <summary>
-/// The assistant's link to Anthropic (docs/decisoes/0074). The browser runs the conversation with the Anthropic SDK
+/// The assistant's link to Anthropic (docs/decisoes/0079). The browser runs the conversation with the Anthropic SDK
 /// pointed at this API; this class keeps only the conversation from its request, adds everything else the server
 /// decides (model, system prompt, tools, limits, the key), sends it to the Messages API and streams the answer back
 /// byte for byte, so the SDK in the browser reads it as if it came from Anthropic. It also reads the token counts

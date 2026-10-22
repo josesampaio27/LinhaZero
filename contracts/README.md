@@ -4,7 +4,7 @@ Os ficheiros em `examples/` são a fonte de verdade dos tipos partilhados entre 
 
 ## `assistant-status.json` — `GET /api/v1/assistant/status`
 
-`enabled` (o servidor tem a chave da Anthropic), `model`, e o que quem tem sessão gastou hoje (`usedTodayUsd`, dia de Lisboa) contra o seu limite (`dailyBudgetUsd`), em dólares ([ADR 0074](../docs/decisoes/0074-assistente-com-claude-haiku.md)). A conversa em si (`POST /api/v1/assistant/v1/messages`) usa o formato da Messages API da Anthropic, não um contrato próprio.
+`enabled` (o servidor tem a chave da Anthropic), `model`, e o que quem tem sessão gastou hoje (`usedTodayUsd`, dia de Lisboa) contra o seu limite (`dailyBudgetUsd`), em dólares ([ADR 0079](../docs/decisoes/0079-assistente-com-claude-haiku.md)). A conversa em si (`POST /api/v1/assistant/v1/messages`) usa o formato da Messages API da Anthropic, não um contrato próprio.
 
 ## `run-request.json` — `POST /api/v1/runs`
 

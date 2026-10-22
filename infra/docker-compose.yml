@@ -105,7 +105,7 @@ services:
       KEYCLOAK_ADMIN_CLIENT_SECRET: ${KEYCLOAK_ADMIN_CLIENT_SECRET:-dev-admin-secret-change-me}
       # Each access request emails every admin (docs/decisoes/0067), at most this many emails a day (SMTP_* from x-smtp).
       ACCESS_REQUEST_EMAILS_PER_DAY: ${ACCESS_REQUEST_EMAILS_PER_DAY:-100}
-      # The assistant (docs/decisoes/0074): off without a key. Each user may spend ASSISTANT_DAILY_BUDGET_USD a day.
+      # The assistant (docs/decisoes/0079): off without a key. Each user may spend ASSISTANT_DAILY_BUDGET_USD a day.
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       ASSISTANT_MODEL: ${ASSISTANT_MODEL:-claude-haiku-5-5}
       ASSISTANT_DAILY_BUDGET_USD: ${ASSISTANT_DAILY_BUDGET_USD:-0.50}

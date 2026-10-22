@@ -1,4 +1,4 @@
-// check_plan: what is wrong with a decision's actions, found by code, not by the model (docs/decisoes/0074). Each
+// check_plan: what is wrong with a decision's actions, found by code, not by the model (docs/decisoes/0079). Each
 // action is judged against a run of the fire without any of the decision's actions (where and when the fire would
 // pass) and, when the results are current, against what happened in the latest run. Pure function, tested in Node.
 import { firePath, isBurnable, toEngineIntervention, type DecisionId, type GridData } from "@linha-zero/engine";

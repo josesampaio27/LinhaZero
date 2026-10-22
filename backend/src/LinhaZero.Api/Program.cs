@@ -67,7 +67,7 @@ services.AddSingleton<RunService>();
 services.AddSingleton<RunEventStream>();
 services.AddSingleton<HealthService>();
 
-// The assistant (docs/decisoes/0074): Anthropic's Messages API, streamed through this API. No client timeout: an
+// The assistant (docs/decisoes/0079): Anthropic's Messages API, streamed through this API. No client timeout: an
 // answer streams for as long as it takes, and the browser's request (its cancellation token) ends it.
 services.Configure<AssistantOptions>(assistant => assistant.ReadFrom(config));
 services.AddSingleton<AssistantUsageRepository>();

@@ -1,4 +1,4 @@
--- The assistant (docs/decisoes/0074): the tokens and cost of every response, so each user's daily limit can be
+-- The assistant (docs/decisoes/0079): the tokens and cost of every response, so each user's daily limit can be
 -- checked and the real cost per conversation measured. Applied by the API on start (docs/decisoes/0065).
 
 create table if not exists assistant_usage (

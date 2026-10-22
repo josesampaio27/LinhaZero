@@ -10,7 +10,7 @@ import { fuelBases, RothermelRates } from "./surface";
 import type { CellRef, FireExplain, Ignition, PreparedGrid, RunMetrics, Scenario, SimulationResult, WeatherStep } from "./types";
 
 const crownOf = (p: ModelParams) => ({ enabled: p.crownFire >= 0.5, rateAdj: p.crownAdj });
-const terrainOptionsOf = (p: ModelParams) => ({ crownRatio: p.crownRatio, demSmoothM: p.demSmoothM });
+const terrainOptionsOf = (p: ModelParams) => ({ crownRatio: p.crownRatio, demSmoothM: p.demSmoothM, shrubModel: p.shrubModel, shapeModel: p.shapeModel, terrainWind: p.terrainWind });
 
 /** Dead fuel moisture shifted by a calibration offset, never below 1%. */
 function withDeadOffset(m: FuelMoisture, offset: number): FuelMoisture {
@@ -118,7 +118,7 @@ export function simulate(grid: PreparedGrid, scenario: Scenario): SimulationResu
   // One rate cache per wind factor, reused by the runs (each run resets it with its own fuel behaviour).
   const ratesByWindAdj = new Map<string, RothermelRates>();
   const ratesFor = (p: ModelParams, b0: (SurfaceBase | null)[]) => {
-    const key = `${p.windAdj}|${p.crownFire}|${p.crownAdj}|${p.windLimit}|${p.crownRatio}|${p.demSmoothM}`;
+    const key = `${p.windAdj}|${p.crownFire}|${p.crownAdj}|${p.windLimit}|${p.crownRatio}|${p.demSmoothM}|${p.shrubModel}|${p.shapeModel}|${p.terrainWind}`;
     let r = ratesByWindAdj.get(key);
     if (!r) ratesByWindAdj.set(key, (r = new RothermelRates(grid, b0, p.windAdj, crownOf(p), p.windLimit, terrainOptionsOf(p))));
     return r;

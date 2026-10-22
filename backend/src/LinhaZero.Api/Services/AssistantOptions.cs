@@ -1,7 +1,7 @@
 namespace LinhaZero.Api.Services;
 
 /// <summary>
-/// The assistant (docs/decisoes/0074), from ANTHROPIC_API_KEY, ASSISTANT_MODEL, ASSISTANT_EFFORT, ASSISTANT_MAX_TOKENS
+/// The assistant (docs/decisoes/0079), from ANTHROPIC_API_KEY, ASSISTANT_MODEL, ASSISTANT_EFFORT, ASSISTANT_MAX_TOKENS
 /// and ASSISTANT_DAILY_BUDGET_USD (infra/README.md). No key: the assistant is off and the app hides its panel.
 /// </summary>
 public sealed class AssistantOptions

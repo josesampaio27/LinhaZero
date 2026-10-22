@@ -1,4 +1,4 @@
-# ADR 0074: Assistente com IA (Claude Haiku 5.5), que vê a aplicação e coloca ações
+# ADR 0079: Assistente com IA (Claude Haiku 5.5), que vê a aplicação e coloca ações
 
 - Estado: aceite (prova de conceito)
 - Data: 2026-10-22

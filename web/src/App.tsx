@@ -18,6 +18,7 @@ import {
   type DecisionId,
   type DrawnIntervention,
   type FireExplain,
+  type LineSuggestion,
   type GridData,
   type GridHeader,
   type GridVariant,
@@ -34,6 +35,7 @@ import { AssistantPanel } from "./components/AssistantPanel";
 import { CellInspector, cellUnder } from "./components/CellInspector";
 import { ComparisonPanel } from "./components/ComparisonPanel";
 import { ExplainPanel } from "./components/ExplainPanel";
+import { SuggestPanel } from "./components/SuggestPanel";
 import { RunHistoryDialog } from "./components/RunHistoryDialog";
 import { DecisionTools, TOOLS } from "./components/DecisionTools";
 import { Legend } from "./components/Legend";
@@ -315,7 +317,12 @@ export function App() {
   const [results, setResults] = useState<Results | null>(null);
   // The cell whose arrival is being explained (a map click or a place in the table on the result step).
   const [explainAt, setExplainAt] = useState<number | null>(null);
-  useEffect(() => setExplainAt(null), [results]);
+  // A suggested third decision shown on the map of the decision it builds on (SuggestPanel).
+  const [suggestPreview, setSuggestPreview] = useState<{ d: DecisionId; s: LineSuggestion } | null>(null);
+  useEffect(() => {
+    setExplainAt(null);
+    setSuggestPreview(null);
+  }, [results]);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   // Base map, contours and 3D relief: shared with the grid editor (lib/map-prefs.ts).
@@ -349,7 +356,7 @@ export function App() {
   const [incidentsTick, setIncidentsTick] = useState(0); // "↻" bumps it to refetch
   // Run token: a slow server run must not land after a grid switch, a scenario load or a newer run.
   const runSeq = useRef(0);
-  // The assistant (docs/decisoes/0074): signed-in users only, when the server has it on. The actions it placed are
+  // The assistant (docs/decisoes/0079): signed-in users only, when the server has it on. The actions it placed are
   // marked on the maps and in the lists.
   const [assistantOn, setAssistantOn] = useState(false);
   const [assistantOpen, setAssistantOpen] = useState(false);
@@ -520,8 +527,13 @@ export function App() {
       });
       return [{ kind: "firePath", line: true, coords }];
     };
-    return { A: [...burned, ...of(decisions.A), ...path("A")], B: [...burned, ...of(decisions.B), ...path("B")] };
-  }, [decisions, burnedArea, results, explainAt, grid, step, assistantIds]);
+    const suggested = (d: DecisionId): MapShape[] =>
+      suggestPreview?.d === d && step === "resultado" ? [{ kind: "suggestedLine", line: true, coords: suggestPreview.s.coords }] : [];
+    return {
+      A: [...burned, ...of(decisions.A), ...path("A"), ...suggested("A")],
+      B: [...burned, ...of(decisions.B), ...path("B"), ...suggested("B")],
+    };
+  }, [decisions, burnedArea, results, explainAt, grid, step, suggestPreview, assistantIds]);
 
   // --- Drawing ---
   const finishDraft = useCallback(() => {
@@ -1782,6 +1794,24 @@ export function App() {
             {explanation}
             {results.explain && !explanation && (
               <p className="hint">Toca num ponto do mapa, ou num lugar da tabela, para ver por onde e porque o fogo lá chega.</p>
+            )}
+            {!stale && bundle && (
+              <SuggestPanel
+                onSuggest={async (d, readyMin, widthM) => {
+                  const scenario = { ...buildScenario(bundle.data.header, inputs, d), ensemble: undefined };
+                  return (await sim.suggest({ scenario, variant: inputs.variants[d] }, { readyMin, widthM })).result;
+                }}
+                preview={suggestPreview?.s ?? null}
+                onPreview={(d, s) => setSuggestPreview(s ? { d, s } : null)}
+                onUse={(d, s) => {
+                  const other: DecisionId = d === "A" ? "B" : "A";
+                  const line: DrawnIntervention = { id: newId(), kind: "containmentLine", startMin: s.startMin, widthM: s.widthM, coords: s.coords };
+                  setDecisions((prev) => ({ ...prev, [other]: [...prev[d].map((iv) => ({ ...iv, id: newId() })), line] }));
+                  setVariantIds((prev) => ({ ...prev, [other]: prev[d] }));
+                  setSuggestPreview(null);
+                  setMessage(`A decisão ${other} passou a ser a ${d} com a linha sugerida. Carrega em "Simular de novo" para a comparar.`);
+                }}
+              />
             )}
           </>
         ) : (

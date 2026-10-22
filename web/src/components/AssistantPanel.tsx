@@ -66,7 +66,7 @@ function Rich({ text }: { text: string }) {
 const usd = (v: number) => `${v.toLocaleString("pt-PT", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} US$`;
 
 /**
- * The assistant (docs/decisoes/0074): a chat beside the maps that sees the app state and can draw actions, change the
+ * The assistant (docs/decisoes/0079): a chat beside the maps that sees the app state and can draw actions, change the
  * conditions and simulate. Stays mounted while closed, so the conversation survives closing it.
  */
 export function AssistantPanel({ open, onClose, context }: { open: boolean; onClose: () => void; context: () => AssistantContext }) {

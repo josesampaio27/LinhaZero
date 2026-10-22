@@ -1,4 +1,4 @@
-// The assistant's tools, run in the browser where the app state lives (docs/decisoes/0074). Their definitions (names,
+// The assistant's tools, run in the browser where the app state lives (docs/decisoes/0079). Their definitions (names,
 // descriptions, input schemas) are the server's: backend/src/LinhaZero.Api/Assistant/tools.json, which a test keeps
 // in step with TOOL_NAMES. Every input is checked here again: the schema allows no ranges.
 import {

@@ -1,4 +1,4 @@
-// The assistant's conversation loop, in the browser (docs/decisoes/0074). The Anthropic SDK talks to our API, which
+// The assistant's conversation loop, in the browser (docs/decisoes/0079). The Anthropic SDK talks to our API, which
 // adds the key, the model, the system prompt and the tools and streams Anthropic's answer back; tools run here,
 // where the app state is. The history is append-only: every assistant message goes back exactly as it came
 // (thinking blocks included), which Claude Haiku 5.5 requires.

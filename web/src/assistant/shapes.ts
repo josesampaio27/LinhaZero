@@ -1,6 +1,6 @@
 // Where an action the assistant asks for goes on the map. The assistant names a place and a shape; these functions
 // turn them into the drawn coordinates (EPSG:3763), from the fire's own path, so the model never writes coordinates
-// (docs/decisoes/0074). Pure functions, tested in Node.
+// (docs/decisoes/0079). Pure functions, tested in Node.
 import { firePath, type GridHeader, type ProjectedPoint } from "@linha-zero/engine";
 import type { FireRun } from "./context";
 import { gridPoint, type NamedPlace } from "./places";

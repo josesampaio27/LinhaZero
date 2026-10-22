@@ -1,4 +1,4 @@
-// What the assistant sees of the app and what it may do to it (docs/decisoes/0074). App.tsx fills both on every render
+// What the assistant sees of the app and what it may do to it (docs/decisoes/0079). App.tsx fills both on every render
 // through a ref, so a tool that runs across several renders always reads the current state.
 import type {
   DecisionId,

@@ -11,7 +11,7 @@ using Microsoft.Extensions.Options;
 namespace LinhaZero.Api.Controllers;
 
 /// <summary>
-/// The assistant (docs/decisoes/0074): Claude, reached through this API so the Anthropic key never leaves the server.
+/// The assistant (docs/decisoes/0079): Claude, reached through this API so the Anthropic key never leaves the server.
 /// The browser's Anthropic SDK uses <c>/api/v1/assistant</c> as its base address and posts to <c>v1/messages</c> here.
 /// Signed-in users only, each with a daily spending limit.
 /// </summary>

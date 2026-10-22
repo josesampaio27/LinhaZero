@@ -137,7 +137,7 @@ kind: NetworkPolicy
 metadata:
   name: api-anthropic
 spec:
-  # The assistant (docs/decisoes/0074): the API calls api.anthropic.com over HTTPS.
+  # The assistant (docs/decisoes/0079): the API calls api.anthropic.com over HTTPS.
   podSelector:
     matchLabels: { app: api }
   policyTypes: [Egress]

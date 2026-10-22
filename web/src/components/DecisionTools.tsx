@@ -23,7 +23,7 @@ interface Props {
 }
 
 /** Typical containment line widths: hand line, machine line, fuel breaks. */
-const LINE_WIDTHS: { m: number; label: string }[] = [
+export const LINE_WIDTHS: { m: number; label: string }[] = [
   { m: 1, label: "1 m · manual" },
   { m: 4, label: "4 m · máquina" },
   { m: 10, label: "10 m · faixa" },
