@@ -11,6 +11,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.1.0",
     "@linha-zero/engine": "*",
     "maplibre-gl": "^5.0.0",
     "proj4": "^2.12.1",

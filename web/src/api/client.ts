@@ -220,6 +220,122 @@ export class AccessRequestsClient {
     }
 }
 
+export class AssistantClient {
+    private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(baseUrl?: string, http?: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> }) {
+        this.http = http ? http : window as any;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * Whether the assistant is on, and what the signed-in user spent today against their limit.
+     * @return OK
+     */
+    status(signal?: AbortSignal): Promise<AssistantStatus> {
+        let url_ = this.baseUrl + "/api/v1/assistant/status";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_: RequestInit = {
+            method: "GET",
+            signal,
+            headers: {
+                "Accept": "application/json"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processStatus(_response);
+        });
+    }
+
+    protected processStatus(response: Response): Promise<AssistantStatus> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as AssistantStatus;
+            return result200;
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<AssistantStatus>(null as any);
+    }
+
+    /**
+     * One turn of the conversation, streamed as Server-Sent Events in the Anthropic Messages API format. Only
+    `messages` is read from the body; the server sets the model, system prompt, tools and limits.
+     * @return OK
+     */
+    messages(body: AssistantRequest, signal?: AbortSignal): Promise<string> {
+        let url_ = this.baseUrl + "/api/v1/assistant/v1/messages";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_: RequestInit = {
+            body: content_,
+            method: "POST",
+            signal,
+            headers: {
+                "Content-Type": "application/json",
+                "Accept": "text/event-stream"
+            }
+        };
+
+        return this.http.fetch(url_, options_).then((_response: Response) => {
+            return this.processMessages(_response);
+        });
+    }
+
+    protected processMessages(response: Response): Promise<string> {
+        const status = response.status;
+        let _headers: any = {}; if (response.headers && response.headers.forEach) { response.headers.forEach((v: any, k: any) => _headers[k] = v); };
+        if (status === 200) {
+            return response.text().then((_responseText) => {
+            let result200: any = null;
+            result200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as string;
+            return result200;
+            });
+        } else if (status === 400) {
+            return response.text().then((_responseText) => {
+            let result400: any = null;
+            result400 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ErrorResponse;
+            return throwException("Bad Request", status, _responseText, _headers, result400);
+            });
+        } else if (status === 403) {
+            return response.text().then((_responseText) => {
+            let result403: any = null;
+            result403 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ErrorResponse;
+            return throwException("Forbidden", status, _responseText, _headers, result403);
+            });
+        } else if (status === 429) {
+            return response.text().then((_responseText) => {
+            let result429: any = null;
+            result429 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ErrorResponse;
+            return throwException("Too Many Requests", status, _responseText, _headers, result429);
+            });
+        } else if (status === 503) {
+            return response.text().then((_responseText) => {
+            let result503: any = null;
+            result503 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver) as ErrorResponse;
+            return throwException("Service Unavailable", status, _responseText, _headers, result503);
+            });
+        } else if (status !== 200 && status !== 204) {
+            return response.text().then((_responseText) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            });
+        }
+        return Promise.resolve<string>(null as any);
+    }
+}
+
 export class FeedbackClient {
     private http: { fetch(url: RequestInfo, init?: RequestInit): Promise<Response> };
     private baseUrl: string;
@@ -971,6 +1087,21 @@ export interface AccessRequestResponse {
     status: string;
     createdAt: string;
     decidedAt: string | null;
+}
+
+/** The body of POST /api/v1/assistant/v1/messages: an Anthropic Messages API request, as the browser's Anthropic SDK sends it. Only `messages` is read (the conversation so far, in the Messages API format); the model, system prompt, tools and limits are the server's, so the other fields the SDK sends are ignored. */
+export interface AssistantRequest {
+    messages: any[] | null;
+
+    [key: string]: any;
+}
+
+/** The GET /api/v1/assistant/status body: whether the assistant is on (the server has an Anthropic key), its model, and what the signed-in user spent today (Lisbon time) against their daily limit, in US dollars. */
+export interface AssistantStatus {
+    enabled: boolean;
+    model: string;
+    usedTodayUsd: number;
+    dailyBudgetUsd: number;
 }
 
 /** A grid cell. */

@@ -663,3 +663,62 @@ kbd {
 .explain-decision ul { margin: 0; padding-left: 1.2em; display: grid; gap: 2px; font-size: 14px; }
 .comparison td .link { padding: 0; min-height: 0; text-align: left; font: inherit; }
 
+
+/* The assistant (components/AssistantPanel.tsx, docs/decisoes/0074): a chat beside the maps. Its button floats in the
+   bottom right corner of the stage, above the map attribution; desktop opens the chat as a window over the button,
+   short enough to leave the map controls at the top free; phones open it as the whole screen, under the app bar. */
+/* Above the bar under the maps (53 px) and the attribution (24 px; 44 px on touch screens). */
+.stage { --assistant-bottom: 92px; }
+@media (pointer: coarse) { .stage { --assistant-bottom: 112px; } }
+@media (max-width: 899px) { .stage:has(.hover-bar.idle) { --assistant-bottom: 52px; } }
+.assistant-btn {
+  position: absolute; z-index: 16; right: 12px; bottom: var(--assistant-bottom); gap: 6px; min-height: var(--tap);
+  padding: 8px 16px; border-radius: 999px; font-weight: 600; background: var(--panel); box-shadow: var(--shadow);
+}
+.assistant-btn .icon-svg { color: #d97706; }
+.assistant-btn.on { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
+.assistant {
+  position: absolute; z-index: 15; right: 12px; bottom: calc(var(--assistant-bottom) + var(--tap) + 8px);
+  width: min(400px, calc(100% - 24px)); height: min(600px, calc(100% - var(--assistant-bottom) - var(--tap) - 72px));
+  display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; box-shadow: var(--shadow);
+}
+.assistant[hidden] { display: none; }
+@media (max-width: 899px) {
+  .assistant { position: fixed; z-index: 25; inset: 0; top: auto; height: calc(100dvh - 56px); width: auto; border-radius: 14px 14px 0 0; padding-bottom: env(safe-area-inset-bottom); }
+}
+.assistant-head { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 14px; border-bottom: 1px solid var(--line); }
+.assistant-head > .icon-svg { color: #d97706; }
+.assistant-head small { flex: 1; color: var(--muted); font-size: 13px; text-align: right; }
+.assistant-head b { font-family: var(--display); font-size: 18px; letter-spacing: .02em; }
+.assistant-head .link { flex: none; }
+.assistant-body { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 12px 14px; display: grid; align-content: start; gap: 12px; }
+.assistant-intro { display: grid; gap: 6px; color: var(--ink); }
+.msg { display: grid; gap: 6px; max-width: 100%; overflow-wrap: anywhere; }
+.msg-user { justify-self: end; max-width: 85%; padding: 8px 12px; border-radius: 12px 12px 2px 12px; background: var(--sunk); white-space: pre-wrap; }
+.msg-text { display: grid; gap: 6px; line-height: 1.4; }
+.msg-text ul { margin: 0; padding-left: 1.2em; display: grid; gap: 2px; }
+.tool-line { display: flex; align-items: center; gap: 8px; margin: 0; font-size: 13px; color: var(--muted); }
+.tool-line i { flex: none; width: 8px; height: 8px; border-radius: 50%; background: var(--line); }
+.tool-line.running i { background: #d97706; animation: assistant-pulse 1s ease-in-out infinite; }
+.tool-line.done i { background: var(--good); }
+.tool-line.error { color: var(--warn); }
+.tool-line.error i { background: var(--warn); }
+@keyframes assistant-pulse { 50% { opacity: .3; } }
+@media (prefers-reduced-motion: reduce) { .tool-line.running i { animation: none; } }
+.msg-actions { display: flex; align-items: center; gap: 8px; }
+.msg-actions button:not(.icon-btn) { min-height: 36px; padding: 4px 10px; font-size: 14px; }
+.msg-actions .hint { margin: 0; }
+.assistant-foot { display: grid; gap: 8px; padding: 10px 12px 12px; border-top: 1px solid var(--line); }
+.assistant-foot .hint { margin: 0; }
+.quick { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.quick button { flex: none; min-height: 34px; padding: 4px 10px; border-radius: 999px; font-size: 14px; font-weight: 500; }
+.assistant-input { display: flex; align-items: flex-end; gap: 6px; }
+.assistant-input textarea {
+  flex: 1; min-height: var(--tap); max-height: 140px; resize: vertical; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px;
+  background: var(--panel); font: inherit;
+}
+.assistant-input .icon-btn { flex: none; border-radius: 10px; background: var(--ink); color: var(--on-ink); min-height: var(--tap); }
+.assistant-input .icon-btn:disabled { background: var(--sunk); color: var(--muted); }
+/* "assistente" on the cards of the actions it placed. */
+.by-assistant { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 0 6px; border-radius: 999px; border: 1px solid #f59e0b; color: var(--warn); font-size: 12px; font-weight: 600; }
+.by-assistant .icon-svg { color: #d97706; }

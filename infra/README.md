@@ -55,6 +55,10 @@ A ingestão faz **um** pedido ao fogos.pt a cada 2 minutos e respeita o `Retry-A
 | `KEYCLOAK_ADMIN_CLIENT_SECRET` | `dev-admin-secret-change-me` | O segredo do cliente `linhazero-api-admin`, com que a API cria as contas dos pedidos aprovados; o mesmo no Keycloak e na API |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_FROM`, `SMTP_AUTH`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_STARTTLS`, `SMTP_SSL` | Mailpit | O servidor de email do Keycloak e da API (avisos de pedidos de acesso). Por omissão o Mailpit local; para enviar emails a sério, os dados de um serviço como o Brevo (ver `infra/.env.example`) |
 | `ACCESS_REQUEST_EMAILS_PER_DAY` | 100 | Quantos emails de aviso de pedidos de acesso a API envia por dia (UTC), contando cada administrador; acima disso os pedidos ficam guardados sem aviso ([ADR 0067](../docs/decisoes/0067-email-aos-administradores-por-pedido-de-acesso.md)) |
+| `ANTHROPIC_API_KEY` | (vazio) | A chave da API da Anthropic para o assistente ([ADR 0074](../docs/decisoes/0074-assistente-com-claude-haiku.md)); sem ela o assistente fica desligado e o painel não aparece |
+| `ASSISTANT_MODEL`, `ASSISTANT_EFFORT`, `ASSISTANT_MAX_TOKENS` | `claude-haiku-5-5`, `medium`, 4096 | O modelo do assistente, o esforço de raciocínio e o máximo de tokens por resposta |
+| `ASSISTANT_DAILY_BUDGET_USD` | 0.50 | Quanto cada utilizador pode gastar por dia no assistente, em dólares (dia de Lisboa); acima disso a API responde 429 até à meia-noite |
+| `ASSISTANT_REQUESTS_PER_HOUR` | 300 | Pedidos por hora e por utilizador ao assistente (cada ronda de ferramentas é um pedido): trava um ciclo, o limite diário é que trava o custo |
 | `INGEST_INTERVAL_<FONTE>` | 10, 10, 60, 1440, 1440, 15, 2 | Minutos entre recolhas: `IPMA_OBSERVATIONS`, `IPMA_WARNINGS`, `IPMA_RCM_D0`, `IPMA_STATIONS`, `IPMA_DISTRICTS`, `OPEN_METEO`, `FOGOS_ACTIVE` |
 
 Todos os serviços leem a ligação ao Postgres das variáveis libpq (`PGHOST`, `PGUSER`, `PGPASSWORD`, `PGDATABASE`), definidas no compose; o worker lê `NATS_URL` e `GRIDS_DIR`; a API lê `OIDC_AUTHORITY`, `OIDC_METADATA_ADDRESS`, `OIDC_CLIENT_ID`, `OIDC_CLIENT_SECRET` e `LANDING_URL`.

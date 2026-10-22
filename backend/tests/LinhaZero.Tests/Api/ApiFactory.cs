@@ -30,6 +30,7 @@ public sealed class ApiFactory : WebApplicationFactory<HealthController>
         builder.UseSetting("CORS_ORIGINS", LandingOrigin);
         builder.UseSetting("ACCESS_REQUESTS_PER_HOUR", "1000"); // AccessRequestsHttpTests checks the real limit on its own
         builder.UseSetting("FEEDBACK_PER_HOUR", "1000"); // and FeedbackHttpTests its own
+        builder.UseSetting("ANTHROPIC_API_KEY", ""); // the assistant is off unless a test turns it on (AssistantHttpTests)
         builder.ConfigureServices(services =>
         {
             services.AddSingleton(_ => Pg.CreateDataSource("Host=127.0.0.1;Port=1;Username=x;Password=x;Database=x;Timeout=2"));
@@ -94,6 +95,7 @@ public sealed class TestUser(IOptionsMonitor<AuthenticationSchemeOptions> option
     public const string SchemeName = "Test";
     public const string Header = "X-Test-User";
     public const string RolesHeader = "X-Test-Roles";
+    public const string UserIdHeader = "X-Test-User-Id";
 
     protected override Task<AuthenticateResult> HandleAuthenticateAsync()
     {
@@ -103,7 +105,10 @@ public sealed class TestUser(IOptionsMonitor<AuthenticationSchemeOptions> option
         }
 
         var roles = Request.Headers[RolesHeader].ToString().Split(',', StringSplitOptions.RemoveEmptyEntries).Select(r => new Claim("role", r.Trim()));
-        var identity = new ClaimsIdentity([new Claim("name", name), new Claim("email", "teste@linhazero.localhost"), .. roles], SchemeName, "name", "role");
+        // A users.id, as a real session carries; without it the session is a test one that is not in the users table.
+        Claim[] userId = Request.Headers[UserIdHeader] is [{ Length: > 0 } id] ? [new Claim(AuthSetup.UserIdClaim, id)] : [];
+        var identity = new ClaimsIdentity(
+            [new Claim("name", name), new Claim("email", "teste@linhazero.localhost"), .. roles, .. userId], SchemeName, "name", "role");
         return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(new ClaimsPrincipal(identity), SchemeName)));
     }
 }

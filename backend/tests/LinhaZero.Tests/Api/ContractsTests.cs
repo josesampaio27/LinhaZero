@@ -85,6 +85,18 @@ public class ContractsTests
     }
 
     [Fact]
+    public void Assistant_status_example_matches_the_record()
+    {
+        var status = JsonSerializer.Deserialize<AssistantStatus>(Read("assistant-status.json"), RunRequestParser.Json)!;
+        Assert.True(status.Enabled);
+        Assert.Equal("claude-haiku-5-5", status.Model);
+        Assert.Equal(0.5m, status.DailyBudgetUsd);
+        var record = JsonSerializer.Deserialize<JsonElement>(JsonSerializer.Serialize(status, JsonSerializerOptions.Web));
+        var example = JsonSerializer.Deserialize<JsonElement>(Read("assistant-status.json"));
+        Assert.Equal(record.EnumerateObject().Select(p => p.Name), example.EnumerateObject().Select(p => p.Name));
+    }
+
+    [Fact]
     public void Weather_and_incidents_examples_match_the_response_records()
     {
         var weatherExample = JsonSerializer.Deserialize<JsonElement>(Read("weather.json"));

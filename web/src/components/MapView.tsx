@@ -21,6 +21,8 @@ export interface MapShape {
   kind: string;
   line: boolean;
   coords: [number, number][]; // EPSG:3763
+  /** Placed by the assistant: drawn with a dashed amber outline. */
+  marked?: boolean;
 }
 
 interface Props {
@@ -174,7 +176,7 @@ function shapeFeatures(items: MapShape[]): GeoJSON.FeatureCollection {
       const geometry: GeoJSON.Geometry = d.line
         ? { type: "LineString", coordinates: ring }
         : { type: "Polygon", coordinates: [[...ring, ring[0]]] };
-      return { type: "Feature", properties: { kind: d.kind }, geometry };
+      return { type: "Feature", properties: { kind: d.kind, marked: !!d.marked }, geometry };
     }),
   };
 }
@@ -277,6 +279,15 @@ export function MapView(props: Props) {
         source: "drawings",
         filter: ["all", ["==", ["geometry-type"], "LineString"], ["==", ["get", "kind"], "backfire"]],
         paint: { "line-color": "#ea580c", "line-width": 4, "line-dasharray": [1.5, 1] },
+      });
+      // Actions the assistant placed: a dashed amber outline over the line or the zone's edge.
+      map.addLayer({
+        id: "drawings-marked",
+        type: "line",
+        source: "drawings",
+        filter: ["==", ["get", "marked"], true],
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": "#f59e0b", "line-width": 2, "line-dasharray": [1, 2] },
       });
       map.addLayer({
         id: "draft-line",

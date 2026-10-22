@@ -30,6 +30,7 @@ import {
   type SpreadModel,
   type WeatherStep,
 } from "@linha-zero/engine";
+import { AssistantPanel } from "./components/AssistantPanel";
 import { CellInspector, cellUnder } from "./components/CellInspector";
 import { ComparisonPanel } from "./components/ComparisonPanel";
 import { ExplainPanel } from "./components/ExplainPanel";
@@ -58,7 +59,10 @@ import { fireArrival, fireIntensity, fireProbability, renderTerrain } from "./li
 import { clearRouteParams, navigate, useRoute } from "./lib/route";
 import { describeCell, placeStats } from "./lib/places";
 import { isLineKind, KIND_LABEL, newId, savedScenarioOf } from "./lib/scenario";
-import { ApiError } from "./lib/api";
+import { ApiError, assistantApi } from "./lib/api";
+import type { AssistantContext } from "./assistant/context";
+import { weatherSourceText } from "./assistant/digest";
+import { DRYNESS } from "./lib/moisture";
 import { forecastSteps } from "./lib/weather-steps";
 import { fetchRunResults, fetchRunScenario, MAX_SERVER_RUNS, MIN_SERVER_RUNS, runOnServer, SERVER_ENSEMBLE, workersAvailable } from "./lib/server-run";
 import { useSession } from "./lib/session";
@@ -143,6 +147,16 @@ type MapsView = "A" | "B" | "split" | "swipe";
 const both = (v: MapsView): MapsView => (v === "swipe" ? "swipe" : "split");
 
 const HORIZONS = [1, 2, 3, 4, 5, 6, 7, 8];
+
+/** The weather values set by hand, as the assistant's state names them. */
+const MANUAL_LABEL: Record<string, string> = {
+  direction: "direção do vento",
+  speed: "velocidade do vento",
+  temp: "temperatura",
+  rh: "humidade do ar",
+  cloud: "nebulosidade",
+  moisture: "humidade do combustível",
+};
 
 const STEP_KEYS: Record<string, Step> = { "1": "situacao", "2": "decisoes", "3": "resultado" };
 
@@ -335,6 +349,26 @@ export function App() {
   const [incidentsTick, setIncidentsTick] = useState(0); // "↻" bumps it to refetch
   // Run token: a slow server run must not land after a grid switch, a scenario load or a newer run.
   const runSeq = useRef(0);
+  // The assistant (docs/decisoes/0074): signed-in users only, when the server has it on. The actions it placed are
+  // marked on the maps and in the lists.
+  const [assistantOn, setAssistantOn] = useState(false);
+  const [assistantOpen, setAssistantOpen] = useState(false);
+  const [assistantIds, setAssistantIds] = useState<ReadonlySet<string>>(() => new Set());
+  const signedIn = session.state === "signed-in";
+  useEffect(() => {
+    if (!signedIn) {
+      setAssistantOn(false);
+      return;
+    }
+    let cancelled = false;
+    assistantApi.status().then(
+      (s) => !cancelled && setAssistantOn(s.enabled),
+      () => !cancelled && setAssistantOn(false),
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [signedIn]);
 
   // --- Grid loading ---
   useEffect(() => {
@@ -470,7 +504,8 @@ export function App() {
   const shapes = useMemo(() => {
     // Retardant drops get their own colour on the map.
     const mapKind = (iv: DrawnIntervention) => (iv.kind === "aerialDrop" && iv.agent === "retardant" ? "aerialDropRetardant" : iv.kind);
-    const of = (items: DrawnIntervention[]): MapShape[] => items.map((iv) => ({ kind: mapKind(iv), line: isLineKind(iv.kind), coords: iv.coords }));
+    const of = (items: DrawnIntervention[]): MapShape[] =>
+      items.map((iv) => ({ kind: mapKind(iv), line: isLineKind(iv.kind), coords: iv.coords, marked: assistantIds.has(iv.id) }));
     const burned: MapShape[] = burnedArea ? [{ kind: "burned", line: false, coords: burnedArea }] : [];
     // The fire's path to the cell being explained, through the cell centres.
     const path = (d: DecisionId): MapShape[] => {
@@ -486,7 +521,7 @@ export function App() {
       return [{ kind: "firePath", line: true, coords }];
     };
     return { A: [...burned, ...of(decisions.A), ...path("A")], B: [...burned, ...of(decisions.B), ...path("B")] };
-  }, [decisions, burnedArea, results, explainAt, grid, step]);
+  }, [decisions, burnedArea, results, explainAt, grid, step, assistantIds]);
 
   // --- Drawing ---
   const finishDraft = useCallback(() => {
@@ -543,35 +578,38 @@ export function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, [active, cancelTool, finishDraft]);
 
-  /** Sets the ignition at a map point (ignite tool or incident marker): the only path where the user moves the ignition. */
-  const igniteAt = (lngLat: LngLat) => {
-    if (!grid) return;
-    // Whole metres keep saved files tidy; the cell is checked after rounding so both agree.
-    const [x, y] = lngLatToProjected(lngLat[0], lngLat[1]).map(Math.round);
+  /**
+   * Puts the ignition at a point (EPSG:3763, whole metres) or on the nearest cell that burns, and asks for the live
+   * weather there. Returns why it could not, or a note when it moved the point.
+   */
+  const placeIgnition = (x: number, y: number): { error: string } | { note: string | null } => {
+    if (!grid) return { error: "A zona ainda está a carregar." };
     const cell = cellAt(grid.header, x, y);
-    if (!cell) {
-      setMessage("O ponto está fora da grelha.");
-      return;
-    }
+    if (!cell) return { error: "O ponto está fora da grelha." };
     // On a road, a river or a non-burnable patch, the fire starts on the nearest cell that burns.
     const target = nearestBurnable(grid, cell);
-    if (!target) {
-      setMessage("Não há combustível a menos de 200 m deste ponto (zona urbana, água). Escolher outro ponto.");
-      return;
-    }
+    if (!target) return { error: "Não há combustível a menos de 200 m deste ponto (zona urbana, água). Escolher outro ponto." };
     const moved = target.row !== cell.row || target.col !== cell.col;
     const { cellSize, originX, originY } = grid.header;
     const point: [number, number] = moved
       ? [Math.round(originX + (target.col + 0.5) * cellSize), Math.round(originY - (target.row + 0.5) * cellSize)]
       : [x, y];
-    setMessage(
-      moved
-        ? `O ponto escolhido não arde (estrada, rio ou zona sem combustível): a ignição passou para a célula com combustível mais próxima, a ${Math.round(Math.hypot(target.row - cell.row, target.col - cell.col) * cellSize).toLocaleString("pt-PT")} m.`
-        : null,
-    );
     setIgnition(point);
     fetchAt(projectedToLngLat(point[0], point[1]), "ignition");
     setTool({ type: "none" });
+    return {
+      note: moved
+        ? `O ponto escolhido não arde (estrada, rio ou zona sem combustível): a ignição passou para a célula com combustível mais próxima, a ${Math.round(Math.hypot(target.row - cell.row, target.col - cell.col) * cellSize).toLocaleString("pt-PT")} m.`
+        : null,
+    };
+  };
+
+  /** Sets the ignition at a map point (ignite tool or incident marker). */
+  const igniteAt = (lngLat: LngLat) => {
+    // Whole metres keep saved files tidy; the cell is checked after rounding so both agree.
+    const [x, y] = lngLatToProjected(lngLat[0], lngLat[1]).map(Math.round);
+    const placed = placeIgnition(x, y);
+    setMessage("error" in placed ? placed.error : placed.note);
   };
 
   const onMapClick = (d: DecisionId) => (lngLat: LngLat) => {
@@ -658,9 +696,11 @@ export function App() {
   };
   const inputKey = inputKeyOf(gridName, inputs);
 
+  /** Runs A and B; resolves with the results it set, or null with why (the assistant waits on it). */
   const runSimulation = useCallback(
-    async (inputs: SimInputs, opts: { animate: boolean }) => {
-      if (!bundle) return;
+    async (inputs: SimInputs, opts: { animate: boolean }): Promise<{ results: Results | null; error: string | null }> => {
+      if (!bundle) return { results: null, error: "A zona ainda está a carregar." };
+      const superseded = { results: null, error: "Outra simulação começou entretanto." };
       const my = ++runSeq.current;
       const current = () => my === runSeq.current;
       const header = bundle.data.header;
@@ -699,7 +739,7 @@ export function App() {
               return null;
             })
           : null;
-        if (!current()) return;
+        if (!current()) return superseded;
         // What actually ran, for the result's key: without the server, no ensemble.
         const ran: SimInputs = { ...inputs, ensemble: !!server };
         // The run without random draws, recording how the fire reached each cell: the map's arrival run.
@@ -718,9 +758,10 @@ export function App() {
           done = `Simulação das duas decisões feita em ${Math.round(elapsedMs).toLocaleString("pt-PT")} ms.`;
           if (serverProblem) done = `${serverProblem}: simulado sem incerteza. ${done}`;
         }
-        if (!current()) return;
+        if (!current()) return superseded;
         // Not under someone drawing: the map must not move while they mark points.
-        setResults(resultsOf(header, bundle.name, ran, A, B, explain, drawingRef.current ? null : String(my)));
+        const res = resultsOf(header, bundle.name, ran, A, B, explain, drawingRef.current ? null : String(my));
+        setResults(res);
         setViewMode("arrival"); // Chegada first, also for an ensemble: Cenários is one tap away
         // Losing the uncertainty is worth noticing: it goes to the message, not to the quiet note.
         setRunNote(serverProblem ? null : done);
@@ -734,8 +775,11 @@ export function App() {
           setT(0);
           setPlaying(true);
         } else setT(inputs.durationMin);
+        return { results: res, error: serverProblem };
       } catch (e) {
-        if (current()) setMessage(e instanceof Error ? e.message : String(e));
+        const error = e instanceof Error ? e.message : String(e);
+        if (current()) setMessage(error);
+        return { results: null, error };
       } finally {
         if (current()) setBusy(false);
       }
@@ -1048,6 +1092,94 @@ export function App() {
   const points = draft?.coords.length ?? 0;
   const title = scenarioTitle ?? gridIndex.find((g) => g.name === gridName)?.label ?? "Zona";
 
+  // --- The assistant: what it sees and what it may do, set every render (its tools run across renders) ---
+  const inputsRef = useRef(inputs);
+  inputsRef.current = inputs;
+  const assistant = useRef<AssistantContext | null>(null);
+  const moistureMode = weather.conditions.moistureMode;
+  assistant.current = {
+    snapshot: {
+      grid,
+      decisionGrids,
+      zone: title,
+      places,
+      step,
+      ignition,
+      burnedArea: !!burnedArea,
+      wind,
+      air: weather.conditions.air && { tempC: weather.conditions.air.tempC, rhPct: weather.conditions.air.rhPct },
+      moisture:
+        moistureMode === "tempo"
+          ? "calculada do tempo (temperatura e humidade do ar)"
+          : moistureMode === "manual"
+            ? "valores postos à mão"
+            : `predefinição "${DRYNESS.find((p) => p.id === moistureMode)?.label ?? moistureMode}"`,
+      weatherSource: weatherSourceText(weather.source, weather.live?.snapshot ?? null),
+      manual: [...weather.manual].map((f) => MANUAL_LABEL[f] ?? f),
+      weatherSteps: weatherSteps ? Math.max(0, weatherSteps.length - 1) : 0,
+      durationMin,
+      decisions,
+      variants: { A: variants.A?.name ?? null, B: variants.B?.name ?? null },
+      ensembleOn,
+      ensembleRuns,
+      serverAvailable,
+      results,
+      stale,
+      busy,
+      t,
+      explainAt,
+      assistantIds,
+    },
+    actions: {
+      addIntervention: (d, item) => {
+        setDecisions((prev) => ({ ...prev, [d]: [...prev[d], item] }));
+        setAssistantIds((prev) => new Set(prev).add(item.id));
+      },
+      updateIntervention: (d, id, patch) => updateIv(d)(id, patch),
+      removeIntervention: (d, id) => removeIv(d)(id),
+      setDecision: (d, items) => setDecisions((prev) => ({ ...prev, [d]: items })),
+      setWind: (w) => weather.editWind(w),
+      setDuration: setDurationMin,
+      setIgnition: ([x, y]) => {
+        const placed = placeIgnition(x, y);
+        return "error" in placed ? placed.error : null;
+      },
+      runSimulation: () => runSimulation(inputsRef.current, { animate: false }),
+      fireRun: async (d, items) => {
+        if (!bundle) throw new Error("A zona ainda está a carregar.");
+        const now = inputsRef.current;
+        const scenario = buildScenario(bundle.data.header, { ...now, decisions: { ...now.decisions, [d]: items } }, d);
+        const { results: runs } = await sim.simulate([{ scenario: { ...scenario, ensemble: undefined, explain: true }, variant: now.variants[d] }]);
+        const run = runs[0];
+        if (!run.explain) throw new Error("A corrida não registou o caminho do fogo.");
+        return { arrivalMin: run.arrivalMin, explain: run.explain };
+      },
+      show: (cell, points) => {
+        if (cell !== null && results?.explain) {
+          setStep("resultado");
+          setMapsView(both);
+        }
+        setExplainAt(cell);
+        const map = maps.current.A ?? maps.current.B;
+        const lngLats = points.map(([x, y]) => projectedToLngLat(x, y));
+        if (map && lngLats.length) map.easeTo({ center: lngLats[0], zoom: Math.max(map.getZoom(), 13) });
+      },
+    },
+  };
+  const assistantContext = useCallback(() => assistant.current!, []);
+  const assistantButton = assistantOn && (
+    <button
+      className={`assistant-btn ${assistantOpen ? "on" : ""}`}
+      aria-label="Assistente"
+      aria-expanded={assistantOpen}
+      title="Assistente"
+      onClick={() => setAssistantOpen((o) => !o)}
+    >
+      <Icon name="spark" size={18} />
+      <span>Assistente</span>
+    </button>
+  );
+
   /** The title's panel: where and what is simulated (zone, examples, files). */
   const titleMenu = (close: () => void) => (
     <div className="menu-body">
@@ -1279,6 +1411,8 @@ export function App() {
           e.target.value = "";
         }}
       />
+      {assistantButton}
+      {assistantOn && <AssistantPanel open={assistantOpen} onClose={() => setAssistantOpen(false)} context={assistantContext} />}
       {showHistory && (
         <RunHistoryDialog
           isAdmin={session.state === "signed-in" && session.me.isAdmin}
@@ -1610,6 +1744,7 @@ export function App() {
           }
           onClear={() => setDecisions((prev) => ({ ...prev, [decisionTab]: [] }))}
           defaultLineWidthM={spreadModel === "rothermel" ? (variants[decisionTab]?.params.lineWidthM ?? DEFAULT_PARAMS.lineWidthM) : undefined}
+          assistantIds={assistantIds}
         >
           <label className="field">
             <span className="field-label">Grelha da decisão {decisionTab}</span>

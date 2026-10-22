@@ -45,6 +45,12 @@ public static class AuthSetup
     /// <summary>The rate limit on problem reports and suggestions: FEEDBACK_PER_HOUR (20 by default) per user.</summary>
     public const string FeedbackLimit = "feedback";
 
+    /// <summary>
+    /// The rate limit on the assistant: ASSISTANT_REQUESTS_PER_HOUR (300 by default) per user. Each tool round is a
+    /// request; this only stops a runaway loop, the daily spending limit is what bounds the cost.
+    /// </summary>
+    public const string AssistantLimit = "assistant";
+
     /// <summary>Our users.id for the signed-in person (null for the test user, who is not in the table).</summary>
     public static Guid? UserId(ClaimsPrincipal user) => Guid.TryParse(user.FindFirst(UserIdClaim)?.Value, out var id) ? id : null;
 
@@ -200,6 +206,7 @@ public static class AuthSetup
 
         var perHour = int.TryParse(config["ACCESS_REQUESTS_PER_HOUR"], out var limit) && limit > 0 ? limit : 5;
         var feedbackPerHour = int.TryParse(config["FEEDBACK_PER_HOUR"], out var feedbackLimit) && feedbackLimit > 0 ? feedbackLimit : 20;
+        var assistantPerHour = int.TryParse(config["ASSISTANT_REQUESTS_PER_HOUR"], out var assistantLimit) && assistantLimit > 0 ? assistantLimit : 300;
         services.AddRateLimiter(limiter =>
         {
             limiter.AddPolicy(AccessRequestLimit, context => RateLimitPartition.GetFixedWindowLimiter(
@@ -209,6 +216,9 @@ public static class AuthSetup
             limiter.AddPolicy(FeedbackLimit, context => RateLimitPartition.GetFixedWindowLimiter(
                 UserId(context.User)?.ToString() ?? context.User.Identity?.Name ?? "?",
                 _ => new FixedWindowRateLimiterOptions { PermitLimit = feedbackPerHour, Window = TimeSpan.FromHours(1) }));
+            limiter.AddPolicy(AssistantLimit, context => RateLimitPartition.GetFixedWindowLimiter(
+                UserId(context.User)?.ToString() ?? context.User.Identity?.Name ?? "?",
+                _ => new FixedWindowRateLimiterOptions { PermitLimit = assistantPerHour, Window = TimeSpan.FromHours(1) }));
             limiter.OnRejected = (context, _) =>
                 new ValueTask(WriteError(context.HttpContext.Response, StatusCodes.Status429TooManyRequests, "Demasiados pedidos. Tente mais tarde."));
         });

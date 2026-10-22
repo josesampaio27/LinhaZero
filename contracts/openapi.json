@@ -226,6 +226,99 @@
         }
       }
     },
+    "/api/v1/assistant/status": {
+      "get": {
+        "tags": [
+          "Assistant"
+        ],
+        "summary": "Whether the assistant is on, and what the signed-in user spent today against their limit.",
+        "operationId": "Assistant_Status",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssistantStatus"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/assistant/v1/messages": {
+      "post": {
+        "tags": [
+          "Assistant"
+        ],
+        "summary": "One turn of the conversation, streamed as Server-Sent Events in the Anthropic Messages API format. Only\r\n`messages` is read from the body; the server sets the model, system prompt, tools and limits.",
+        "description": "At most ASSISTANT_REQUESTS_PER_HOUR per user, and ASSISTANT_DAILY_BUDGET_USD of spending per day.",
+        "operationId": "Assistant_Messages",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssistantRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/feedback": {
       "post": {
         "tags": [
@@ -999,6 +1092,46 @@
         },
         "additionalProperties": false,
         "description": "An access request as the admin page shows it. Status: pending, approved or rejected."
+      },
+      "AssistantRequest": {
+        "required": [
+          "messages"
+        ],
+        "type": "object",
+        "properties": {
+          "messages": {
+            "type": "array",
+            "nullable": true
+          }
+        },
+        "description": "The body of POST /api/v1/assistant/v1/messages: an Anthropic Messages API request, as the browser's Anthropic SDK\r\nsends it. Only `messages` is read (the conversation so far, in the Messages API format); the model, system\r\nprompt, tools and limits are the server's, so the other fields the SDK sends are ignored."
+      },
+      "AssistantStatus": {
+        "required": [
+          "enabled",
+          "model",
+          "usedTodayUsd",
+          "dailyBudgetUsd"
+        ],
+        "type": "object",
+        "properties": {
+          "enabled": {
+            "type": "boolean"
+          },
+          "model": {
+            "type": "string"
+          },
+          "usedTodayUsd": {
+            "type": "number",
+            "format": "double"
+          },
+          "dailyBudgetUsd": {
+            "type": "number",
+            "format": "double"
+          }
+        },
+        "additionalProperties": false,
+        "description": "The GET /api/v1/assistant/status body: whether the assistant is on (the server has an Anthropic key), its model,\r\nand what the signed-in user spent today (Lisbon time) against their daily limit, in US dollars."
       },
       "Cell": {
         "required": [
@@ -2089,6 +2222,9 @@
   "tags": [
     {
       "name": "AccessRequests"
+    },
+    {
+      "name": "Assistant"
     },
     {
       "name": "Feedback"

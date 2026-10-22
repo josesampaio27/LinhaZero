@@ -1,0 +1,160 @@
+[
+  {
+    "name": "get_state",
+    "description": "The current state of the app as text: setup (grid, ignition, weather and its source, duration), the actions drawn in decisions A and B (with their ids), and the latest results (and whether they are stale). Every user message already carries this snapshot; call it again after you change something.",
+    "strict": true,
+    "input_schema": { "type": "object", "properties": {}, "required": [], "additionalProperties": false }
+  },
+  {
+    "name": "get_results",
+    "description": "Detailed results of the latest simulation of A and B: burned hectares hour by hour, buildings reached, minute the fire reaches each place in A and in B, and, when the uncertainty was on, in how many wind scenarios each decision is better. Fails if nothing was simulated yet.",
+    "strict": true,
+    "input_schema": { "type": "object", "properties": {}, "required": [], "additionalProperties": false }
+  },
+  {
+    "name": "explain_place",
+    "description": "Why and when the fire reaches a place in one decision: arrival minute, the path the fire took from the ignition (as nearby places), its length and mean speed, and what made it fast (fuel, wind, slope shares, crown fire, slowed by an action). Needs results.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "place": { "type": "string", "description": "Place name as listed in the state or by find_places." },
+        "decision": { "type": "string", "enum": ["A", "B"] }
+      },
+      "required": ["place", "decision"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "find_places",
+    "description": "Search the places (villages, hamlets) of the grid by name, or list the ones nearest the ignition when the query is empty. Returns name, buildings, distance and direction from the ignition, and the minute the fire reaches it in A and B when there are results.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": { "query": { "type": "string", "description": "Part of the name, any case or accents; empty for the nearest places." } },
+      "required": ["query"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "show_place",
+    "description": "Shows a place to the user: moves the map there and, when there are results, draws the path the fire takes to reach it.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "place": { "type": "string" },
+        "decision": { "type": "string", "enum": ["A", "B"], "description": "Whose fire path to draw; both when absent." }
+      },
+      "required": ["place"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "check_plan",
+    "description": "Checks the actions of one decision against a run of the fire without them: actions that start after the fire already passed, that the fire never reaches, aerial drops that end before it arrives, line ends with nothing to anchor them, and lines the fire crossed in the latest result. Use it to review a plan before giving advice.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": { "decision": { "type": "string", "enum": ["A", "B"] } },
+      "required": ["decision"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "place_intervention",
+    "description": "Adds one action to a decision, placed by the app from a named place and a shape (you never give coordinates). Shapes: across_path = across the fire's path toward `place`, where the fire arrives at `minute`; fire_head = at the head of the fire heading to `place`, where it is at `minute`; around_place = around the houses of `place` (a ring for line actions, an area for zones); between_places = a straight line from `place` to `to_place`. `place` may be \"ignição\". Line actions: containmentLine, backfire, aerialDrop. Zone actions: suppression (attack), protectZone. The action appears on the map at once, marked as yours, and the user can undo it. Returns its id, size and where it ended up.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "decision": { "type": "string", "enum": ["A", "B"] },
+        "kind": { "type": "string", "enum": ["containmentLine", "suppression", "protectZone", "aerialDrop", "backfire"] },
+        "shape": { "type": "string", "enum": ["across_path", "fire_head", "around_place", "between_places"] },
+        "place": { "type": "string" },
+        "to_place": { "type": "string", "description": "between_places only: where the line ends." },
+        "minute": { "type": "integer", "description": "across_path and fire_head: the fire's arrival minute that picks the spot on its path. Default: halfway between start_min and the fire reaching the place." },
+        "length_m": { "type": "integer", "description": "Length of a line across the path, 100 to 5000 m. Default 1000 (500 for fire_head)." },
+        "radius_m": { "type": "integer", "description": "Radius of a zone or margin around a place's houses, 50 to 3000 m. Default 300." },
+        "start_min": { "type": "integer", "description": "Minute from ignition when the action is in place (line ready, crews arrived, drop made). 0 to the duration." },
+        "end_min": { "type": "integer", "description": "Minute it stops acting; absent = never (aerial drops default to 20 min for water, 120 for retardant)." },
+        "width_m": { "type": "number", "description": "Line width in m: 1 hand line, 4 machine line (default), 10 or 25 fuel break." },
+        "agent": { "type": "string", "enum": ["water", "retardant"], "description": "Aerial drops only. Default water." }
+      },
+      "required": ["decision", "kind", "shape", "place", "start_min"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "update_intervention",
+    "description": "Changes the start, end or width of an action already in a decision, by its id (from the state).",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "decision": { "type": "string", "enum": ["A", "B"] },
+        "id": { "type": "string" },
+        "start_min": { "type": "integer" },
+        "end_min": { "type": ["integer", "null"], "description": "null removes the end (acts until the end of the simulation)." },
+        "width_m": { "type": "number" }
+      },
+      "required": ["decision", "id"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "remove_intervention",
+    "description": "Removes one action from a decision, by its id.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": { "decision": { "type": "string", "enum": ["A", "B"] }, "id": { "type": "string" } },
+      "required": ["decision", "id"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "copy_decision",
+    "description": "Replaces every action of one decision with a copy of the other's, e.g. to build B as \"A plus one line\". The replaced actions can be undone.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": { "from": { "type": "string", "enum": ["A", "B"] }, "to": { "type": "string", "enum": ["A", "B"] } },
+      "required": ["from", "to"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "clear_decision",
+    "description": "Removes every action of a decision (it becomes \"deixar arder\"). Can be undone.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": { "decision": { "type": "string", "enum": ["A", "B"] } },
+      "required": ["decision"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "set_conditions",
+    "description": "Changes the scenario for both decisions: wind (direction it blows FROM, in degrees, and speed in km/h, both marked as set by hand), simulation duration, or the ignition (moved to a place). Only what you pass changes. Results become stale: run the simulation again.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "wind_from_deg": { "type": "integer", "description": "0 to 359; 0 = from the north, 90 = from the east." },
+        "wind_speed_kmh": { "type": "integer", "description": "0 to 72." },
+        "duration_min": { "type": "integer", "description": "60 to 1440." },
+        "ignition_place": { "type": "string", "description": "Moves the ignition to the nearest burnable cell of this place." }
+      },
+      "required": [],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "run_simulation",
+    "description": "Simulates decisions A and B with the current setup (with the uncertainty scenarios if the user turned them on) and returns the summary of the results. Takes from under a second to about a minute.",
+    "strict": true,
+    "input_schema": { "type": "object", "properties": {}, "required": [], "additionalProperties": false }
+  }
+]

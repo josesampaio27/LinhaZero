@@ -65,6 +65,10 @@ spec:
             - name: SMTP_PASSWORD
               valueFrom: { secretKeyRef: { name: linhazero-secrets, key: SMTP_PASSWORD } }
             - { name: ACCESS_REQUEST_EMAILS_PER_DAY, value: "100" }
+            # The assistant (docs/decisoes/0074): off when the secret has no key; each user's daily spending limit.
+            - name: ANTHROPIC_API_KEY
+              valueFrom: { secretKeyRef: { name: linhazero-secrets, key: ANTHROPIC_API_KEY, optional: true } }
+            - { name: ASSISTANT_DAILY_BUDGET_USD, value: "0.50" }
           ports:
             - { name: http, containerPort: 8080 }
           readinessProbe:

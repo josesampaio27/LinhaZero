@@ -19,6 +19,8 @@ Os endpoints da API do LinhaZero (`backend/src/LinhaZero.Api`, .NET 10). A API s
 | `POST /api/v1/feedback` | Um problema ou sugestão de quem tem sessão, com a página, a versão e o browser ([ADR 0066](../decisoes/0066-relatorios-de-problemas-e-sugestoes.md)); no máximo 20 por hora por utilizador | `202`; `400` tipo ou mensagem inválidos; `429` |
 | `GET /api/v1/feedback` | Todos os relatórios, os abertos primeiro (papel `linhazero-admin`) | `200`; `403` |
 | `POST /api/v1/feedback/{id}/status` | `{ "status": "open" \| "done" \| "dismissed" }` (papel `linhazero-admin`) | `200`; `400`; `403`; `404` |
+| `GET /api/v1/assistant/status` | O assistente está ligado (há chave da Anthropic)? Com que modelo, e quanto gastou hoje quem tem sessão, contra o seu limite diário ([ADR 0074](../decisoes/0074-assistente-com-claude-haiku.md)) | `200` `assistant-status.json` |
+| `POST /api/v1/assistant/v1/messages` | Um passo da conversa do assistente, no formato da Messages API da Anthropic, para o SDK do browser. Só lê `messages` (mensagens do utilizador e do assistente); o modelo, o prompt de sistema, as ferramentas e os limites são do servidor. Responde com o stream da Anthropic tal como vem e regista os tokens e o custo; no máximo `ASSISTANT_REQUESTS_PER_HOUR` por utilizador e `ASSISTANT_DAILY_BUDGET_USD` por dia | `200 text/event-stream`; `400` conversa inválida ou longa demais; `403` sessão sem utilizador; `429` limite atingido ou Anthropic sobrecarregada; `503` assistente desligado ou indisponível |
 | `GET /api/v1/health` | PostgreSQL e NATS respondem? Quantos workers estão livres? | `200`; `503` se o PostgreSQL ou o NATS falharem |
 
 Todos os erros têm o corpo `{ "error": "..." }`, com a mensagem em português que a interface mostra.
@@ -27,7 +29,7 @@ Todos os erros têm o corpo `{ "error": "..." }`, com a mensagem em português q
 
 - **Ids e limites:** os ids são UUID gerados pela API; o corpo de um pedido tem no máximo 1 MB; um ensemble tem no máximo 500 corridas, e cada decisão no máximo 50 intervenções.
 - **Pedido de corrida estrito:** `POST /runs` lê o corpo à mão, recusa chaves repetidas e campos obrigatórios em falta, e passa ao worker, sem os alterar, os campos que não lê (`variants`, `weather`, `spreadModel`, `moisture`, `weatherSteps`, `ignitions`, `scenario`). Cada corrida guarda quem a pediu (`runs.user_id`), para o histórico.
-- **Dados externos:** a API nunca sai da rede; só a ingestão contacta o IPMA, o Open-Meteo e o fogos.pt ([Intranet](../arquitetura/07-implantacao.md#intranet)).
+- **Dados externos:** só a ingestão contacta o IPMA, o Open-Meteo e o fogos.pt ([Intranet](../arquitetura/07-implantacao.md#intranet)). A API só sai da rede para a Anthropic, quando o assistente está ligado ([ADR 0074](../decisoes/0074-assistente-com-claude-haiku.md)); sem `ANTHROPIC_API_KEY` nunca sai.
 
 ## Planeado
 

@@ -14,6 +14,7 @@ public class AuthHttpTests(ApiFactory factory) : IClassFixture<ApiFactory>
     [InlineData("/api/v1/weather?lat=41.45&lon=-8.29")]
     [InlineData("/api/v1/incidents/active?bbox=-9,41,-8,42")]
     [InlineData("/api/v1/me")]
+    [InlineData("/api/v1/assistant/status")]
     [InlineData("/api/v1/runs/7f8a3c1e-0000-4000-8000-000000000000")]
     public async Task Without_a_session_the_api_answers_401_json(string url)
     {

@@ -1,0 +1,6 @@
+{
+  "enabled": true,
+  "model": "claude-haiku-5-5",
+  "usedTodayUsd": 0.0123,
+  "dailyBudgetUsd": 0.5
+}

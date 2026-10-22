@@ -107,3 +107,4 @@ O que se pôs de lado, e porquê.
 | [0071](0071-celulas-nas-variantes-de-grelha.md) | Células escolhidas uma a uma nas variantes de grelha | aceite | 2026-10-22 |
 | [0072](0072-explicacao-do-resultado-e-mapa-pelo-modelo-da-simulacao.md) | Explicação do resultado, e o mapa e o inspetor pelo modelo da simulação | aceite | 2026-10-22 |
 | [0073](0073-historico-de-simulacoes.md) | Histórico de simulações, aberto com o resultado guardado | aceite | 2026-10-22 |
+| [0074](0074-assistente-com-claude-haiku.md) | Assistente com IA (Claude Haiku 5.5), que vê a aplicação e coloca ações | aceite (prova de conceito) | 2026-10-22 |
