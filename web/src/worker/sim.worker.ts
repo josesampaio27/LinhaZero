@@ -4,6 +4,7 @@ import {
   decodeGrid,
   prepareGrid,
   simulate,
+  suggestLines,
   variantHash,
   type GridData,
   type GridVariant,
@@ -42,6 +43,11 @@ self.onmessage = (ev: MessageEvent<WorkerRequest>) => {
       return;
     }
     const t0 = performance.now();
+    if (msg.type === "suggest") {
+      const result = suggestLines(gridFor(msg.job.variant), msg.job.scenario, msg.options);
+      reply({ type: "suggestions", id: msg.id, result, elapsedMs: performance.now() - t0 });
+      return;
+    }
     const results = msg.jobs.map((job) => simulate(gridFor(job.variant), job.scenario));
     const transfer: Transferable[] = [];
     for (const r of results) {

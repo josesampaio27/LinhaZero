@@ -15,6 +15,8 @@ export * from "./surface";
 export * from "./metrics";
 export * from "./simulate";
 export * from "./explain";
+export * from "./terrain-wind";
+export * from "./suggest";
 export * from "./scenario";
 export * from "./hash";
 export * from "./variant";

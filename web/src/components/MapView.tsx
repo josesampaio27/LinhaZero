@@ -249,8 +249,8 @@ export function MapView(props: Props) {
         filter: ["all", ["==", ["geometry-type"], "LineString"], ["!=", ["get", "kind"], "backfire"], ["!=", ["get", "kind"], "firePath"]],
         layout: { "line-cap": "round", "line-join": "round" },
         paint: {
-          "line-color": ["match", ["get", "kind"], "addBarrier", "#334155", "aerialDrop", "#0ea5e9", "aerialDropRetardant", "#dc2626", "#1e3a8a"],
-          "line-width": ["match", ["get", "kind"], "aerialDrop", 7, "aerialDropRetardant", 7, 4],
+          "line-color": ["match", ["get", "kind"], "addBarrier", "#334155", "aerialDrop", "#0ea5e9", "aerialDropRetardant", "#dc2626", "suggestedLine", "#db2777", "#1e3a8a"],
+          "line-width": ["match", ["get", "kind"], "aerialDrop", 7, "aerialDropRetardant", 7, "suggestedLine", 6, 4],
           "line-opacity": ["match", ["get", "kind"], "aerialDrop", 0.85, "aerialDropRetardant", 0.85, 1],
         },
       });

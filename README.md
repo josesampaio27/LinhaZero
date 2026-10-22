@@ -138,6 +138,7 @@ A CI (`.github/workflows/ci.yml`) corre o typecheck, o lint, os testes (motor e 
    com o minuto de início. Para terminar, faz duplo clique ou carrega em Enter; Esc cancela.
 5. **Simular**. Para ver a incerteza, com os serviços a correr, liga "Considerar a incerteza" e escolhe na barra quantos cenários por decisão (200 a 500): o painel diz em quantos cenários cada decisão é melhor. A incerteza corre sempre no servidor, e as variantes de grelha também.
 6. **Porque o fogo chega aqui:** no resultado, toca num ponto do mapa, ou num lugar da tabela. Os mapas mostram o caminho que o fogo fez até lá, e o painel diz quanto tempo levou e o que pesou na velocidade (combustível, vento, declive).
+7. **Sugerir uma terceira decisão:** no resultado, escolhe a decisão de partida, quando uma linha pode estar pronta e com que largura, e carrega em "Procurar linhas". O simulador experimenta linhas de contenção no caminho do fogo e mostra as que mais poupam; "Pôr na decisão B" (ou A) leva a sugestão para a comparação.
 
 Um cenário em `web/public/scenarios/` (listado em `index.json`) abre com `https://app.linhazero.localhost/?scenario=<nome>` (ou `http://localhost:5173/?scenario=<nome>` com `npm run dev`), sem login. Os cenários de demonstração são incêndios reais (Alijó 2019, Vieira do Minho 2016): a simulação parte da ignição e do tempo reais, e a camada "Fogo real" mostra o perímetro observado à hora da barra de tempo.
 

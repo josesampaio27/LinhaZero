@@ -293,6 +293,11 @@ export interface SurfaceBase {
    * the unadjusted rate, so a calibrated slowdown does not make the fire look weaker to attacks and lines.
    */
   rosAdj?: number;
+  /**
+   * The fuel group's own calibration factor, without the global rosAdj (params.groupFactor). The empirical
+   * shrubland rate (shrubModel) takes this one only: the global factor compensates Rothermel, not that model.
+   */
+  groupAdj?: number;
 }
 
 function dampingCoefficient(mf: number, mx: number): number {
@@ -390,6 +395,35 @@ export interface HeadFire {
    */
   windPart: number;
   slopePart: number;
+}
+
+/**
+ * Head fire rate (m/min) in shrublands on level ground, Anderson et al. (2015), as given in Cruz et al. (2015),
+ * "A guide to rate of fire spread models for Australian vegetation", eq. 4.5:
+ *   R = 5.67 (WF U10)^0.91 H^0.22 exp(-0.076 MC)                              U10 >= 5 km/h
+ *   R = [R0 + 0.2 (5.67 (5 WF)^0.91 - R0) U10] H^0.22 exp(-0.076 MC)          U10 <  5 km/h, R0 = 5 m/min
+ * U10: 10-m open wind (km/h); H: vegetation height (m); MC: dead fuel moisture (%); WF: wind adjustment factor,
+ * 0.67 for heath-shrublands (0.35 for woodlands). Fitted on fires on slopes under 5°, dead moisture under 35% and
+ * rates of 2 to 60 m/min; it has no threshold for continuous spread (the caller keeps Rothermel's).
+ */
+export function andersonShrubRate(u10Kmh: number, heightM: number, deadMoisturePct: number, wf = 0.67): number {
+  const R0 = 5;
+  const u = Math.max(0, u10Kmh);
+  const fuel = Math.pow(Math.max(heightM, 0.01), 0.22) * Math.exp(-0.076 * deadMoisturePct);
+  if (u >= 5) return 5.67 * Math.pow(wf * u, 0.91) * fuel;
+  return (R0 + 0.2 * (5.67 * Math.pow(5 * wf, 0.91) - R0) * u) * fuel;
+}
+
+/**
+ * Length-to-breadth ratio of a wind-driven fire on level ground from the 10-m open wind (km/h), the Canadian
+ * Forest Fire Behavior Prediction System relations tabulated in Cruz et al. (2015), adapted from Taylor et al.
+ * (1997): forest 1 + 8.729 (1 - e^(-0.030 U10))^2.155; grassland 1.1 U10^0.464 (1 below 1 km/h). They reproduce
+ * the guide's table to its rounding (forest 1.5 at 10 km/h, 6.1 at 50; grassland 3.2 and 6.8).
+ */
+export function lengthToBreadthTaylor(u10Kmh: number, forest: boolean): number {
+  const u = Math.max(0, u10Kmh);
+  const lb = forest ? 1 + 8.729 * Math.pow(1 - Math.exp(-0.03 * u), 2.155) : u < 1 ? 1 : 1.1 * Math.pow(u, 0.464);
+  return Math.min(MAX_LENGTH_TO_BREADTH, Math.max(1, lb));
 }
 
 /** Length-to-breadth ratio from the effective midflame wind (BehavePlus form of Anderson 1983). */
