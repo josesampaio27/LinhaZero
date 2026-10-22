@@ -183,7 +183,8 @@ export function EnginePage() {
           decisão A e a B mede só o efeito do que se desenhou.
         </p>
         <p>
-          Cada decisão junta uma ou mais ações, desenhadas no mapa, cada uma com o minuto em que começa. Há três:
+          Cada decisão junta uma ou mais ações, desenhadas no mapa, cada uma com o minuto em que começa e, se se quiser, o minuto
+          em que acaba. Há cinco:
         </p>
         <ul className="actions-list">
           <li>
@@ -201,20 +202,34 @@ export function EnginePage() {
             travar ali. Desenha-se a zona à volta do que se defende. No simulador: a partir do minuto em que lá estão, o fogo nessa
             zona anda 10 vezes mais devagar, mais do que num ataque, porque os meios estão no sítio e preparados.
           </li>
+          <li>
+            <strong>Descarga aérea.</strong> No terreno: um helicóptero ou um avião larga água ou retardante numa faixa, à frente
+            ou no flanco do fogo. Desenha-se o percurso da descarga. No simulador: enquanto faz efeito (a água cerca de 20 minutos,
+            o retardante cerca de 2 horas), a faixa trava o fogo, se as chamas não forem altas demais.
+          </li>
+          <li>
+            <strong>Contrafogo.</strong> No terreno: os meios queimam de propósito o combustível entre uma linha de apoio (uma
+            estrada, um caminho ou uma linha aberta) e o fogo que se aproxima. Desenha-se a linha de apoio. No simulador: no minuto
+            indicado, acende o lado da linha virado para a ignição; esse fogo arde como qualquer outro, e a linha segura-o se for
+            larga o bastante para as chamas.
+          </li>
         </ul>
         <p>
           Como na realidade, tudo depende da força do fogo. Um ataque, ou uma zona protegida, tem efeito total até chamas de cerca de
           1,4 m (500 kW/m), o fogo que uma equipa com ferramentas manuais controla, e perde-o por completo com chamas de 3,5 m
           (4000 kW/m), onde nenhum meio terrestre atua. Uma linha trava o fogo se for pelo menos 5 vezes mais larga do que as chamas
           são compridas, porque o calor e as faúlhas passam faixas mais largas do que a chama: uma linha de 4 m só trava chamas até
-          80 cm, uma faixa de 25 m trava chamas até 5 m. Qualquer ação só conta se estiver no terreno antes de o fogo lá chegar.
+          80 cm, uma faixa de 25 m trava chamas até 5 m. Uma descarga aérea trava sempre chamas até cerca de 2,5 m (2000 kW/m) e
+          nunca acima de 3,5 m (4000 kW/m); estes limites são provisórios. Qualquer ação só conta se estiver no terreno antes de o
+          fogo lá chegar.
         </p>
       </Section>
 
       <Section id="incerteza" title="A incerteza">
         <p>
           O vento previsto nunca é exato, a humidade varia de sítio para sítio e a ignição nem sempre se conhece ao metro. Com a
-          incerteza ligada, o simulador corre <strong>{data.reliability.runs} simulações</strong> de cada decisão e, em cada uma, sorteia:
+          incerteza ligada, o simulador corre <strong>de 200 a 500 simulações</strong> de cada decisão, no servidor (o número
+          escolhe-se na aplicação), e, em cada uma, sorteia:
         </p>
         <ul>
           <li>a direção do vento, até ±{data.reliability.perturbation.windDirJitterDeg}°, e a velocidade, até ±{num(data.reliability.perturbation.windSpeedJitterPct, 1)}%;</li>
@@ -225,13 +240,13 @@ export function EnginePage() {
         <p>
           <strong>A comparação é emparelhada:</strong> a simulação n.º 7 da decisão A tem exatamente o mesmo vento, humidade e
           ignição que a n.º 7 da decisão B. A diferença entre as duas é só o efeito da decisão. É daí que vem a frase "B é melhor do
-          que A em N de 30 variações do vento".
+          que A em N dos cenários".
         </p>
         <h3>Como ler o mapa de cenários</h3>
         <p>
-          O mapa mostra em quantas das {data.reliability.runs} simulações cada célula arde, sem combate além do desenhado. Pusemo-lo à
-          prova em {data.reliability.fires} incêndios reais, onde o fogo menos foi travado (nas horas em que corria livre e até à
-          primeira observação):
+          O mapa mostra em quantas das simulações cada célula arde, sem combate além do desenhado. Pusemo-lo à prova em{" "}
+          {data.reliability.fires} incêndios reais, com {data.reliability.runs} simulações por incêndio, onde o fogo menos foi travado
+          (nas horas em que corria livre e até à primeira observação):
         </p>
         <Figure caption={`Nas células em que todas as simulações ardem, arderam de facto ${pct(top.observed)}. O mapa arde mais do que os incêndios reais porque estes foram combatidos, mesmo nas horas em que corriam livres. Por isso a aplicação lhe chama "cenários em que arde", e não probabilidade. Avisa ${pct(data.reliability.coverage10)} das células que arderam (com pelo menos 10% das simulações).`}>
           <ReliabilityCurve label="Fração das simulações em que cada célula arde, contra a fração que ardeu de facto" bins={rel} />

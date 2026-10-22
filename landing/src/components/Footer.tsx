@@ -9,10 +9,11 @@ const CREDITS: [string, string, string, string, string][] = [
   ["Incêndio de Monchique - 2018", "https://commons.wikimedia.org/wiki/File:Inc%C3%AAndio_de_Monchique_-_2018.jpg", "Bextrel", "CC BY-SA 4.0", "https://creativecommons.org/licenses/by-sa/4.0"],
 ];
 
-/** The site explains the engine itself: the two pages on how it works and how it was calibrated and validated. */
+/** The site explains the engine itself: how it works, how it was calibrated and validated, and its technical sheet. */
 const DOC_LINKS: [string, string][] = [
   ["/motor", "Como funciona o simulador"],
   ["/calibracao", "Calibração e validação"],
+  ["/ficha-tecnica", "Ficha técnica"],
 ];
 
 export function Footer() {

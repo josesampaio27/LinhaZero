@@ -51,6 +51,7 @@ docs/
 - [Como calibramos](modelo/como-calibramos.md): o método (pontuação de cobertura para incêndios combatidos) e os resultados de cada grelha, com gráficos.
 - [O motor explicado](modelo/o-motor-explicado.md): o motor de ponta a ponta para o júri, os mentores e a comunidade científica: a grelha de Guimarães, a física, todos os parâmetros e a validação.
 - [O motor contra incêndios reais](modelo/validacao-resumo.md): resumo de uma página da validação em 80 incêndios e da probabilidade calibrada.
+- **Ficha técnica:** página `/ficha-tecnica` do site (`landing/src/pages/DataSheetPage.tsx`): em que se baseia o simulador, como usa o combustível e como este se relaciona com o mapa, com os números tirados de `landing/src/data/site-data.json` e da grelha de Guimarães. Pode imprimir-se ou guardar-se em PDF.
 
 ### Referência
 

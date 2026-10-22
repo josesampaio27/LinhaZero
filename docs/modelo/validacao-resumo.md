@@ -18,23 +18,26 @@ Sobreposição entre a área simulada e a área que ardeu de facto (Sørensen m�
 
 | | Modelo simples | Rothermel sem calibração | **Rothermel calibrado** |
 | --- | --- | --- | --- |
-| 34 incêndios de 2018–2021 | 0,25 | 0,34 | **0,38** |
-| … dos quais na região Norte (8) | 0,18 | 0,26 | **0,39** |
-| 26 incêndios fora do ajuste dos parâmetros principais | 0,26 | 0,35 | **0,38** |
+| 34 incêndios de 2018–2021 | 0,27 | 0,33 | **0,40** |
+| … dos quais na região Norte (8) | 0,20 | 0,27 | **0,40** |
+| 27 incêndios fora do ajuste dos parâmetros principais | 0,28 | 0,33 | **0,40** |
 
-- **Ganho sobre o modelo simples (já retirado da aplicação):** o Rothermel calibrado ganha-lhe em 28 dos 34 incêndios.
-- **Ressalva:** os três parâmetros principais nunca foram ajustados nos 26 incêndios de teste, mas algumas escolhas discretas (fogo de copas, limite do vento, tamanho da incerteza) foram decididas a olhar para eles. O número é por isso um pouco otimista.
-- **Teste de controlo:** com o vento de cada hora invertido, o acerto cai para metade. A comparação mede de facto alguma coisa.
+Motor de hoje, grelha de 100 m; valores de `landing/src/data/site-data.json` (gerado por `engine/scripts/landing-data.ts` a 21 de outubro de 2026).
+
+- **Ganho sobre o modelo simples (já retirado da aplicação):** o Rothermel calibrado ganha-lhe em 27 dos 34 incêndios.
+- **Ressalva:** os três parâmetros principais nunca foram ajustados nos 27 incêndios de teste, mas algumas escolhas discretas (fogo de copas, limite do vento, tamanho da incerteza) foram decididas a olhar para eles. O número é por isso um pouco otimista.
+- **Teste de controlo:** com o vento de cada hora invertido, o acerto cai de 0,40 para 0,08. A comparação mede de facto alguma coisa.
 
 ## Fogo sem combate, e um mapa de cenários verificado
 
 ![Cenários em que arde contra o que ardeu nos incêndios reais](fiabilidade.png)
 
 - **O motor simula o fogo sem combate.** Só há combate onde se desenha (Ataque, Linha, Proteger zona), e esse combate perde efeito em fogos intensos. Assim, comparar a decisão A com a B mede só o efeito do que se desenhou.
-- **Cada uma das 30 simulações** sorteia o vento, a humidade do combustível, a velocidade por tipo de combustível e o ponto de ignição. O mapa mostra em quantas das simulações cada célula arde, sem combate além do desenhado.
-- **Como se escolheu a incerteza:** pela qualidade da probabilidade (Brier) em fogos de teste, onde o fogo real menos foi travado. Aí o Brier desce de 0,047 (só vento) para 0,039, e o mapa avisa 79% das células que arderam (antes 68%).
-- **Como se lê:** não é uma probabilidade calibrada. Das células em que todos os cenários ardem, arderam de facto 47%, porque os incêndios reais foram combatidos, e mesmo nas horas em que corriam livres o ataque inicial já travava partes do fogo.
-- **Comparar decisões A e B:** usa as mesmas 30 simulações para as duas (emparelhadas).
+- **Cada uma das simulações** (de 200 a 500 por decisão, no servidor) sorteia o vento, a humidade do combustível, a velocidade por tipo de combustível e o ponto de ignição. O mapa mostra em quantas das simulações cada célula arde, sem combate além do desenhado.
+- **Como se escolheu a incerteza:** pela qualidade da probabilidade (Brier) em fogos de teste, onde o fogo real menos foi travado, com 30 simulações por incêndio (`engine/reports/reliability-2026-10-19.json`). Aí o Brier descia de 0,047 (só vento) para 0,039, e o mapa avisava 79% das células que arderam (antes 68%).
+- **Com o motor de hoje** (`site-data.json`, 19 incêndios, 30 simulações por incêndio): Brier 0,028; o mapa avisa 70,5% das células que arderam.
+- **Como se lê:** não é uma probabilidade calibrada. Das células em que todos os cenários ardem, arderam de facto 44%, porque os incêndios reais foram combatidos, e mesmo nas horas em que corriam livres o ataque inicial já travava partes do fogo.
+- **Comparar decisões A e B:** usa as mesmas simulações para as duas (emparelhadas).
 
 ## Física
 
@@ -52,10 +55,10 @@ Os cenários **"Incêndio real: Alijó, 24 jul 2019"** e **"Incêndio real: Viei
 
 ## Limites conhecidos
 
-- **Picos subestimados:** nas corridas rápidas, o motor faz cerca de 0,67 da velocidade observada. Era 0,6 antes de corrigir as direções de propagação ([ADR 0058](../decisoes/0058-revisao-do-motor.md)).
+- **Picos subestimados:** nas corridas rápidas, o motor fica abaixo da velocidade observada: cerca de 0,67 na medição da revisão do motor, contra 0,6 antes de corrigir as direções de propagação ([ADR 0058](../decisoes/0058-revisao-do-motor.md)); ainda não repetida com o motor de hoje.
   - Testámos também recalibrar só no fogo livre, usar as rajadas e mudar o limite do vento ([ADR 0057](../decisoes/0057-fogo-sem-combate-e-corridas-rapidas.md)); nenhum passou a regra.
   - Os fogos reais pedem uma cabeça mais rápida e flancos mais lentos, e tudo o que acelera a cabeça acelera também o resto.
-- **Fogos de 2015–2017:** acertam pouco (0,12), porque o mapa de combustível é de depois do fogo.
+- **Fogos de 2015–2017:** acertam pouco, porque o mapa de combustível é de depois do fogo ([Calibração e validação](calibracao-e-validacao.md), tier B).
 - **Dados aproximados:** as copas (altura, densidade) são valores típicos por modelo, e as horas do PT-FireSprd são aproximadas.
 
 ## Reproduzir
