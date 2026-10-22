@@ -106,8 +106,9 @@ O que se pôs de lado, e porquê.
 | [0070](0070-incerteza-sempre-no-servidor.md) | A incerteza corre sempre no servidor, com 200 a 500 cenários | aceite | 2026-10-22 |
 | [0071](0071-celulas-nas-variantes-de-grelha.md) | Células escolhidas uma a uma nas variantes de grelha | aceite | 2026-10-22 |
 | [0072](0072-explicacao-do-resultado-e-mapa-pelo-modelo-da-simulacao.md) | Explicação do resultado, e o mapa e o inspetor pelo modelo da simulação | aceite | 2026-10-22 |
-| [0073](0073-protocolo-da-etapa-b.md) | Protocolo da etapa B: quando se adota uma mudança da física | aceite | 2026-10-22 |
-| [0074](0074-faulhas-de-longo-alcance-nao-adotadas.md) | Faúlhas de longo alcance: estudadas, não adotadas | aceite | 2026-10-22 |
-| [0075](0075-sugerir-uma-terceira-decisao.md) | Sugerir uma terceira decisão | aceite | 2026-10-22 |
-| [0076](0076-recalibracao-com-matos-e-forma-do-fogo.md) | Recalibração da grelha de 100 m com o modelo de matos e a forma do fogo | aceite: não se adota | 2026-10-22 |
-| [0077](0077-verificacao-dos-valores-das-acoes-de-combate.md) | Verificação dos valores das ações de combate | proposta | 2026-10-22 |
+| [0073](0073-historico-de-simulacoes.md) | Histórico de simulações, aberto com o resultado guardado | aceite | 2026-10-22 |
+| [0074](0074-protocolo-da-etapa-b.md) | Protocolo da etapa B: quando se adota uma mudança da física | aceite | 2026-10-22 |
+| [0075](0075-faulhas-de-longo-alcance-nao-adotadas.md) | Faúlhas de longo alcance: estudadas, não adotadas | aceite | 2026-10-22 |
+| [0076](0076-sugerir-uma-terceira-decisao.md) | Sugerir uma terceira decisão | aceite | 2026-10-22 |
+| [0077](0077-recalibracao-com-matos-e-forma-do-fogo.md) | Recalibração da grelha de 100 m com o modelo de matos e a forma do fogo | aceite: não se adota | 2026-10-22 |
+| [0078](0078-verificacao-dos-valores-das-acoes-de-combate.md) | Verificação dos valores das ações de combate | aceite: não se muda nenhum valor | 2026-10-22 |

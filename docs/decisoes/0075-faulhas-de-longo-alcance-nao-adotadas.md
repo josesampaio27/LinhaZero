@@ -1,4 +1,4 @@
-# ADR 0074: Faúlhas de longo alcance: estudadas, não adotadas
+# ADR 0075: Faúlhas de longo alcance: estudadas, não adotadas
 
 - Estado: aceite (não se adota nenhum modelo de faúlhas de longo alcance)
 - Data: 2026-10-22

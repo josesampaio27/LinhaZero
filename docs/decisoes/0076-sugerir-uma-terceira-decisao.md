@@ -1,4 +1,4 @@
-# ADR 0075: Sugerir uma terceira decisão
+# ADR 0076: Sugerir uma terceira decisão
 
 - Estado: aceite
 - Data: 2026-10-22

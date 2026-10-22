@@ -127,6 +127,73 @@ public class PostgresTests(ITestOutputHelper output)
     }
 
     [PostgresFact]
+    public async Task History_lists_only_the_owner_s_runs_that_carry_a_scenario()
+    {
+        var repo = new RunRepository(Db);
+        async Task<Guid> User(string name)
+        {
+            await using var cmd = Db.CreateCommand("insert into users (issuer, subject, name) values ('test', $1, $2) returning id");
+            cmd.Parameters.Add(new() { Value = _source + name });
+            cmd.Parameters.Add(new() { Value = name });
+            return (Guid)(await cmd.ExecuteScalarAsync())!;
+        }
+
+        const string Base = """
+            "grid":"guimaraes","ignition":{"row":1,"col":2},"wind":{"directionDeg":45,"speedMs":2.5},"durationMin":240,
+            "ensemble":{"runs":200,"windDirJitterDeg":20,"windSpeedJitterPct":25,"seed":2035},
+            "decisions":{"A":[{"cells":[{"row":1,"col":1}]}],"B":[]}
+            """;
+        var ana = await User("Ana");
+        var rui = await User("Rui");
+        var anaRun = Guid.NewGuid();
+        var anaOld = Guid.NewGuid();
+        var ruiRun = Guid.NewGuid();
+        try
+        {
+            await repo.InsertQueuedAsync(anaRun, "{" + Base + ""","scenario":{"version":3,"title":"Teste"}}""", ana, default);
+            await repo.InsertQueuedAsync(anaOld, "{" + Base + "}", ana, default); // sent before the history: no scenario
+            await repo.InsertQueuedAsync(ruiRun, "{" + Base + ""","scenario":{"version":3}}""", rui, default);
+            await using (var cmd = Db.CreateCommand("""update runs set status = 'done', result = '{"A":{"metrics":{"burnedHaByHour":[1,5],"buildingsReached":3}},"B":{"metrics":{"burnedHaByHour":[2,7],"buildingsReached":4}}}' where id = $1"""))
+            {
+                cmd.Parameters.Add(new() { Value = anaRun });
+                await cmd.ExecuteNonQueryAsync();
+            }
+
+            var mine = await repo.ListAsync(ana, 50, default);
+            var only = Assert.Single(mine);
+            Assert.Equal(anaRun, only.Id);
+            Assert.Equal(("Teste", "guimaraes", 240, 200, 1, 0), (only.Title, only.Grid, only.DurationMin, only.EnsembleRuns, only.InterventionsA, only.InterventionsB));
+            Assert.Equal((5.0, 7.0, 3, 4), (only.BurnedHaA, only.BurnedHaB, only.BuildingsA, only.BuildingsB));
+            Assert.Equal("Ana", only.UserName);
+
+            var everyone = (await repo.ListAsync(null, 200, default)).Select(r => r.Id).ToList();
+            Assert.Contains(anaRun, everyone);
+            Assert.Contains(ruiRun, everyone);
+            Assert.DoesNotContain(anaOld, everyone);
+
+            // The variants come back from the request's own field (none here: both null).
+            using (var scenario = JsonDocument.Parse((await repo.ScenarioAsync(anaRun, ana, default))!))
+            {
+                Assert.Equal("Teste", scenario.RootElement.GetProperty("title").GetString());
+                Assert.Equal(JsonValueKind.Null, scenario.RootElement.GetProperty("variants").GetProperty("B").ValueKind);
+            }
+
+            Assert.Null(await repo.ScenarioAsync(anaRun, rui, default)); // not Rui's
+            Assert.NotNull(await repo.ScenarioAsync(anaRun, null, default)); // admin
+            Assert.Null(await repo.ScenarioAsync(anaOld, ana, default));
+        }
+        finally
+        {
+            foreach (var sql in new[] { "delete from runs where user_id = any($1)", "delete from users where id = any($1)" })
+            {
+                await using var cmd = Db.CreateCommand(sql);
+                cmd.Parameters.Add(new() { Value = new[] { ana, rui } });
+                await cmd.ExecuteNonQueryAsync();
+            }
+        }
+    }
+
+    [PostgresFact]
     public async Task Exactly_one_leader_and_failover_within_one_period()
     {
         var period = TimeSpan.FromSeconds(1);

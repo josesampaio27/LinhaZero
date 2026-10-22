@@ -11,6 +11,8 @@ Os endpoints da API do LinhaZero (`backend/src/LinhaZero.Api`, .NET 10). A API s
 | `GET /api/v1/weather?lat=&lon=` | Vento, humidade, risco de incêndio e avisos para um ponto de Portugal continental: o vento da estação IPMA mais próxima com vento nas últimas 2 h (até 25 km), senão o modelo Open-Meteo; a humidade e a temperatura da estação mais próxima que as mede (`air`); com a idade de cada fonte | `200` `weather.json`; `400` fora de 36.5–42.5 N, -10–-6 E; `503` nenhuma fonte tem vento |
 | `GET /api/v1/incidents/active?bbox=minLon,minLat,maxLon,maxLat` | Fogos rurais ativos do fogos.pt dentro da caixa | `200` `incidents.json`; `400` sem `bbox` válida |
 | `POST /api/v1/runs` | Valida o pedido e põe a corrida de A e B na fila `runs.jobs` | `202 { runId }` com `Location`; `400` pedido inválido; `503` fila indisponível (a interface corre no browser) |
+| `GET /api/v1/runs?all=&limit=` | O histórico de simulações: as corridas de quem tem sessão, as mais recentes primeiro, só as enviadas com o cenário desenhado; `all=true` lista as de todos (papel `linhazero-admin`); `limit` 1–200, 50 por omissão ([ADR 0073](../decisoes/0073-historico-de-simulacoes.md)) | `200` lista de `RunSummary`; `403` `all=true` sem ser administrador |
+| `GET /api/v1/runs/{id}/scenario` | O cenário desenhado que veio com a corrida (um [ficheiro de cenário](formato-cenario.md), com as variantes repostas a partir de `variants`), só para quem a pediu ou um administrador | `200`; `404` corrida de outra pessoa, desconhecida ou sem cenário |
 | `GET /api/v1/runs/{id}` | Estado da corrida (`queued`, `running`, `done`, `failed`), progresso e resultado | `200`; `404` corrida desconhecida |
 | `GET /api/v1/runs/{id}/events` | Progresso por Server-Sent Events: `progress`, `done`, `failed`, e um `ping` a cada 15 s | `200 text/event-stream` |
 | `GET /api/v1/runs/{id}/rasters/{A\|B}/{arrival\|probability}` | Um raster do resultado: Float32 little-endian, `rows × cols × 4` bytes, guardado em cache um ano | `200 application/octet-stream`; `400`; `404` |
@@ -24,7 +26,7 @@ Todos os erros têm o corpo `{ "error": "..." }`, com a mensagem em português q
 ## Regras (feito)
 
 - **Ids e limites:** os ids são UUID gerados pela API; o corpo de um pedido tem no máximo 1 MB; um ensemble tem no máximo 500 corridas, e cada decisão no máximo 50 intervenções.
-- **Pedido de corrida estrito:** `POST /runs` lê o corpo à mão, recusa chaves repetidas e campos obrigatórios em falta, e passa ao worker, sem os alterar, os campos que não lê (`variants`, `weather`, `spreadModel`, `moisture`, `weatherSteps`, `ignitions`).
+- **Pedido de corrida estrito:** `POST /runs` lê o corpo à mão, recusa chaves repetidas e campos obrigatórios em falta, e passa ao worker, sem os alterar, os campos que não lê (`variants`, `weather`, `spreadModel`, `moisture`, `weatherSteps`, `ignitions`, `scenario`). Cada corrida guarda quem a pediu (`runs.user_id`), para o histórico.
 - **Dados externos:** a API nunca sai da rede; só a ingestão contacta o IPMA, o Open-Meteo e o fogos.pt ([Intranet](../arquitetura/07-implantacao.md#intranet)).
 
 ## Planeado
@@ -37,7 +39,7 @@ GET  /api/v1/scenarios/{id}            → SavedScenario
 POST /api/v1/grid-variants             { GridVariant, visibility, parentId? } → { id, hash }  (cria sempre uma versão nova)
 GET  /api/v1/grid-variants?grid=       → variantes visíveis para essa grelha de base
 GET  /api/v1/grid-variants/{id}        → GridVariant
-GET  /api/v1/runs?scenarioId=          → registo das simulações de um cenário
+GET  /api/v1/runs?scenarioId=          → registo das simulações de um cenário guardado (o histórico por pessoa já está feito)
 ```
 
 - **Erros em ProblemDetails** (RFC 9457, o formato normal do ASP.NET Core): fica para a mesma alteração que adapta a interface, que hoje lê `{ "error" }` ([ADR 0047](../decisoes/0047-clientes-http-tipados-modelos-json-e-dapper.md)).

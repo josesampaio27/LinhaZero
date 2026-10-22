@@ -45,17 +45,20 @@ export function TimeBar({ t, durationMin, playing, disabled, onChange, onPlaying
     return () => cancelAnimationFrame(raf);
   }, [playing, durationMin, onChange, onPlayingChange]);
 
+  // At the end the button replays from the start (playing from the end already rewinds to 0, see above).
+  const ended = !playing && t >= durationMin;
   return (
     <div className="timebar" title={disabled ? DISABLED_REASON : undefined}>
       <button
         className="play"
         disabled={disabled}
         onClick={() => onPlayingChange(!playing)}
-        aria-label={playing ? "Pausa" : "Reproduzir"}
+        aria-label={playing ? "Pausa" : ended ? "Recomeçar" : "Reproduzir"}
+        title={ended ? "Recomeçar" : undefined}
         aria-keyshortcuts="Space"
         aria-description={disabled ? DISABLED_REASON : undefined}
       >
-        <Icon name={playing ? "pause" : "play"} />
+        <Icon name={playing ? "pause" : ended ? "refresh" : "play"} />
       </button>
       <span className="track">
         {marks

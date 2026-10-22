@@ -375,13 +375,11 @@ export function MapView(props: Props) {
       (map.getSource("draft") as GeoJSONSource | undefined)?.setData(draftFeatures(draftRef.current, hover.current));
     });
     map.on("mouseout", () => Date.now() - lastTouch > 1000 && handlers.current.onHover?.(null));
-    // The mouse leaving the map (also over its title or controls) or dragging it clears the hover bar; a touch long press stays until closed.
+    // The mouse leaving the map (also over its title or controls) clears the hover bar; a touch long press stays until
+    // closed. Never during a drag: clearing it changes the bar's height, the map resizes, and the resize ends the drag.
     const el = container.current!;
-    const leave = (e: PointerEvent) => e.pointerType === "mouse" && handlers.current.onHover?.(null);
+    const leave = (e: PointerEvent) => e.pointerType === "mouse" && e.buttons === 0 && handlers.current.onHover?.(null);
     el.addEventListener("pointerleave", leave);
-    map.on("movestart", (e) => {
-      if ((e as { originalEvent?: Event }).originalEvent instanceof MouseEvent && Date.now() - lastTouch > 1000) handlers.current.onHover?.(null);
-    });
     mapRef.current = map;
     return () => {
       el.removeEventListener("pointerleave", leave);

@@ -1,9 +1,9 @@
-// Stage B (ADR 0073): does a change of the physics hold up on the real fires, with the calibration in use?
+// Stage B (ADR 0074): does a change of the physics hold up on the real fires, with the calibration in use?
 //   npx tsx scripts/compare-models.ts --name m4-shrub --goal fast shrubModel=1
 //   npx tsx scripts/compare-models.ts --name m4-both --goal fast shrubModel=1 shapeModel=1
 //   npx tsx scripts/compare-models.ts --name m5-ffmc --moisture ffmc     (the hypothesis uses FFMC dead fuel moisture)
 // Scores the base (PT_CALIBRATION) and the hypothesis (PT_CALIBRATION + the given params) on the 100 m cases in
-// data-prep/out/reference, without random draws, and applies the rule registered in ADR 0073 on the tier A fires
+// data-prep/out/reference, without random draws, and applies the rule registered in ADR 0074 on the tier A fires
 // not used to fit the calibration. Tier B is reported apart. Writes engine/reports/stage-b-<name>.json.
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
@@ -87,7 +87,7 @@ const decidingRows = rows.filter((r) => r.tier === "A");
 const sum = summary(decidingRows);
 const sumB = tierB.length ? summary(rows.filter((r) => r.tier === "B")) : null;
 
-// The rule of ADR 0073.
+// The rule of ADR 0074.
 const guards = sum.S.diff >= -0.01 && sum.C.diff <= 0.02;
 const lnF = (x: number) => Math.abs(Math.log(x));
 const target =
@@ -108,7 +108,7 @@ writeFileSync(
   JSON.stringify(
     {
       created: new Date().toISOString().slice(0, 10),
-      rule: "ADR 0073",
+      rule: "ADR 0074",
       option,
       moisture,
       goal,

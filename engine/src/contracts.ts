@@ -1,5 +1,5 @@
 // Types only: the contracts between the web, the API and the engine worker (examples in contracts/examples/).
-import type { WeatherProvenance } from "./scenario";
+import type { SavedScenario, WeatherProvenance } from "./scenario";
 import type { FuelMoisture } from "./rothermel";
 import type { CellRef, EnsembleOptions, Intervention, Metrics, RunMetrics, SpreadModel, WeatherStep, Wind } from "./types";
 import type { GridVariant } from "./variant";
@@ -27,6 +27,11 @@ export interface RunRequest {
   weatherSteps?: WeatherStep[];
   /** Optional ignited cells, each from its own minute (an already burned area, in cells); replaces `ignition` for the spread. */
   ignitions?: { cell: CellRef; t0Min: number }[];
+  /**
+   * Optional: the run as drawn, i.e. the scenario file "Guardar ficheiro" would write. Stored with the run and ignored by
+   * the worker; the simulation history opens it again with the stored result (docs/decisoes/0073).
+   */
+  scenario?: SavedScenario;
 }
 
 /** Stored in runs.result; the rasters travel separately. paired and likelyHa are computed in the browser. */

@@ -1,4 +1,4 @@
-# ADR 0073: Protocolo da etapa B: quando se adota uma mudança da física
+# ADR 0074: Protocolo da etapa B: quando se adota uma mudança da física
 
 - Estado: aceite (registado antes de pontuar qualquer mudança da etapa B)
 - Data: 2026-10-22
@@ -42,4 +42,4 @@ Corridos a 22 de outubro de 2026, nos 27 incêndios do tier A fora do ajuste, co
 
 Verificação à parte, que a regra não mede: a velocidade nos intervalos lentos (L2 abaixo de 5 m/min, 26 intervalos), em que o motor sem combate já anda depressa de mais (onde os meios travaram o fogo): simulada / observada 2,6 hoje, 3,5 com o modelo de matos, 2,8 com as duas mudanças.
 
-Adoção: nenhuma mudança fica ligada. As duas linhas que passaram foram testadas com uma calibração própria na etapa D e não passaram a regra da ADR 0068 ([ADR 0076](0076-recalibracao-com-matos-e-forma-do-fogo.md)); a humidade FFMC e o vento no relevo não passaram aqui.
+Adoção: nenhuma mudança fica ligada. As duas linhas que passaram foram testadas com uma calibração própria na etapa D e não passaram a regra da ADR 0068 ([ADR 0077](0077-recalibracao-com-matos-e-forma-do-fogo.md)); a humidade FFMC e o vento no relevo não passaram aqui.

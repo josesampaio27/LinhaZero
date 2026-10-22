@@ -84,6 +84,37 @@ public class ApiHttpTests(ApiFactory factory) : IClassFixture<ApiFactory>
     }
 
     [Fact]
+    public async Task History_of_a_session_without_a_users_row_is_empty()
+    {
+        // The test user has no users.id (real sessions always do), so it has no runs and the list stops before the database.
+        var res = await _http.GetAsync("/api/v1/runs");
+        Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+        Assert.Equal("[]", await res.Content.ReadAsStringAsync());
+    }
+
+    [Fact]
+    public async Task Everyone_s_history_is_for_admins_only()
+    {
+        var res = await _http.GetAsync("/api/v1/runs?all=true");
+        Assert.Equal(HttpStatusCode.Forbidden, res.StatusCode);
+        Assert.Equal("só os administradores veem as simulações de todos", await ErrorOf(res));
+    }
+
+    [Fact]
+    public async Task History_without_a_session_is_401()
+    {
+        Assert.Equal(HttpStatusCode.Unauthorized, (await factory.CreateAnonymousClient().GetAsync("/api/v1/runs")).StatusCode);
+    }
+
+    [Fact]
+    public async Task Scenario_of_a_run_is_404_for_a_session_that_did_not_start_it()
+    {
+        var res = await _http.GetAsync($"/api/v1/runs/{Guid.NewGuid()}/scenario");
+        Assert.Equal(HttpStatusCode.NotFound, res.StatusCode);
+        Assert.Equal("cenário indisponível", await ErrorOf(res));
+    }
+
+    [Fact]
     public async Task Health_is_503_and_says_what_is_down()
     {
         var res = await _http.GetAsync("/api/v1/health");

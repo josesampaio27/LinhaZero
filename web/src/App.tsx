@@ -20,6 +20,7 @@ import {
   type FireExplain,
   type LineSuggestion,
   type GridData,
+  type GridHeader,
   type GridVariant,
   type InterventionKind,
   type PairedComparison,
@@ -34,6 +35,7 @@ import { CellInspector, cellUnder } from "./components/CellInspector";
 import { ComparisonPanel } from "./components/ComparisonPanel";
 import { ExplainPanel } from "./components/ExplainPanel";
 import { SuggestPanel } from "./components/SuggestPanel";
+import { RunHistoryDialog } from "./components/RunHistoryDialog";
 import { DecisionTools, TOOLS } from "./components/DecisionTools";
 import { Legend } from "./components/Legend";
 import { MapView, type Draft, type MapShape } from "./components/MapView";
@@ -57,17 +59,18 @@ import { gridBounds, gridToLngLat, lngLatToProjected, projectedToLngLat, type Ln
 import { fireArrival, fireIntensity, fireProbability, renderTerrain } from "./lib/render";
 import { clearRouteParams, navigate, useRoute } from "./lib/route";
 import { describeCell, placeStats } from "./lib/places";
-import { isLineKind, KIND_LABEL, newId } from "./lib/scenario";
+import { isLineKind, KIND_LABEL, newId, savedScenarioOf } from "./lib/scenario";
 import { ApiError } from "./lib/api";
 import { forecastSteps } from "./lib/weather-steps";
-import { MAX_SERVER_RUNS, MIN_SERVER_RUNS, runOnServer, SERVER_ENSEMBLE, workersAvailable } from "./lib/server-run";
+import { fetchRunResults, fetchRunScenario, MAX_SERVER_RUNS, MIN_SERVER_RUNS, runOnServer, SERVER_ENSEMBLE, workersAvailable } from "./lib/server-run";
+import { useSession } from "./lib/session";
 import { SimClient } from "./lib/sim-client";
 import { syncMaps } from "./lib/sync-maps";
 import { newVariantId, useVariants, variantStore } from "./lib/variants";
 import { useLiveWeather } from "./lib/useLiveWeather";
 import { useMapPrefs } from "./lib/map-prefs";
 import { ageText, fetchIncidents } from "./lib/weather";
-import type { IncidentsResponse } from "./api/client";
+import type { IncidentsResponse, RunSummary } from "./api/client";
 
 type Tool = { type: "none" } | { type: "ignite" } | { type: "draw"; decision: DecisionId; kind: InterventionKind } | { type: "burned" };
 type SimDraft = Draft & { kind: InterventionKind | "burned" };
@@ -172,6 +175,60 @@ const inputKeyOf = (gridName: string, i: SimInputs) =>
     burnedArea: i.burnedArea ?? null,
   });
 
+/** A scenario waiting for its grid to load: then it runs, or, opened from the history, its stored result is shown. */
+type Pending = { saved: SavedScenario; stored?: { id: string; ensembleRuns: number; createdAt: string } };
+
+const explainOf = (a: SimulationResult, b: SimulationResult): Results["explain"] =>
+  a.explain && b.explain ? { A: { explain: a.explain, arrivalMin: a.arrivalMin }, B: { explain: b.explain, arrivalMin: b.arrivalMin } } : undefined;
+
+/**
+ * The Results of a run, from what ran (`ran`: the inputs with the ensemble as it actually ran, for the key) and its two
+ * results. `fitKey` names the run so both maps fit once; null fit while someone is drawing, so the map does not move.
+ */
+function resultsOf(
+  header: GridHeader,
+  gridName: string,
+  ran: SimInputs,
+  A: SimulationResult,
+  B: SimulationResult,
+  explain: Results["explain"],
+  fitKey: string | null,
+): Results {
+  // Rothermel: the ensemble checked against real fires; the share of runs that burn each cell is the
+  // probability of burning with no firefighting other than what was drawn (ADR 0057).
+  const chance = ran.spreadModel === "rothermel" && !!A.burnProbability && !!B.burnProbability;
+  return {
+    A,
+    B,
+    burnChance: chance,
+    durationMin: ran.durationMin,
+    key: inputKeyOf(gridName, ran),
+    fit:
+      fitKey === null
+        ? null
+        : (() => {
+            const points = [
+              ...(ran.ignition ? [ran.ignition] : []),
+              ...(ran.burnedArea ?? []),
+              ...DECISIONS.flatMap((d) => ran.decisions[d].flatMap((iv) => iv.coords)),
+            ];
+            const bounds = burnedBounds(header, A.arrivalMin, B.arrivalMin, ran.durationMin, points);
+            return bounds && { key: fitKey, bounds };
+          })(),
+    starts: DECISIONS.flatMap((d) => ran.decisions[d].map((iv) => ({ min: iv.startMin, className: `dec-${d}` }))),
+    likelyHa: A.burnProbability && {
+      a: chance ? expectedHa(A.burnProbability, header.cellSize) : hectaresAbove(A.burnProbability, 0.5, header.cellSize),
+      b: chance ? expectedHa(B.burnProbability!, header.cellSize) : hectaresAbove(B.burnProbability, 0.5, header.cellSize),
+    },
+    paired: A.runs &&
+      B.runs && {
+        buildings: comparePaired(A.runs, B.runs, "buildingsReached"),
+        ha: comparePaired(A.runs, B.runs, "burnedHa"),
+      },
+    explain,
+  };
+}
+
 /** A worker seen idle in the last 60 s counts as available, so the option does not flicker off while the only worker is busy. */
 const WORKER_WINDOW_MS = 60_000;
 
@@ -261,7 +318,8 @@ export function App() {
   // Replays of real fires: the observed perimeters, drawn over the simulation up to the time shown.
   const [observedFire, setObservedFire] = useState<ObservedFire | null>(null);
   const [showObserved, setShowObserved] = useState(true);
-  const [ensemble, setEnsemble] = useState(false);
+  // On by default: with a worker available every run goes to the server, so it is stored for the history (ADR 0073).
+  const [ensemble, setEnsemble] = useState(true);
   const [ensembleRuns, setEnsembleRuns] = useState(SERVER_ENSEMBLE.runs);
   // Last health check: when it ran and whether a worker was idle then.
   const [health, setHealth] = useState<{ at: number; idle: boolean } | null>(null);
@@ -269,7 +327,9 @@ export function App() {
   const [viewMode, setViewMode] = useState<ViewMode>("arrival");
   const [scenarioIndex, setScenarioIndex] = useState<GridIndexEntry[]>([]);
   const [scenarioTitle, setScenarioTitle] = useState<string | null>(null);
-  const [pending, setPending] = useState<SavedScenario | null>(null);
+  const [pending, setPending] = useState<Pending | null>(null);
+  const [showHistory, setShowHistory] = useState(false);
+  const session = useSession();
   const [hover, setHover] = useState<{ d: DecisionId; cell: number } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -640,6 +700,9 @@ export function App() {
                 ...(inputs.spreadModel === "rothermel" && { spreadModel: "rothermel" as const, moisture: inputs.moisture }),
                 ...(inputs.weatherSteps?.length && { weatherSteps: inputs.weatherSteps }),
                 ...(scenarios.A.ignitions && { ignitions: scenarios.A.ignitions }),
+                // The run as drawn, for the history (ignored by the worker). Its variants already travel in `variants`
+                // and the body is capped at 1 MB, so they go once: the API puts them back when the scenario is read.
+                scenario: { ...savedScenarioOf(bundle.name, scenarioTitle, inputs, provenance), variants: { A: null, B: null } },
               },
               (n) => current() && setMessage(`A simular no servidor: ${n}/2`),
             ).catch((e: unknown) => {
@@ -654,8 +717,6 @@ export function App() {
         // The run without random draws, recording how the fire reached each cell: the map's arrival run.
         const explainRun = (d: DecisionId) => ({ scenario: { ...scenarios[d], ensemble: undefined, explain: true }, variant: inputs.variants[d] });
         let explain: Results["explain"];
-        const explainOf = (a: SimulationResult, b: SimulationResult) =>
-          a.explain && b.explain ? { A: { explain: a.explain, arrivalMin: a.arrivalMin }, B: { explain: b.explain, arrivalMin: b.arrivalMin } } : undefined;
         if (server) {
           ({ A, B } = server);
           done = `Simulação no servidor: 2×(${inputs.ensembleRuns}+1) corridas em ${server.elapsedMs.toLocaleString("pt-PT")} ms.`;
@@ -670,40 +731,9 @@ export function App() {
           if (serverProblem) done = `${serverProblem}: simulado sem incerteza. ${done}`;
         }
         if (!current()) return;
-        // Rothermel: the ensemble checked against real fires; the share of runs that burn each cell is the
-        // probability of burning with no firefighting other than what was drawn (ADR 0057).
-        const chance = inputs.spreadModel === "rothermel" && !!A.burnProbability && !!B.burnProbability;
-        setResults({
-          A,
-          B,
-          burnChance: chance,
-          durationMin: inputs.durationMin,
-          key: inputKeyOf(bundle.name, ran),
-          // Not under someone drawing: the map must not move while they mark points.
-          fit: drawingRef.current
-            ? null
-            : (() => {
-                const points = [
-                  ...(inputs.ignition ? [inputs.ignition] : []),
-                  ...(inputs.burnedArea ?? []),
-                  ...DECISIONS.flatMap((d) => inputs.decisions[d].flatMap((iv) => iv.coords)),
-                ];
-                const bounds = burnedBounds(header, A.arrivalMin, B.arrivalMin, inputs.durationMin, points);
-                return bounds && { key: String(my), bounds };
-              })(),
-          starts: DECISIONS.flatMap((d) => inputs.decisions[d].map((iv) => ({ min: iv.startMin, className: `dec-${d}` }))),
-          likelyHa: A.burnProbability && {
-            a: chance ? expectedHa(A.burnProbability, header.cellSize) : hectaresAbove(A.burnProbability, 0.5, header.cellSize),
-            b: chance ? expectedHa(B.burnProbability!, header.cellSize) : hectaresAbove(B.burnProbability, 0.5, header.cellSize),
-          },
-          paired: A.runs &&
-            B.runs && {
-              buildings: comparePaired(A.runs, B.runs, "buildingsReached"),
-              ha: comparePaired(A.runs, B.runs, "burnedHa"),
-            },
-          explain,
-        });
-        setViewMode(ran.ensemble ? "probability" : "arrival");
+        // Not under someone drawing: the map must not move while they mark points.
+        setResults(resultsOf(header, bundle.name, ran, A, B, explain, drawingRef.current ? null : String(my)));
+        setViewMode("arrival"); // Chegada first, also for an ensemble: Cenários is one tap away
         // Losing the uncertainty is worth noticing: it goes to the message, not to the quiet note.
         setRunNote(serverProblem ? null : done);
         setMessage(serverProblem ? done : null);
@@ -711,7 +741,8 @@ export function App() {
           setStep("resultado");
           setMapsView(both);
         }
-        if (opts.animate && !ran.ensemble) {
+        // Server runs too: the result opens on Chegada, which plays from the ignition to the end.
+        if (opts.animate) {
           setT(0);
           setPlaying(true);
         } else setT(inputs.durationMin);
@@ -721,11 +752,11 @@ export function App() {
         if (current()) setBusy(false);
       }
     },
-    [bundle, sim, provenance],
+    [bundle, sim, provenance, scenarioTitle],
   );
 
   // --- Scenarios ---
-  const applyScenario = useCallback((saved: SavedScenario) => {
+  const applyScenario = useCallback((saved: SavedScenario, stored?: Pending["stored"]) => {
     const variants = { A: saved.variants.A && adoptVariant(saved.variants.A), B: saved.variants.B && adoptVariant(saved.variants.B) };
     runSeq.current++;
     setBusy(false);
@@ -740,11 +771,12 @@ export function App() {
     setBurnedArea(saved.burnedArea ?? null);
     setFollowForecast(!!saved.weatherSteps?.length);
     setEnsemble(saved.ensemble);
+    if (stored) setEnsembleRuns(stored.ensembleRuns); // as it ran, so the stored result is not shown as out of date
     setDecisions(saved.decisions);
     setVariantIds({ A: variants.A?.id ?? null, B: variants.B?.id ?? null });
     setScenarioTitle(saved.title ?? null);
     setStep("situacao");
-    setPending({ ...saved, variants });
+    setPending({ saved: { ...saved, variants }, stored });
   }, [loadFromScenario]);
 
   // --- Active incidents (fogos.pt) ---
@@ -779,14 +811,67 @@ export function App() {
     return src.stale && src.fetchedAt ? `${text} (dados de ${ageText(src.fetchedAt)}, sem ligação)` : text;
   })();
 
-  // Once the scenario's grid is loaded, run it straight away so the comparison is ready.
+  /** A run from the history: its stored result on the maps, without simulating again (docs/decisoes/0073). */
+  const showStoredRun = useCallback(
+    async (inputs: SimInputs, stored: NonNullable<Pending["stored"]>) => {
+      if (!bundle) return;
+      const my = ++runSeq.current;
+      const current = () => my === runSeq.current;
+      const header = bundle.data.header;
+      setBusy(true);
+      setPlaying(false);
+      try {
+        for (const d of DECISIONS) if (inputs.variants[d]) checkVariantBase(inputs.variants[d]!, bundle.sha256);
+        const server = await fetchRunResults(header, stored.id);
+        if (!current()) return;
+        // As after a server run: the explanation is not stored, and one run per decision here takes milliseconds.
+        const ex = await sim
+          .simulate(DECISIONS.map((d) => ({ scenario: { ...buildScenario(header, inputs, d), ensemble: undefined, explain: true }, variant: inputs.variants[d] })))
+          .catch(() => null);
+        if (!current()) return;
+        const explain = ex ? explainOf(ex.results[0], ex.results[1]) : undefined;
+        setResults(resultsOf(header, bundle.name, { ...inputs, ensemble: true }, server.A, server.B, explain, String(my)));
+        setViewMode("arrival");
+        const at = new Date(stored.createdAt).toLocaleString("pt-PT", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" });
+        setRunNote(`Simulação guardada de ${at}: 2×(${inputs.ensembleRuns}+1) corridas no servidor.`);
+        setMessage(null);
+        setStep("resultado");
+        setMapsView(both);
+        // Replayed from the ignition to the end, as when it first ran.
+        setT(0);
+        setPlaying(true);
+      } catch (e) {
+        if (current()) setMessage(`Não foi possível abrir a simulação guardada: ${e instanceof Error ? e.message : String(e)}`);
+      } finally {
+        if (current()) setBusy(false);
+      }
+    },
+    [bundle, sim],
+  );
+
+  // Once the scenario's grid is loaded, run it straight away so the comparison is ready (or show the stored one).
   useEffect(() => {
-    if (!pending || !bundle || bundle.name !== pending.grid) return;
+    if (!pending || !bundle || bundle.name !== pending.saved.grid) return;
     setPending(null);
     // The scenario's inputs are passed explicitly: React has not re-rendered with them yet. Its ensemble goes to
     // the server even before the first health check answers; without workers it runs without uncertainty.
-    if (pending.ignition) void runSimulation({ ...pending, ensembleRuns }, { animate: false });
-  }, [pending, bundle, runSimulation, ensembleRuns]);
+    const { saved, stored } = pending;
+    if (stored) void showStoredRun({ ...saved, ensembleRuns: stored.ensembleRuns }, stored);
+    else if (saved.ignition) void runSimulation({ ...saved, ensembleRuns }, { animate: false });
+  }, [pending, bundle, runSimulation, showStoredRun, ensembleRuns]);
+
+  /** "Abrir" in the history: the drawn scenario stored with the run, checked like a file, then its stored result. */
+  const openRun = useCallback(
+    async (run: RunSummary) => {
+      try {
+        const saved = await readSavedScenario(await fetchRunScenario(run.id));
+        applyScenario(saved, { id: run.id, ensembleRuns: run.ensembleRuns, createdAt: run.createdAt });
+      } catch (e) {
+        setMessage(`Não foi possível abrir a simulação guardada: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    },
+    [applyScenario],
+  );
 
   const loadScenarioByName = useCallback(
     async (name: string) => {
@@ -805,22 +890,8 @@ export function App() {
   }, [loadScenarioByName]);
 
   const saveScenario = () => {
-    const saved: SavedScenario = {
-      version: 3,
-      title: scenarioTitle ?? undefined,
-      grid: gridName,
-      ignition,
-      wind,
-      durationMin,
-      ensemble,
-      decisions,
-      variants,
-      ...(spreadModel === "rothermel" && { spreadModel, moisture }),
-      ...(weatherSteps?.length && { weatherSteps }),
-      ...(burnedArea && { burnedArea }),
-      // Where the wind came from, only while nobody changed it by hand.
-      weather: provenance,
-    };
+    // The ensemble as chosen, even while no worker is there to run it.
+    const saved = savedScenarioOf(gridName, scenarioTitle, { ...inputs, ensemble }, provenance);
     const blob = new Blob([JSON.stringify(saved, null, 2)], { type: "application/json" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
@@ -1053,6 +1124,17 @@ export function App() {
       >
         Nova simulação <Icon name="refresh" size={18} />
       </button>
+      {session.state === "signed-in" && (
+        <button
+          className="menu-item"
+          onClick={() => {
+            close();
+            setShowHistory(true);
+          }}
+        >
+          Histórico de simulações <Icon name="chevron" size={18} />
+        </button>
+      )}
       <button
         className="menu-item"
         onClick={() => {
@@ -1209,6 +1291,14 @@ export function App() {
           e.target.value = "";
         }}
       />
+      {showHistory && (
+        <RunHistoryDialog
+          isAdmin={session.state === "signed-in" && session.me.isAdmin}
+          zoneLabel={(name) => gridIndex.find((g) => g.name === name)?.label ?? name}
+          onOpen={(run) => void openRun(run)}
+          onClose={() => setShowHistory(false)}
+        />
+      )}
     </>
   );
 

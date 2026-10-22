@@ -1,17 +1,17 @@
-# ADR 0076: Recalibração da grelha de 100 m com o modelo de matos e a forma do fogo
+# ADR 0077: Recalibração da grelha de 100 m com o modelo de matos e a forma do fogo
 
 - Estado: aceite: não se adota (o protocolo foi registado antes de correr; resultados no fim)
 - Data: 2026-10-22
-- Etapa D do plano [Melhorias do motor](../plano/melhorias-do-motor.md), marco M11; segue as ADRs [0068](0068-calibracao-por-cobertura-30-m.md), [0069](0069-recalibracao-da-grelha-de-100-m.md) e [0073](0073-protocolo-da-etapa-b.md)
+- Etapa D do plano [Melhorias do motor](../plano/melhorias-do-motor.md), marco M11; segue as ADRs [0068](0068-calibracao-por-cobertura-30-m.md), [0069](0069-recalibracao-da-grelha-de-100-m.md) e [0074](0074-protocolo-da-etapa-b.md)
 
 ## Contexto
 
-- Na etapa B ([ADR 0073](0073-protocolo-da-etapa-b.md)), o modelo de matos de Anderson et al. (2015) com a forma do fogo de Taylor et al. (1997) (`shrubModel=1`, `shapeModel=1`) passou a regra com a calibração em uso: corridas rápidas de 0,68 para 0,98 da velocidade observada, Sørensen de 0,400 para 0,412 (intervalo de 90% de −0,010 a +0,034).
+- Na etapa B ([ADR 0074](0074-protocolo-da-etapa-b.md)), o modelo de matos de Anderson et al. (2015) com a forma do fogo de Taylor et al. (1997) (`shrubModel=1`, `shapeModel=1`) passou a regra com a calibração em uso: corridas rápidas de 0,68 para 0,98 da velocidade observada, Sørensen de 0,400 para 0,412 (intervalo de 90% de −0,010 a +0,034).
 - Mas a calibração em uso foi ajustada para o Rothermel, e a forma do fogo sozinha piorava. Decidiu-se testar as duas mudanças com uma calibração própria antes de as adotar.
 - Antes de correr, `engine/scripts/check-calibration.ts` verificou que:
   - o motor de hoje, sem as opções, reproduz o objetivo do melhor ajuste da ADR 0069 com o motor dessa altura (1,4438 com os dois motores; o relatório registou 1,4425, porque os casos foram reconstruídos a 22 de outubro de 2026 a partir de fontes que mudam, como o OpenStreetMap);
   - as opções chegam às simulações da calibração;
-  - todas as dimensões do espaço mexem no custo com as opções ligadas. Para isso, o fator do grupo dos matos (`rosAdjShrub`) passou a aplicar-se à velocidade de Anderson (sem o fator global, que compensa o Rothermel; a intensidade vem da velocidade sem fator, como no Rothermel). Com o fator a 1, o modelo é o publicado, e os resultados da ADR 0073 não mudam.
+  - todas as dimensões do espaço mexem no custo com as opções ligadas. Para isso, o fator do grupo dos matos (`rosAdjShrub`) passou a aplicar-se à velocidade de Anderson (sem o fator global, que compensa o Rothermel; a intensidade vem da velocidade sem fator, como no Rothermel). Com o fator a 1, o modelo é o publicado, e os resultados da ADR 0074 não mudam.
 
 ## Protocolo (registado antes de ver resultados)
 

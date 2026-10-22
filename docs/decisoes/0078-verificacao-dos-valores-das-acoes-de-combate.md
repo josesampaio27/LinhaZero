@@ -1,4 +1,4 @@
-# ADR 0077: Verificação dos valores das ações de combate
+# ADR 0078: Verificação dos valores das ações de combate
 
 - Estado: aceite: não se muda nenhum valor por agora (a verificação fica registada; as propostas ficam para rever com peritos)
 - Data: 2026-10-22
@@ -24,8 +24,8 @@ As ações de combate (linha de contenção, ataque, proteger zona, descarga aé
 
   Ajuste aos incêndios: segura a 50% com largura = **2,33 × chama** (90%: 0,37 a 3,48). Em uso: 5.
 - **Tier B** (46 incêndios, mapa de combustível de depois do fogo, 2052 células sem chama simulada): 4,25 × chama (90%: 1,64 a 5,46).
-- **As duas recalibrações recentes** ajustaram o mesmo valor, cada uma por si: 2,30 ([ADR 0069](0069-recalibracao-da-grelha-de-100-m.md)) e 2,87 ([ADR 0076](0076-recalibracao-com-matos-e-forma-do-fogo.md)).
-- **Na regra da etapa B** ([ADR 0073](0073-protocolo-da-etapa-b.md)), com a calibração em uso: 2,5 dá S +0,003 (90%: −0,000 a +0,007) e C −0,003 (−0,006 a 0,000), e o tier B também melhora; não chega ao objetivo da regra (as estradas mexem pouco na área total), mas não piora nada. 3,5 não muda nada; uma inclinação mais suave (1) dá o mesmo que 2,5.
+- **As duas recalibrações recentes** ajustaram o mesmo valor, cada uma por si: 2,30 ([ADR 0069](0069-recalibracao-da-grelha-de-100-m.md)) e 2,87 ([ADR 0077](0077-recalibracao-com-matos-e-forma-do-fogo.md)).
+- **Na regra da etapa B** ([ADR 0074](0074-protocolo-da-etapa-b.md)), com a calibração em uso: 2,5 dá S +0,003 (90%: −0,000 a +0,007) e C −0,003 (−0,006 a 0,000), e o tier B também melhora; não chega ao objetivo da regra (as estradas mexem pouco na área total), mas não piora nada. 3,5 não muda nada; uma inclinação mais suave (1) dá o mesmo que 2,5.
 - **Limites:** os meios defenderam muitas estradas, por isso "segurou" mistura largura e combate (por isso há 40% de estradas que seguram com chamas maiores do que a largura); um fogo que contornou a ponta de uma estrada conta como passou; as larguras são por classe de estrada, não medidas.
 - **Leitura:** a forma da regra está certa (quanto mais larga a estrada em relação à chama, mais segura). Todos os indícios põem o ponto de 50% abaixo de 5, entre cerca de 2 e 3.
 
