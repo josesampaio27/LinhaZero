@@ -144,8 +144,8 @@ Um cenário em `web/public/scenarios/` (listado em `index.json`) abre com `https
 
 No botão **Editor de grelha** (ou `#/grelha`):
 
-1. Escolhe a grelha. Passa o rato sobre o mapa para ver o que a grelha diz em cada ponto: combustível, velocidade, altitude, declive, barreira, edifícios e lugar. **Ver** troca entre combustível, relevo e lugares.
-2. Para experimentar alterações: **Pintar combustível** numa área (por exemplo uma faixa não combustível), **Acrescentar barreira** ou **Tirar barreiras**; muda as velocidades por combustível ou os coeficientes do modelo. A grelha oficial nunca muda: o resultado é uma variante.
+1. Escolhe a grelha. Passa o rato sobre o mapa para ver o que a grelha diz em cada ponto: combustível, velocidade, altitude, declive, barreira, edifícios e lugar. **Ver** troca entre combustível (com legenda), relevo, declive e lugares; **Camadas** tem o mesmo mapa de ruas, satélite, curvas de nível e relevo 3D da simulação.
+2. Para experimentar alterações, escolhe as células: **Selecionar células** (tocar ou arrastar, com pincel de 1, 3×3 ou 5×5; tocar numa célula selecionada retira-a) ou **Selecionar uma área**. Depois: **Tornar não combustível**, **Pôr o combustível escolhido**, **Acrescentar barreira** ou **Tirar barreiras**. **Desenhar uma barreira** traça uma linha nova. **Desfazer** e **Refazer** (Ctrl+Z, Ctrl+Shift+Z) valem para tudo. Em **Valores** mudam-se os coeficientes do modelo (os principais à vista, o resto em "Avançado"). A grelha oficial nunca muda: o resultado é uma variante.
 3. **Guardar** (neste browser), **Exportar** ou **Importar** a variante.
 4. **Testar na simulação**: abre a simulação com a decisão A na grelha oficial e a B na variante. Em cada decisão, "Grelha" escolhe a oficial ou uma variante guardada.
 

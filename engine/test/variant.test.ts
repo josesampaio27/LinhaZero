@@ -5,7 +5,7 @@ import { canonicalJson, hashGrid, sha256Hex } from "../src/hash";
 import { comparePaired } from "../src/metrics";
 import { buildScenario, parseSavedScenario } from "../src/scenario";
 import { simulate } from "../src/simulate";
-import { applyVariant, checkVariantBase, editCells, parseGridVariant, variantHash, type GridVariant } from "../src/variant";
+import { applyVariant, checkVariantBase, editCells, MAX_EDIT_CELLS, parseGridVariant, variantHash, type GridVariant } from "../src/variant";
 import { makeGrid, reach } from "./helpers";
 
 const text = (s: string) => new TextEncoder().encode(s);
@@ -149,5 +149,39 @@ describe("grid variants", () => {
     for (const [raw, msg] of cases) expect(() => parseGridVariant(raw, grid.header)).toThrow(msg);
     const scenario = { version: 3, grid: "test", decisions: { A: [], B: [] }, variants: { B: { ...v, fuelRates: { 7: 3 } } } };
     expect(() => parseSavedScenario(scenario, grid.header)).toThrow(/variante da decisão B/);
+  });
+});
+
+describe("edits with cells picked one by one", () => {
+  it("change exactly those cells", () => {
+    const out = applyVariant(
+      grid,
+      variant({
+        edits: [
+          { kind: "setFuel", fuel: 0, cells: [[3, 4], [5, 6]] },
+          { kind: "addBarrier", cells: [[10, 10]] },
+        ],
+      }),
+    );
+    expect(out.fuel[at(3, 4)]).toBe(0);
+    expect(out.fuel[at(5, 6)]).toBe(0);
+    expect(out.fuel[at(3, 5)]).toBe(1);
+    expect(out.barrier[at(10, 10)]).toBe(1);
+    expect(out.barrier[at(10, 11)]).toBe(0);
+    const back = applyVariant(out, variant({ edits: [{ kind: "removeBarrier", cells: [[10, 10]] }] }));
+    expect(back.barrier[at(10, 10)]).toBe(0);
+  });
+
+  it("round-trip through the parser, and bad cells are refused", () => {
+    const v = variant({ edits: [{ kind: "setFuel", fuel: 0, cells: [[0, 0], [N - 1, N - 1]] }] });
+    expect(parseGridVariant(JSON.parse(JSON.stringify(v)), grid.header).edits).toEqual(v.edits);
+    const bad = (edit: unknown) => () => parseGridVariant({ ...v, edits: [edit] }, grid.header);
+    expect(bad({ kind: "setFuel", fuel: 0, cells: [[N, 0]] })).toThrow(/fora da grelha/);
+    expect(bad({ kind: "addBarrier", cells: [[1.5, 0]] })).toThrow(/fora da grelha/);
+    expect(bad({ kind: "removeBarrier", cells: [] })).toThrow(/pelo menos uma célula/);
+    expect(bad({ kind: "setFuel", fuel: 0, cells: [[1, 1]], polygon: strip })).toThrow(/só pode ter uma/);
+    expect(bad({ kind: "addBarrier", cells: [[1, 1]], line: wall })).toThrow(/só pode ter uma/);
+    const many = Array.from({ length: MAX_EDIT_CELLS + 1 }, () => [0, 0]);
+    expect(bad({ kind: "setFuel", fuel: 0, cells: many })).toThrow(/mais de/);
   });
 });

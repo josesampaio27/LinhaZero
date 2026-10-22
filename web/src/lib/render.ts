@@ -9,6 +9,9 @@ const FUEL_COLORS: Record<number, [number, number, number]> = {
 };
 const BARRIER: [number, number, number] = [120, 132, 150];
 const BUILDING: [number, number, number] = [122, 74, 42];
+/** CSS colours of barriers and buildings on the offline base map, for legends. */
+export const BARRIER_SWATCH = `rgb(${BARRIER.join(", ")})`;
+export const BUILDING_SWATCH = `rgb(${BUILDING.join(", ")})`;
 
 function fuelColor(grid: GridData, code: number): [number, number, number] {
   if (grid.header.name === "sintetica" && FUEL_COLORS[code]) return FUEL_COLORS[code];
@@ -95,6 +98,17 @@ const ELEVATION_STOPS: [number, [number, number, number]][] = [
   [1, [240, 236, 228]],
 ];
 
+/** The elevation legend: a CSS gradient of the ramp above and the grid's lowest and highest altitude (m). */
+export function elevationLegend(grid: GridData): { gradient: string; lo: number; hi: number } {
+  let lo = Infinity, hi = -Infinity;
+  for (const z of grid.elevation) {
+    lo = Math.min(lo, z);
+    hi = Math.max(hi, z);
+  }
+  const stops = ELEVATION_STOPS.map(([t, rgb]) => `rgb(${rgb.join(", ")}) ${t * 100}%`).join(", ");
+  return { gradient: `linear-gradient(to right, ${stops})`, lo: Math.round(lo), hi: Math.round(hi) };
+}
+
 /** One layer of the grid as an image: fuel (the base map), elevation, slope class, or the place each cell belongs to. */
 export function renderLayer(grid: GridData, view: LayerView): string {
   if (view === "fuel") return renderTerrain(grid);
@@ -130,15 +144,20 @@ function hsl(h: number, s: number, l: number): [number, number, number] {
   return [f(0), f(8), f(4)];
 }
 
-/** Cells where mask[i] is set, in one translucent colour (the edited cells in the grid editor). */
-export function renderMask(mask: Uint8Array, cols: number, rows: number, rgb: [number, number, number]): ImageData {
+/** Sets of cells, each in its own translucent colour, later layers on top (edited and selected cells in the grid editor). */
+export function renderCellLayers(
+  cols: number,
+  rows: number,
+  layers: { cells: Iterable<number>; rgb: [number, number, number]; alpha: number }[],
+): ImageData {
   const img = new ImageData(cols, rows);
-  for (let i = 0; i < mask.length; i++) {
-    if (!mask[i]) continue;
-    img.data[i * 4] = rgb[0];
-    img.data[i * 4 + 1] = rgb[1];
-    img.data[i * 4 + 2] = rgb[2];
-    img.data[i * 4 + 3] = 150;
+  for (const { cells, rgb, alpha } of layers) {
+    for (const i of cells) {
+      img.data[i * 4] = rgb[0];
+      img.data[i * 4 + 1] = rgb[1];
+      img.data[i * 4 + 2] = rgb[2];
+      img.data[i * 4 + 3] = alpha;
+    }
   }
   return img;
 }
