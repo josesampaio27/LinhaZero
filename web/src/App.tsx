@@ -691,7 +691,7 @@ export function App() {
             },
           explain,
         });
-        setViewMode(ran.ensemble ? "probability" : "arrival");
+        setViewMode("arrival"); // Chegada first, also for an ensemble: Cenários is one tap away
         // Losing the uncertainty is worth noticing: it goes to the message, not to the quiet note.
         setRunNote(serverProblem ? null : done);
         setMessage(serverProblem ? done : null);
