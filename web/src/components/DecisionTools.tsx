@@ -18,6 +18,8 @@ interface Props {
   onRestore?: (item: DrawnIntervention, index: number) => void;
   /** Width (m) of lines that do not set their own; when given, lines show a width choice (Rothermel model). */
   defaultLineWidthM?: number;
+  /** Ids of the actions the assistant placed, marked on their cards. */
+  assistantIds?: ReadonlySet<string>;
 }
 
 /** Typical containment line widths: hand line, machine line, fuel breaks. */
@@ -187,6 +189,11 @@ export function DecisionTools(p: Props) {
                 </span>
                 <span className="action-text">
                   <b>{label}</b>
+                  {p.assistantIds?.has(iv.id) && (
+                    <span className="by-assistant" title="Colocada pelo assistente">
+                      <Icon name="spark" size={12} /> assistente
+                    </span>
+                  )}
                   <details className="action-effect">
                     <summary>
                       Efeito no fogo

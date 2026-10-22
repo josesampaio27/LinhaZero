@@ -24,7 +24,8 @@ var services = builder.Services;
 
 // Host
 builder.Logging.ClearProviders().AddJsonConsole().AddFilter("Microsoft.AspNetCore", LogLevel.Warning);
-builder.WebHost.ConfigureKestrel(kestrel => kestrel.Limits.MaxRequestBodySize = 1_048_576); // the only body is the run request
+// The largest bodies are the run request and an assistant conversation; the panel starts a new conversation well before 1 MB.
+builder.WebHost.ConfigureKestrel(kestrel => kestrel.Limits.MaxRequestBodySize = 1_048_576);
 if (config["ASPNETCORE_URLS"] is null)
 {
     builder.WebHost.UseUrls("http://localhost:8080");
@@ -65,6 +66,18 @@ services.AddSingleton<IncidentService>();
 services.AddSingleton<RunService>();
 services.AddSingleton<RunEventStream>();
 services.AddSingleton<HealthService>();
+
+// The assistant (docs/decisoes/0079): Anthropic's Messages API, streamed through this API. No client timeout: an
+// answer streams for as long as it takes, and the browser's request (its cancellation token) ends it.
+services.Configure<AssistantOptions>(assistant => assistant.ReadFrom(config));
+services.AddSingleton<AssistantUsageRepository>();
+services
+    .AddHttpClient<AssistantProxy>(http =>
+    {
+        http.BaseAddress = AssistantProxy.BaseAddress;
+        http.Timeout = Timeout.InfiniteTimeSpan;
+    })
+    .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler { PooledConnectionLifetime = TimeSpan.FromMinutes(5) });
 
 // Controllers. Every body is JSON, and every 400 is written by the controller with the { "error": "..." } the web shows.
 services

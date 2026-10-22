@@ -1,5 +1,6 @@
 import {
   AccessRequestsClient,
+  AssistantClient,
   FeedbackClient,
   HealthClient,
   IncidentsClient,
@@ -66,6 +67,8 @@ async function apiFetch(
 const http = { fetch: apiFetch };
 
 export const accessRequestsApi = new AccessRequestsClient("", http);
+/** Only status(): the conversation itself goes through the Anthropic SDK (web/src/assistant/client.ts). */
+export const assistantApi = new AssistantClient("", http);
 export const feedbackApi = new FeedbackClient("", http);
 export const healthApi = new HealthClient("", http);
 export const incidentsApi = new IncidentsClient("", http);

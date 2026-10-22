@@ -39,4 +39,9 @@
     <ProjectReference Include="..\LinhaZero.Core\LinhaZero.Core.csproj" />
   </ItemGroup>
 
+  <!-- The assistant's system prompt and tool definitions (docs/decisoes/0079), read once at start. -->
+  <ItemGroup>
+    <EmbeddedResource Include="Assistant/*" />
+  </ItemGroup>
+
 </Project>

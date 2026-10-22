@@ -112,3 +112,4 @@ O que se pôs de lado, e porquê.
 | [0076](0076-sugerir-uma-terceira-decisao.md) | Sugerir uma terceira decisão | aceite | 2026-10-22 |
 | [0077](0077-recalibracao-com-matos-e-forma-do-fogo.md) | Recalibração da grelha de 100 m com o modelo de matos e a forma do fogo | aceite: não se adota | 2026-10-22 |
 | [0078](0078-verificacao-dos-valores-das-acoes-de-combate.md) | Verificação dos valores das ações de combate | aceite: não se muda nenhum valor | 2026-10-22 |
+| [0079](0079-assistente-com-claude-haiku.md) | Assistente com IA (Claude Haiku 5.5), que vê a aplicação e coloca ações | aceite (prova de conceito) | 2026-10-22 |

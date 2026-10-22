@@ -2,6 +2,10 @@
 
 Os ficheiros em `examples/` são a fonte de verdade dos tipos partilhados entre a interface (TypeScript, `engine/src/contracts.ts`), o worker do motor (Node) e a API (.NET: `backend/src/LinhaZero.Api/Models` e os `*Models.cs` de `backend/src/LinhaZero.Core`). Os testes de ambos os lados desserializam cada exemplo e falham se faltar um campo obrigatório; não há gerador. O documento OpenAPI da API (`/api/openapi/v1.json`, Swagger UI em `/api/docs`) é gerado a partir desses tipos C#; os exemplos continuam a ser a referência. Cada `dotnet build` da API (ou `npm run api:client`) grava esse documento em `contracts/openapi.json` e o NSwag gera a partir dele o cliente TypeScript `web/src/api/client.ts` (definições em `backend/src/LinhaZero.Api/nswag.json`). Os dois ficheiros vão no git; não se editam à mão. Todas as horas são ISO 8601 UTC com `Z`; os nomes são camelCase.
 
+## `assistant-status.json` — `GET /api/v1/assistant/status`
+
+`enabled` (o servidor tem a chave da Anthropic), `model`, e o que quem tem sessão gastou hoje (`usedTodayUsd`, dia de Lisboa) contra o seu limite (`dailyBudgetUsd`), em dólares ([ADR 0079](../docs/decisoes/0079-assistente-com-claude-haiku.md)). A conversa em si (`POST /api/v1/assistant/v1/messages`) usa o formato da Messages API da Anthropic, não um contrato próprio.
+
 ## `run-request.json` — `POST /api/v1/runs`
 
 | Campo | Significado |

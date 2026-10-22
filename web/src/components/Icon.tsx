@@ -19,12 +19,16 @@ const PATHS = {
   chevron: "M9 6l6 6-6 6",
   chevronDown: "M6 9l6 6 6-6",
   feedback: "M4 5h16v11H9l-5 4zM9 9.5h6M9 12.5h4",
+  spark: "M12 3l1.9 5.6L19.5 10.5l-5.6 1.9L12 18l-1.9-5.6-5.6-1.9 5.6-1.9zM18.5 15.5l.8 2.2 2.2.8-2.2.8-.8 2.2-.8-2.2-2.2-.8 2.2-.8z",
+  send: "M4 12l16-8-6 16-2.5-6.5z",
+  stop: "M7 7h10v10H7z",
+  copy: "M9 9h11v11H9zM5 15H4V4h11v1",
 } as const;
 
 export type IconName = keyof typeof PATHS;
 
 /** Filled shapes; the rest are strokes. */
-const FILLED = new Set<IconName>(["play", "flame"]);
+const FILLED = new Set<IconName>(["play", "flame", "spark", "stop"]);
 /** Outline plus a translucent fill. */
 const SOFT = new Set<IconName>(["attack"]);
 
