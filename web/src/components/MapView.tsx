@@ -246,13 +246,30 @@ export function MapView(props: Props) {
         id: "drawings-line",
         type: "line",
         source: "drawings",
-        filter: ["all", ["==", ["geometry-type"], "LineString"], ["!=", ["get", "kind"], "backfire"]],
+        filter: ["all", ["==", ["geometry-type"], "LineString"], ["!=", ["get", "kind"], "backfire"], ["!=", ["get", "kind"], "firePath"]],
         layout: { "line-cap": "round", "line-join": "round" },
         paint: {
           "line-color": ["match", ["get", "kind"], "addBarrier", "#334155", "aerialDrop", "#0ea5e9", "aerialDropRetardant", "#dc2626", "#1e3a8a"],
           "line-width": ["match", ["get", "kind"], "aerialDrop", 7, "aerialDropRetardant", 7, 4],
           "line-opacity": ["match", ["get", "kind"], "aerialDrop", 0.85, "aerialDropRetardant", 0.85, 1],
         },
+      });
+      // The fire's path to a point being explained: dark with a light halo, readable over the fire colours.
+      map.addLayer({
+        id: "drawings-path-halo",
+        type: "line",
+        source: "drawings",
+        filter: ["==", ["get", "kind"], "firePath"],
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": "#ffffff", "line-width": 6, "line-opacity": 0.9 },
+      });
+      map.addLayer({
+        id: "drawings-path",
+        type: "line",
+        source: "drawings",
+        filter: ["==", ["get", "kind"], "firePath"],
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: { "line-color": "#111827", "line-width": 3 },
       });
       map.addLayer({
         id: "drawings-backfire",

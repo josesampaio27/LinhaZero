@@ -103,3 +103,5 @@ Com os casos construídos, `npm run calibrate -w engine` calibra o motor (ver [C
 **Os valores são provisórios** e têm de ser calibrados. As designações vêm da legenda `FMM_pallete.lyr`
 do repositório; o código 235 existe no mapa mas não na legenda, por isso a designação está por confirmar.
 Um código que não esteja no CSV fica não combustível e o script avisa.
+
+Estas velocidades são do modelo simples, já retirado. A aplicação não as mostra (as cores e o inspetor usam o modelo de Rothermel, [ADR 0072](../docs/decisoes/0072-explicacao-do-resultado-e-mapa-pelo-modelo-da-simulacao.md)). Só marcam que códigos ardem, e o teste `engine/test/grids.test.ts` exige que isso coincida com ter parâmetros de Rothermel.

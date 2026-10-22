@@ -7,7 +7,7 @@ import { createRng, hashNormal, hashRandom, RANDOM_PURPOSE } from "./random";
 import { DEFAULT_MOISTURE, type FuelMoisture, type SurfaceBase } from "./rothermel";
 import { computeArrival, type SpreadInput } from "./spread";
 import { fuelBases, RothermelRates } from "./surface";
-import type { CellRef, Ignition, PreparedGrid, RunMetrics, Scenario, SimulationResult, WeatherStep } from "./types";
+import type { CellRef, FireExplain, Ignition, PreparedGrid, RunMetrics, Scenario, SimulationResult, WeatherStep } from "./types";
 
 const crownOf = (p: ModelParams) => ({ enabled: p.crownFire >= 0.5, rateAdj: p.crownAdj });
 const terrainOptionsOf = (p: ModelParams) => ({ crownRatio: p.crownRatio, demSmoothM: p.demSmoothM });
@@ -102,11 +102,13 @@ export function simulate(grid: PreparedGrid, scenario: Scenario): SimulationResu
     })),
   };
   const intensityKwM = rothermel ? new Float32Array(rows * cols) : undefined;
-  const arrivalMin = computeArrival(grid, { ...base, intensityOut: intensityKwM, random: scenario.realisation }, layers, heap);
+  const explain = rothermel && scenario.explain ? emptyExplain(rows * cols) : undefined;
+  const arrivalMin = computeArrival(grid, { ...base, intensityOut: intensityKwM, explainOut: explain, random: scenario.realisation }, layers, heap);
   const metrics = computeMetrics(grid, arrivalMin, scenario.durationMin);
+  const extras = { ...(intensityKwM && { intensityKwM }), ...(explain && { explain }) };
 
   const ens = scenario.ensemble;
-  if (!ens || ens.runs <= 0) return { arrivalMin, metrics, ...(intensityKwM && { intensityKwM }) };
+  if (!ens || ens.runs <= 0) return { arrivalMin, metrics, ...extras };
 
   // Per-run parameters (Rothermel): calibration sample k mod n, then the perturbation of run k.
   const samples = rothermel && ens.paramSamples?.length ? ens.paramSamples : undefined;
@@ -215,5 +217,17 @@ export function simulate(grid: PreparedGrid, scenario: Scenario): SimulationResu
         return p;
       })
     : undefined;
-  return { arrivalMin, burnProbability, runs, metrics, ...(burnProbabilityAt && { burnProbabilityAt }), ...(intensityKwM && { intensityKwM }) };
+  return { arrivalMin, burnProbability, runs, metrics, ...(burnProbabilityAt && { burnProbabilityAt }), ...extras };
+}
+
+function emptyExplain(n: number): FireExplain {
+  return {
+    from: new Int32Array(n).fill(-1),
+    rate: new Float32Array(n),
+    headRate: new Float32Array(n),
+    r0: new Float32Array(n),
+    windPart: new Float32Array(n),
+    slopePart: new Float32Array(n),
+    flags: new Uint8Array(n),
+  };
 }

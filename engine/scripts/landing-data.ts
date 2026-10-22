@@ -150,7 +150,7 @@ const gridInfo = {
   buildings: grid.buildings.reduce((a, b) => a + b, 0),
   places: grid.header.villages.length,
   fuels: [...byFuel]
-    .map(([code, k]) => ({ code, label: grid.header.fuelTable[code]?.label ?? String(code), burns: (grid.header.fuelTable[code]?.baseRate ?? 0) > 0, share: r3(k / n) }))
+    .map(([code, k]) => ({ code, label: grid.header.fuelTable[code]?.label ?? String(code), burns: !!grid.header.fuelTable[code]?.rothermel, share: r3(k / n) }))
     .sort((a, b) => b.share - a.share),
 };
 

@@ -643,3 +643,13 @@ kbd {
   /* B's title on B's side, under the switch and layers. */
   .maps.view-swipe .map-wrap.dec-B .map-title { left: auto; right: 52px; top: 64px; max-width: calc(100% - var(--split) - 64px); }
 }
+
+/* Why the fire gets to a point (components/ExplainPanel.tsx). */
+.explain { display: grid; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.explain-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.explain-head .field-label { margin: 0; }
+.explain-decision { display: grid; gap: 4px; }
+.explain-title { margin: 0; font-weight: 600; display: flex; align-items: baseline; gap: 6px; }
+.explain-decision ul { margin: 0; padding-left: 1.2em; display: grid; gap: 2px; font-size: 14px; }
+.comparison td .link { padding: 0; min-height: 0; text-align: left; font: inherit; }
+

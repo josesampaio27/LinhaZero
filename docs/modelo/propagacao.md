@@ -90,6 +90,8 @@ O motor é uma **função pura**: `simulate(grid, scenario) → result`. Não ch
 
 ## Evolução (planeado)
 
+A ordem de trabalho, por etapas e marcos, está em [Melhorias do motor](../plano/melhorias-do-motor.md).
+
 Mantemos a formulação de **tempo de chegada sobre grafo**. É rápida, determinística, explicável (há caminhos críticos) e lida naturalmente com intervenções dependentes do tempo. Melhoramo-la em várias frentes:
 
 | Limitação no protótipo | Evolução |
@@ -104,9 +106,9 @@ Mantemos a formulação de **tempo de chegada sobre grafo**. É rápida, determi
 
 Com o tempo meteorológico como entrada, a função passa a `simulate(grid, weather, scenario, seed) → result`, e continua pura.
 
-### Explicação do resultado (planeado)
+### Explicação do resultado (feito)
 
-O Dijkstra pode guardar o predecessor de cada célula. Daí obtém-se o **caminho crítico do fogo até cada aldeia** e a decomposição da velocidade em fatores (combustível × vento × declive × humidade): *"o fogo chega à escola por este vale; 60% da velocidade deve-se ao vento"*.
+Na simulação sem sorteios, o motor guarda de que célula o fogo chegou a cada célula e, nessa altura, as partes da velocidade da cabeça do fogo: Rothermel dá `r0 × (1 + vento + declive)`, com `r0` a velocidade do combustível sem vento nem declive (humidade e calibração incluídas) e o vento e o declive projetados na direção da cabeça (`Scenario.explain`, `engine/src/explain.ts`). Daí sai o **caminho do fogo até qualquer ponto**, e o peso do combustível, do vento e do declive ao longo dele, pesado pelo tempo de cada passo. Na aplicação: tocar num ponto do mapa, ou num lugar da tabela, no resultado ([ADR 0072](../decisoes/0072-explicacao-do-resultado-e-mapa-pelo-modelo-da-simulacao.md)).
 
 ### Intervenções e meios (planeado)
 

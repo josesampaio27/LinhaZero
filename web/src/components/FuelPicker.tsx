@@ -1,6 +1,11 @@
 import { useMemo } from "react";
-import type { GridData } from "@linha-zero/engine";
-import { BARRIER_SWATCH, BUILDING_SWATCH, fuelSwatch } from "../lib/render";
+import { REFERENCE_WIND_KMH, type GridData } from "@linha-zero/engine";
+import {
+  BARRIER_SWATCH,
+  BUILDING_SWATCH,
+  fuelReferenceRate,
+  fuelSwatch,
+} from "../lib/render";
 
 /** The fuel codes the grid uses, most common first, with the share of cells each one covers. */
 export function fuelsInGrid(grid: GridData): { code: number; share: number }[] {
@@ -12,7 +17,15 @@ export function fuelsInGrid(grid: GridData): { code: number; share: number }[] {
 }
 
 /** Swatch buttons to pick a fuel code, in the colours of the map. */
-export function FuelPicker({ grid, value, onChange }: { grid: GridData; value: number | null; onChange: (code: number) => void }) {
+export function FuelPicker({
+  grid,
+  value,
+  onChange,
+}: {
+  grid: GridData;
+  value: number | null;
+  onChange: (code: number) => void;
+}) {
   const codes = Object.keys(grid.header.fuelTable)
     .map(Number)
     .sort((a, b) => a - b);
@@ -26,7 +39,10 @@ export function FuelPicker({ grid, value, onChange }: { grid: GridData; value: n
           className={`fuel-option ${code === value ? "selected" : ""}`}
           onClick={() => onChange(code)}
         >
-          <i className="swatch" style={{ background: fuelSwatch(grid, code) }} />
+          <i
+            className="swatch"
+            style={{ background: fuelSwatch(grid, code) }}
+          />
           <span>
             {code} · {grid.header.fuelTable[code].label}
           </span>
@@ -38,27 +54,52 @@ export function FuelPicker({ grid, value, onChange }: { grid: GridData; value: n
 
 /** Colour key of the fuel view: the fuels on this grid, then barriers and buildings. */
 export function FuelLegend({ grid }: { grid: GridData }) {
-  const fuels = useMemo(() => fuelsInGrid(grid), [grid]);
-  const pct = (share: number) => (share >= 0.01 ? `${Math.round(share * 100)}%` : "< 1%");
+  const fuels = useMemo(
+    () =>
+      fuelsInGrid(grid).map((f) => ({
+        ...f,
+        rate: fuelReferenceRate(grid, f.code),
+      })),
+    [grid],
+  );
+  const pct = (share: number) =>
+    share >= 0.01 ? `${Math.round(share * 100)}%` : "< 1%";
+  const speed = (v: number) =>
+    v > 0
+      ? `${v.toLocaleString("pt-PT", { maximumFractionDigits: v < 10 ? 1 : 0 })} m/min`
+      : "não arde";
   return (
-    <ul className="fuel-legend">
-      {fuels.map(({ code, share }) => (
-        <li key={code}>
-          <i className="swatch" style={{ background: fuelSwatch(grid, code) }} />
-          <span>
-            {code} · {grid.header.fuelTable[code]?.label ?? "sem descrição"}
-          </span>
-          <small>{pct(share)}</small>
+    <>
+      <p className="hint">
+        Cor: velocidade da cabeça do fogo com vento de {REFERENCE_WIND_KMH} km/h
+        em terreno plano, pelo modelo da simulação (verde-escuro lento,
+        amarelo-claro rápido); a cor de cada combustível é a da sua célula
+        típica.
+      </p>
+      <ul className="fuel-legend">
+        {fuels.map(({ code, share, rate }) => (
+          <li key={code}>
+            <i
+              className="swatch"
+              style={{ background: fuelSwatch(grid, code) }}
+            />
+            <span>
+              {code} · {grid.header.fuelTable[code]?.label ?? "sem descrição"}
+            </span>
+            <small>
+              {speed(rate)} · {pct(share)}
+            </small>
+          </li>
+        ))}
+        <li>
+          <i className="swatch" style={{ background: BARRIER_SWATCH }} />
+          <span>Barreira (estrada, rio, aceiro)</span>
         </li>
-      ))}
-      <li>
-        <i className="swatch" style={{ background: BARRIER_SWATCH }} />
-        <span>Barreira (estrada, rio, aceiro)</span>
-      </li>
-      <li>
-        <i className="swatch" style={{ background: BUILDING_SWATCH }} />
-        <span>Edifícios</span>
-      </li>
-    </ul>
+        <li>
+          <i className="swatch" style={{ background: BUILDING_SWATCH }} />
+          <span>Edifícios</span>
+        </li>
+      </ul>
+    </>
   );
 }

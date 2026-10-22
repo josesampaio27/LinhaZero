@@ -8,7 +8,7 @@ import { hashRandom, RANDOM_PURPOSE } from "./random";
 import { flameLength } from "./rothermel";
 import { normals, spotDistribution } from "./spotting";
 import type { SpreadChange, SpreadInput } from "./spread";
-import type { PreparedGrid } from "./types";
+import { EXPLAIN_CROWN, EXPLAIN_SLOWED, type PreparedGrid } from "./types";
 
 /** One move of the stencil: offset, direction and the cells its centre-to-centre line crosses. */
 export interface StencilMove {
@@ -239,6 +239,8 @@ export function computeArrivalRothermel(
   const duration = input.durationMin;
   const intensityOut = input.intensityOut;
   intensityOut?.fill(0);
+  const explain = input.explainOut;
+  explain?.from.fill(-1);
   const random = input.random;
   const spotting = !!random && params.spotPerHa > 0;
   // Intensity as the fire arrives in each cell: the output, or a scratch copy when spot fires need it.
@@ -292,6 +294,7 @@ export function computeArrivalRothermel(
     if (arrival[j] === Infinity) touched.push(j);
     arrival[j] = ta;
     heap.push(ta, j);
+    if (explain) explain.from[j] = -1; // an ignition or a spot fire; relax() sets the cell it came from
   };
   // The fire's own start, then the cells people set alight (backfires), each from its own minute.
   for (const { cell, t0Min, burned } of [
@@ -400,6 +403,16 @@ export function computeArrivalRothermel(
     }
     setArrival(j, ta);
     if (fireIntensity) fireIntensity[j] = rates.intensity(j, stepTarget);
+    if (explain) {
+      const f = rates.factors(j);
+      explain.from[j] = i;
+      explain.rate[j] = stepTarget;
+      explain.headRate[j] = f.headRate;
+      explain.r0[j] = f.r0;
+      explain.windPart[j] = f.windPart;
+      explain.slopePart[j] = f.slopePart;
+      explain.flags[j] = (f.crown ? EXPLAIN_CROWN : 0) | (slowStart[j] <= ta && ta < slowEnd[j] ? EXPLAIN_SLOWED : 0);
+    }
   };
   // Target of move m from (r, c) if it is an unburned, burnable cell inside the grid; else -1.
   const target = (r: number, c: number, m: StencilMove) => {
