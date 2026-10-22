@@ -84,6 +84,8 @@ input[type="range"] { width: 100%; min-height: 32px; margin: 0; }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .row > button { flex: 1; }
 .hint { color: var(--muted); font-size: 14px; margin: 6px 0 0; }
+/* The demo: what it allows, above the steps. */
+.demo-note { margin: 0 0 12px; }
 .field { display: grid; grid-template-columns: minmax(0, 1fr); }
 .field select { width: 100%; text-overflow: ellipsis; }
 .field-label { font-family: var(--display); font-weight: 600; font-size: 14px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 0 0 6px; }

@@ -67,7 +67,7 @@ import { weatherSourceText } from "./assistant/digest";
 import { DRYNESS } from "./lib/moisture";
 import { forecastSteps } from "./lib/weather-steps";
 import { fetchRunResults, fetchRunScenario, MAX_SERVER_RUNS, MIN_SERVER_RUNS, runOnServer, SERVER_ENSEMBLE, workersAvailable } from "./lib/server-run";
-import { useSession } from "./lib/session";
+import { loginUrl, useSession } from "./lib/session";
 import { SimClient } from "./lib/sim-client";
 import { syncMaps } from "./lib/sync-maps";
 import { newVariantId, useVariants, variantStore } from "./lib/variants";
@@ -272,6 +272,10 @@ function adoptVariant(v: GridVariant): GridVariant {
 export function App() {
   const sim = useMemo(() => new SimClient(), []);
   const route = useRoute();
+  const session = useSession();
+  // The demo (no session, docs/decisoes/0080): the example scenarios can be opened and simulated, never changed. The
+  // session is known before the first render (main.tsx) and an anonymous one never changes without a page load.
+  const readOnly = session.state === "anonymous";
   const allVariants = useVariants();
   const [gridIndex, setGridIndex] = useState<GridIndexEntry[]>([]);
   const [gridName, setGridName] = useState("guimaraes");
@@ -292,7 +296,7 @@ export function App() {
   const [burnedArea, setBurnedArea] = useState<ProjectedPoint[] | null>(null);
   const [decisions, setDecisions] = useState<Record<DecisionId, DrawnIntervention[]>>({ A: [], B: [] });
   const [variantIds, setVariantIds] = useState<Record<DecisionId, string | null>>(NO_VARIANTS);
-  const [tool, setTool] = useState<Tool>({ type: "ignite" });
+  const [tool, setTool] = useState<Tool>(() => (readOnly ? { type: "none" } : { type: "ignite" }));
   const [step, setStep] = useState<Step>("situacao");
   const [decisionTab, setDecisionTab] = useState<DecisionId>("A");
   const [mapsView, setMapsView] = useState<MapsView>(() => (wide() ? "split" : "A"));
@@ -343,7 +347,6 @@ export function App() {
   const [scenarioTitle, setScenarioTitle] = useState<string | null>(null);
   const [pending, setPending] = useState<Pending | null>(null);
   const [showHistory, setShowHistory] = useState(false);
-  const session = useSession();
   const [hover, setHover] = useState<{ d: DecisionId; cell: number } | null>(null);
   const fileInput = useRef<HTMLInputElement>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -469,7 +472,7 @@ export function App() {
   // "Testar na simulação" in the grid editor opens #/?variante=<id>: A on the official grid, B on the variant.
   const variantParam = route.page === "simulacao" ? route.params.get("variante") : null;
   useEffect(() => {
-    if (!variantParam) return;
+    if (!variantParam || readOnly) return;
     clearRouteParams();
     const v = variantStore.get(variantParam);
     if (!v) {
@@ -481,7 +484,7 @@ export function App() {
     setResults(null);
     setStep("situacao");
     setMessage(`A decisão A corre na grelha oficial e a B na variante "${v.name}", com o mesmo fogo e o mesmo vento. Acender o fogo e simular.`);
-  }, [variantParam]);
+  }, [variantParam, readOnly]);
 
   // --- Map sync ---
   const maps = useRef<Partial<Record<DecisionId, maplibregl.Map>>>({});
@@ -577,7 +580,7 @@ export function App() {
     setTool({ type: "none" });
   }, []);
 
-  const active = route.page === "simulacao";
+  const active = route.page === "simulacao" || readOnly; // the demo shows the simulation on any page (main.tsx)
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
@@ -618,6 +621,7 @@ export function App() {
 
   /** Sets the ignition at a map point (ignite tool or incident marker). */
   const igniteAt = (lngLat: LngLat) => {
+    if (readOnly) return;
     // Whole metres keep saved files tidy; the cell is checked after rounding so both agree.
     const [x, y] = lngLatToProjected(lngLat[0], lngLat[1]).map(Math.round);
     const placed = placeIgnition(x, y);
@@ -626,7 +630,7 @@ export function App() {
 
   const onMapClick = (d: DecisionId) => (lngLat: LngLat) => {
     if (!grid) return;
-    if (tool.type === "none") {
+    if (tool.type === "none" || readOnly) {
       // On the result, a tap asks why the fire gets there (or when it does not).
       if (step === "resultado" && results?.explain) setExplainAt(cellUnder(decisionGrids[d], lngLat));
       return;
@@ -652,15 +656,18 @@ export function App() {
   };
 
   const pickTool = (decision: DecisionId) => (kind: InterventionKind) => {
+    if (readOnly) return;
     setDraft(null);
     setMessage(null);
     setTool({ type: "draw", decision, kind });
   };
 
-  const updateIv = (d: DecisionId) => (id: string, patch: Partial<DrawnIntervention>) =>
-    setDecisions((prev) => ({ ...prev, [d]: prev[d].map((iv) => (iv.id === id ? { ...iv, ...patch } : iv)) }));
-  const removeIv = (d: DecisionId) => (id: string) =>
-    setDecisions((prev) => ({ ...prev, [d]: prev[d].filter((iv) => iv.id !== id) }));
+  const updateIv = (d: DecisionId) => (id: string, patch: Partial<DrawnIntervention>) => {
+    if (!readOnly) setDecisions((prev) => ({ ...prev, [d]: prev[d].map((iv) => (iv.id === id ? { ...iv, ...patch } : iv)) }));
+  };
+  const removeIv = (d: DecisionId) => (id: string) => {
+    if (!readOnly) setDecisions((prev) => ({ ...prev, [d]: prev[d].filter((iv) => iv.id !== id) }));
+  };
 
   // --- Server health (every 15 s: the uncertainty toggle turns on and off with it) ---
   useEffect(() => {
@@ -810,18 +817,20 @@ export function App() {
     setGridName(saved.grid);
     setIgnition(saved.ignition);
     loadFromScenario(saved);
+    // The demo runs in the browser: the server's ensemble needs a session.
+    const ensemble = saved.ensemble && !readOnly;
     setDurationMin(saved.durationMin);
     setFileSteps(saved.weatherSteps ?? null);
     setBurnedArea(saved.burnedArea ?? null);
     setFollowForecast(!!saved.weatherSteps?.length);
-    setEnsemble(saved.ensemble);
+    setEnsemble(ensemble);
     if (stored) setEnsembleRuns(stored.ensembleRuns); // as it ran, so the stored result is not shown as out of date
     setDecisions(saved.decisions);
     setVariantIds({ A: variants.A?.id ?? null, B: variants.B?.id ?? null });
     setScenarioTitle(saved.title ?? null);
     setStep("situacao");
-    setPending({ saved: { ...saved, variants }, stored });
-  }, [loadFromScenario]);
+    setPending({ saved: { ...saved, variants, ensemble }, stored });
+  }, [loadFromScenario, readOnly]);
 
   // --- Active incidents (fogos.pt) ---
   useEffect(() => {
@@ -928,10 +937,15 @@ export function App() {
     [applyScenario],
   );
 
+  // A scenario link opens that scenario; the demo without one opens the first example. Once, at the start.
+  const openedAtStart = useRef(false);
   useEffect(() => {
-    const name = new URLSearchParams(window.location.search).get("scenario");
-    if (name) void loadScenarioByName(name);
-  }, [loadScenarioByName]);
+    if (openedAtStart.current) return;
+    const name = new URLSearchParams(window.location.search).get("scenario") ?? (readOnly ? scenarioIndex[0]?.name : null);
+    if (!name) return;
+    openedAtStart.current = true;
+    void loadScenarioByName(name);
+  }, [loadScenarioByName, readOnly, scenarioIndex]);
 
   const saveScenario = () => {
     // The ensemble as chosen, even while no worker is there to run it.
@@ -945,6 +959,7 @@ export function App() {
   };
 
   const loadScenarioFile = async (file: File) => {
+    if (readOnly) return;
     try {
       applyScenario(await readSavedScenario(JSON.parse(await file.text())));
     } catch (e) {
@@ -987,6 +1002,7 @@ export function App() {
    * burned area, the variants, a loaded scenario and the result go; the zone and the settings (duration, view) stay.
    */
   const newSimulation = () => {
+    if (readOnly) return;
     if (
       (decisions.A.length + decisions.B.length > 0 || ignition || burnedArea) &&
       !confirm("Começar uma simulação nova? O fogo, as decisões desenhadas e o resultado desta são apagados.")
@@ -1017,7 +1033,7 @@ export function App() {
   };
 
   const changeGrid = (name: string) => {
-    if (name === gridName) return;
+    if (name === gridName || readOnly) return;
     const lost = variantIds.A || variantIds.B;
     // Same pattern as "Nova simulação": what would go silently is confirmed first.
     if (lost && !confirm("Mudar de zona? As variantes de grelha das decisões deixam de se aplicar e o resultado é apagado.")) return;
@@ -1195,22 +1211,24 @@ export function App() {
   /** The title's panel: where and what is simulated (zone, examples, files). */
   const titleMenu = (close: () => void) => (
     <div className="menu-body">
-      <label className="field">
-        <span className="field-label">Zona</span>
-        <select
-          value={gridName}
-          onChange={(e) => {
-            changeGrid(e.target.value);
-            close();
-          }}
-        >
-          {gridIndex.map((g) => (
-            <option key={g.name} value={g.name}>
-              {g.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      {!readOnly && (
+        <label className="field">
+          <span className="field-label">Zona</span>
+          <select
+            value={gridName}
+            onChange={(e) => {
+              changeGrid(e.target.value);
+              close();
+            }}
+          >
+            {gridIndex.map((g) => (
+              <option key={g.name} value={g.name}>
+                {g.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {scenarioIndex.length > 0 && <p className="field-label">Exemplos</p>}
       {scenarioIndex.map((s) => (
         <button
@@ -1225,14 +1243,16 @@ export function App() {
         </button>
       ))}
       <div className="row">
-        <button
-          onClick={() => {
-            close();
-            fileInput.current?.click();
-          }}
-        >
-          Abrir ficheiro
-        </button>
+        {!readOnly && (
+          <button
+            onClick={() => {
+              close();
+              fileInput.current?.click();
+            }}
+          >
+            Abrir ficheiro
+          </button>
+        )}
         <button
           onClick={() => {
             close();
@@ -1245,7 +1265,8 @@ export function App() {
     </div>
   );
 
-  const menu = (close: () => void) => (
+  // The demo has nothing for the menu: a new simulation, the history and the grid editor all need a session.
+  const menu = readOnly ? undefined : (close: () => void) => (
     <div className="menu-body">
       <button
         className="menu-item"
@@ -1342,17 +1363,20 @@ export function App() {
           )
         }
         after={
-          <>
-            <Toggle checked={showIncidents} onChange={setShowIncidents}>
-              Ocorrências ativas (fogos.pt)
-              <small>{incidentsLine ?? "Escolher uma ocorrência no mapa para lá pôr a ignição"}</small>
-            </Toggle>
-            {showIncidents && (
-              <button onClick={() => setIncidentsTick((t) => t + 1)}>
-                <Icon name="refresh" size={16} /> Atualizar ocorrências
-              </button>
-            )}
-          </>
+          // Live incidents need a session, and choosing one places the ignition.
+          !readOnly && (
+            <>
+              <Toggle checked={showIncidents} onChange={setShowIncidents}>
+                Ocorrências ativas (fogos.pt)
+                <small>{incidentsLine ?? "Escolher uma ocorrência no mapa para lá pôr a ignição"}</small>
+              </Toggle>
+              {showIncidents && (
+                <button onClick={() => setIncidentsTick((t) => t + 1)}>
+                  <Icon name="refresh" size={16} /> Atualizar ocorrências
+                </button>
+              )}
+            </>
+          )
         }
       />
       <div className={`hover-bar ${hover ? "" : "idle"}`}>
@@ -1537,6 +1561,10 @@ export function App() {
       <button className="primary" onClick={() => goTo("decisoes")}>
         Seguinte: decisões <Icon name="chevron" size={18} />
       </button>
+    ) : readOnly ? (
+      <button className="primary" disabled>
+        A carregar o exemplo…
+      </button>
     ) : (
       <button
         className="primary"
@@ -1550,7 +1578,11 @@ export function App() {
     );
   } else if (results && !stale && !busy) {
     cta =
-      step === "resultado" ? (
+      step === "resultado" && readOnly ? (
+        <button className="primary secondary" onClick={() => goTo("decisoes")}>
+          Ver decisões
+        </button>
+      ) : step === "resultado" ? (
         <div className="cta-pair">
           <button className="primary secondary" onClick={() => goTo("decisoes")}>
             Alterar decisões
@@ -1567,13 +1599,13 @@ export function App() {
   } else {
     cta = (
       <button className="primary" disabled={!ignitionCell || busy || !!variantProblem} onClick={() => runSimulation(inputs, { animate: true })}>
-        {busy ? "A simular…" : !ignitionCell ? "Falta acender o fogo" : stale ? "Simular de novo" : "Simular"}
+        {busy ? "A simular…" : !ignitionCell ? (readOnly ? "A carregar o exemplo…" : "Falta acender o fogo") : stale ? "Simular de novo" : "Simular"}
       </button>
     );
   }
 
   // Horizon and uncertainty (scenarios per decision, on the server), in one chip next to the CTA (not beside the result's own two buttons).
-  const runSettings = !(step === "resultado" && results && !stale && !busy) && (
+  const runSettings = !readOnly && !(step === "resultado" && results && !stale && !busy) && (
     <Popover
       className="run-settings"
       label="Horizonte e incerteza"
@@ -1646,13 +1678,19 @@ export function App() {
         </>
       }
     >
+      {readOnly && (
+        <p className="hint demo-note">
+          Demonstração: os exemplos podem ser simulados, mas não alterados. <a href={loginUrl()}>Entrar</a> para criar e
+          alterar cenários.
+        </p>
+      )}
       <div className="step" hidden={step !== "situacao"}>
         <div className="field-row">
           <div>
             <h2 className="field-label">Ignição</h2>
             <p className="value">{ignitionText}</p>
           </div>
-          {placing ? (
+          {readOnly ? null : placing ? (
             <button onClick={cancelTool}>
               Cancelar
             </button>
@@ -1674,17 +1712,19 @@ export function App() {
             <h2 className="field-label">Área já ardida (opcional)</h2>
             <p className="value">{burnedArea ? `Desenhada (${burnedArea.length} cantos)` : "Nenhuma"}</p>
           </div>
-          <div className="row">
-            {burnedArea && <button onClick={() => setBurnedArea(null)}>Apagar</button>}
-            <button
-              onClick={() => {
-                setDraft(null);
-                setTool({ type: "burned" });
-              }}
-            >
-              {burnedArea ? "Redesenhar" : "Desenhar"}
-            </button>
-          </div>
+          {!readOnly && (
+            <div className="row">
+              {burnedArea && <button onClick={() => setBurnedArea(null)}>Apagar</button>}
+              <button
+                onClick={() => {
+                  setDraft(null);
+                  setTool({ type: "burned" });
+                }}
+              >
+                {burnedArea ? "Redesenhar" : "Desenhar"}
+              </button>
+            </div>
+          )}
         </div>
         <p className="hint touch-only">Tocar longamente no mapa para ver o terreno</p>
         <div>
@@ -1693,6 +1733,7 @@ export function App() {
             weather={weather}
             onRefresh={fetchHere}
             canRefresh={!!grid}
+            readOnly={readOnly}
             adjust={
               <>
                 <Toggle checked={followForecast && !!weatherSteps} onChange={setFollowForecast} disabled={!snapshot && !fileSteps}>
@@ -1757,6 +1798,7 @@ export function App() {
           onClear={() => setDecisions((prev) => ({ ...prev, [decisionTab]: [] }))}
           defaultLineWidthM={spreadModel === "rothermel" ? (variants[decisionTab]?.params.lineWidthM ?? DEFAULT_PARAMS.lineWidthM) : undefined}
           assistantIds={assistantIds}
+          readOnly={readOnly}
         >
           <label className="field">
             <span className="field-label">Grelha da decisão {decisionTab}</span>
@@ -1795,7 +1837,7 @@ export function App() {
             {results.explain && !explanation && (
               <p className="hint">Toca num ponto do mapa, ou num lugar da tabela, para ver por onde e porque o fogo lá chega.</p>
             )}
-            {!stale && bundle && (
+            {!stale && bundle && !readOnly && (
               <SuggestPanel
                 onSuggest={async (d, readyMin, widthM) => {
                   const scenario = { ...buildScenario(bundle.data.header, inputs, d), ensemble: undefined };

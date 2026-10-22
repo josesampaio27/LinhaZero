@@ -8,11 +8,15 @@ import { Feedback } from "./Feedback";
 import { GridEditor } from "./GridEditor";
 import { ApiError, meApi } from "./lib/api";
 import { useRoute, type Page } from "./lib/route";
-import { isDemo, setSession } from "./lib/session";
+import { isDemo, setSession, useSession } from "./lib/session";
 
-/** Both pages stay mounted once visited, so switching keeps what was drawn on each. */
+/**
+ * Both pages stay mounted once visited, so switching keeps what was drawn on each. The demo (no session) only has the
+ * simulation: the grid editor and the admin pages need a login.
+ */
 function Root() {
-  const { page } = useRoute();
+  const route = useRoute();
+  const page: Page = useSession().state === "anonymous" ? "simulacao" : route.page;
   const [visited, setVisited] = useState<Set<Page>>(() => new Set([page]));
   if (!visited.has(page)) setVisited(new Set(visited).add(page));
   return (

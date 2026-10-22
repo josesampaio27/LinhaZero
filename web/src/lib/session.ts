@@ -36,8 +36,9 @@ export function accountNextToApp({
 }
 
 /**
- * The demo opens without login (docs/plano/landing.md): a scenario link or ?demo. Everything else needs a session; an
- * API call without one sends the browser to the login.
+ * The demo opens without login (docs/plano/landing.md): a scenario link or ?demo. It is read-only: the examples can be
+ * simulated, not changed (docs/decisoes/0080). Everything else needs a session; an API call without one sends the
+ * browser to the login.
  */
 export function isDemo(search = location.search): boolean {
   const q = new URLSearchParams(search);
