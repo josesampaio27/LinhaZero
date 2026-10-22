@@ -7,11 +7,13 @@ import {
   applyVariant,
   comparePaired,
   decodeGrid,
+  editCells,
   gridLayerNames,
   prepareGrid,
   rothermelEnsemble,
   rothermelParams,
   simulate,
+  type GridEdit,
   type GridHeader,
   type LayerBuffers,
   type RunEvent,
@@ -259,6 +261,18 @@ describe("grid variants on the server", () => {
     expect(result.A.metrics.buildingsReached).toBeGreaterThan(0);
     expect(result.B.metrics.buildingsReached).toBe(0);
     expect(comparePaired(result.A.runs, result.B.runs, "buildingsReached").bBetter).toBeGreaterThan(small.ensemble.runs / 2);
+  });
+
+  it("a variant with cells picked one by one runs like the same area drawn as a polygon", () => {
+    const header = syn.prepared.header;
+    const polygonVariant = small.variants!.B!;
+    const asCells = polygonVariant.edits.map((e): GridEdit => {
+      const cells = editCells(header, e).map((i): [number, number] => [Math.floor(i / header.cols), i % header.cols]);
+      return e.kind === "setFuel" ? { kind: "setFuel", fuel: e.fuel, cells } : e.kind === "addBarrier" ? { kind: "addBarrier", cells } : { kind: "removeBarrier", cells };
+    });
+    const cellsRequest: RunRequest = { ...small, variants: { B: { ...polygonVariant, edits: asCells } } };
+    expect(variantProblem(syn.prepared, syn.hash, cellsRequest)).toBeNull();
+    expect(runDecision(syn.prepared, cellsRequest, "B").metrics).toEqual(runDecision(syn.prepared, small, "B").metrics);
   });
 
   it("a variant made for another version of the grid is refused before simulating", () => {

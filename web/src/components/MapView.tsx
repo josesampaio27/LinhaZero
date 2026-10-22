@@ -51,6 +51,12 @@ interface Props {
   onDblClick?: (lngLat: LngLat) => void;
   /** Pointer position over the map, or null when it leaves. On touch screens: where a long press happened. */
   onHover?: (lngLat: LngLat | null) => void;
+  /**
+   * Paint mode (cell selection in the grid editor): a left-button or one-finger drag calls onPaint instead of panning
+   * the map. "start" and "move" carry the pointer position; erase is true while Shift or Alt is held.
+   */
+  paint?: boolean;
+  onPaint?: (lngLat: LngLat | null, phase: "start" | "move" | "end", erase: boolean) => void;
   /** An active incident marker was clicked: sets the ignition there. */
   onIncidentClick?: (lngLat: LngLat) => void;
   children?: React.ReactNode;
@@ -300,10 +306,35 @@ export function MapView(props: Props) {
     // Touch: a long press inspects a point (there is no hover). Taps also fire emulated mouse events; those are ignored.
     let press: number | undefined;
     let lastTouch = 0;
+    let painting: { erase: boolean } | null = null;
+    const paintAt = (e: maplibregl.MapMouseEvent | maplibregl.MapTouchEvent, phase: "start" | "move") =>
+      painting && handlers.current.onPaint?.([e.lngLat.lng, e.lngLat.lat], phase, painting.erase);
+    const endPaint = () => {
+      if (!painting) return;
+      painting = null;
+      handlers.current.onPaint?.(null, "end", false);
+    };
+    map.on("mousedown", (e) => {
+      if (!handlers.current.paint || e.originalEvent.button !== 0 || Date.now() - lastTouch < 1000) return;
+      painting = { erase: e.originalEvent.shiftKey || e.originalEvent.altKey };
+      paintAt(e, "start");
+    });
+    window.addEventListener("mouseup", endPaint);
+    map.on("touchmove", (e) => {
+      if (e.points.length === 1) paintAt(e, "move");
+      else endPaint(); // a second finger: pinch to zoom
+    });
+    map.on("touchend", endPaint);
+    map.on("touchcancel", endPaint);
     map.on("touchstart", (e) => {
       lastTouch = Date.now();
       window.clearTimeout(press);
       if (e.points.length !== 1) return;
+      if (handlers.current.paint) {
+        painting = { erase: false };
+        paintAt(e, "start");
+        return;
+      }
       const start = e.point;
       const at: LngLat = [e.lngLat.lng, e.lngLat.lat];
       press = window.setTimeout(() => handlers.current.onHover?.(at), LONG_PRESS_MS);
@@ -317,6 +348,7 @@ export function MapView(props: Props) {
     map.on("touchend", () => (lastTouch = Date.now())); // a long tap also ends with emulated mouse events
     map.on("mousemove", (e) => {
       if (Date.now() - lastTouch < 1000) return;
+      paintAt(e, "move");
       // Not while dragging: the cell under the pointer changes every frame and each change re-renders the app.
       if (!map.isMoving()) handlers.current.onHover?.([e.lngLat.lng, e.lngLat.lat]);
       if (!draftRef.current) return;
@@ -327,6 +359,7 @@ export function MapView(props: Props) {
     mapRef.current = map;
     return () => {
       window.clearTimeout(press);
+      window.removeEventListener("mouseup", endPaint);
       map.remove();
       mapRef.current = null;
     };
@@ -504,6 +537,16 @@ export function MapView(props: Props) {
     if (interactive) map.doubleClickZoom.disable();
     else map.doubleClickZoom.enable();
   }, [map, interactive]);
+
+  // Painting cells: a drag paints instead of panning, and Shift+drag erases instead of zooming to a box.
+  const paint = !!props.paint;
+  useEffect(() => {
+    if (!map) return;
+    for (const handler of [map.dragPan, map.boxZoom]) {
+      if (paint) handler.disable();
+      else handler.enable();
+    }
+  }, [map, paint]);
 
   // Village labels (HTML markers, so no glyph server is needed offline).
   useEffect(() => {

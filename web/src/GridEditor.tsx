@@ -3,10 +3,15 @@ import {
   applyVariant,
   DEFAULT_PARAMS,
   calibrationFor,
+  editCells,
   emptyVariant,
+  MAX_EDIT_CELLS,
+  rasterizePolyline,
   PARAM_RANGES,
   parseGridVariant,
   variantHash,
+  type EditCells,
+  type GridData,
   type GridEdit,
   type GridEditKind,
   type GridVariant,
@@ -15,17 +20,27 @@ import {
 import { CellInspector, cellUnder } from "./components/CellInspector";
 import { Icon } from "./components/Icon";
 import { Segmented, Shell, Toggle } from "./components/Shell";
+import { FuelLegend, FuelPicker } from "./components/FuelPicker";
+import { MapLayers } from "./components/MapLayers";
 import { MapView, type Draft, type MapShape } from "./components/MapView";
 import { fetchGrid, fetchGridHeader, fetchGridIndex, type GridBundle, type GridIndexEntry } from "./lib/load-grid";
 import { lngLatToProjected, type LngLat } from "./lib/projection";
-import { fuelSwatch, renderLayer, renderMask, SLOPE_CLASSES, type LayerView } from "./lib/render";
+import { elevationLegend, renderCellLayers, renderLayer, SLOPE_CLASSES, type LayerView } from "./lib/render";
+import { useMapPrefs } from "./lib/map-prefs";
 import { navigate, useRoute } from "./lib/route";
 import { newVariantId, useVariants, variantStore } from "./lib/variants";
 
-const EDIT_TOOLS: { kind: GridEditKind; label: string; hint: string }[] = [
-  { kind: "setFuel", label: "Pintar combustível", hint: "Desenha uma área: as células lá dentro passam a ter o combustível escolhido." },
-  { kind: "addBarrier", label: "Acrescentar barreira", hint: "Desenha uma linha: uma estrada ou aceiro novo, que o fogo não atravessa." },
-  { kind: "removeBarrier", label: "Tirar barreiras", hint: "Desenha uma área: as barreiras lá dentro deixam de existir." },
+/** The editor's tools: pick cells one by one, pick the cells inside an area, or draw a new barrier line. */
+type Tool = "cells" | "area" | "barrierLine";
+
+const TOOLS: { tool: Tool; label: string; hint: string }[] = [
+  {
+    tool: "cells",
+    label: "Selecionar células",
+    hint: "Toca ou arrasta sobre as células para as selecionar; numa célula já selecionada, retira-as. Shift + arrastar também retira.",
+  },
+  { tool: "area", label: "Selecionar uma área", hint: "Marca os cantos de uma área: as células lá dentro juntam-se à seleção." },
+  { tool: "barrierLine", label: "Desenhar uma barreira", hint: "Marca os pontos de uma linha: uma estrada ou aceiro novo, que o fogo não atravessa." },
 ];
 
 const EDIT_LABEL: Record<GridEditKind, string> = {
@@ -34,6 +49,9 @@ const EDIT_LABEL: Record<GridEditKind, string> = {
   removeBarrier: "Barreiras retiradas",
 };
 
+const BRUSHES = [1, 3, 5] as const;
+type Brush = (typeof BRUSHES)[number];
+
 const VIEWS: { view: LayerView; label: string }[] = [
   { view: "fuel", label: "Combustível" },
   { view: "elevation", label: "Relevo" },
@@ -41,62 +59,113 @@ const VIEWS: { view: LayerView; label: string }[] = [
   { view: "village", label: "Lugares" },
 ];
 
-const PARAM_LABEL: Record<keyof ModelParams, string> = {
-  kWind: "Efeito do vento (kWind)",
-  kSlope: "Efeito do declive (kSlope)",
-  minSlopeFactor: "Fator mínimo a descer",
-  suppressionFactor: "Fator do Ataque",
-  protectFactor: "Fator de Proteger zona",
-  attackFullKwM: "Ataque eficaz até (kW/m, Rothermel)",
-  attackNoneKwM: "Ataque sem efeito a partir de (kW/m, Rothermel)",
-  aerialFullKwM: "Descarga aérea segura sempre até (kW/m, Rothermel)",
-  aerialNoneKwM: "Descarga aérea nunca segura a partir de (kW/m, Rothermel)",
-  lineWidthM: "Largura das linhas de contenção (m, Rothermel)",
-  holdWidthPerFlame: "Linha segura a 50% com largura = N × chama (Rothermel)",
-  holdSteepness: "Inclinação da probabilidade de a linha segurar (Rothermel)",
-  spotCriticalKwM: "Focos secundários a partir de (kW/m, Rothermel)",
-  spotPerHa: "Probabilidade de foco secundário por hectare (Rothermel)",
-  spotDelayMin: "Atraso até um foco secundário arder (min, Rothermel)",
-  rosAdj: "Ajuste da velocidade (calibração, Rothermel)",
-  windAdj: "Ajuste do vento a meia chama (calibração, Rothermel)",
-  rosAdjLitter: "Ajuste da velocidade: folhada (calibração, Rothermel)",
-  rosAdjUnderstory: "Ajuste da velocidade: sub-bosque (calibração, Rothermel)",
-  rosAdjShrub: "Ajuste da velocidade: matos (calibração, Rothermel)",
-  rosAdjGrass: "Ajuste da velocidade: herbáceas (calibração, Rothermel)",
-  deadMoistureOffset: "Correção da humidade do combustível morto (fração, Rothermel)",
-  crownFire: "Fogo de copas (1 = sim, 0 = não; Rothermel)",
-  crownAdj: "Ajuste da velocidade do fogo de copas (Rothermel)",
-  gustShare: "Fração da rajada somada ao vento médio (0 a 1)",
-  windLimit: "Limite do vento de Rothermel (1 original, 2 revisto em 2013, 0 sem)",
-  crownRatio: "Razão de copa no abrigo do vento (0,1 a 1; Rothermel)",
-  demSmoothM: "Suavização do relevo antes do declive (m, 0 = nenhuma)",
-  bgSuppression: "Combate de fundo (só calibração)",
+/** Label and a short explanation of each coefficient the editor shows. */
+const PARAM_INFO: Partial<Record<keyof ModelParams, { label: string; hint?: string }>> = {
+  rosAdj: { label: "Velocidade do fogo", hint: "Multiplica a velocidade de propagação de todos os combustíveis" },
+  windAdj: { label: "Efeito do vento", hint: "Multiplica o vento à altura da chama" },
+  deadMoistureOffset: { label: "Correção da humidade do combustível morto", hint: "Somada à humidade calculada (0,01 = 1 ponto percentual)" },
+  crownFire: { label: "Fogo de copas", hint: "1 = o fogo pode passar às copas das árvores; 0 = nunca" },
+  lineWidthM: { label: "Largura das linhas de contenção (m)", hint: "Mais larga, mais difícil de a chama galgar" },
+  suppressionFactor: { label: "Efeito do Ataque", hint: "Fator da velocidade do fogo nas células atacadas (0,2 = 5 vezes mais lento)" },
+  protectFactor: { label: "Efeito de Proteger zona", hint: "Fator da velocidade do fogo na zona protegida" },
+  attackFullKwM: { label: "Ataque eficaz até (kW/m)" },
+  attackNoneKwM: { label: "Ataque sem efeito a partir de (kW/m)" },
+  aerialFullKwM: { label: "Descarga aérea segura sempre até (kW/m)" },
+  aerialNoneKwM: { label: "Descarga aérea nunca segura a partir de (kW/m)" },
+  holdWidthPerFlame: { label: "Linha segura a 50% com largura = N × chama" },
+  holdSteepness: { label: "Inclinação da probabilidade de a linha segurar" },
+  spotCriticalKwM: { label: "Focos secundários a partir de (kW/m)" },
+  spotPerHa: { label: "Probabilidade de foco secundário por hectare" },
+  spotDelayMin: { label: "Atraso até um foco secundário arder (min)" },
+  rosAdjLitter: { label: "Velocidade do fogo: folhada" },
+  rosAdjUnderstory: { label: "Velocidade do fogo: sub-bosque" },
+  rosAdjShrub: { label: "Velocidade do fogo: matos" },
+  rosAdjGrass: { label: "Velocidade do fogo: herbáceas" },
+  crownAdj: { label: "Velocidade do fogo de copas" },
+  gustShare: { label: "Fração da rajada somada ao vento médio (0 a 1)" },
+  windLimit: { label: "Limite do vento de Rothermel (1 original, 2 revisto em 2013, 0 sem)" },
+  crownRatio: { label: "Razão de copa no abrigo do vento (0,1 a 1)" },
+  demSmoothM: { label: "Suavização do relevo antes do declive (m, 0 = nenhuma)" },
 };
 
-/**
- * Not shown: the coefficients of the retired simple model (ADR 0058), kept so older variant files still
- * load, and the calibration-only firefighting layer (ADR 0068), which the app never uses.
- */
-const HIDDEN_PARAMS = new Set<keyof ModelParams>(["kWind", "kSlope", "minSlopeFactor", "bgSuppression"]);
+/** Shown first; the rest go under "Avançado". Not shown at all: the retired simple model's coefficients (ADR 0058) and the calibration-only firefighting layer. */
+const MAIN_PARAMS: (keyof ModelParams)[] = ["rosAdj", "windAdj", "deadMoistureOffset", "crownFire", "lineWidthM", "suppressionFactor", "protectFactor"];
+const ADVANCED_PARAMS = (Object.keys(PARAM_INFO) as (keyof ModelParams)[]).filter((k) => !MAIN_PARAMS.includes(k));
 
 const EDITED_CELLS: [number, number, number] = [217, 70, 239];
+const SELECTED_CELLS: [number, number, number] = [14, 165, 233];
+/** Undo steps kept. */
+const MAX_HISTORY = 100;
 
-const shapeOf = (e: GridEdit): MapShape =>
-  e.kind === "addBarrier" ? { kind: e.kind, line: true, coords: e.line } : { kind: e.kind, line: false, coords: e.polygon };
+/** Areas and lines drawn on the map; edits of cells picked one by one show through the changed-cells highlight. */
+const shapeOf = (e: GridEdit): MapShape | null =>
+  "line" in e
+    ? { kind: e.kind, line: true, coords: e.line }
+    : "polygon" in e
+      ? { kind: e.kind, line: false, coords: e.polygon }
+      : null;
+
+/** The non-combustible code to paint for a fuel break: the one labelled so, else any code that never burns. */
+function nonFuelCode(grid: GridData): number | null {
+  const codes = Object.keys(grid.header.fuelTable).map(Number);
+  const table = grid.header.fuelTable;
+  return (
+    codes.find((c) => /não combustível/i.test(table[c].label)) ??
+    codes.find((c) => c !== 0 && (table[c].baseRate ?? 0) <= 0 && !table[c].rothermel) ??
+    codes.find((c) => (table[c].baseRate ?? 0) <= 0) ??
+    null
+  );
+}
+
+/** The cells covered by a square brush of `size` cells centred on `cell`. */
+function brushCells(grid: GridData, cell: number, size: Brush): number[] {
+  const { rows, cols } = grid.header;
+  const r0 = Math.floor(cell / cols);
+  const c0 = cell % cols;
+  const k = (size - 1) / 2;
+  const out: number[] = [];
+  for (let r = r0 - k; r <= r0 + k; r++) {
+    for (let c = c0 - k; c <= c0 + k; c++) if (r >= 0 && r < rows && c >= 0 && c < cols) out.push(r * cols + c);
+  }
+  return out;
+}
+
+/** The cells between two cells, both included: a fast drag skips cells between two pointer events. */
+function cellsBetween(grid: GridData, from: number, to: number): number[] {
+  const { cols, rows } = grid.header;
+  const centre = (i: number) => ({ x: (i % cols) + 0.5, y: Math.floor(i / cols) + 0.5 });
+  return rasterizePolyline([centre(from), centre(to)], rows, cols).map(({ row, col }) => row * cols + col);
+}
+
+/** One edit per MAX_EDIT_CELLS cells, so a big selection still fits the variant format. */
+function cellEdits(grid: GridData, cells: number[], make: (cells: EditCells) => GridEdit): GridEdit[] {
+  const { cols } = grid.header;
+  const sorted = [...cells].sort((a, b) => a - b);
+  const edits: GridEdit[] = [];
+  for (let i = 0; i < sorted.length; i += MAX_EDIT_CELLS) {
+    edits.push(make(sorted.slice(i, i + MAX_EDIT_CELLS).map((c): [number, number] => [Math.floor(c / cols), c % cols])));
+  }
+  return edits;
+}
 
 /** The grid editor page: inspect a grid, edit it as a variant, save it and test it in the simulation. */
 export function GridEditor() {
   const route = useRoute();
   const active = route.page === "grelha";
   const saved = useVariants();
+  const mapPrefs = useMapPrefs();
   const [gridIndex, setGridIndex] = useState<GridIndexEntry[]>([]);
   const [gridName, setGridName] = useState("guimaraes");
   const [bundle, setBundle] = useState<GridBundle | null>(null);
-  const [variant, setVariant] = useState<GridVariant | null>(null);
+  const [variant, setVariantState] = useState<GridVariant | null>(null);
+  // Undo and redo: earlier and later versions of the variant being edited.
+  const [history, setHistory] = useState<{ past: GridVariant[]; future: GridVariant[] }>({ past: [], future: [] });
   const [view, setView] = useState<LayerView>("fuel");
   const [showEdited, setShowEdited] = useState(true);
-  const [tool, setTool] = useState<GridEditKind | null>(null);
+  const [tool, setTool] = useState<Tool | null>(null);
   const [draft, setDraft] = useState<Draft | null>(null);
+  const [selection, setSelection] = useState<ReadonlySet<number>>(new Set());
+  const [brush, setBrush] = useState<Brush>(1);
   const [paintFuel, setPaintFuel] = useState<number | null>(null);
   const [hoverCell, setHoverCell] = useState<number | null>(null);
   const [message, setMessage] = useState<string | null>(null);
@@ -110,6 +179,35 @@ export function GridEditor() {
   }, [confirmDelete]);
   const fileInput = useRef<HTMLInputElement>(null);
 
+  /** Starts editing another variant (new, opened or imported): no undo across variants, no selection carried over. */
+  const startVariant = useCallback((v: GridVariant | null) => {
+    setVariantState(v);
+    setHistory({ past: [], future: [] });
+    setSelection(new Set());
+  }, []);
+
+  /** Changes the variant being edited, as one undo step. */
+  const change = useCallback(
+    (next: (v: GridVariant) => GridVariant) => {
+      if (!variant) return;
+      setHistory((h) => ({ past: [...h.past, variant].slice(-MAX_HISTORY), future: [] }));
+      setVariantState(next(variant));
+    },
+    [variant],
+  );
+  const update = (patch: Partial<GridVariant>) => change((v) => ({ ...v, ...patch }));
+
+  const undo = useCallback(() => {
+    if (!variant || !history.past.length) return;
+    setVariantState(history.past[history.past.length - 1]);
+    setHistory({ past: history.past.slice(0, -1), future: [variant, ...history.future] });
+  }, [variant, history]);
+  const redo = useCallback(() => {
+    if (!variant || !history.future.length) return;
+    setVariantState(history.future[0]);
+    setHistory({ past: [...history.past, variant], future: history.future.slice(1) });
+  }, [variant, history]);
+
   useEffect(() => {
     fetchGridIndex().then(setGridIndex, (e) => setMessage(String(e)));
   }, []);
@@ -118,6 +216,7 @@ export function GridEditor() {
     let cancelled = false;
     setBundle(null);
     setHoverCell(null); // a cell index of the old grid
+    setSelection(new Set());
     fetchGrid(gridName)
       .then((b) => !cancelled && setBundle(b))
       .catch((e) => setMessage(`Não foi possível carregar a grelha "${gridName}": ${e instanceof Error ? e.message : e}`));
@@ -129,51 +228,96 @@ export function GridEditor() {
   // A new grid starts a new variant, unless the variant being opened is for this grid.
   useEffect(() => {
     if (!bundle) return;
-    setVariant((v) => (v && v.base.grid === bundle.name ? v : emptyVariant(bundle.data.header, bundle.sha256, newVariantId(), "Nova variante")));
+    setVariantState((v) => {
+      if (v && v.base.grid === bundle.name) return v;
+      setHistory({ past: [], future: [] });
+      return emptyVariant(bundle.data.header, bundle.sha256, newVariantId(), "Nova variante");
+    });
+    // Default paint: the non-combustible code, the usual choice for a fuel break.
     const codes = Object.keys(bundle.data.header.fuelTable).map(Number);
-    // Default paint: a non-burnable code, the usual choice for a fuel break.
-    setPaintFuel(codes.find((c) => (bundle.data.header.fuelTable[c].baseRate ?? 0) <= 0) ?? codes[0] ?? null);
+    setPaintFuel(nonFuelCode(bundle.data) ?? codes[0] ?? null);
   }, [bundle]);
 
   const base = bundle?.data ?? null;
   const shaMismatch = !!(bundle && variant && variant.base.sha256 !== bundle.sha256);
   const edited = useMemo(() => (base && variant && !shaMismatch ? applyVariant(base, variant) : base), [base, variant, shaMismatch]);
   const terrainUrl = useMemo(() => (edited ? renderLayer(edited, view) : null), [edited, view]);
-  const mask = useMemo(() => {
-    if (!base || !edited || !showEdited) return null;
-    const mask = new Uint8Array(base.fuel.length);
-    for (let i = 0; i < mask.length; i++) mask[i] = base.fuel[i] !== edited.fuel[i] || base.barrier[i] !== edited.barrier[i] ? 1 : 0;
-    return renderMask(mask, base.header.cols, base.header.rows, EDITED_CELLS);
+  const editedCells = useMemo(() => {
+    if (!base || !edited || !showEdited) return [];
+    const cells: number[] = [];
+    for (let i = 0; i < base.fuel.length; i++) if (base.fuel[i] !== edited.fuel[i] || base.barrier[i] !== edited.barrier[i]) cells.push(i);
+    return cells;
   }, [base, edited, showEdited]);
-  const shapes = useMemo(() => (variant ? variant.edits.map(shapeOf) : []), [variant]);
+  const overlay = useMemo(() => {
+    if (!base || (!editedCells.length && !selection.size)) return null;
+    return renderCellLayers(base.header.cols, base.header.rows, [
+      { cells: editedCells, rgb: EDITED_CELLS, alpha: 150 },
+      { cells: selection, rgb: SELECTED_CELLS, alpha: 210 },
+    ]);
+  }, [base, editedCells, selection]);
+  const shapes = useMemo(() => (variant ? variant.edits.map(shapeOf).filter((x): x is MapShape => x !== null) : []), [variant]);
+  const elevation = useMemo(() => (base && view === "elevation" ? elevationLegend(base) : null), [base, view]);
 
   const savedHere = saved.filter((v) => bundle && v.base.grid === bundle.name);
   const stored = variant ? variantStore.get(variant.id) : null;
   const unsaved = !!variant && (!stored || variantHash(stored) !== variantHash(variant) || stored.name !== variant.name);
   const changeCount = variant ? variant.edits.length + Object.keys(variant.fuelRates).length + Object.keys(variant.params).length : 0;
+  const editable = !!variant && !shaMismatch;
 
-  const update = (patch: Partial<GridVariant>) => setVariant((v) => (v ? { ...v, ...patch } : v));
+  // --- Selecting cells ---
+  const paintRef = useRef<{ add: boolean; last: number } | null>(null);
+  const onPaint = (lngLat: LngLat | null, phase: "start" | "move" | "end", erase: boolean) => {
+    if (!edited) return;
+    if (phase === "end") {
+      paintRef.current = null;
+      return;
+    }
+    const cell = cellUnder(edited, lngLat);
+    if (cell === null) return;
+    const stroke = paintRef.current;
+    if (phase === "start") {
+      // Starting on a selected cell removes, as a tap toggles it.
+      const add = !erase && !selection.has(cell);
+      paintRef.current = { add, last: cell };
+      setSelection((prev) => withCells(prev, brushCells(edited, cell, brush), add));
+      return;
+    }
+    if (!stroke || cell === stroke.last) return;
+    const path = cellsBetween(edited, stroke.last, cell).flatMap((c) => brushCells(edited, c, brush));
+    stroke.last = cell;
+    setSelection((prev) => withCells(prev, path, stroke.add));
+  };
 
-  // --- Drawing ---
+  const applyToSelection = (make: (cells: EditCells) => GridEdit, done: string) => {
+    if (!edited || !selection.size) return;
+    const edits = cellEdits(edited, [...selection], make);
+    change((v) => ({ ...v, edits: [...v.edits, ...edits] }));
+    setMessage(`${done}: ${selection.size} ${selection.size === 1 ? "célula" : "células"}.`);
+    setSelection(new Set());
+  };
+  const nonFuel = base ? nonFuelCode(base) : null;
+
+  // --- Drawing (an area to select, or a barrier line) ---
   const finishDraft = useCallback(() => {
-    if (!draft || !tool || !base) return;
+    if (!draft || (tool !== "area" && tool !== "barrierLine") || !base) return;
     const minDist = base.header.cellSize / 3;
     const coords = draft.coords.filter((p, i, all) => i === 0 || Math.hypot(p[0] - all[i - 1][0], p[1] - all[i - 1][1]) > minDist);
     if (coords.length < (draft.line ? 2 : 3)) {
       setMessage(draft.line ? "Uma linha precisa de pelo menos 2 pontos." : "Uma área precisa de pelo menos 3 pontos.");
       return;
     }
-    const edit: GridEdit =
-      tool === "setFuel"
-        ? { kind: "setFuel", fuel: paintFuel ?? 0, polygon: coords }
-        : tool === "addBarrier"
-          ? { kind: "addBarrier", line: coords }
-          : { kind: "removeBarrier", polygon: coords };
-    setVariant((v) => (v ? { ...v, edits: [...v.edits, edit] } : v));
+    if (tool === "barrierLine") {
+      change((v) => ({ ...v, edits: [...v.edits, { kind: "addBarrier", line: coords }] }));
+      setMessage(null);
+    } else {
+      // The same cells an area edit would change.
+      const inside = editCells(base.header, { kind: "setFuel", fuel: 0, polygon: coords });
+      setSelection((prev) => withCells(prev, inside, true));
+      setMessage(inside.length ? `${inside.length} células juntas à seleção.` : "A área não tem nenhuma célula da grelha.");
+    }
     setDraft(null);
     setTool(null);
-    setMessage(null);
-  }, [draft, tool, base, paintFuel]);
+  }, [draft, tool, base, change]);
 
   const cancelTool = useCallback(() => {
     setDraft(null);
@@ -183,24 +327,34 @@ export function GridEditor() {
   useEffect(() => {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") cancelTool();
+      const typing = e.target instanceof Element && e.target.closest("input, select, textarea");
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z" && !typing) {
+        e.preventDefault();
+        if (e.shiftKey) redo();
+        else undo();
+        return;
+      }
+      if (e.key === "Escape") {
+        if (tool) cancelTool();
+        else setSelection(new Set());
+      }
       // Enter on a focused control does what that control does.
       if (e.key === "Enter" && !(e.target instanceof Element && e.target.closest("button, input, select, textarea"))) finishDraft();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [active, cancelTool, finishDraft]);
+  }, [active, tool, cancelTool, finishDraft, undo, redo]);
 
   const onMapClick = (lngLat: LngLat) => {
-    if (!tool) return;
+    if (tool !== "area" && tool !== "barrierLine") return;
     const xy = lngLatToProjected(lngLat[0], lngLat[1]);
-    setDraft((prev) => ({ line: tool === "addBarrier", coords: [...(prev?.coords ?? []), xy] }));
+    setDraft((prev) => ({ line: tool === "barrierLine", coords: [...(prev?.coords ?? []), xy] }));
   };
 
-  const pickTool = (kind: GridEditKind) => {
+  const pickTool = (t: Tool) => {
     setDraft(null);
     setMessage(null);
-    setTool(kind);
+    setTool(t);
   };
 
   // --- Values ---
@@ -219,13 +373,13 @@ export function GridEditor() {
     if (!variant) return null;
     const v = { ...variant, name: variant.name.trim() || "Variante sem nome" };
     variantStore.save(v);
-    setVariant(v);
+    setVariantState(v);
     setConfirmDelete(false);
     return v;
   };
 
   const open = (v: GridVariant) => {
-    setVariant(v);
+    startVariant(v);
     setGridName(v.base.grid);
     setDraft(null);
     setTool(null);
@@ -265,7 +419,7 @@ export function GridEditor() {
       return;
     }
     variantStore.remove(variant.id);
-    setVariant(emptyVariant(bundle.data.header, bundle.sha256, newVariantId(), "Nova variante"));
+    startVariant(emptyVariant(bundle.data.header, bundle.sha256, newVariantId(), "Nova variante"));
     setConfirmDelete(false);
     setMessage("Variante apagada.");
   };
@@ -276,9 +430,9 @@ export function GridEditor() {
   };
 
   const fuelTable = base?.header.fuelTable ?? {};
-  const codes = Object.keys(fuelTable).map(Number).sort((a, b) => a - b);
+  const fuelName = (code: number) => `${code} · ${fuelTable[code]?.label ?? ""}`;
 
-  const drawTool = tool ? EDIT_TOOLS.find((t) => t.kind === tool)! : null;
+  const activeTool = tool ? TOOLS.find((t) => t.tool === tool)! : null;
   const points = draft?.coords.length ?? 0;
   const hoverRowCol: [string, string][] =
     hoverCell !== null && edited ? [["Célula", `linha ${Math.floor(hoverCell / edited.header.cols)}, coluna ${hoverCell % edited.header.cols}`]] : [];
@@ -306,6 +460,69 @@ export function GridEditor() {
     </p>
   );
 
+  const undoRow = (
+    <div className="row">
+      <button onClick={undo} disabled={!history.past.length} title="Ctrl+Z">
+        <Icon name="undo" size={18} /> Desfazer
+      </button>
+      <button onClick={redo} disabled={!history.future.length} title="Ctrl+Shift+Z">
+        Refazer
+      </button>
+    </div>
+  );
+
+  // What to do with the selected cells: shown while selecting and in the "Alterar" tab.
+  const selectionPanel = selection.size > 0 && base && (
+    <div className="selection-panel">
+      <p className="value">
+        <i className="swatch" style={{ background: `rgb(${SELECTED_CELLS.join(",")})` }} /> {selection.size}{" "}
+        {selection.size === 1 ? "célula selecionada" : "células selecionadas"}
+        <button className="link" onClick={() => setSelection(new Set())}>
+          Limpar a seleção
+        </button>
+      </p>
+      <div className="add-actions">
+        {nonFuel !== null && (
+          <button className="add-action" disabled={!editable} onClick={() => applyToSelection((cells) => ({ kind: "setFuel", fuel: nonFuel, cells }), "Não combustível")}>
+            <span>
+              <b>Tornar não combustível</b>
+              <small>Uma faixa de gestão de combustível: o fogo não arde nestas células</small>
+            </span>
+          </button>
+        )}
+        <button
+          className="add-action"
+          disabled={!editable || paintFuel === null}
+          onClick={() => paintFuel !== null && applyToSelection((cells) => ({ kind: "setFuel", fuel: paintFuel, cells }), `Combustível ${fuelName(paintFuel)}`)}
+        >
+          <span>
+            <b>Pôr o combustível escolhido</b>
+            <small>{paintFuel !== null ? fuelName(paintFuel) : "Escolhe o combustível abaixo"}</small>
+          </span>
+        </button>
+        <button className="add-action" disabled={!editable} onClick={() => applyToSelection((cells) => ({ kind: "addBarrier", cells }), "Barreira nova")}>
+          <span>
+            <b>Acrescentar barreira</b>
+            <small>Uma estrada ou aceiro novo, que o fogo não atravessa</small>
+          </span>
+        </button>
+        <button className="add-action" disabled={!editable} onClick={() => applyToSelection((cells) => ({ kind: "removeBarrier", cells }), "Barreiras retiradas")}>
+          <span>
+            <b>Tirar barreiras</b>
+            <small>As barreiras nestas células deixam de existir</small>
+          </span>
+        </button>
+      </div>
+    </div>
+  );
+
+  const fuelChoice = base && (
+    <div>
+      <p className="field-label">Combustível a pôr</p>
+      <FuelPicker grid={base} value={paintFuel} onChange={setPaintFuel} />
+    </div>
+  );
+
   const stage = (
     <>
       <div className="maps">
@@ -314,18 +531,23 @@ export function GridEditor() {
           accent="var(--b)"
           grid={edited}
           terrainUrl={terrainUrl}
-          fire={mask}
-          showOsm={false}
-          contours={view === "elevation"}
+          fire={overlay}
+          showOsm={mapPrefs.baseMap === "osm"}
+          showSatellite={mapPrefs.baseMap === "satellite"}
+          terrain3d={mapPrefs.terrain3d}
+          contours={mapPrefs.contours}
           ignition={null}
           shapes={shapes}
           draft={draft}
           interactive={tool !== null}
+          paint={tool === "cells"}
+          onPaint={onPaint}
           onClick={onMapClick}
           onDblClick={() => finishDraft()}
           onHover={(lngLat) => setHoverCell(cellUnder(edited, lngLat))}
         />
       </div>
+      <MapLayers />
       <div className={`hover-bar ${hoverCell === null ? "idle" : ""}`}>
         <CellInspector
           compact
@@ -357,8 +579,45 @@ export function GridEditor() {
 
   const title = `Editor de grelha${variant ? ` · ${variant.name}` : ""}`;
 
-  if (drawTool) {
-    const line = tool === "addBarrier";
+  if (activeTool && tool === "cells") {
+    return (
+      <Shell
+        title={title}
+        menu={menu}
+        stage={stage}
+        footer={
+          <div className="draw-buttons">
+            <button onClick={undo} disabled={!history.past.length}>
+              <Icon name="undo" size={18} /> Desfazer
+            </button>
+            <button className="primary" onClick={cancelTool}>
+              <Icon name="check" size={18} /> Concluir
+            </button>
+          </div>
+        }
+      >
+        <div className="draw">
+          <p className="draw-title">
+            <b>{activeTool.label}</b>
+          </p>
+          <p>{activeTool.hint}</p>
+          <Segmented
+            label="Tamanho do pincel"
+            value={brush}
+            onChange={setBrush}
+            options={BRUSHES.map((b) => ({ value: b, label: b === 1 ? "1 célula" : `${b} × ${b}` }))}
+          />
+          <p className="hint">Enquanto selecionas, arrastar não move o mapa: aproxima com dois dedos ou com a roda do rato, e carrega em Concluir para voltar a mover.</p>
+          {selectionPanel}
+          {fuelChoice}
+          {messageLine}
+        </div>
+      </Shell>
+    );
+  }
+
+  if (activeTool) {
+    const line = tool === "barrierLine";
     return (
       <Shell
         title={title}
@@ -381,15 +640,9 @@ export function GridEditor() {
       >
         <div className="draw">
           <p className="draw-title">
-            <b>{drawTool.label}</b>
+            <b>{activeTool.label}</b>
           </p>
-          <p>{drawTool.hint}</p>
-          {tool === "setFuel" && paintFuel !== null && (
-            <p className="hint">
-              <i className="swatch" style={{ background: base ? fuelSwatch(base, paintFuel) : undefined }} />
-              {paintFuel} · {fuelTable[paintFuel]?.label}
-            </p>
-          )}
+          <p>{activeTool.hint}</p>
           <p className="hint">
             {line ? "Toca no mapa para marcar os pontos da linha" : "Toca no mapa para marcar os cantos da área"} ({points}{" "}
             {points === 1 ? "ponto" : "pontos"}). No computador: duplo clique ou Enter para terminar, Esc para cancelar.
@@ -399,6 +652,31 @@ export function GridEditor() {
       </Shell>
     );
   }
+
+  const paramInput = (k: keyof ModelParams) => {
+    const info = PARAM_INFO[k]!;
+    const official = calibrationFor(base?.header.cellSize ?? 100).params[k] ?? DEFAULT_PARAMS[k];
+    return (
+      <label key={k} className={`param ${variant && k in variant.params ? "changed" : ""}`}>
+        <span>
+          {info.label}
+          {info.hint && <small>{info.hint}</small>}
+          <small>Oficial: {official.toLocaleString("pt-PT")}</small>
+        </span>
+        <input
+          type="number"
+          inputMode="decimal"
+          min={PARAM_RANGES[k][0]}
+          max={PARAM_RANGES[k][1]}
+          step={0.01}
+          placeholder={String(official)}
+          value={variant?.params[k] ?? ""}
+          onChange={(e) => setParam(k, e.target.value)}
+          disabled={!editable}
+        />
+      </label>
+    );
+  };
 
   return (
     <Shell
@@ -454,7 +732,7 @@ export function GridEditor() {
             onChange={(e) => {
               const v = variantStore.get(e.target.value);
               if (v) open(v);
-              else if (bundle) setVariant(emptyVariant(bundle.data.header, bundle.sha256, newVariantId(), "Nova variante"));
+              else if (bundle) startVariant(emptyVariant(bundle.data.header, bundle.sha256, newVariantId(), "Nova variante"));
             }}
           >
             <option value="">Nova variante</option>
@@ -467,7 +745,8 @@ export function GridEditor() {
         </label>
         <label className="field">
           <span className="field-label">Nome</span>
-          <input value={variant?.name ?? ""} onChange={(e) => update({ name: e.target.value })} disabled={!variant} />
+          {/* Typing the name is not an undo step. */}
+          <input value={variant?.name ?? ""} onChange={(e) => setVariantState((v) => (v ? { ...v, name: e.target.value } : v))} disabled={!variant} />
         </label>
         <p className="value">
           {changeCount === 0 ? "Sem alterações: é igual à grelha oficial." : `${changeCount} alteraç${changeCount === 1 ? "ão" : "ões"}`}
@@ -493,6 +772,12 @@ export function GridEditor() {
         <div>
           <p className="field-label">Ver</p>
           <Segmented label="Camada" value={view} onChange={setView} options={VIEWS.map((v) => ({ value: v.view, label: v.label }))} />
+          {view === "fuel" && base && (
+            <details className="legend-details">
+              <summary>Legenda do combustível</summary>
+              <FuelLegend grid={edited ?? base} />
+            </details>
+          )}
           {view === "slope" && (
             <div className="legend legend-classes">
               <span>Declive:</span>
@@ -504,6 +789,14 @@ export function GridEditor() {
               ))}
             </div>
           )}
+          {elevation && (
+            <div className="legend">
+              <span>Altitude:</span>
+              <span>{elevation.lo} m</span>
+              <i className="ramp" style={{ background: elevation.gradient }} />
+              <span>{elevation.hi} m</span>
+            </div>
+          )}
           <Toggle checked={showEdited} onChange={setShowEdited}>
             <span>
               <i className="swatch" style={{ background: `rgb(${EDITED_CELLS.join(",")})` }} /> Destacar células alteradas
@@ -513,8 +806,8 @@ export function GridEditor() {
         <div>
           <p className="field-label">Alterar</p>
           <div className="add-actions">
-            {EDIT_TOOLS.map((t) => (
-              <button key={t.kind} className="add-action" onClick={() => pickTool(t.kind)} disabled={!variant || shaMismatch}>
+            {TOOLS.map((t) => (
+              <button key={t.tool} className="add-action" onClick={() => pickTool(t.tool)} disabled={!editable}>
                 <span>
                   <b>{t.label}</b>
                   <small>{t.hint}</small>
@@ -523,25 +816,19 @@ export function GridEditor() {
             ))}
           </div>
         </div>
-        <label className="field">
-          <span className="field-label">Combustível a pintar</span>
-          <select value={paintFuel ?? ""} onChange={(e) => setPaintFuel(Number(e.target.value))}>
-            {codes.map((c) => (
-              <option key={c} value={c}>
-                {c} · {fuelTable[c].label} ({fuelTable[c].baseRate} m/min)
-              </option>
-            ))}
-          </select>
-        </label>
+        {selectionPanel}
+        {selection.size > 0 && fuelChoice}
+        {undoRow}
         {variant && variant.edits.length > 0 && (
           <div>
-            <p className="field-label">Alterações desenhadas</p>
+            <p className="field-label">Alterações feitas</p>
             <ul className="actions">
               {variant.edits.map((e, i) => (
                 <li key={i} className="edit-item">
                   <span>
                     {i + 1}. {EDIT_LABEL[e.kind]}
-                    {e.kind === "setFuel" && `: ${e.fuel} · ${fuelTable[e.fuel]?.label ?? ""}`}
+                    {e.kind === "setFuel" && `: ${fuelName(e.fuel)}`}
+                    {"cells" in e && ` (${e.cells.length} ${e.cells.length === 1 ? "célula" : "células"})`}
                   </span>
                   <button
                     className="icon-btn"
@@ -554,9 +841,6 @@ export function GridEditor() {
                 </li>
               ))}
             </ul>
-            <button className="link" onClick={() => update({ edits: variant.edits.slice(0, -1) })}>
-              Anular a última
-            </button>
           </div>
         )}
       </div>
@@ -564,23 +848,12 @@ export function GridEditor() {
       <div className="step" hidden={tab !== "valores"}>
         <div>
           <p className="field-label">Coeficientes do modelo</p>
-          <p className="hint">Os valores usados pelo modelo de Rothermel, calibrados com incêndios reais. Vazio = valor oficial.</p>
-          {(Object.keys(PARAM_LABEL) as (keyof ModelParams)[]).filter((k) => !HIDDEN_PARAMS.has(k)).map((k) => (
-            <label key={k} className={`param ${variant && k in variant.params ? "changed" : ""}`}>
-              <span>{PARAM_LABEL[k]}</span>
-              <input
-                type="number"
-                inputMode="decimal"
-                min={PARAM_RANGES[k][0]}
-                max={PARAM_RANGES[k][1]}
-                step={0.01}
-                placeholder={String(calibrationFor(base?.header.cellSize ?? 100).params[k] ?? DEFAULT_PARAMS[k])}
-                value={variant?.params[k] ?? ""}
-                onChange={(e) => setParam(k, e.target.value)}
-                disabled={!variant || shaMismatch}
-              />
-            </label>
-          ))}
+          <p className="hint">Os valores do modelo de Rothermel, calibrados com incêndios reais. Vazio = valor oficial.</p>
+          {MAIN_PARAMS.map(paramInput)}
+          <details className="advanced">
+            <summary>Avançado ({ADVANCED_PARAMS.length} coeficientes)</summary>
+            {ADVANCED_PARAMS.map(paramInput)}
+          </details>
           {variant && Object.keys(variant.params).length > 0 && (
             <button className="link" onClick={() => update({ params: {} })}>
               Repor os valores oficiais
@@ -590,4 +863,14 @@ export function GridEditor() {
       </div>
     </Shell>
   );
+}
+
+/** A copy of the selection with the cells added or removed. */
+function withCells(prev: ReadonlySet<number>, cells: number[], add: boolean): ReadonlySet<number> {
+  const next = new Set(prev);
+  for (const c of cells) {
+    if (add) next.add(c);
+    else next.delete(c);
+  }
+  return next;
 }

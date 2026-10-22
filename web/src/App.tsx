@@ -31,7 +31,8 @@ import { DecisionTools, TOOLS } from "./components/DecisionTools";
 import { Legend } from "./components/Legend";
 import { MapView, type Draft, type MapShape } from "./components/MapView";
 import { Icon } from "./components/Icon";
-import { Popover, Segmented, Shell, Toggle } from "./components/Shell";
+import { MapLayers } from "./components/MapLayers";
+import { Segmented, Shell, Toggle } from "./components/Shell";
 import { formatMinutes, TimeBar } from "./components/TimeBar";
 import { ConditionsPanel, MoistureControl } from "./components/ConditionsPanel";
 import {
@@ -57,6 +58,7 @@ import { SimClient } from "./lib/sim-client";
 import { syncMaps } from "./lib/sync-maps";
 import { newVariantId, useVariants, variantStore } from "./lib/variants";
 import { useLiveWeather } from "./lib/useLiveWeather";
+import { useMapPrefs } from "./lib/map-prefs";
 import { ageText, fetchIncidents } from "./lib/weather";
 import type { IncidentsResponse } from "./api/client";
 
@@ -176,17 +178,13 @@ export function App() {
   const [results, setResults] = useState<Results | null>(null);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
-  // Two base maps under the grid, one at a time: turning one on turns the other off.
-  const [baseMap, setBaseMap] = useState<"osm" | "satellite" | null>("osm");
+  // Base map, contours and 3D relief: shared with the grid editor (lib/map-prefs.ts).
+  const { baseMap, contours, terrain3d } = useMapPrefs();
   const showOsm = baseMap === "osm";
   const showSatellite = baseMap === "satellite";
-  const setShowOsm = (on: boolean) => setBaseMap(on ? "osm" : null);
-  const setShowSatellite = (on: boolean) => setBaseMap(on ? "satellite" : null);
   // Replays of real fires: the observed perimeters, drawn over the simulation up to the time shown.
   const [observedFire, setObservedFire] = useState<ObservedFire | null>(null);
   const [showObserved, setShowObserved] = useState(true);
-  const [terrain3d, setTerrain3d] = useState(true);
-  const [contours, setContours] = useState(true);
   const [ensemble, setEnsemble] = useState(false);
   const [ensembleRuns, setEnsembleRuns] = useState(SERVER_ENSEMBLE.runs);
   // Last health check: when it ran and whether a worker was idle then.
@@ -923,31 +921,18 @@ export function App() {
           { value: "B", label: "B" },
         ]}
       />
-      <Popover className="layers" icon="layers" label="Camadas" badge={showIncidents ? incidents?.incidents.length : undefined}>
-        {() => (
-          <div className="menu-body">
-            {observedFire && (
-              <Toggle checked={showObserved} onChange={setShowObserved}>
-                Fogo real ({observedFire.fire})
-                <small>Perímetros observados, PT-FireSprd (CC BY 4.0)</small>
-              </Toggle>
-            )}
-            <Toggle checked={showOsm} onChange={setShowOsm}>
-              Mapa de ruas (OpenStreetMap)
-              <small>Precisa de internet</small>
+      <MapLayers
+        badge={showIncidents ? incidents?.incidents.length : undefined}
+        before={
+          observedFire && (
+            <Toggle checked={showObserved} onChange={setShowObserved}>
+              Fogo real ({observedFire.fire})
+              <small>Perímetros observados, PT-FireSprd (CC BY 4.0)</small>
             </Toggle>
-            <Toggle checked={showSatellite} onChange={setShowSatellite}>
-              Imagem de satélite
-              <small>Portugal continental em 2023 (DGT). Precisa de internet</small>
-            </Toggle>
-            <Toggle checked={contours} onChange={setContours}>
-              Curvas de nível
-              <small>Mais grossa a cada 5 curvas; a altitude aparece ao passar ou tocar longamente no mapa</small>
-            </Toggle>
-            <Toggle checked={terrain3d} onChange={setTerrain3d}>
-              Relevo 3D
-              <small>Inclinar: dois dedos, ou arrastar com o botão direito do rato</small>
-            </Toggle>
+          )
+        }
+        after={
+          <>
             <Toggle checked={showIncidents} onChange={setShowIncidents}>
               Ocorrências ativas (fogos.pt)
               <small>{incidentsLine ?? "Toca numa ocorrência para pôr lá a ignição"}</small>
@@ -957,9 +942,9 @@ export function App() {
                 <Icon name="refresh" size={16} /> Atualizar ocorrências
               </button>
             )}
-          </div>
-        )}
-      </Popover>
+          </>
+        }
+      />
       <div className={`hover-bar ${hover ? "" : "idle"}`}>
         <CellInspector
           compact

@@ -39,16 +39,16 @@ O ficheiro que o Editor de grelha guarda: uma grelha oficial de base mais a list
 
 | `kind` | Campos | Efeito |
 | --- | --- | --- |
-| `setFuel` | `fuel` (código), `polygon` (pelo menos 3 pontos `[x, y]`) | As células da área passam a ter esse combustível (por exemplo 98, não combustível, numa faixa de gestão) |
-| `addBarrier` | `line` (pelo menos 2 pontos `[x, y]`) | As células da linha, rasterizada 4-conexa, passam a barreira (uma estrada ou aceiro novo) |
-| `removeBarrier` | `polygon` | As células da área deixam de ser barreira |
+| `setFuel` | `fuel` (código), e `polygon` (pelo menos 3 pontos `[x, y]`) ou `cells` | As células da área, ou as escolhidas, passam a ter esse combustível (por exemplo 98, não combustível, numa faixa de gestão) |
+| `addBarrier` | `line` (pelo menos 2 pontos `[x, y]`) ou `cells` | As células da linha, rasterizada 4-conexa, ou as escolhidas, passam a barreira (uma estrada ou aceiro novo) |
+| `removeBarrier` | `polygon` ou `cells` | As células da área, ou as escolhidas, deixam de ser barreira |
 
-As coordenadas estão em metros, EPSG:3763, e só se convertem em células ao aplicar a variante, com as mesmas regras de rasterização das intervenções ([ADR 0003](../decisoes/0003-rasterizacao-de-linhas.md)). Editar edifícios e lugares fica para depois.
+Cada alteração tem uma só geometria. As coordenadas de `polygon` e `line` estão em metros, EPSG:3763, e só se convertem em células ao aplicar a variante, com as mesmas regras de rasterização das intervenções ([ADR 0003](../decisoes/0003-rasterizacao-de-linhas.md)). `cells` é a lista das células escolhidas uma a uma no editor, `[linha, coluna]` a contar do canto noroeste: de 1 a 20 000 células por alteração, todas dentro da grelha (o editor divide uma seleção maior em várias alterações; [ADR 0071](../decisoes/0071-celulas-nas-variantes-de-grelha.md)). Exemplo: `{ "kind": "setFuel", "fuel": 98, "cells": [[40, 61], [40, 62], [41, 62]] }`. Editar edifícios e lugares fica para depois.
 
 ## Regras
 
 - **Aplicação:** `applyVariant(grelha, variante)` devolve uma grelha nova, sem alterar a de base: primeiro `fuelRates`, depois as alterações pela ordem da lista. É uma função pura, com testes.
-- **Validação:** a variante só se aplica se `base.sha256` for o da grelha carregada; se a grelha oficial mudar, a simulação recusa-a com uma mensagem, e o editor avisa e propõe "Reaplicar à versão atual". Códigos de combustível desconhecidos, polígonos com menos de 3 pontos e coeficientes fora do intervalo permitido são recusados com uma mensagem em português, como nos cenários.
+- **Validação:** a variante só se aplica se `base.sha256` for o da grelha carregada; se a grelha oficial mudar, a simulação recusa-a com uma mensagem, e o editor avisa e propõe "Reaplicar à versão atual". Códigos de combustível desconhecidos, polígonos com menos de 3 pontos, células fora da grelha, alterações com área e células ao mesmo tempo e coeficientes fora do intervalo permitido são recusados com uma mensagem em português, como nos cenários.
 - **Hash:** `variantHash` é o sha256 do `base.sha256` mais `fuelRates`, `params` e `edits` em JSON canónico. Cenários e registos de simulação guardam este hash ([Reprodutibilidade](../arquitetura/08-conceitos.md#reprodutibilidade-e-auditoria)).
 - **Onde se guarda:** no browser (`localStorage`) e em ficheiro, com "Exportar" e "Importar" (feito); dentro do ficheiro de cenário, para que este se abra noutro computador (feito, [Formato do cenário](formato-cenario.md)); na base de dados, pela API, com as mesmas regras de entidade e visibilidade dos cenários (planeado).
 - **Nunca é oficial:** uma variante não substitui a grelha oficial. A interface mostra sempre que se está a usar uma variante.
