@@ -37,10 +37,10 @@ const TOOLS: { tool: Tool; label: string; hint: string }[] = [
   {
     tool: "cells",
     label: "Selecionar células",
-    hint: "Toca ou arrasta sobre as células para as selecionar; numa célula já selecionada, retira-as. Shift + arrastar também retira.",
+    hint: "Marcar ou arrastar sobre as células para as selecionar; a partir de uma já selecionada, retira-as. Shift + arrastar também retira.",
   },
-  { tool: "area", label: "Selecionar uma área", hint: "Marca os cantos de uma área: as células lá dentro juntam-se à seleção." },
-  { tool: "barrierLine", label: "Desenhar uma barreira", hint: "Marca os pontos de uma linha: uma estrada ou aceiro novo, que o fogo não atravessa." },
+  { tool: "area", label: "Selecionar uma área", hint: "Marcar os cantos de uma área: as células lá dentro juntam-se à seleção." },
+  { tool: "barrierLine", label: "Desenhar uma barreira", hint: "Marcar os pontos de uma linha: uma estrada ou aceiro novo, que o fogo não atravessa." },
 ];
 
 const EDIT_LABEL: Record<GridEditKind, string> = {
@@ -435,7 +435,7 @@ export function GridEditor() {
   const activeTool = tool ? TOOLS.find((t) => t.tool === tool)! : null;
   const points = draft?.coords.length ?? 0;
   const hoverRowCol: [string, string][] =
-    hoverCell !== null && edited ? [["Célula", `linha ${Math.floor(hoverCell / edited.header.cols)}, coluna ${hoverCell % edited.header.cols}`]] : [];
+    hoverCell !== null && edited ? [["Célula", `linha ${(Math.floor(hoverCell / edited.header.cols)).toLocaleString("pt-PT")}, coluna ${(hoverCell % edited.header.cols).toLocaleString("pt-PT")}`]] : [];
 
   const menu = (close: () => void) => (
     <div className="menu-body">
@@ -497,7 +497,7 @@ export function GridEditor() {
         >
           <span>
             <b>Pôr o combustível escolhido</b>
-            <small>{paintFuel !== null ? fuelName(paintFuel) : "Escolhe o combustível abaixo"}</small>
+            <small>{paintFuel !== null ? fuelName(paintFuel) : "Escolher o combustível abaixo"}</small>
           </span>
         </button>
         <button className="add-action" disabled={!editable} onClick={() => applyToSelection((cells) => ({ kind: "addBarrier", cells }), "Barreira nova")}>
@@ -518,7 +518,7 @@ export function GridEditor() {
 
   const fuelChoice = base && (
     <div>
-      <p className="field-label">Combustível a pôr</p>
+      <h2 className="field-label">Combustível a pôr</h2>
       <FuelPicker grid={base} value={paintFuel} onChange={setPaintFuel} />
     </div>
   );
@@ -555,7 +555,7 @@ export function GridEditor() {
           base={changeCount ? base : null}
           cell={hoverCell}
           extra={hoverRowCol}
-          placeholder="Passa o rato sobre o mapa (ou toca e segura) para ver o que a grelha diz em cada ponto."
+          placeholder="Passar o cursor ou tocar longamente no mapa."
         />
         {hoverCell !== null && (
           <button className="icon-btn" aria-label="Fechar" onClick={() => setHoverCell(null)}>
@@ -607,7 +607,7 @@ export function GridEditor() {
             onChange={setBrush}
             options={BRUSHES.map((b) => ({ value: b, label: b === 1 ? "1 célula" : `${b} × ${b}` }))}
           />
-          <p className="hint">Enquanto selecionas, arrastar não move o mapa: aproxima com dois dedos ou com a roda do rato, e carrega em Concluir para voltar a mover.</p>
+          <p className="hint">Durante a seleção, arrastar não move o mapa: aproximar com dois dedos ou com a roda do rato, e Concluir para voltar a mover.</p>
           {selectionPanel}
           {fuelChoice}
           {messageLine}
@@ -644,8 +644,8 @@ export function GridEditor() {
           </p>
           <p>{activeTool.hint}</p>
           <p className="hint">
-            {line ? "Toca no mapa para marcar os pontos da linha" : "Toca no mapa para marcar os cantos da área"} ({points}{" "}
-            {points === 1 ? "ponto" : "pontos"}). No computador: duplo clique ou Enter para terminar, Esc para cancelar.
+            {line ? "Marcar no mapa os pontos da linha" : "Marcar no mapa os cantos da área"} ({points}{" "}
+            {points === 1 ? "ponto" : "pontos"}). Duplo clique ou Enter para terminar, Esc para cancelar.
           </p>
           {messageLine}
         </div>
@@ -695,7 +695,7 @@ export function GridEditor() {
       }}
       footer={
         <>
-          {shaMismatch && tab !== "variante" && <p className="message">Esta variante é de outra versão da grelha: reaplica-a no separador Variante.</p>}
+          {shaMismatch && tab !== "variante" && <p className="message">Esta variante é de outra versão da grelha: reaplicar no separador Variante.</p>}
           {messageLine}
           <button className="primary" onClick={test} disabled={!variant || shaMismatch}>
             Testar na simulação <Icon name="chevron" size={18} />
@@ -762,7 +762,7 @@ export function GridEditor() {
           <button onClick={() => fileInput.current?.click()}>Importar</button>
           {stored && (
             <button onClick={remove} className={confirmDelete ? "danger" : ""}>
-              {confirmDelete ? "Toca outra vez para apagar" : "Apagar"}
+              {confirmDelete ? "Sim, apagar" : "Apagar"}
             </button>
           )}
         </div>
@@ -770,7 +770,7 @@ export function GridEditor() {
 
       <div className="step" hidden={tab !== "alterar"}>
         <div>
-          <p className="field-label">Ver</p>
+          <h2 className="field-label">Ver</h2>
           <Segmented label="Camada" value={view} onChange={setView} options={VIEWS.map((v) => ({ value: v.view, label: v.label }))} />
           {view === "fuel" && base && (
             <details className="legend-details">
@@ -804,7 +804,7 @@ export function GridEditor() {
           </Toggle>
         </div>
         <div>
-          <p className="field-label">Alterar</p>
+          <h2 className="field-label">Alterar</h2>
           <div className="add-actions">
             {TOOLS.map((t) => (
               <button key={t.tool} className="add-action" onClick={() => pickTool(t.tool)} disabled={!editable}>
@@ -821,7 +821,7 @@ export function GridEditor() {
         {undoRow}
         {variant && variant.edits.length > 0 && (
           <div>
-            <p className="field-label">Alterações feitas</p>
+            <h2 className="field-label">Alterações feitas</h2>
             <ul className="actions">
               {variant.edits.map((e, i) => (
                 <li key={i} className="edit-item">
@@ -847,8 +847,8 @@ export function GridEditor() {
 
       <div className="step" hidden={tab !== "valores"}>
         <div>
-          <p className="field-label">Coeficientes do modelo</p>
-          <p className="hint">Os valores do modelo de Rothermel, calibrados com incêndios reais. Vazio = valor oficial.</p>
+          <h2 className="field-label">Coeficientes do modelo</h2>
+          <p className="hint">Os valores usados pelo modelo de Rothermel, calibrados com incêndios reais. Vazio = valor oficial.</p>
           {MAIN_PARAMS.map(paramInput)}
           <details className="advanced">
             <summary>Avançado ({ADVANCED_PARAMS.length} coeficientes)</summary>

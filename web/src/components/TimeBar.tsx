@@ -12,6 +12,8 @@ interface Props {
   marks?: { min: number; className: string }[];
 }
 
+const DISABLED_REASON = "Sem tempo no modo Cenários: mostra a probabilidade final";
+
 /** Seconds of real time to play the whole simulated duration. */
 const PLAY_SECONDS = 12;
 
@@ -44,12 +46,14 @@ export function TimeBar({ t, durationMin, playing, disabled, onChange, onPlaying
   }, [playing, durationMin, onChange, onPlayingChange]);
 
   return (
-    <div className="timebar">
+    <div className="timebar" title={disabled ? DISABLED_REASON : undefined}>
       <button
         className="play"
         disabled={disabled}
         onClick={() => onPlayingChange(!playing)}
         aria-label={playing ? "Pausa" : "Reproduzir"}
+        aria-keyshortcuts="Space"
+        aria-description={disabled ? DISABLED_REASON : undefined}
       >
         <Icon name={playing ? "pause" : "play"} />
       </button>
@@ -67,6 +71,7 @@ export function TimeBar({ t, durationMin, playing, disabled, onChange, onPlaying
           step={1}
           value={t}
           disabled={disabled}
+          aria-description={disabled ? DISABLED_REASON : undefined}
           onChange={(e) => {
             onPlayingChange(false);
             onChange(Number(e.target.value));

@@ -19,13 +19,13 @@ import {
   type Place,
 } from "./conditions";
 import type { LngLat } from "./projection";
-import { fetchWeather, provenanceOf, UNAVAILABLE } from "./weather";
+import { fetchWeather, provenanceOf, SIGNED_OUT, UNAVAILABLE } from "./weather";
 
 /** Where the live weather was asked for. */
 export type WeatherAt = "ignition" | "centre";
 /** Where the values without an override come from. */
 export type WeatherSource = "default" | "live" | "scenario";
-export type WeatherStatus = { kind: "idle" } | { kind: "loading" } | { kind: "offline" } | { kind: "error"; message: string };
+export type WeatherStatus = { kind: "idle" } | { kind: "loading" } | { kind: "offline" } | { kind: "signedOut" } | { kind: "error"; message: string };
 
 const without = (o: Overrides, field: Field): Overrides => {
   const rest = { ...o };
@@ -68,7 +68,9 @@ export function useLiveWeather() {
       (e: unknown) => {
         if (my !== seq.current) return;
         const message = e instanceof Error ? e.message : String(e);
-        setStatus(message === UNAVAILABLE ? { kind: "offline" } : { kind: "error", message });
+        setStatus(
+          message === UNAVAILABLE ? { kind: "offline" } : message === SIGNED_OUT ? { kind: "signedOut" } : { kind: "error", message },
+        );
       },
     );
   }, []);

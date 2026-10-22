@@ -57,6 +57,8 @@ interface Props {
    */
   paint?: boolean;
   onPaint?: (lngLat: LngLat | null, phase: "start" | "move" | "end", erase: boolean) => void;
+  /** Moves the view to `bounds` ([w, s], [e, n]) once per `key`, e.g. the burned extent after each run. */
+  fitBounds?: { key: string; bounds: [LngLat, LngLat] } | null;
   /** An active incident marker was clicked: sets the ignition there. */
   onIncidentClick?: (lngLat: LngLat) => void;
   children?: React.ReactNode;
@@ -356,8 +358,16 @@ export function MapView(props: Props) {
       (map.getSource("draft") as GeoJSONSource | undefined)?.setData(draftFeatures(draftRef.current, hover.current));
     });
     map.on("mouseout", () => Date.now() - lastTouch > 1000 && handlers.current.onHover?.(null));
+    // The mouse leaving the map (also over its title or controls) or dragging it clears the hover bar; a touch long press stays until closed.
+    const el = container.current!;
+    const leave = (e: PointerEvent) => e.pointerType === "mouse" && handlers.current.onHover?.(null);
+    el.addEventListener("pointerleave", leave);
+    map.on("movestart", (e) => {
+      if ((e as { originalEvent?: Event }).originalEvent instanceof MouseEvent && Date.now() - lastTouch > 1000) handlers.current.onHover?.(null);
+    });
     mapRef.current = map;
     return () => {
+      el.removeEventListener("pointerleave", leave);
       window.clearTimeout(press);
       window.removeEventListener("mouseup", endPaint);
       map.remove();
@@ -409,6 +419,17 @@ export function MapView(props: Props) {
     ro.observe(el);
     return () => ro.disconnect();
   }, [map]);
+
+  // After a run: once per key, and only on a map with a size (the other follows through syncMaps).
+  const fitKey = props.fitBounds?.key;
+  const lastFit = useRef<string | null>(null);
+  useEffect(() => {
+    const f = handlers.current.fitBounds;
+    if (!map || !f || lastFit.current === f.key || container.current!.clientWidth === 0) return;
+    lastFit.current = f.key;
+    const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    map.fitBounds(f.bounds, { padding: 40, maxZoom: 16, duration: still ? 0 : 600 });
+  }, [map, fitKey]);
 
   // Grid change: (re)create the image sources and fit the view.
   useEffect(() => {

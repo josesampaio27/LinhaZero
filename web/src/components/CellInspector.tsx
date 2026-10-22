@@ -21,14 +21,14 @@ interface Props {
   cell: number | null;
   /** Extra rows after the cell description, e.g. the fire arrival time of each decision. */
   extra?: [string, string][];
-  /** Shown when the pointer is not over the grid. */
+  /** Shown when the pointer is not over the grid. Keep it to one short line: in the bar under the maps it must not wrap. */
   placeholder?: string;
   /** One line instead of a list, for the bar under the maps. */
   compact?: boolean;
 }
 
 /** What the grid says about one cell: fuel, speed, elevation, slope, barrier, buildings, place. */
-export function CellInspector({ grid, base, cell, extra = [], placeholder = "Passa o rato sobre o mapa.", compact = false }: Props) {
+export function CellInspector({ grid, base, cell, extra = [], placeholder = "Passar o cursor ou tocar longamente no mapa.", compact = false }: Props) {
   const elevation = grid?.elevation;
   const header = grid?.header;
   // Elevation does not change between variants, so the slope is computed once per grid.
@@ -36,7 +36,7 @@ export function CellInspector({ grid, base, cell, extra = [], placeholder = "Pas
     () => (elevation && header ? computeSlopeAspect(elevation, header.rows, header.cols, header.cellSize).slopeDeg : null),
     [elevation, header?.rows, header?.cols, header?.cellSize], // eslint-disable-line react-hooks/exhaustive-deps
   );
-  if (!grid || cell === null || !slope || cell >= grid.fuel.length) return <p className="hint">{placeholder}</p>;
+  if (!grid || cell === null || !slope || cell >= grid.fuel.length) return <p className={compact ? "hint inspector-idle" : "hint"}>{placeholder}</p>;
 
   const { cols, fuelTable, villages } = grid.header;
   const code = grid.fuel[cell];
@@ -48,7 +48,7 @@ export function CellInspector({ grid, base, cell, extra = [], placeholder = "Pas
   const place = villages.find((v) => v.id === grid.village[cell])?.name;
 
   const rows: [string, React.ReactNode][] = [
-    ["Célula", `linha ${Math.floor(cell / cols)}, coluna ${cell % cols}`],
+    ["Célula", `linha ${fmt(Math.floor(cell / cols))}, coluna ${fmt(cell % cols)}`],
     [
       "Combustível",
       <>

@@ -10,8 +10,12 @@ interface Props {
   onUpdate: (id: string, patch: Partial<DrawnIntervention>) => void;
   onRemove: (id: string) => void;
   onClear: () => void;
-  /** Shown before the actions, e.g. the grid this decision runs on. */
+  /** Expert options, e.g. the grid this decision runs on; shown inside "Mais opções da decisão". */
   children?: React.ReactNode;
+  /** Name of the grid variant this decision runs on, shown on the collapsed "Mais opções" summary. */
+  variantName?: string | null;
+  /** Puts a removed action back at its index; when given, deleting an action offers "Desfazer" for a few seconds. */
+  onRestore?: (item: DrawnIntervention, index: number) => void;
   /** Width (m) of lines that do not set their own; when given, lines show a width choice (Rothermel model). */
   defaultLineWidthM?: number;
 }
@@ -26,7 +30,7 @@ const LINE_WIDTHS: { m: number; label: string }[] = [
 
 const AGENTS: { value: AerialAgent; label: string }[] = [
   { value: "water", label: `Água · ${AERIAL_DEFAULT_MIN.water} min` },
-  { value: "retardant", label: `Retardante · ${AERIAL_DEFAULT_MIN.retardant / 60} h` },
+  { value: "retardant", label: `Retardante · ${(AERIAL_DEFAULT_MIN.retardant / 60).toLocaleString("pt-PT")} h` },
 ];
 
 /**
@@ -56,8 +60,8 @@ export const TOOLS: {
     meaning:
       "Uma faixa sem combustível que os meios abrem à frente do fogo, à mão ou com máquinas. Também serve para uma faixa de gestão que já existe.",
     rule:
-      "A partir do minuto em que fica pronta, o fogo para na linha se ela for pelo menos 5 vezes mais larga do que as chamas são compridas, porque o calor e as faúlhas passam faixas mais largas do que a chama. Uma linha de 4 m só trava chamas até 80 cm; uma faixa de 25 m trava chamas até 5 m. Se o fogo lá chegar antes de ela estar pronta, passa. Se lhe deres um fim, a partir daí deixa de ser defendida e o fogo passa-a.",
-    where: "Desenha-a onde os meios a abririam, entre o fogo e o que queres proteger.",
+      "A partir do minuto em que fica pronta, o fogo para na linha se ela for pelo menos 5 vezes mais larga do que as chamas são compridas, porque o calor e as faúlhas passam faixas mais largas do que a chama. Uma linha de 4 m só trava chamas até 80 cm; uma faixa de 25 m trava chamas até 5 m. Se o fogo lá chegar antes de ela estar pronta, passa. Com um fim definido, a partir daí deixa de ser defendida e o fogo passa-a.",
+    where: "Marcar onde os meios a abririam, entre o fogo e o que se quer proteger.",
   },
   {
     kind: "suppression",
@@ -66,8 +70,8 @@ export const TOOLS: {
     effect: "O fogo anda 5 vezes mais devagar na zona, menos se as chamas forem altas",
     meaning: "Meios a combater o fogo diretamente, com água, ferramentas ou máquinas, na cabeça ou num flanco.",
     rule:
-      "A partir do minuto em que os meios chegam, o fogo nessa zona anda 5 vezes mais devagar, até eles saírem, se lhe deres um fim. Atrasa o fogo, não o apaga. Com chamas acima de 1,4 m perde efeito, e acima de 3,5 m já não tem nenhum.",
-    where: "Desenha a zona onde os meios vão trabalhar.",
+      "A partir do minuto em que os meios chegam, o fogo nessa zona anda 5 vezes mais devagar, até saírem, se houver um fim definido. Atrasa o fogo, não o apaga. Com chamas acima de 1,4 m perde efeito, e acima de 3,5 m já não tem nenhum.",
+    where: "Marcar a zona onde os meios vão trabalhar.",
   },
   {
     kind: "protectZone",
@@ -77,8 +81,8 @@ export const TOOLS: {
     meaning:
       "Meios já colocados junto a casas ou a uma aldeia, à espera do fogo para o travar ali. Têm mais efeito do que um ataque, porque estão no sítio e preparados.",
     rule:
-      "A partir do minuto em que lá estão, o fogo nessa zona anda 10 vezes mais devagar, até eles saírem, se lhe deres um fim. Com chamas acima de 1,4 m perde efeito, e acima de 3,5 m já não tem nenhum.",
-    where: "Desenha a zona à volta do que queres defender.",
+      "A partir do minuto em que lá estão, o fogo nessa zona anda 10 vezes mais devagar, até saírem, se houver um fim definido. Com chamas acima de 1,4 m perde efeito, e acima de 3,5 m já não tem nenhum.",
+    where: "Marcar a zona à volta do que se quer defender.",
   },
   {
     kind: "aerialDrop",
@@ -86,8 +90,8 @@ export const TOOLS: {
     summary: "Água ou retardante largado por um meio aéreo",
     effect: "Trava o fogo enquanto faz efeito, se as chamas não forem altas demais",
     meaning: "Um helicóptero ou um avião larga água ou retardante numa faixa, à frente ou no flanco do fogo.",
-    rule: `Do minuto da descarga até deixar de fazer efeito, a faixa trava o fogo: sempre com chamas até cerca de 2,5 m, nunca com chamas acima de 3,5 m, e umas vezes sim, outras não, entre as duas. A água dura cerca de ${AERIAL_DEFAULT_MIN.water} minutos e o retardante cerca de ${AERIAL_DEFAULT_MIN.retardant / 60} horas; podes mudar o fim.`,
-    where: "Desenha o percurso da descarga, por onde o fogo vai passar.",
+    rule: `Do minuto da descarga até deixar de fazer efeito, a faixa trava o fogo: sempre com chamas até cerca de 2,5 m, nunca com chamas acima de 3,5 m, e umas vezes sim, outras não, entre as duas. A água dura cerca de ${AERIAL_DEFAULT_MIN.water} minutos e o retardante cerca de ${(AERIAL_DEFAULT_MIN.retardant / 60).toLocaleString("pt-PT")} horas; o fim pode ser alterado.`,
+    where: "Marcar o percurso da descarga, por onde o fogo vai passar.",
   },
   {
     kind: "backfire",
@@ -98,7 +102,7 @@ export const TOOLS: {
       "Os meios queimam de propósito o combustível entre uma linha de apoio (uma estrada, um caminho ou uma linha aberta) e o fogo que se aproxima, para que a frente chegue a terreno já ardido.",
     rule:
       "No minuto indicado, o simulador acende o lado da linha virado para a ignição. Esse fogo arde como qualquer outro e conta como área ardida. A linha segura-o como uma linha de contenção, se for larga o bastante para as chamas. Aceso tarde, ou com o vento a empurrá-lo contra a linha, pode escapar.",
-    where: "Desenha a linha de apoio entre o fogo e o que queres proteger, de preferência sobre uma estrada ou um caminho.",
+    where: "Marcar a linha de apoio entre o fogo e o que se quer proteger, de preferência sobre uma estrada ou um caminho.",
   },
 ];
 
@@ -134,15 +138,21 @@ function Stepper(p: { label: string; value: number; min: number; onChange: (v: n
   );
 }
 
-/** Actions of one decision: a card per action with its start and end minutes, and the tools to add one. */
+/** Actions of one decision: a card per action with its start and end minutes, the tools to add one, and expert options. */
 export function DecisionTools(p: Props) {
   const [confirmClear, setConfirmClear] = useState(false);
-  // The second tap must come soon: touch browsers may never blur the button.
+  const [removed, setRemoved] = useState<{ item: DrawnIntervention; index: number } | null>(null);
+  // Touch browsers may never blur the button, so the confirmation also expires, after a generous 8 s.
   useEffect(() => {
     if (!confirmClear) return;
-    const t = window.setTimeout(() => setConfirmClear(false), 4000);
+    const t = window.setTimeout(() => setConfirmClear(false), 8000);
     return () => window.clearTimeout(t);
   }, [confirmClear]);
+  useEffect(() => {
+    if (!removed) return;
+    const t = window.setTimeout(() => setRemoved(null), 8000);
+    return () => window.clearTimeout(t);
+  }, [removed]);
   // The end moves with the start, so the action keeps its duration.
   const setStart = (iv: DrawnIntervention, v: number) => {
     const startMin = Math.max(0, Math.round(v));
@@ -153,14 +163,20 @@ export function DecisionTools(p: Props) {
   const fixEnd = (iv: DrawnIntervention) => {
     if (iv.endMin !== undefined && iv.endMin <= iv.startMin) p.onUpdate(iv.id, { endMin: iv.startMin + STEP });
   };
+  const remove = (iv: DrawnIntervention, index: number) => {
+    setRemoved({ item: iv, index });
+    p.onRemove(iv.id);
+  };
   return (
     <div className="decision">
-      {p.children}
       {p.items.length === 0 ? (
-        <p className="hint">Sem ações: o fogo evolui livremente.</p>
+        <div className="decision-empty">
+          <b>Sem ações (deixar arder)</b>
+          <p className="hint">O fogo propaga-se livremente. É a base de comparação.</p>
+        </div>
       ) : (
         <ul className="actions">
-          {p.items.map((iv) => {
+          {p.items.map((iv, index) => {
             const tool = TOOLS.find((t) => t.kind === iv.kind)!;
             const label = KIND_LABEL[iv.kind];
             const hasWidth = (iv.kind === "containmentLine" || iv.kind === "backfire") && p.defaultLineWidthM !== undefined;
@@ -171,7 +187,13 @@ export function DecisionTools(p: Props) {
                 </span>
                 <span className="action-text">
                   <b>{label}</b>
-                  <small>{tool.effect}</small>
+                  <details className="action-effect">
+                    <summary>
+                      Efeito no fogo
+                      <Icon name="chevron" size={14} />
+                    </summary>
+                    <small>{tool.effect}</small>
+                  </details>
                 </span>
                 <span className="action-start">
                   <span>{iv.kind === "aerialDrop" ? "Descarga aos" : iv.kind === "backfire" ? "Aceso aos" : "Começa aos"}</span>
@@ -196,7 +218,7 @@ export function DecisionTools(p: Props) {
                         onBlur={() => fixEnd(iv)}
                       />
                       {iv.kind !== "aerialDrop" && (
-                        <button className="icon-btn" aria-label={`Tirar o fim de ${label}`} title="Sem fim" onClick={() => p.onUpdate(iv.id, { endMin: undefined })}>
+                        <button className="icon-btn" aria-label={`Retirar o fim de ${label}`} title="Sem fim" onClick={() => p.onUpdate(iv.id, { endMin: undefined })}>
                           <Icon name="close" size={16} />
                         </button>
                       )}
@@ -209,7 +231,7 @@ export function DecisionTools(p: Props) {
                     Agente
                     <select
                       value={iv.agent ?? "water"}
-                      title="Muda também o fim para a duração habitual deste agente"
+                      title="Altera também o fim para a duração habitual deste agente"
                       onChange={(e) => {
                         const agent = e.target.value as AerialAgent;
                         p.onUpdate(iv.id, { agent, endMin: iv.startMin + AERIAL_DEFAULT_MIN[agent] });
@@ -235,13 +257,13 @@ export function DecisionTools(p: Props) {
                         .sort((a, b) => a - b)
                         .map((m) => (
                           <option key={m} value={m}>
-                            {LINE_WIDTHS.find((w) => w.m === m)?.label ?? `${m} m`}
+                            {LINE_WIDTHS.find((w) => w.m === m)?.label ?? `${m.toLocaleString("pt-PT")} m`}
                           </option>
                         ))}
                     </select>
                   </label>
                 )}
-                <button className="icon-btn" aria-label={`Apagar ${label}`} title="Apagar" onClick={() => p.onRemove(iv.id)}>
+                <button className="icon-btn" aria-label={`Apagar ${label}`} title="Apagar" onClick={() => remove(iv, index)}>
                   <Icon name="trash" size={18} />
                 </button>
               </li>
@@ -249,10 +271,29 @@ export function DecisionTools(p: Props) {
           })}
         </ul>
       )}
-      <p className="field-label">Adicionar ação à decisão {p.decision}</p>
+      {p.onRestore && (
+        <p className="decision-status" role="status">
+          {removed && (
+            <>
+              <span>Ação removida ({KIND_LABEL[removed.item.kind]}).</span>
+              <button
+                className="link"
+                onClick={() => {
+                  p.onRestore!(removed.item, removed.index);
+                  setRemoved(null);
+                }}
+              >
+                <Icon name="undo" size={16} />
+                Desfazer
+              </button>
+            </>
+          )}
+        </p>
+      )}
+      <h3 className="field-label">Adicionar ação à decisão {p.decision}</h3>
       <div className="add-actions">
         {TOOLS.map((t) => (
-          <button key={t.kind} className={`add-action dec-${p.decision}`} onClick={() => p.onPickTool(t.kind)}>
+          <button key={t.kind} className={`add-action dec-${p.decision}`} title={t.summary} onClick={() => p.onPickTool(t.kind)}>
             <Icon name={t.icon} size={18} />
             <span>
               <b>{KIND_LABEL[t.kind]}</b>
@@ -261,19 +302,31 @@ export function DecisionTools(p: Props) {
           </button>
         ))}
       </div>
-      {p.items.length > 1 && (
-        <button
-          className={`link ${confirmClear ? "danger-text" : ""}`}
-          onClick={() => {
-            if (!confirmClear) return setConfirmClear(true);
-            setConfirmClear(false);
-            p.onClear();
-          }}
-          onBlur={() => setConfirmClear(false)}
-        >
-          {confirmClear ? "Toca outra vez para apagar todas" : "Apagar todas as ações"}
-        </button>
-      )}
+      <details className="disclosure decision-more">
+        <summary>
+          Mais opções da decisão
+          {p.variantName && <span className="variant-badge">Variante: {p.variantName}</span>}
+        </summary>
+        {p.children}
+        {p.items.length > 1 && (
+          <>
+            <button
+              className={`link ${confirmClear ? "danger-text" : ""}`}
+              onClick={() => {
+                if (!confirmClear) return setConfirmClear(true);
+                setConfirmClear(false);
+                p.onClear();
+              }}
+              onBlur={() => setConfirmClear(false)}
+            >
+              {confirmClear ? "Confirmar: apagar todas as ações" : "Apagar todas as ações"}
+            </button>
+            <p className="decision-status" role="status">
+              {confirmClear && "Carregar outra vez para confirmar."}
+            </p>
+          </>
+        )}
+      </details>
     </div>
   );
 }

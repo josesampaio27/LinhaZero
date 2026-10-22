@@ -15,21 +15,21 @@ export function MapLayers({ before, after, badge }: { before?: ReactNode; after?
           {before}
           <Toggle checked={prefs.baseMap === "osm"} onChange={(on) => setMapPrefs({ baseMap: on ? "osm" : null })}>
             Mapa de ruas (OpenStreetMap)
-            <small>Precisa de internet</small>
           </Toggle>
           <Toggle checked={prefs.baseMap === "satellite"} onChange={(on) => setMapPrefs({ baseMap: on ? "satellite" : null })}>
             Imagem de satélite
-            <small>Portugal continental em 2023 (DGT). Precisa de internet</small>
+            <small>Portugal continental em 2023 (DGT)</small>
           </Toggle>
           <Toggle checked={prefs.contours} onChange={(contours) => setMapPrefs({ contours })}>
             Curvas de nível
-            <small>Mais grossa a cada 5 curvas; a altitude aparece ao passar ou tocar longamente no mapa</small>
+            <small>Mais grossa a cada 5 curvas</small>
           </Toggle>
           <Toggle checked={prefs.terrain3d} onChange={(terrain3d) => setMapPrefs({ terrain3d })}>
             Relevo 3D
-            <small>Inclinar: dois dedos, ou arrastar com o botão direito do rato</small>
+            <small>Inclinar com dois dedos ou arrastar com o botão direito do rato</small>
           </Toggle>
           {after}
+          <p className="hint">OSM e satélite precisam de internet</p>
         </div>
       )}
     </Popover>

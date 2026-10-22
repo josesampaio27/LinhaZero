@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type maplibregl from "maplibre-gl";
 import {
   AERIAL_DEFAULT_MIN,
@@ -32,7 +32,7 @@ import { Legend } from "./components/Legend";
 import { MapView, type Draft, type MapShape } from "./components/MapView";
 import { Icon } from "./components/Icon";
 import { MapLayers } from "./components/MapLayers";
-import { Segmented, Shell, Toggle } from "./components/Shell";
+import { Popover, Segmented, Shell, Toggle } from "./components/Shell";
 import { formatMinutes, TimeBar } from "./components/TimeBar";
 import { ConditionsPanel, MoistureControl } from "./components/ConditionsPanel";
 import {
@@ -84,16 +84,62 @@ interface Results {
   paired?: { buildings: PairedComparison; ha: PairedComparison };
   /** When each simulated action starts, for the time bar. */
   starts: { min: number; className: string }[];
+  /** Where both maps go once the run lands: the burned extent of A and B plus the ignition and every drawn shape, keyed by run so it fits once. */
+  fit: { key: string; bounds: [LngLat, LngLat] } | null;
+}
+
+/**
+ * The cells that burn by the end in A or B, plus `points` (EPSG:3763: the ignition and the drawn shapes, so the actions
+ * stay in view), as a [lng, lat] box with a margin; null when nothing burns and there are no points.
+ */
+function burnedBounds(
+  header: GridData["header"],
+  a: Float32Array,
+  b: Float32Array,
+  durationMin: number,
+  points: ProjectedPoint[] = [],
+): [LngLat, LngLat] | null {
+  const { cols, rows, cellSize, originX, originY } = header;
+  let c0 = Infinity, c1 = -Infinity, r0 = Infinity, r1 = -Infinity;
+  const grow = (c: number, r: number) => {
+    c0 = Math.min(c0, c);
+    c1 = Math.max(c1, c);
+    r0 = Math.min(r0, r);
+    r1 = Math.max(r1, r);
+  };
+  for (let i = 0; i < a.length; i++) if (a[i] <= durationMin || b[i] <= durationMin) grow(i % cols, Math.floor(i / cols));
+  for (const [x, y] of points) grow(Math.floor((x - originX) / cellSize), Math.floor((originY - y) / cellSize));
+  if (c0 === Infinity) return null;
+  // A third of the extent around it (at least 10 cells), so the fire sits in context.
+  const m = Math.max(10, Math.round(Math.max(c1 - c0, r1 - r0) / 3));
+  const corners = [
+    gridToLngLat(header, Math.max(0, c0 - m), Math.max(0, r0 - m)),
+    gridToLngLat(header, Math.min(cols, c1 + 1 + m), Math.min(rows, r1 + 1 + m)),
+  ];
+  const lngs = corners.map((p) => p[0]), lats = corners.map((p) => p[1]);
+  return [[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]];
 }
 
 type ViewMode = "arrival" | "probability" | "intensity";
 
 type Step = "situacao" | "decisoes" | "resultado";
 
-/** Phones show one map at a time: A, B, or both split by a draggable divider. Desktop always shows both side by side. */
-type MapsView = "A" | "B" | "split";
+/**
+ * A or B alone, or both. "split" is both side by side on desktop; "swipe" is one map with B over A, cut at a draggable
+ * divider (as on the landing). Phones have no room for side by side, so there "split" is the divider too.
+ */
+type MapsView = "A" | "B" | "split" | "swipe";
+/** The "both maps" view to switch to automatically: keeps the divider if that is what is showing. */
+const both = (v: MapsView): MapsView => (v === "swipe" ? "swipe" : "split");
 
 const HORIZONS = [1, 2, 3, 4, 5, 6, 7, 8];
+
+const STEP_KEYS: Record<string, Step> = { "1": "situacao", "2": "decisoes", "3": "resultado" };
+
+/** From 900 px both maps fit side by side: automatic view changes keep both, the A / A|B / B switch still picks one. */
+const WIDE = window.matchMedia("(min-width: 900px)");
+const wide = () => WIDE.matches;
+const onWideChange = (cb: () => void) => (WIDE.addEventListener("change", cb), () => WIDE.removeEventListener("change", cb));
 
 /**
  * Inputs of one simulation, captured explicitly so a freshly loaded scenario can run before React re-renders.
@@ -169,11 +215,24 @@ export function App() {
   const [tool, setTool] = useState<Tool>({ type: "ignite" });
   const [step, setStep] = useState<Step>("situacao");
   const [decisionTab, setDecisionTab] = useState<DecisionId>("A");
-  const [mapsView, setMapsView] = useState<MapsView>("A");
+  const [mapsView, setMapsView] = useState<MapsView>(() => (wide() ? "split" : "A"));
+  const autoView = (v: MapsView) => setMapsView((prev) => (wide() ? both(prev) : v));
+  const isWide = useSyncExternalStore(onWideChange, wide);
+  /** Set each render (needs the latest state); called from the window keydown handler. */
+  const shortcut = useRef<(e: KeyboardEvent) => void>(() => {});
   const [split, setSplit] = useState(50); // divider position, % of the map width
   // Read by a run that lands later: it must not switch step or view under someone drawing.
   const drawingRef = useRef(false);
   drawingRef.current = tool.type === "draw" || tool.type === "burned";
+  // Drawing an action: only that decision's map, on every viewport (taps on the other map are refused), and the view
+  // from before once drawing ends. The burned area applies to both, so it keeps whatever view is on.
+  const drawDecision = tool.type === "draw" ? tool.decision : null;
+  useEffect(() => {
+    if (!drawDecision) return;
+    const before = mapsView; // the view when drawing started, not each change during it
+    setMapsView(drawDecision);
+    return () => setMapsView(before);
+  }, [drawDecision]);
   const [draft, setDraft] = useState<SimDraft | null>(null);
   const [results, setResults] = useState<Results | null>(null);
   const [t, setT] = useState(0);
@@ -310,7 +369,7 @@ export function App() {
     setVariantIds({ A: null, B: v.id });
     setResults(null);
     setStep("situacao");
-    setMessage(`A decisão A corre na grelha oficial e a B na variante "${v.name}", com o mesmo fogo e o mesmo vento. Acende o fogo e simula.`);
+    setMessage(`A decisão A corre na grelha oficial e a B na variante "${v.name}", com o mesmo fogo e o mesmo vento. Acender o fogo e simular.`);
   }, [variantParam]);
 
   // --- Map sync ---
@@ -393,8 +452,9 @@ export function App() {
     if (!active) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") cancelTool();
+      shortcut.current(e);
       // Enter on a focused control does what that control does.
-      if (e.key === "Enter" && !(e.target instanceof Element && e.target.closest("button, input, select, textarea"))) finishDraft();
+      if (e.key === "Enter" && !(e.target instanceof Element && e.target.closest("button, a, summary, input, select, textarea"))) finishDraft();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
@@ -413,7 +473,7 @@ export function App() {
     // On a road, a river or a non-burnable patch, the fire starts on the nearest cell that burns.
     const target = nearestBurnable(grid, cell);
     if (!target) {
-      setMessage("Não há combustível a menos de 200 m deste ponto (zona urbana, água). Escolhe outro ponto.");
+      setMessage("Não há combustível a menos de 200 m deste ponto (zona urbana, água). Escolher outro ponto.");
       return;
     }
     const moved = target.row !== cell.row || target.col !== cell.col;
@@ -423,7 +483,7 @@ export function App() {
       : [x, y];
     setMessage(
       moved
-        ? `O ponto escolhido não arde (estrada, rio ou zona sem combustível): a ignição passou para a célula com combustível mais próxima, a ${Math.round(Math.hypot(target.row - cell.row, target.col - cell.col) * cellSize)} m.`
+        ? `O ponto escolhido não arde (estrada, rio ou zona sem combustível): a ignição passou para a célula com combustível mais próxima, a ${Math.round(Math.hypot(target.row - cell.row, target.col - cell.col) * cellSize).toLocaleString("pt-PT")} m.`
         : null,
     );
     setIgnition(point);
@@ -440,7 +500,7 @@ export function App() {
       setDraft((prev) => ({ kind: "burned", line: false, coords: [...(prev?.coords ?? []), xy] }));
     } else if (tool.type === "draw") {
       if (d !== tool.decision) {
-        setMessage(`Desenha no mapa da Decisão ${tool.decision}.`);
+        setMessage(`Desenhar no mapa da Decisão ${tool.decision}.`);
         return;
       }
       const xy = lngLatToProjected(lngLat[0], lngLat[1]);
@@ -457,7 +517,6 @@ export function App() {
     setDraft(null);
     setMessage(null);
     setTool({ type: "draw", decision, kind });
-    setMapsView(decision);
   };
 
   const updateIv = (d: DecisionId) => (id: string, patch: Partial<DrawnIntervention>) =>
@@ -560,7 +619,7 @@ export function App() {
           const jobs = DECISIONS.map((d) => ({ scenario: local[d], variant: inputs.variants[d] }));
           const { results: res, elapsedMs } = await sim.simulate(jobs);
           [A, B] = res;
-          done = `Simulação das duas decisões feita em ${elapsedMs.toFixed(0)} ms.`;
+          done = `Simulação das duas decisões feita em ${Math.round(elapsedMs).toLocaleString("pt-PT")} ms.`;
           if (serverProblem) done = `${serverProblem}: simulado sem incerteza. ${done}`;
         }
         if (!current()) return;
@@ -573,6 +632,18 @@ export function App() {
           burnChance: chance,
           durationMin: inputs.durationMin,
           key: inputKeyOf(bundle.name, ran),
+          // Not under someone drawing: the map must not move while they mark points.
+          fit: drawingRef.current
+            ? null
+            : (() => {
+                const points = [
+                  ...(inputs.ignition ? [inputs.ignition] : []),
+                  ...(inputs.burnedArea ?? []),
+                  ...DECISIONS.flatMap((d) => inputs.decisions[d].flatMap((iv) => iv.coords)),
+                ];
+                const bounds = burnedBounds(header, A.arrivalMin, B.arrivalMin, inputs.durationMin, points);
+                return bounds && { key: String(my), bounds };
+              })(),
           starts: DECISIONS.flatMap((d) => inputs.decisions[d].map((iv) => ({ min: iv.startMin, className: `dec-${d}` }))),
           likelyHa: A.burnProbability && {
             a: chance ? expectedHa(A.burnProbability, header.cellSize) : hectaresAbove(A.burnProbability, 0.5, header.cellSize),
@@ -590,7 +661,7 @@ export function App() {
         setMessage(serverProblem ? done : null);
         if (!drawingRef.current) {
           setStep("resultado");
-          setMapsView("split");
+          setMapsView(both);
         }
         if (opts.animate && !ran.ensemble) {
           setT(0);
@@ -733,7 +804,7 @@ export function App() {
     if (results.A.intensityKwM && results.B.intensityKwM) {
       const fire = (d: DecisionId) => {
         const I = results[d].intensityKwM![cell];
-        return I > 0 ? `${Math.round(I).toLocaleString("pt-PT")} kW/m (chamas ${flameLength(I).toFixed(1)} m)` : "—";
+        return I > 0 ? `${Math.round(I).toLocaleString("pt-PT")} kW/m (chamas ${flameLength(I).toLocaleString("pt-PT", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} m)` : "—";
       };
       rows.push(["Intensidade", `A ${fire("A")} · B ${fire("B")}`]);
     }
@@ -754,7 +825,7 @@ export function App() {
    */
   const newSimulation = () => {
     if (
-      decisions.A.length + decisions.B.length > 0 &&
+      (decisions.A.length + decisions.B.length > 0 || ignition || burnedArea) &&
       !confirm("Começar uma simulação nova? O fogo, as decisões desenhadas e o resultado desta são apagados.")
     )
       return;
@@ -774,7 +845,7 @@ export function App() {
     setFileSteps(null);
     setScenarioTitle(null);
     setDecisionTab("A");
-    setMapsView("A");
+    autoView("A");
     // Live weather again, at the zone's centre until a new ignition asks for its own point.
     weather.resetAll();
     if (grid) fetchAt(gridToLngLat(grid.header, grid.header.cols / 2, grid.header.rows / 2), "centre");
@@ -785,29 +856,45 @@ export function App() {
   const changeGrid = (name: string) => {
     if (name === gridName) return;
     const lost = variantIds.A || variantIds.B;
+    // Same pattern as "Nova simulação": what would go silently is confirmed first.
+    if (lost && !confirm("Mudar de zona? As variantes de grelha das decisões deixam de se aplicar e o resultado é apagado.")) return;
     setGridName(name);
     setVariantIds(NO_VARIANTS);
     setScenarioTitle(null); // the app bar then names the zone
-    setMessage(lost ? "Zona mudada: as variantes deixaram de se aplicar." : null);
+    setMessage(lost ? "Zona mudada: as decisões voltaram à grelha oficial." : null);
   };
 
   const places = useMemo(() => (grid ? placeStats(grid) : []), [grid]);
   const ignitionText =
-    tool.type === "ignite"
-      ? "Toca no mapa para pôr a ignição."
+    tool.type === "ignite" && !ignition
+      ? "A aguardar o ponto no mapa…"
       : ignitionCell && grid
         ? (describeCell(grid, places, ignitionCell.row, ignitionCell.col) ?? "Ignição colocada.")
         : ignition
           ? grid
-            ? "A ignição está fora desta zona. Acende o fogo noutro ponto."
+            ? "A ignição está fora desta zona. Acender o fogo noutro ponto."
             : "A carregar a zona…"
           : "Sem ignição.";
 
   const stale = !!results && results.key !== inputKey;
   const goTo = (s: Step) => {
     setStep(s);
-    if (s === "decisoes") setMapsView(decisionTab);
-    if (s === "resultado" && results) setMapsView("split");
+    if (s === "decisoes") autoView(decisionTab);
+    if (s === "resultado" && results) setMapsView(both);
+  };
+
+  // Light shortcuts (keydown handler above): 1/2/3 pick the step, Space plays or pauses. Never while typing or with a modifier.
+  shortcut.current = (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey || e.defaultPrevented) return;
+    const el = e.target instanceof Element ? e.target : null;
+    if (el?.closest("input, select, textarea, [contenteditable]") || document.querySelector("dialog[open], .popover-panel")) return;
+    if (tool.type === "draw" || tool.type === "burned") return;
+    const s = STEP_KEYS[e.key];
+    if (s) goTo(s);
+    else if (e.key === " " && results && viewMode !== "probability" && !el?.closest("button, a, summary")) {
+      e.preventDefault();
+      setPlaying((p) => !p);
+    }
   };
 
   const dragSplit = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -819,10 +906,28 @@ export function App() {
 
   const drawing = tool.type === "draw" ? tool : null;
   const points = draft?.coords.length ?? 0;
+  const title = scenarioTitle ?? gridIndex.find((g) => g.name === gridName)?.label ?? "Zona";
 
-  const menu = (close: () => void) => (
+  /** The title's panel: where and what is simulated (zone, examples, files). */
+  const titleMenu = (close: () => void) => (
     <div className="menu-body">
-      {scenarioIndex.length > 0 && <p className="field-label">Cenários de demonstração</p>}
+      <label className="field">
+        <span className="field-label">Zona</span>
+        <select
+          value={gridName}
+          onChange={(e) => {
+            changeGrid(e.target.value);
+            close();
+          }}
+        >
+          {gridIndex.map((g) => (
+            <option key={g.name} value={g.name}>
+              {g.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      {scenarioIndex.length > 0 && <p className="field-label">Exemplos</p>}
       {scenarioIndex.map((s) => (
         <button
           key={s.name}
@@ -839,30 +944,34 @@ export function App() {
         <button
           onClick={() => {
             close();
-            saveScenario();
-          }}
-        >
-          Guardar ficheiro
-        </button>
-        <button
-          onClick={() => {
-            close();
             fileInput.current?.click();
           }}
         >
           Abrir ficheiro
         </button>
+        <button
+          onClick={() => {
+            close();
+            saveScenario();
+          }}
+        >
+          Guardar ficheiro
+        </button>
       </div>
-      <label className="field">
-        <span className="field-label">Zona</span>
-        <select value={gridName} onChange={(e) => changeGrid(e.target.value)}>
-          {gridIndex.map((g) => (
-            <option key={g.name} value={g.name}>
-              {g.label}
-            </option>
-          ))}
-        </select>
-      </label>
+    </div>
+  );
+
+  const menu = (close: () => void) => (
+    <div className="menu-body">
+      <button
+        className="menu-item"
+        onClick={() => {
+          close();
+          newSimulation();
+        }}
+      >
+        Nova simulação <Icon name="refresh" size={18} />
+      </button>
       <button
         className="menu-item"
         onClick={() => {
@@ -882,7 +991,7 @@ export function App() {
           <MapView
             key={d}
             className={`dec-${d}`}
-            title={`Decisão ${d}${variants[d] ? ` · variante: ${variants[d]!.name}` : ""}`}
+            title={`Decisão ${d}${decisions[d].length === 0 ? " · deixar arder" : ""}${variants[d] ? ` · variante: ${variants[d]!.name}` : ""}`}
             accent={ACCENT[d]}
             grid={decisionGrids[d]}
             terrainUrl={terrainUrls[d]}
@@ -897,6 +1006,7 @@ export function App() {
             draft={(tool.type === "draw" && tool.decision === d) || tool.type === "burned" ? draft : null}
             interactive={tool.type !== "none"}
             incidents={showIncidents ? incidents?.incidents : undefined}
+            fitBounds={results?.fit ?? null}
             onReady={onReady(d)}
             onClick={onMapClick(d)}
             onDblClick={() => finishDraft()}
@@ -904,7 +1014,7 @@ export function App() {
             onIncidentClick={igniteAt}
           />
         ))}
-        {mapsView === "split" && (
+        {(mapsView === "split" || mapsView === "swipe") && (
           <div className="divider" style={{ left: `${split}%` }} onPointerDown={dragSplit} onPointerMove={dragSplit} aria-hidden>
             <span>A ‹ › B</span>
           </div>
@@ -917,7 +1027,12 @@ export function App() {
         onChange={setMapsView}
         options={[
           { value: "A", label: "A" },
-          { value: "split", label: "A | B" },
+          ...(isWide
+            ? [
+                { value: "split" as const, label: "A B", title: "Os dois mapas lado a lado" },
+                { value: "swipe" as const, label: "A | B", title: "Um mapa, com um divisor a arrastar entre A e B" },
+              ]
+            : [{ value: "split" as const, label: "A | B" }]),
           { value: "B", label: "B" },
         ]}
       />
@@ -935,7 +1050,7 @@ export function App() {
           <>
             <Toggle checked={showIncidents} onChange={setShowIncidents}>
               Ocorrências ativas (fogos.pt)
-              <small>{incidentsLine ?? "Toca numa ocorrência para pôr lá a ignição"}</small>
+              <small>{incidentsLine ?? "Escolher uma ocorrência no mapa para lá pôr a ignição"}</small>
             </Toggle>
             {showIncidents && (
               <button onClick={() => setIncidentsTick((t) => t + 1)}>
@@ -952,7 +1067,11 @@ export function App() {
           base={hover && variants[hover.d] ? grid : null}
           cell={hover?.cell ?? null}
           extra={hover ? hoverExtra(hover.cell) : []}
-          placeholder="Passa o rato sobre um mapa para ver o combustível e a chegada do fogo em cada ponto."
+          placeholder={
+            window.matchMedia("(pointer: coarse)").matches
+              ? "Tocar longamente no mapa para ver o terreno"
+              : "Passar o cursor no mapa para ver o terreno"
+          }
         />
         {hover && (
           <button className="icon-btn" aria-label="Fechar" onClick={() => setHover(null)}>
@@ -1021,98 +1140,107 @@ export function App() {
     </p>
   );
 
-  if (drawing) {
-    const info = TOOLS.find((x) => x.kind === drawing.kind)!;
-    const line = isLineKind(drawing.kind);
+  // Drawing an action or the burned area. Phones fold the sheet to its footer, which keeps the instruction and the buttons.
+  if (drawing || tool.type === "burned") {
+    const info = drawing ? TOOLS.find((x) => x.kind === drawing.kind)! : null;
+    const line = drawing ? isLineKind(drawing.kind) : false;
+    const instruction = `${drawing ? (line ? "Marcar no mapa os pontos da linha" : "Marcar no mapa os cantos da zona") : "Marcar no mapa os cantos da área"} · ${points} ${points === 1 ? "ponto" : "pontos"}`;
     return (
       <Shell
-        title={scenarioTitle ?? gridIndex.find((g) => g.name === gridName)?.label ?? ""}
+        title={title}
+        titleMenu={titleMenu}
         menu={menu}
         stage={stage}
+        collapse
         footer={
-          <div className="draw-buttons">
-            <button
-              disabled={!points}
-              onClick={() => setDraft((d) => (d && d.coords.length > 1 ? { ...d, coords: d.coords.slice(0, -1) } : null))}
-            >
-              <Icon name="undo" size={18} /> Desfazer
-            </button>
-            <button onClick={cancelTool}>Cancelar</button>
-            <button className="primary" disabled={points < (line ? 2 : 3)} onClick={finishDraft}>
-              <Icon name="check" size={18} /> Concluir
-            </button>
-          </div>
+          <>
+            <p className="draw-instruction draw-foot-line" aria-live="polite">
+              {drawing ? (
+                <>
+                  <b>{KIND_LABEL[drawing.kind]}</b> <span className={`tag dec-${drawing.decision}`}>Decisão {drawing.decision}</span>
+                </>
+              ) : (
+                <b>Área já ardida</b>
+              )}{" "}
+              · {instruction}
+            </p>
+            {messageLine}
+            <div className="draw-buttons">
+              <button
+                disabled={!points}
+                onClick={() => setDraft((d) => (d && d.coords.length > 1 ? { ...d, coords: d.coords.slice(0, -1) } : null))}
+              >
+                <Icon name="undo" size={18} /> Desfazer
+              </button>
+              <button onClick={cancelTool}>Cancelar</button>
+              <button className="primary" disabled={points < (line ? 2 : 3)} onClick={finishDraft}>
+                <Icon name="check" size={18} /> Concluir
+              </button>
+            </div>
+          </>
         }
       >
         <div className="draw">
-          <p className="draw-title">
-            <span className={`action-icon dec-${drawing.decision}`}>
-              <Icon name={info.icon} size={18} />
-            </span>
-            <b>{KIND_LABEL[drawing.kind]}</b>
-            <span className={`tag dec-${drawing.decision}`}>Decisão {drawing.decision}</span>
+          {drawing && info ? (
+            <p className="draw-title">
+              <span className={`action-icon dec-${drawing.decision}`}>
+                <Icon name={info.icon} size={18} />
+              </span>
+              <b>{KIND_LABEL[drawing.kind]}</b>
+              <span className={`tag dec-${drawing.decision}`}>Decisão {drawing.decision}</span>
+            </p>
+          ) : (
+            <p className="draw-title">
+              <Icon name="flame" size={18} />
+              <b>Área já ardida</b>
+              <span className="tag tag-both">Decisões A e B</span>
+            </p>
+          )}
+          <p className="draw-instruction" aria-live="polite">
+            {instruction}
           </p>
-          <p>{info.meaning}</p>
-          <p>
-            <b>No simulador:</b> {info.rule}
+          {info ? (
+            <>
+              <p>{info.where}</p>
+              <details className="disclosure">
+                <summary>Como o simulador trata esta ação</summary>
+                <p>{info.meaning}</p>
+                <p>
+                  <b>No simulador:</b> {info.rule}
+                </p>
+              </details>
+            </>
+          ) : (
+            <p>Aplica-se às duas decisões: o fogo parte de toda esta área no início da simulação, por exemplo um perímetro observado.</p>
+          )}
+          <p className="hint keys-hint">
+            <kbd>Enter</kbd> ou duplo clique para terminar · <kbd>Esc</kbd> para cancelar
           </p>
-          <p>{info.where}</p>
-          <p className="hint">
-            {line ? "Toca no mapa para marcar os pontos da linha" : "Toca no mapa para marcar os cantos da zona"} ({points}{" "}
-            {points === 1 ? "ponto" : "pontos"}). No computador: duplo clique ou Enter para terminar, Esc para cancelar.
-          </p>
-          {messageLine}
         </div>
       </Shell>
     );
   }
 
-  if (tool.type === "burned") {
-    return (
-      <Shell
-        title={scenarioTitle ?? gridIndex.find((g) => g.name === gridName)?.label ?? ""}
-        menu={menu}
-        stage={stage}
-        footer={
-          <div className="draw-buttons">
-            <button
-              disabled={!points}
-              onClick={() => setDraft((d) => (d && d.coords.length > 1 ? { ...d, coords: d.coords.slice(0, -1) } : null))}
-            >
-              <Icon name="undo" size={18} /> Desfazer
-            </button>
-            <button onClick={cancelTool}>Cancelar</button>
-            <button className="primary" disabled={points < 3} onClick={finishDraft}>
-              <Icon name="check" size={18} /> Concluir
-            </button>
-          </div>
-        }
-      >
-        <div className="draw">
-          <p className="draw-title">
-            <Icon name="flame" size={18} />
-            <b>Área já ardida</b>
-          </p>
-          <p>O fogo parte de toda esta área no início da simulação, por exemplo um perímetro observado.</p>
-          <p className="hint">
-            Toca no mapa para marcar os cantos da área ({points} {points === 1 ? "ponto" : "pontos"}). No computador: duplo clique ou
-            Enter para terminar, Esc para cancelar.
-          </p>
-          {messageLine}
-        </div>
-      </Shell>
-    );
-  }
-
+  const placing = tool.type === "ignite";
   let cta: React.ReactNode;
   if (step === "situacao") {
-    cta = ignitionCell ? (
+    cta = placing ? (
+      <p className="placing-hint">
+        <i aria-hidden /> Marcar o ponto de ignição no mapa
+      </p>
+    ) : ignitionCell ? (
       <button className="primary" onClick={() => goTo("decisoes")}>
         Seguinte: decisões <Icon name="chevron" size={18} />
       </button>
     ) : (
-      <button className="primary" disabled={tool.type === "ignite"} onClick={() => setTool({ type: "ignite" })}>
-        {tool.type === "ignite" ? "Toca no mapa para acender o fogo" : "Acender o fogo"}
+      <button
+        className="primary"
+        onClick={() => {
+          setDraft(null);
+          setTool({ type: "ignite" });
+        }}
+      >
+        <Icon name="flame" size={18} /> Acender o fogo
       </button>
     );
   } else if (results && !stale && !busy) {
@@ -1139,15 +1267,66 @@ export function App() {
     );
   }
 
+  // Horizon and uncertainty (scenarios per decision, on the server), in one chip next to the CTA (not beside the result's own two buttons).
+  const runSettings = !(step === "resultado" && results && !stale && !busy) && (
+    <Popover
+      className="run-settings"
+      label="Horizonte e incerteza"
+      ariaLabel={`Definições da simulação: ${formatMinutes(durationMin)}, ${ensembleOn ? `${ensembleRuns} cenários` : "1 cenário"}`}
+      text={`${formatMinutes(durationMin)} · ${ensembleOn ? `${ensembleRuns} cenários` : "1 cenário"}`}
+    >
+      {() => (
+        <div className="menu-body">
+          <div>
+            <h2 className="field-label">Horizonte</h2>
+            <Segmented
+              className="horizon"
+              label="Horizonte da simulação"
+              value={durationMin / 60}
+              onChange={(h) => setDurationMin(Math.round(h * 60))}
+              options={[...new Set([...HORIZONS, durationMin / 60])].sort((a, b) => a - b).map((h) => ({ value: h, label: formatMinutes(h * 60) }))}
+            />
+          </div>
+          <div className="uncertainty">
+            <Toggle checked={ensembleOn} onChange={setEnsemble} disabled={!serverAvailable}>
+              Considerar a incerteza
+              <small>
+                {ensembleOn
+                  ? `${ensembleRuns} cenários por decisão, no servidor: vento, humidade, combustível e ignição variam; inclui faúlhas e linhas que podem ceder.`
+                  : "Uma simulação por decisão, sem faúlhas."}
+              </small>
+            </Toggle>
+            {ensembleOn && (
+              <label className="ensemble-runs">
+                Cenários por decisão: {ensembleRuns}
+                <input
+                  type="range"
+                  min={MIN_SERVER_RUNS}
+                  max={MAX_SERVER_RUNS}
+                  step={50}
+                  value={ensembleRuns}
+                  onChange={(e) => setEnsembleRuns(Number(e.target.value))}
+                />
+              </label>
+            )}
+            {!serverAvailable && <p className="hint">Servidor sem workers disponíveis: a incerteza precisa do servidor.</p>}
+          </div>
+        </div>
+      )}
+    </Popover>
+  );
+
   return (
     <Shell
-      title={scenarioTitle ?? gridIndex.find((g) => g.name === gridName)?.label ?? ""}
+      title={title}
+      titleMenu={titleMenu}
       menu={menu}
       stage={stage}
+      collapse={false}
       tabs={[
-        { id: "situacao", label: "Situação", done: !!ignitionCell },
-        { id: "decisoes", label: "Decisões", done: decisions.A.length + decisions.B.length > 0 },
-        { id: "resultado", label: "Resultado", done: !!results && !stale },
+        { id: "situacao", label: "Situação", done: !!ignitionCell, shortcut: "1" },
+        { id: "decisoes", label: "Decisões", done: decisions.A.length + decisions.B.length > 0, shortcut: "2" },
+        { id: "resultado", label: "Resultado", done: !!results && !stale, shortcut: "3" },
       ]}
       tab={step}
       onTab={goTo}
@@ -1155,39 +1334,39 @@ export function App() {
         <>
           {variantProblem && <p className="message">{variantProblem}</p>}
           {messageLine}
-          {cta}
+          <div className="cta-row">
+            {runSettings}
+            {cta}
+          </div>
         </>
       }
     >
       <div className="step" hidden={step !== "situacao"}>
         <div className="field-row">
           <div>
-            <p className="field-label">Ignição</p>
+            <h2 className="field-label">Ignição</h2>
             <p className="value">{ignitionText}</p>
           </div>
-          {!(tool.type === "ignite" && !ignition) && (
-            <button
-              className={tool.type === "ignite" ? "active" : ""}
-              onClick={() => {
-                setDraft(null);
-                setTool(tool.type === "ignite" ? { type: "none" } : { type: "ignite" });
-              }}
-            >
-              {tool.type === "ignite" ? (
-                "Cancelar"
-              ) : ignition ? (
-                "Mudar"
-              ) : (
-                <>
-                  <Icon name="flame" size={18} /> Acender fogo
-                </>
-              )}
+          {placing ? (
+            <button onClick={cancelTool}>
+              Cancelar
             </button>
+          ) : (
+            ignition && (
+              <button
+                onClick={() => {
+                  setDraft(null);
+                  setTool({ type: "ignite" });
+                }}
+              >
+                Mudar
+              </button>
+            )
           )}
         </div>
-        <div className="field-row">
+        <div className="field-row optional">
           <div>
-            <p className="field-label">Área já ardida</p>
+            <h2 className="field-label">Área já ardida (opcional)</h2>
             <p className="value">{burnedArea ? `Desenhada (${burnedArea.length} cantos)` : "Nenhuma"}</p>
           </div>
           <div className="row">
@@ -1202,37 +1381,35 @@ export function App() {
             </button>
           </div>
         </div>
+        <p className="hint touch-only">Tocar longamente no mapa para ver o terreno</p>
         <div>
-          <p className="field-label">Tempo</p>
-          <ConditionsPanel weather={weather} onRefresh={fetchHere} canRefresh={!!grid} />
-        </div>
-        <div>
-          <p className="field-label">Horizonte</p>
-          <Segmented
-            className="horizon"
-            label="Horizonte da simulação"
-            value={durationMin / 60}
-            onChange={(h) => setDurationMin(Math.round(h * 60))}
-            options={[...new Set([...HORIZONS, durationMin / 60])].sort((a, b) => a - b).map((h) => ({ value: h, label: formatMinutes(h * 60) }))}
+          <h2 className="field-label">Tempo</h2>
+          <ConditionsPanel
+            weather={weather}
+            onRefresh={fetchHere}
+            canRefresh={!!grid}
+            adjust={
+              <>
+                <Toggle checked={followForecast && !!weatherSteps} onChange={setFollowForecast} disabled={!snapshot && !fileSteps}>
+                  Seguir a previsão hora a hora
+                  <small>
+                    {snapshot
+                      ? forecastChanges > 0
+                        ? `O vento muda ${forecastChanges} ${forecastChanges === 1 ? "vez" : "vezes"} em ${formatMinutes(durationMin)} (Open-Meteo)${spreadModel === "rothermel" && moistureFromWeather ? ", e a humidade do combustível também" : ""}`
+                        : "A previsão não muda dentro do horizonte"
+                      : fileSteps
+                        ? `Tempo hora a hora guardado no cenário (${fileSteps.length} passos)`
+                        : "Sem previsão (tempo manual)"}
+                  </small>
+                </Toggle>
+                <div>
+                  <h3 className="field-label">Secura do combustível</h3>
+                  <MoistureControl weather={weather} />
+                </div>
+              </>
+            }
           />
         </div>
-        <Toggle checked={followForecast && !!weatherSteps} onChange={setFollowForecast} disabled={!snapshot && !fileSteps}>
-          Seguir a previsão hora a hora
-          <small>
-            {snapshot
-              ? forecastChanges > 0
-                ? `O vento muda ${forecastChanges} ${forecastChanges === 1 ? "vez" : "vezes"} em ${formatMinutes(durationMin)} (Open-Meteo)${spreadModel === "rothermel" && moistureFromWeather ? ", e a humidade do combustível também" : ""}`
-                : "A previsão não muda dentro do horizonte"
-              : fileSteps
-                ? `Tempo hora a hora guardado no cenário (${fileSteps.length} passos)`
-                : "Sem previsão (tempo manual)"}
-          </small>
-        </Toggle>
-        <div>
-          <p className="field-label">Secura do combustível</p>
-          <MoistureControl weather={weather} />
-        </div>
-        <p className="hint">Toca e segura no mapa (ou passa o rato) para ver o terreno e a chegada do fogo num ponto.</p>
       </div>
 
       <div className="step" hidden={step !== "decisoes"}>
@@ -1242,14 +1419,16 @@ export function App() {
           value={decisionTab}
           onChange={(d) => {
             setDecisionTab(d);
-            setMapsView(d);
+            autoView(d);
           }}
           options={DECISIONS.map((d) => ({
             value: d,
             label: (
               <>
                 <b className={`letter dec-${d}`}>{d}</b>
-                {decisions[d].length} {decisions[d].length === 1 ? "ação" : "ações"}
+                {decisions[d].length === 0
+                  ? "sem ações (deixar arder)"
+                  : `${decisions[d].length} ${decisions[d].length === 1 ? "ação" : "ações"}`}
                 {variants[d] && " · variante"}
               </>
             ),
@@ -1259,9 +1438,17 @@ export function App() {
           key={decisionTab}
           decision={decisionTab}
           items={decisions[decisionTab]}
+          variantName={variants[decisionTab]?.name ?? null}
           onPickTool={pickTool(decisionTab)}
           onUpdate={updateIv(decisionTab)}
           onRemove={removeIv(decisionTab)}
+          onRestore={(item, i) =>
+            setDecisions((prev) => {
+              const l = [...prev[decisionTab]];
+              l.splice(i, 0, item);
+              return { ...prev, [decisionTab]: l };
+            })
+          }
           onClear={() => setDecisions((prev) => ({ ...prev, [decisionTab]: [] }))}
           defaultLineWidthM={spreadModel === "rothermel" ? (variants[decisionTab]?.params.lineWidthM ?? DEFAULT_PARAMS.lineWidthM) : undefined}
         >
@@ -1280,30 +1467,6 @@ export function App() {
             </select>
           </label>
         </DecisionTools>
-        <div className="uncertainty">
-          <Toggle checked={ensembleOn} onChange={setEnsemble} disabled={!serverAvailable}>
-            Considerar a incerteza
-            <small>
-              {ensembleOn
-                ? `${ensembleRuns} cenários por decisão, no servidor. Em cada um variam a direção e a força do vento, a humidade do combustível, a velocidade de cada combustível e o ponto de ignição; há faúlhas que acendem focos à frente, e linhas e estradas que podem ceder`
-                : "Uma só simulação por decisão, com os valores indicados, sem faúlhas"}
-            </small>
-          </Toggle>
-          {ensembleOn && (
-            <label className="ensemble-runs">
-              Cenários por decisão: {ensembleRuns}
-              <input
-                type="range"
-                min={MIN_SERVER_RUNS}
-                max={MAX_SERVER_RUNS}
-                step={50}
-                value={ensembleRuns}
-                onChange={(e) => setEnsembleRuns(Number(e.target.value))}
-              />
-            </label>
-          )}
-          {!serverAvailable && <p className="hint">Servidor sem workers disponíveis: a incerteza precisa do servidor.</p>}
-        </div>
       </div>
 
       <div className="step" hidden={step !== "resultado"}>
@@ -1318,11 +1481,12 @@ export function App() {
               likelyIsExpected={results.burnChance}
               paired={results.paired}
               stale={stale}
+              actions={{ A: decisions.A.length, B: decisions.B.length }}
+              note={runNote ?? undefined}
             />
-            {runNote && <p className="hint">{runNote}</p>}
           </>
         ) : (
-          <p className="hint">Ainda não há resultado. Acende o fogo, escolhe as decisões e carrega em Simular.</p>
+          <p className="hint">Ainda sem resultado: acender o fogo, escolher as decisões e simular.</p>
         )}
       </div>
     </Shell>

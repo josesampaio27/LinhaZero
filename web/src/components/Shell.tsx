@@ -7,10 +7,14 @@ export interface Tab<T extends string> {
   id: T;
   label: string;
   done?: boolean;
+  /** Keyboard shortcut that opens this tab (e.g. "1"), announced and shown in the tooltip. */
+  shortcut?: string;
 }
 
 interface Props<T extends string> {
   title: string;
+  /** Optional: the title becomes a button ("Guimarães ▾") opening this panel, e.g. the zone and scenario switcher. */
+  titleMenu?: (close: () => void) => ReactNode;
   /** App bar menu; `close` hides it after an action. */
   menu: (close: () => void) => ReactNode;
   /** The map area. */
@@ -21,6 +25,8 @@ interface Props<T extends string> {
   onTab?: (t: T) => void;
   /** Pinned under the sheet body: the primary action. */
   footer?: ReactNode;
+  /** Phones: true folds the sheet down to its footer (e.g. while drawing, so the map gets the height); false unfolds it. */
+  collapse?: boolean;
   children: ReactNode;
 }
 
@@ -28,8 +34,11 @@ interface Props<T extends string> {
  * Page layout shared by the simulation and the grid editor. Phones: app bar, map, bottom sheet.
  * From 900 px: the sheet becomes a left panel and the map takes the rest (styles.css).
  */
-export function Shell<T extends string>({ title, menu, stage, tabs, tab, onTab, footer, children }: Props<T>) {
+export function Shell<T extends string>({ title, titleMenu, menu, stage, tabs, tab, onTab, footer, collapse, children }: Props<T>) {
   const [open, setOpen] = useState(true);
+  useEffect(() => {
+    if (collapse !== undefined) setOpen(!collapse);
+  }, [collapse]);
   return (
     <div className="shell">
       <header className="appbar">
@@ -38,7 +47,13 @@ export function Shell<T extends string>({ title, menu, stage, tabs, tab, onTab, 
           <b>
             Linha<span>Zero</span>
           </b>
-          <span title={title}>{title}</span>
+          {titleMenu ? (
+            <Popover className="title-menu" label={title} text={<span className="title-text">{title}</span>}>
+              {titleMenu}
+            </Popover>
+          ) : (
+            <span title={title}>{title}</span>
+          )}
         </span>
         <SignIn />
         <FeedbackButton />
@@ -59,6 +74,8 @@ export function Shell<T extends string>({ title, menu, stage, tabs, tab, onTab, 
                 key={t.id}
                 aria-current={t.id === tab ? "step" : undefined}
                 className={t.id === tab ? "on" : ""}
+                aria-keyshortcuts={t.shortcut}
+                title={t.shortcut ? `${t.label} (tecla ${t.shortcut})` : undefined}
                 onClick={() => {
                   onTab?.(t.id);
                   setOpen(true);
@@ -151,11 +168,16 @@ function AccountMenu() {
   );
 }
 
-/** An icon button (or `face`, e.g. initials) that opens a floating panel; a tap outside closes it. */
+/**
+ * An icon button (or `face`, e.g. initials, or `text` with a chevron) that opens a floating panel; a tap outside or Esc
+ * closes it. Focus moves into the panel on open and back to the button on close.
+ */
 export function Popover({
   icon = "menu",
   face,
+  text,
   label,
+  ariaLabel,
   badge,
   className = "",
   children,
@@ -163,14 +185,30 @@ export function Popover({
   icon?: IconName;
   /** Shown instead of the icon while closed. */
   face?: ReactNode;
+  /** A text button instead of an icon (kept while open, with a chevron); `label` then becomes its tooltip. */
+  text?: ReactNode;
   label: string;
+  /** Accessible name of a text trigger when its visible text needs context (e.g. "Definições da simulação: 4 h, 1 cenário"). */
+  ariaLabel?: string;
   badge?: number;
   className?: string;
   children: (close: () => void) => ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const trigger = useRef<HTMLButtonElement>(null);
+  const panel = useRef<HTMLDivElement>(null);
   const close = () => setOpen(false);
+  useEffect(() => {
+    if (!open) return;
+    const p = panel.current;
+    const t = trigger.current;
+    (p?.querySelector<HTMLElement>("button:not(:disabled), [href], input:not(:disabled), select:not(:disabled), textarea, [tabindex]:not([tabindex='-1'])") ?? p)?.focus();
+    // Back to the button on close, unless the action moved focus somewhere on purpose (e.g. a dialog it opened).
+    return () => {
+      const at = document.activeElement;
+      if (!at || at === document.body || p?.contains(at)) t?.focus();
+    };
+  }, [open]);
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => {
@@ -185,14 +223,21 @@ export function Popover({
   }, [open]);
   return (
     <div className={`popover ${className}`}>
-      <button ref={trigger} className="icon-btn" aria-label={label} title={label} aria-expanded={open} onClick={() => setOpen(!open)}>
-        {open || !face ? <Icon name={open ? "close" : icon} /> : face}
-        {!!badge && <span className="badge">{badge}</span>}
-      </button>
+      {text ? (
+        <button ref={trigger} className="popover-chip" title={label} aria-label={ariaLabel} aria-expanded={open} aria-haspopup="dialog" onClick={() => setOpen(!open)}>
+          {text}
+          <Icon name="chevronDown" size={16} />
+        </button>
+      ) : (
+        <button ref={trigger} className="icon-btn" aria-label={label} title={label} aria-expanded={open} onClick={() => setOpen(!open)}>
+          {open || !face ? <Icon name={open ? "close" : icon} /> : face}
+          {!!badge && <span className="badge">{badge}</span>}
+        </button>
+      )}
       {open && (
         <>
           <div className="popover-scrim" onClick={close} />
-          <div className="popover-panel">
+          <div ref={panel} className="popover-panel" role="dialog" aria-label={label} tabIndex={-1}>
             {children(close)}
           </div>
         </>

@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "side-tab",
+        "value": "*",
+        "files": [
+          "src/styles.css"
+        ],
+        "createdAt": "2026-10-22T10:41:43.897Z",
+        "reason": "Claude triage: both side-tab hits are intentional/neutral: .map-title stripe carries the A/B decision colour; .request-body blockquote is a grey quote rule"
+      }
+    ]
+  }
+}

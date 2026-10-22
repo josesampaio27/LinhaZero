@@ -2,6 +2,10 @@ import type { Wind } from "@linha-zero/engine";
 
 const POINTS = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
 
+const MS = new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 1 });
+/** "6,5 m/s" */
+export const msText = (ms: number) => `${MS.format(ms)} m/s`;
+
 export function compassName(deg: number): string {
   return POINTS[Math.round((((deg % 360) + 360) % 360) / 45) % 8];
 }
@@ -34,24 +38,27 @@ export function WindControl({ wind, onChange }: { wind: Wind; onChange: (w: Wind
         </g>
       </svg>
       <div className="wind-sliders">
+        {/* The degrees and km/h are in the number fields next to the sliders; the labels add the compass point and m/s. */}
         <label>
-          Direção: de {compassName(wind.directionDeg)} ({Math.round(wind.directionDeg)}°)
+          Direção: de {compassName(wind.directionDeg)}
           <input
             type="range"
             min={0}
             max={359}
             value={wind.directionDeg}
+            aria-valuetext={`de ${compassName(wind.directionDeg)}, ${Math.round(wind.directionDeg)}°`}
             onChange={(e) => onChange({ ...wind, directionDeg: Number(e.target.value) })}
           />
         </label>
         <label>
-          Velocidade: {Math.round(wind.speedMs * 3.6)} km/h ({wind.speedMs} m/s)
+          Velocidade: {msText(wind.speedMs)}
           <input
             type="range"
             min={0}
             max={20}
             step={0.5}
             value={wind.speedMs}
+            aria-valuetext={`${Math.round(wind.speedMs * 3.6)} km/h, ${msText(wind.speedMs)}`}
             onChange={(e) => onChange({ ...wind, speedMs: Number(e.target.value) })}
           />
         </label>

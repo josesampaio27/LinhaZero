@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { loginUrl } from "../lib/session";
 import type { FuelMoisture } from "@linha-zero/engine";
 import type { WeatherResponse } from "../api/client";
 import {
@@ -13,69 +14,170 @@ import {
 import { DRYNESS, moistureText } from "../lib/moisture";
 import type { LiveWeather, WeatherAt } from "../lib/useLiveWeather";
 import { ageText, dayHour, hourMinute } from "../lib/weather";
+import { Icon } from "./Icon";
 import { Segmented } from "./Shell";
 import { compassName, WindControl } from "./WindControl";
 
 const WARNING_LEVEL: Record<string, string> = { yellow: "amarelo", orange: "laranja", red: "vermelho" };
+const NUM = new Intl.NumberFormat("pt-PT", { maximumFractionDigits: 1 });
 
 /**
- * The weather of the simulation: live by default, every value editable. A value typed by hand is marked and
- * keeps its value when the weather is fetched again; "repor" brings the source's value back.
+ * The weather of the simulation: live by default, every value editable. A summary is always shown; the controls
+ * and the source's details are behind two disclosures. A value typed by hand is marked and keeps its value when
+ * the weather is fetched again; "repor" brings the source's value back.
  */
-export function ConditionsPanel({ weather, onRefresh, canRefresh }: { weather: LiveWeather; onRefresh: () => void; canRefresh: boolean }) {
+export function ConditionsPanel({
+  weather,
+  onRefresh,
+  canRefresh,
+  adjust,
+}: {
+  weather: LiveWeather;
+  onRefresh: () => void;
+  canRefresh: boolean;
+  /** More controls shown inside "Ajustar condições" (App passes the forecast toggle and the fuel dryness). */
+  adjust?: React.ReactNode;
+}) {
   const { conditions, manual, edit, reset } = weather;
   const { wind, air } = conditions;
   const field = (f: Exclude<Field, "moisture">) => ({ manual: manual.has(f), onReset: () => reset(f) });
 
   return (
     <div className="conditions">
-      <Source weather={weather} onRefresh={onRefresh} canRefresh={canRefresh} />
+      <Summary weather={weather} onRefresh={onRefresh} canRefresh={canRefresh} />
 
-      <p className="field-label">Vento</p>
-      <WindControl wind={wind} onChange={weather.editWind} />
-      <div className="num-fields">
-        <NumberField label="Direção (de)" unit="°" value={Math.round(wind.directionDeg)} min={0} max={359} onChange={(v) => edit("direction", v)} {...field("direction")} />
-        <NumberField
-          label="Velocidade"
-          unit="km/h"
-          value={msToKmh(wind.speedMs)}
-          min={0}
-          max={MAX_SPEED_KMH}
-          onChange={(v) => edit("speed", kmhToMs(v))}
-          {...field("speed")}
-        />
-      </div>
+      <details className="disclosure">
+        <summary>Ajustar condições</summary>
+        <div className="conditions-group">
+          <h3 className="field-label">Vento</h3>
+          <WindControl wind={wind} onChange={weather.editWind} />
+          <div className="num-fields">
+            <NumberField label="Direção (de)" unit="°" value={Math.round(wind.directionDeg)} min={0} max={359} onChange={(v) => edit("direction", v)} {...field("direction")} />
+            <NumberField
+              label="Velocidade"
+              unit="km/h"
+              value={msToKmh(wind.speedMs)}
+              min={0}
+              max={MAX_SPEED_KMH}
+              onChange={(v) => edit("speed", kmhToMs(v))}
+              {...field("speed")}
+            />
+          </div>
+        </div>
+        <div className="conditions-group">
+          <h3 className="field-label">Ar</h3>
+          <div className="num-fields">
+            <NumberField label="Temperatura" unit="°C" value={air?.tempC ?? null} min={-20} max={50} step={0.5} onChange={(v) => edit("temp", v)} {...field("temp")} />
+            <NumberField label="Humidade" unit="%" value={air?.rhPct ?? null} min={1} max={100} onChange={(v) => edit("rh", v)} {...field("rh")} />
+            <NumberField label="Nuvens" unit="%" value={air?.cloudPct ?? null} min={0} max={100} onChange={(v) => edit("cloud", v)} {...field("cloud")} />
+          </div>
+          {!air && <p className="hint">Sem dados do ar: indicar temperatura e humidade para calcular a secura.</p>}
+        </div>
+        {adjust && <div className="conditions-group">{adjust}</div>}
+        {manual.size > 0 && (
+          <button className="link" onClick={weather.resetAll}>
+            Repor tudo
+          </button>
+        )}
+      </details>
 
-      <p className="field-label">Ar</p>
-      <div className="num-fields">
-        <NumberField label="Temperatura" unit="°C" value={air?.tempC ?? null} min={-20} max={50} step={0.5} onChange={(v) => edit("temp", v)} {...field("temp")} />
-        <NumberField label="Humidade" unit="%" value={air?.rhPct ?? null} min={1} max={100} onChange={(v) => edit("rh", v)} {...field("rh")} />
-        <NumberField label="Nuvens" unit="%" value={air?.cloudPct ?? null} min={0} max={100} onChange={(v) => edit("cloud", v)} {...field("cloud")} />
-      </div>
-      {!air && <p className="hint">Sem dados do ar: escreve a temperatura e a humidade para calcular a secura do combustível.</p>}
-
-      {weather.live && <Details s={weather.live.snapshot} />}
+      <details className="disclosure">
+        <summary>Detalhes da fonte</summary>
+        <div className="conditions-group">
+          {/* The default source is already named in the summary. */}
+          {sourceText(weather) !== "Valores por omissão" && <p className="hint">{sourceText(weather)}</p>}
+          {weather.live && <Details s={weather.live.snapshot} />}
+          <p className="hint">Dados: IPMA · Open-Meteo · fogos.pt (VOST Portugal)</p>
+          <p className="hint">Modelo de Rothermel com os combustíveis portugueses, validado em 80 incêndios reais do PT-FireSprd.</p>
+        </div>
+      </details>
     </div>
   );
 }
 
-/** Where the values come from, how old they are, and the buttons to fetch again or drop every override. */
-function Source({ weather, onRefresh, canRefresh }: { weather: LiveWeather; onRefresh: () => void; canRefresh: boolean }) {
-  const { live, source, status, manual } = weather;
+/** The dryness in use, as the fuel dryness control names it. */
+function drynessLabel(mode: MoistureMode): string {
+  if (mode === "tempo") return "Do tempo";
+  if (mode === "manual") return "Manual";
+  return DRYNESS.find((p) => p.id === mode)!.label;
+}
+
+/** "IPMA Braga · há 12 min": where the wind comes from and how old it is. */
+function shortSource({ live, source }: LiveWeather): string {
+  if (source === "live" && live) {
+    const s = live.snapshot;
+    return `${s.use === "observed" ? `IPMA ${s.observed!.station.name}` : "Open-Meteo"} · ${ageText(windOf(s).observedAt)}`;
+  }
+  return source === "scenario" ? "Tempo do cenário" : "Valores por omissão";
+}
+
+/**
+ * Always shown: the wind, the air, the dryness, the source and its age, the refresh, the fire risk and warnings,
+ * and anything that needs attention (values typed by hand, no service, an error, a stale wind).
+ */
+function Summary({ weather, onRefresh, canRefresh }: { weather: LiveWeather; onRefresh: () => void; canRefresh: boolean }) {
+  const { live, source, status, manual, conditions } = weather;
+  const { wind, air } = conditions;
   const loading = status.kind === "loading";
+  const s = live?.snapshot;
+  const refreshLabel = source === "live" ? "Atualizar o tempo" : "Usar o tempo de agora";
   return (
-    <div className="conditions-source">
-      <div className="field-row">
-        <p className="hint">{loading ? "A obter o tempo…" : sourceText(weather)}</p>
-        <button className="link" disabled={loading || !canRefresh} onClick={onRefresh} title="Obter o tempo de agora no ponto de ignição (ou no centro da zona)">
-          {source === "live" ? "↻ Atualizar" : "Usar o tempo de agora"}
+    <div className="conditions-summary">
+      <p className="conditions-now">
+        <svg viewBox="-12 -12 24 24" className="conditions-arrow" aria-hidden>
+          <g transform={`rotate(${wind.directionDeg + 180})`}>
+            <line x1="0" y1="8" x2="0" y2="-6" />
+            <polygon points="0,-10 -5,-3 5,-3" />
+          </g>
+        </svg>
+        <strong>
+          {msToKmh(wind.speedMs)} km/h de {compassName(wind.directionDeg)}
+        </strong>
+        {air ? (
+          <>
+            <span>{NUM.format(air.tempC)} °C</span>
+            <span>HR {NUM.format(air.rhPct)}%</span>
+          </>
+        ) : (
+          <span>Sem dados do ar</span>
+        )}
+        <span>Secura: {drynessLabel(conditions.moistureMode)}</span>
+      </p>
+      <div className="conditions-source">
+        <p className="hint">{loading ? "A obter o tempo…" : shortSource(weather)}</p>
+        <button
+          className="icon-btn"
+          disabled={loading || !canRefresh}
+          onClick={onRefresh}
+          aria-label={refreshLabel}
+          title={`${refreshLabel} no ponto de ignição (ou no centro da zona)`}
+        >
+          <Icon name="refresh" size={18} />
         </button>
       </div>
+      {s && (s.fireRisk || s.warnings.length > 0) && (
+        <p className="row">
+          {s.fireRisk && (
+            <span>
+              Risco de incêndio: <span className={`risk risk-${s.fireRisk.level}`}>{s.fireRisk.label}</span>
+            </span>
+          )}
+          {s.warnings.map((w, i) => (
+            <span key={i} className={`chip chip-${w.level}`} title={w.text}>
+              Aviso {WARNING_LEVEL[w.level] ?? w.level}: {w.type}
+            </span>
+          ))}
+        </p>
+      )}
+      {status.kind === "signedOut" && (
+        <p className="hint">
+          Tempo em direto só com sessão iniciada ·{" "}
+          <a href={loginUrl()}>Entrar</a>
+        </p>
+      )}
       {status.kind === "offline" && <p className="hint">Sem tempo em direto (serviço indisponível): valores manuais.</p>}
       {status.kind === "error" && <p className="warn-text">{status.message}</p>}
-      {live && live.snapshot.sources.find((x) => x.name === live.snapshot.windSource)?.stale && (
-        <p className="warn-text">Vento de {ageText(windOf(live.snapshot).observedAt)} (sem ligação)</p>
-      )}
+      {s && s.sources.find((x) => x.name === s.windSource)?.stale && <p className="warn-text">Vento de {ageText(windOf(s).observedAt)} (sem ligação)</p>}
       {manual.size > 0 && (
         <p className="hint">
           {manual.size === 1 ? "1 valor ajustado à mão" : `${manual.size} valores ajustados à mão`} ·{" "}
@@ -90,6 +192,7 @@ function Source({ weather, onRefresh, canRefresh }: { weather: LiveWeather; onRe
 
 const windOf = (s: WeatherResponse) => (s.use === "observed" ? s.observed! : s.model!);
 
+/** The full source line: station and distance, the hour and age, and where it was asked for. */
 function sourceText({ live, source, provenance }: LiveWeather): string {
   if (source === "live" && live) {
     const s = live.snapshot;
@@ -164,14 +267,14 @@ function NumberField({
   );
 }
 
-/** The read-only part of the live weather: the other source's wind, the air's station, fire risk, warnings, forecast. */
+/** The read-only part of the live weather: the other source's wind, the air's station, the forecast, what failed. */
 function Details({ s }: { s: WeatherResponse }) {
   const other = s.use === "observed" ? s.model : s.observed;
   const failed = (name: string) => s.sources.some((x) => x.name === name && x.error && !x.fetchedAt);
   const windText = (v: { directionDeg: number | null; speedMs: number }) =>
     v.directionDeg === null ? `${msToKmh(v.speedMs)} km/h (calmo)` : `${msToKmh(v.speedMs)} km/h de ${compassName(v.directionDeg)}`;
   return (
-    <div className="weather-card">
+    <>
       {other && (
         <p className="hint">
           {s.use === "observed" ? "Modelo" : `IPMA ${s.observed!.station.name}`}: {windText(other)}
@@ -182,30 +285,14 @@ function Details({ s }: { s: WeatherResponse }) {
           Ar do IPMA {s.air.station.name}, {Math.round(s.air.station.distanceKm)} km, {hourMinute(s.air.observedAt)}
         </p>
       )}
-      {s.fireRisk ? (
-        <p>
-          Risco de incêndio: <span className={`risk risk-${s.fireRisk.level}`}>{s.fireRisk.label}</span>
-        </p>
-      ) : (
-        failed("IPMA risco de incêndio") && <p className="hint">Risco de incêndio indisponível</p>
-      )}
-      {s.warnings.length > 0 && (
-        <p className="row">
-          {s.warnings.map((w, i) => (
-            <span key={i} className={`chip chip-${w.level}`} title={w.text}>
-              Aviso {WARNING_LEVEL[w.level] ?? w.level}: {w.type}
-            </span>
-          ))}
-        </p>
-      )}
+      {!s.fireRisk && failed("IPMA risco de incêndio") && <p className="hint">Risco de incêndio indisponível</p>}
       {failed("IPMA avisos") && <p className="hint">Avisos indisponíveis</p>}
       {s.forecast.length > 0 && (
         <p className="hint">
           Próximas horas: {s.forecast.map((f) => `${hourMinute(f.time).slice(0, 2)}h ${compassName(f.directionDeg)} ${msToKmh(f.speedMs)} km/h`).join(" · ")}
         </p>
       )}
-      <p className="hint">Dados: IPMA · Open-Meteo · fogos.pt (VOST Portugal)</p>
-    </div>
+    </>
   );
 }
 
@@ -266,7 +353,6 @@ export function MoistureControl({ weather }: { weather: LiveWeather }) {
             </button>
           </>
         )}
-        . Modelo de Rothermel com os combustíveis portugueses, validado em 80 incêndios reais do PT-FireSprd.
       </p>
     </div>
   );

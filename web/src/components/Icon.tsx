@@ -17,6 +17,7 @@ const PATHS = {
   trash: "M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3",
   check: "M5 12l5 5 9-10",
   chevron: "M9 6l6 6-6 6",
+  chevronDown: "M6 9l6 6 6-6",
   feedback: "M4 5h16v11H9l-5 4zM9 9.5h6M9 12.5h4",
 } as const;
 
@@ -49,7 +50,7 @@ export function Icon({ name, size = 20 }: { name: IconName; size?: number }) {
   );
 }
 
-/** The LinhaZero mark (public/logo.png, 109×128). */
+/** The LinhaZero mark with the white outline the landing uses (public/logo-outline.png, 85×99). */
 export function Mark({ size = 32 }: { size?: number }) {
-  return <img src="/logo.png" width={Math.round((size * 109) / 128)} height={size} alt="" />;
+  return <img src="/logo-outline.png" width={Math.round((size * 85) / 99)} height={size} alt="" />;
 }

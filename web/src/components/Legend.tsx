@@ -37,7 +37,7 @@ export function Legend({
       className="legend"
       title={
         burnChance
-          ? "Em quantos dos cenários a célula arde. Cada cenário varia o vento, a humidade do combustível, a velocidade por combustível e o ponto de ignição. Não há combate além do que desenhar, por isso contra incêndios reais (combatidos) o mapa arde mais do que eles: das células em que todos os cenários ardem, arderam cerca de 22%."
+          ? "Em quantos dos cenários a célula arde. Cada cenário varia o vento, a humidade do combustível, a velocidade por combustível e o ponto de ignição. Não há combate além do desenhado; por isso contra incêndios reais (combatidos) o mapa arde mais do que eles: das células em que todos os cenários ardem, arderam cerca de 22%."
           : "Fração das corridas, com o vento perturbado, em que a célula arde"
       }
     >

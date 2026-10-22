@@ -17,8 +17,15 @@ async function weatherCall<T>(call: Promise<T>): Promise<T> {
   }
 }
 
+/** The error of a weather call without a session (the demo, or not signed in): not a failure, live weather needs a login. */
+export const SIGNED_OUT = "Tempo em direto só com sessão iniciada.";
+
 export function fetchWeather(lat: number, lon: number): Promise<WeatherResponse> {
-  return weatherCall(weatherApi.get(lat, lon));
+  return weatherCall(
+    weatherApi.get(lat, lon).catch((e: unknown) => {
+      throw e instanceof ApiError && e.status === 401 ? new Error(SIGNED_OUT) : e;
+    }),
+  );
 }
 
 export function fetchIncidents([[minLon, minLat], [maxLon, maxLat]]: [LngLat, LngLat]): Promise<IncidentsResponse> {

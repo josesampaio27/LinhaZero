@@ -1,15 +1,23 @@
+import { DropdownMenu } from "radix-ui";
+import { ChevronDown } from "lucide-react";
 import { SIGNIN_URL, SIGNUP_URL } from "@/components/Hero";
 
 /**
- * The bar's links. Sections of the main page are written as "/#id", so they work from the subpages too (on the main
- * page the browser only scrolls); the two subpages explain the engine and its calibration.
+ * The bar's links are all sections of the main page, written as "/#id" so they work from the subpages too (on the main
+ * page the browser only scrolls). The two subpages, which load a new page, sit apart under "Documentação", so every
+ * link in the bar does one thing.
  */
-const NAV = [
+const SECTIONS = [
   ["/#como-funciona", "Como funciona"],
-  ["/motor", "O simulador"],
-  ["/calibracao", "Calibração"],
+  ["/#validacao", "Validação"],
   ["/#dados", "Dados"],
   ["/#quem-somos", "Quem somos"],
+] as const;
+
+const DOCS = [
+  ["/motor", "O simulador", "Como o território, o fogo e as decisões são simulados"],
+  ["/calibracao", "Calibração e validação", "Como foi ajustado e posto à prova em incêndios reais"],
+  ["/ficha-tecnica", "Ficha técnica", "Os modelos em que se baseia e como usa o combustível do mapa"],
 ] as const;
 
 /**
@@ -19,6 +27,7 @@ const NAV = [
  */
 export function Nav({ stuck }: { stuck: boolean }) {
   const here = location.pathname.replace(/\/$/, "") || "/";
+  const inDocs = DOCS.some(([href]) => href === here);
   return (
     <nav
       aria-label="Principal"
@@ -30,17 +39,44 @@ export function Nav({ stuck }: { stuck: boolean }) {
         <span className="font-display text-statement leading-none">LinhaZero</span>
       </a>
       <ul className="hidden items-center gap-7 text-small font-medium lg:flex">
-        {NAV.map(([href, label]) => (
+        {SECTIONS.map(([href, label]) => (
           <li key={href}>
-            <a
-              href={href}
-              aria-current={href === here ? "page" : undefined}
-              className="inline-block py-3 underline-offset-[0.3em] decoration-2 hover:underline aria-[current=page]:underline"
-            >
+            <a href={href} className="inline-block py-3 underline-offset-[0.3em] decoration-2 hover:underline">
               {label}
             </a>
           </li>
         ))}
+        <li className="border-l border-border pl-7">
+          <DropdownMenu.Root modal={false}>
+            <DropdownMenu.Trigger
+              data-current={inDocs || undefined}
+              className="group inline-flex items-center gap-1 py-3 underline-offset-[0.3em] decoration-2 hover:underline data-current:underline"
+            >
+              Documentação
+              <ChevronDown aria-hidden size={16} strokeWidth={2} className="transition-transform duration-200 group-data-[state=open]:rotate-180" />
+            </DropdownMenu.Trigger>
+            <DropdownMenu.Portal>
+              <DropdownMenu.Content
+                align="end"
+                sideOffset={6}
+                className="z-40 w-80 border border-border bg-panel p-2 shadow-[0_12px_32px_-8px_rgb(0_0_0/0.6)]"
+              >
+                {DOCS.map(([href, label, blurb]) => (
+                  <DropdownMenu.Item key={href} asChild>
+                    <a
+                      href={href}
+                      aria-current={href === here ? "page" : undefined}
+                      className="block px-3 py-2.5 outline-none data-highlighted:bg-raised aria-[current=page]:bg-raised"
+                    >
+                      <span className="block font-medium">{label}</span>
+                      <span className="block text-small text-muted">{blurb}</span>
+                    </a>
+                  </DropdownMenu.Item>
+                ))}
+              </DropdownMenu.Content>
+            </DropdownMenu.Portal>
+          </DropdownMenu.Root>
+        </li>
       </ul>
       <div className="flex items-center gap-3 sm:gap-5">
         {/* Phones keep one compact row: the wordmark and the request; "Entrar" is in the footer too. */}
