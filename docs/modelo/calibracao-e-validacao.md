@@ -55,12 +55,14 @@ Nove deles, os mais próximos de Guimarães, estão também em `engine/test/refe
 
 | Fogos | Simples | Rothermel sem calibração | Rothermel calibrado |
 | --- | --- | --- | --- |
-| Tier A, 34 fogos | 0,25 | 0,34 | **0,39** |
-| … dos quais Norte, 8 fogos | 0,18 | 0,26 | **0,42** |
-| Tier A, 26 fogos fora da calibração | 0,26 | 0,35 | **0,38** |
-| Tier B, 46 fogos (combustível de 2018) | 0,10 | 0,14 | 0,14 |
+| Tier A, 34 fogos | 0,27 | 0,33 | **0,40** |
+| … dos quais Norte, 8 fogos | 0,20 | 0,27 | **0,40** |
+| Tier A, 27 fogos fora da calibração | 0,28 | 0,33 | **0,40** |
+| Tier B, 46 fogos (combustível de 2018)* | 0,10 | 0,14 | 0,14 |
 
-Os valores são o Sørensen médio nas horas observadas, desde a ignição. O Rothermel calibrado ganha ao Simples em 28 dos 34 fogos do tier A.
+Os valores são o Sørensen médio nas horas observadas, desde a ignição, na grelha de 100 m. As linhas do tier A são do motor de hoje (`landing/src/data/site-data.json`, gerado por `engine/scripts/landing-data.ts` a 21 de outubro de 2026). O Rothermel calibrado ganha ao Simples em 27 dos 34 fogos do tier A.
+
+\* Medição anterior à revisão do motor, ainda não repetida.
 
 ![Os nove fogos da CI: simulado contra observado](validacao-pt-firesprd.png)
 

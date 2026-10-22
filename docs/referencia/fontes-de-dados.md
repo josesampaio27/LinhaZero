@@ -22,6 +22,6 @@ Os dados que mudam devagar (combustível, relevo, OSM, população) entram nas g
 
 ## Licenças
 
-Confirmar as condições de uso comercial do Open-Meteo para produção (é gratuito para uso não comercial) e o uso do fogos.pt e do FUMOD. Num piloto institucional, preferir acordos de dados diretamente com o IPMA, a ANEPC e o ICNF. O fogos.pt não tem garantia de serviço: para uso operacional, o feed oficial da ANEPC, por acordo.
+Confirmar as condições de uso comercial do Open-Meteo para produção (é gratuito para uso não comercial) e o uso do fogos.pt. O repositório do FUMOD (github.com/anasa30/PT_FuelModels) não declara licença (verificado a 22 de outubro de 2026): para produção, pedir autorização aos autores. Num piloto institucional, preferir acordos de dados diretamente com o IPMA, a ANEPC e o ICNF. O fogos.pt não tem garantia de serviço: para uso operacional, o feed oficial da ANEPC, por acordo.
 
 As ligações para cada fonte estão em [Referências](../bibliografia.md).

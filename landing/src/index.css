@@ -285,6 +285,24 @@
 .article td.n, .article th.n { text-align: right; }
 .expert p + p { margin-top: 0.5em; }
 .refs { list-style: decimal; padding-left: 1.5em; }
+.article ol.steps { list-style: decimal; padding-left: 1.5em; display: grid; gap: 0.5em; max-width: 68ch; }
+.article table.wide { max-width: none; min-width: 640px; }
+.article code { overflow-wrap: anywhere; }
+.article th[scope="row"] { width: 30%; vertical-align: top; }
+.article p + .overflow-x-auto, .article .overflow-x-auto + p { margin-top: 1em; }
+
+/* Printing a page (the technical sheet's "Imprimir ou guardar em PDF"): the text only, dark on white. */
+@media print {
+  nav, footer, .no-print { display: none !important; }
+  :root, html { color-scheme: light; }
+  html, body { background: #fff !important; }
+  body *, body *::before, *::after { color: #111 !important; background: transparent !important; box-shadow: none !important; }
+  .article th, .article td { border-color: #bbb !important; }
+  .article table.wide { min-width: 0; font-size: 11px; }
+  main.article { padding: 0; }
+  section { break-inside: auto; }
+  tr { break-inside: avoid; }
+}
 
 /* ---------- Charts (components/charts): marks carry the series colour, text stays in the ink tokens. ---------- */
 .chart { position: relative; }

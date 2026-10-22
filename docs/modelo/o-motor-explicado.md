@@ -39,9 +39,9 @@ A ferramenta responde a uma pergunta de quem coordena um incêndio rural nas pri
 | Física | Modelo de Rothermel (1972), com os modelos de combustível portugueses, fogo de copas e focos secundários |
 | Tempo | Vento, temperatura e humidade hora a hora; humidade do combustível calculada a partir deles |
 | Combate | Só o que o utilizador desenha; sem nada desenhado, o fogo não é combatido |
-| Incerteza | 30 simulações por decisão, com vento, humidade, combustível e ponto de ignição a variar |
+| Incerteza | De 200 a 500 simulações por decisão, no servidor, com vento, humidade, combustível e ponto de ignição a variar |
 | Validação | 80 incêndios reais portugueses (PT-FireSprd, 2015–2021); regra de adoção em fogos não usados no ajuste |
-| Velocidade | Duas decisões com 30 simulações cada, em Guimarães: menos de um segundo num portátil |
+| Velocidade | Uma decisão com 500 simulações na grelha de 100 m: cerca de 0,2 s num portátil; na grelha de 30 m, com 8 h de fogo, cerca de 43 s (medido a 22 de outubro de 2026) |
 
 ---
 
@@ -200,10 +200,15 @@ Fogos intensos (acima de 2000 kW/m) lançam faúlhas que podem acender focos à 
 | **Linha de contenção** | Uma faixa sem combustível que os meios abrem à frente do fogo, à mão ou com máquinas, ou uma faixa de gestão que já existe. Desenha-se como uma linha (por omissão com 4 m de largura) | A partir do minuto em que fica pronta, o fogo para nela, se a faixa for larga o bastante para as chamas. Uma linha de 4 m só trava fogo fraco |
 | **Ataque** | Meios a combater o fogo diretamente, com água, ferramentas ou máquinas, na cabeça ou num flanco. Desenha-se a zona onde trabalham | A partir do minuto em que os meios chegam, o fogo nessa zona anda 5 vezes mais devagar (20% da velocidade). Atrasa o fogo, não o apaga |
 | **Proteger zona** | Meios já colocados junto a casas ou a uma aldeia, à espera do fogo para o travar ali. Desenha-se a zona à volta do que se defende | A partir do minuto em que lá estão, o fogo nessa zona anda 10 vezes mais devagar (10% da velocidade): mais do que num ataque, porque os meios estão no sítio e preparados |
+| **Descarga aérea** | Um helicóptero ou um avião larga água ou retardante numa faixa, à frente ou no flanco do fogo. Desenha-se o percurso da descarga | Do minuto da descarga até deixar de fazer efeito (água cerca de 20 min, retardante cerca de 2 h, valores provisórios que se podem mudar), a faixa trava o fogo conforme a intensidade (abaixo) |
+| **Contrafogo** | Os meios queimam de propósito o combustível entre uma linha de apoio (estrada, caminho ou linha aberta) e o fogo que se aproxima. Desenha-se a linha de apoio | No minuto indicado, acende o lado da linha virado para a ignição. Esse fogo arde como qualquer outro e conta como área ardida; a linha segura-o como uma linha de contenção, se for larga o bastante para as chamas |
+
+Todas as ações podem ter um minuto de fim: a partir daí deixam de atuar.
 
 As ações dependem da **intensidade do fogo**, como na realidade:
 
 - **Ataques e zonas protegidas:** têm efeito total até 500 kW/m, chamas de cerca de 1,4 m (o fogo que uma equipa com ferramentas manuais controla). Perdem efeito até 4000 kW/m, chamas de cerca de 3,5 m, a partir do qual nenhum meio terrestre consegue atuar.
+- **Descargas aéreas:** travam sempre o fogo até 2000 kW/m (chamas de cerca de 2,5 m), nunca acima de 4000 kW/m (cerca de 3,5 m), e umas vezes sim, outras não, entre os dois. Estes limites são **provisórios**.
 - **Linhas e estradas:** seguram ou cedem conforme a largura e o comprimento da chama.
   - Uma linha com a largura de 5 comprimentos de chama segura em metade dos casos; mais estreita, cede quase sempre; mais larga, quase nunca. Assim, uma linha de 4 m só trava chamas até 80 cm, e uma faixa de 25 m trava chamas até 5 m.
   - O valor de 5 foi ajustado nos incêndios reais. As faixas são galgadas pelo calor radiante e pelas faúlhas muito antes de a chama ter a largura delas.
@@ -211,9 +216,9 @@ As ações dependem da **intensidade do fogo**, como na realidade:
 
 ---
 
-## 5. A incerteza: 30 simulações em vez de uma
+## 5. A incerteza: de 200 a 500 simulações em vez de uma
 
-O tempo previsto nunca é exato, a humidade do combustível varia de sítio para sítio e o ponto de ignição nem sempre é conhecido. Por isso, com "Incerteza" ligada, o motor corre **30 simulações** de cada decisão (200 no servidor). Em cada uma sorteia:
+O tempo previsto nunca é exato, a humidade do combustível varia de sítio para sítio e o ponto de ignição nem sempre é conhecido. Por isso, com "Considerar a incerteza" ligada, o motor corre **de 200 a 500 simulações** de cada decisão, no servidor; o número escolhe-se numa barra na aplicação ([ADR 0070](../decisoes/0070-incerteza-sempre-no-servidor.md)). Sem o servidor, a incerteza fica desligada. Em cada simulação sorteia:
 
 | O que varia | Quanto |
 | --- | --- |
@@ -223,10 +228,10 @@ O tempo previsto nunca é exato, a humidade do combustível varia de sítio para
 | Velocidade de cada grupo de combustível | fator aleatório (desvio de 0,6 em escala logarítmica) |
 | Ponto de ignição | até 400 m de distância (não quando se desenha a área já ardida) |
 
-- **O mapa de cenários** mostra, em cada célula, em quantas das 30 simulações ela arde, **sem combate além do desenhado**. Não é uma probabilidade calibrada de que a célula arda na realidade: os incêndios reais são combatidos, e o mapa arde mais do que eles (secção 7.4).
+- **O mapa de cenários** mostra, em cada célula, em quantas das simulações ela arde, **sem combate além do desenhado**. Não é uma probabilidade calibrada de que a célula arda na realidade: os incêndios reais são combatidos, e o mapa arde mais do que eles (secção 7.4).
 - **A comparação é emparelhada:** a simulação nº 7 da decisão A tem exatamente o mesmo vento, humidade e ignição da simulação nº 7 da decisão B. Assim, a diferença entre as duas é só o efeito da decisão, não o acaso.
-  - O painel diz "em 24 de 30 cenários, a decisão B queima menos", e a diferença típica.
-  - Duas decisões iguais dão sempre 30 empates.
+  - O painel diz em quantos dos cenários a decisão B queima menos, e a diferença típica.
+  - Duas decisões iguais dão sempre só empates.
 - **Os valores desta tabela** foram escolhidos por comparação com incêndios reais, dentro de limites fisicamente plausíveis. A melhor escolha ficou no limite máximo testado, por isso são o teto do que se considerou plausível, não um valor estimado com precisão (secção 7.4).
 
 ---
@@ -258,6 +263,9 @@ O par velocidade ×0,5 e vento ×2,5 faz fogos mais alongados: a cabeça corre m
 | `attackFullKwM` | 500 kW/m | Até aqui, os ataques têm efeito total |
 | `attackNoneKwM` | 4000 kW/m | A partir daqui, nenhum efeito |
 | `lineWidthM` | 4 m | Largura de uma linha de contenção desenhada |
+| `aerialFullKwM` | 2000 kW/m | Até aqui, uma descarga aérea trava sempre o fogo (**provisório**) |
+| `aerialNoneKwM` | 4000 kW/m | A partir daqui, nunca trava (**provisório**) |
+| Duração de uma descarga | água 20 min, retardante 120 min | Fim por omissão, que se pode mudar (**provisório**, `AERIAL_DEFAULT_MIN`) |
 | `holdSteepness` | 3 | Quão abrupta é a passagem entre "segura" e "cede" |
 | `spotCriticalKwM` | 2000 kW/m | Intensidade a partir da qual há faúlhas |
 | `spotPerHa` | 0,1 | Probabilidade de um hectare a arder acima desse limiar lançar um foco |
@@ -297,7 +305,7 @@ Um modelo de fogo só merece confiança se for comparado com fogos reais, e com 
 - **BehavePlus:** o modelo de Rothermel do motor foi comparado com o BehavePlus em 7 modelos de combustível e 7 combinações de vento e declive. A diferença é sempre inferior a 1% na velocidade, intensidade, comprimento de chama e direção.
 - **Modelos portugueses:** nas condições do artigo de referência (Fernandes et al. 2009), os 18 modelos portugueses dão a velocidade e o calor publicados.
 - **Testes de comportamento:** sem vento nem declive, o fogo cresce igual em todas as direções; com vento, alonga-se; a subir, acelera; com mais humidade, abranda.
-- **Testes automáticos:** são cerca de 225, e correm a cada alteração do código.
+- **Testes automáticos:** são cerca de 290 no motor, e correm a cada alteração do código.
 
 ### 7.2 O motor reproduz incêndios reais?
 
@@ -336,15 +344,16 @@ Várias ideias foram testadas e **rejeitadas** por esta regra:
 
 ![Sobreposição entre simulado e observado em cada um dos 34 incêndios de 2018–2021](validacao-tier-a.png)
 
+Sørensen médio nas horas observadas, desde a ignição observada, com o tempo hora a hora e sem combate, na grelha de 100 m, com o motor de hoje. Os valores vêm de `landing/src/data/site-data.json`, gerado por `engine/scripts/landing-data.ts` a 21 de outubro de 2026, o mesmo ficheiro de onde a página web tira os números.
+
 | | Modelo simples | Rothermel sem ajuste | **Rothermel ajustado** |
 | --- | --- | --- | --- |
-| 34 incêndios de 2018–2021 | 0,25 | 0,34 | **0,38** |
-| … dos quais na região Norte (8) | 0,18 | 0,26 | **0,39** |
-| 26 incêndios fora do ajuste dos parâmetros principais | 0,26 | 0,35 | **0,38** |
+| 34 incêndios de 2018–2021 | 0,27 | 0,33 | **0,40** |
+| … dos quais na região Norte (8) | 0,20 | 0,27 | **0,40** |
+| 27 incêndios fora do ajuste dos parâmetros principais | 0,28 | 0,33 | **0,40** |
 
-- **Contra o modelo simples:** o Rothermel ajustado é melhor do que o modelo simples, já retirado (secção 8), em 28 dos 34 incêndios.
-- **No fogo livre:** nos intervalos em que o fogo real corria livre, o custo de erro desce de 1,17 (modelo simples) e 1,06 (Rothermel sem ajuste) para 1,04. Nas corridas rápidas, o motor faz 0,67 da velocidade observada (0,53 sem ajuste).
-- **Teste de controlo:** com o vento de cada hora invertido, o acerto cai para cerca de metade. A comparação mede de facto a física, não o acaso.
+- **Contra o modelo simples:** o Rothermel ajustado é melhor do que o modelo simples, já retirado (secção 8), em 27 dos 34 incêndios.
+- **Teste de controlo:** com o vento de cada hora invertido, o acerto cai de 0,40 para 0,08. A comparação mede de facto a física, não o acaso.
 - **Como ler estes números:** os incêndios reais **foram combatidos** e a simulação não. O máximo possível fica abaixo de 1, porque parte do perímetro real é obra dos bombeiros. Também as horas observadas e o mapa de combustível de 100 m são aproximados.
 
 ### 7.4 O que vale o mapa de cenários?
@@ -353,8 +362,10 @@ Várias ideias foram testadas e **rejeitadas** por esta regra:
 
 Um mapa que diz "30%" seria perfeito se, das células com 30%, arderem de facto 3 em cada 10. Isso mediu-se nos fogos de teste, onde o fogo real menos foi travado: nos intervalos em que corria livre e até à primeira observação.
 
-- **Ganho das perturbações:** com vento, humidade, combustível e ignição a variar, o mapa avisa 79% das células que arderam (68% só com o vento). O erro da probabilidade (índice de Brier) desce de 0,047 para 0,039.
-- **O mapa arde mais do que a realidade:** das células em que todos os cenários ardem, arderam de facto 47%. A área com mais de metade dos cenários é 1,3 vezes a real.
+- **Como se escolheu o tamanho das perturbações** (relatório `engine/reports/reliability-2026-10-19.json`, com 30 simulações por incêndio, em fogos de teste): com vento, humidade, combustível e ignição a variar, o mapa avisava 79% das células que arderam (68% só com o vento), e o erro da probabilidade (índice de Brier) descia de 0,047 para 0,039. A área com mais de metade dos cenários era 1,3 vezes a real.
+- **Verificação com o motor de hoje** (`site-data.json`, 21 de outubro de 2026, 30 simulações por incêndio, 19 incêndios): Brier 0,028; o mapa avisa 70,5% das células que arderam (com pelo menos 10% das simulações).
+- **O mapa arde mais do que a realidade:** das células em que todos os cenários ardem, arderam de facto 44%.
+- **Na aplicação** correm de 200 a 500 simulações com os mesmos sorteios: mais simulações dão um mapa menos ruidoso, mas a verificação foi feita com 30.
 - **É o esperado num fogo sem combate:** mesmo nas horas em que o fogo real corria livre, o ataque inicial já travava partes dele. Por isso a aplicação chama-lhe "cenários em que arde, sem combate além do desenhado", e não probabilidade.
 
 ### 7.5 Ver na aplicação
@@ -371,7 +382,7 @@ O primeiro protótipo usava um modelo simples:
 - a velocidade multiplicava-se por um fator exponencial do vento e do declive;
 - não respondia à humidade, as linhas seguravam sempre e os ataques não perdiam efeito com a intensidade.
 
-Nos incêndios reais acertava menos (0,25 contra 0,38) e fazia as decisões desenhadas parecerem melhores do que são.
+Nos incêndios reais acertava menos (0,27 contra 0,40, secção 7.3) e fazia as decisões desenhadas parecerem melhores do que são.
 
 **Foi retirado:** a aplicação e o servidor usam só o modelo de Rothermel. Os cenários antigos abrem com ele. O código fica no motor apenas como referência nos testes de validação.
 
@@ -379,7 +390,7 @@ Nos incêndios reais acertava menos (0,25 contra 0,38) e fazia as decisões dese
 
 ## 9. O que o motor ainda não sabe fazer
 
-- **Corridas rápidas subestimadas:** nas horas em que os fogos reais correram a mais de 15 m/min, o motor faz cerca de 67% da velocidade observada.
+- **Corridas rápidas subestimadas:** nas horas em que os fogos reais correram a mais de 15 m/min, o motor fica abaixo da velocidade observada.
   - **Porquê:** os fogos reais são mais alongados (cabeça mais rápida, flancos mais lentos) do que o modelo dá. Tudo o que acelera a cabeça acelera também o resto.
   - **Candidatos para corrigir:**
     - a forma do fogo com vento forte;
