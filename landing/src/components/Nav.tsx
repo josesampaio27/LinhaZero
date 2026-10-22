@@ -9,6 +9,7 @@ import { SIGNIN_URL, SIGNUP_URL } from "@/components/Hero";
  */
 const SECTIONS = [
   ["/#como-funciona", "Como funciona"],
+  ["/#o-que-faz", "O que faz"],
   ["/#validacao", "Validação"],
   ["/#dados", "Dados"],
   ["/#quem-somos", "Quem somos"],
@@ -38,7 +39,7 @@ export function Nav({ stuck }: { stuck: boolean }) {
         <img src="/logo-outline.png" alt="" width={85} height={99} className="h-8 w-auto" />
         <span className="font-display text-statement leading-none">LinhaZero</span>
       </a>
-      <ul className="hidden items-center gap-7 text-small font-medium lg:flex">
+      <ul className="hidden items-center gap-5 whitespace-nowrap text-small font-medium lg:flex xl:gap-7">
         {SECTIONS.map(([href, label]) => (
           <li key={href}>
             <a href={href} className="inline-block py-3 underline-offset-[0.3em] decoration-2 hover:underline">
@@ -46,7 +47,7 @@ export function Nav({ stuck }: { stuck: boolean }) {
             </a>
           </li>
         ))}
-        <li className="border-l border-border pl-7">
+        <li className="border-l border-border pl-5 xl:pl-7">
           <DropdownMenu.Root modal={false}>
             <DropdownMenu.Trigger
               data-current={inDocs || undefined}

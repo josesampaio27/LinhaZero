@@ -19,7 +19,7 @@ const STEPS: [string, string][] = [
   ["O tempo vem do IPMA.", "Vento, humidade e temperatura daquele local e daquela hora, que se podem ajustar."],
   ["Desenham-se duas decisões.", "Uma linha de contenção contra um ataque direto, com a hora a que os meios chegam."],
   ["Os dois mapas avançam juntos.", "Hora a hora, com a área ardida colorida pela hora a que o fogo chega."],
-  ["Por baixo, a comparação.", "Edifícios e aldeias protegidos, e em quantas de 30 variações do vento cada decisão ganha."],
+  ["Por baixo, a comparação.", "Edifícios e aldeias protegidos, e em quantos cenários cada decisão ganha."],
 ];
 
 /** True from the md breakpoint up, where the scenario panel is on screen. */
@@ -82,6 +82,54 @@ function HowItWorks() {
   );
 }
 
+/* ---------- What it does: every feature of the app, in four groups; phones keep the names only ---------- */
+
+const FEATURES: [string, [string, string][]][] = [
+  ["Simular e comparar", [
+    ["Duas decisões lado a lado", "Dois mapas sincronizados e uma barra de tempo da ignição ao fim."],
+    ["Linha, ataque ou zona a proteger", "Desenhados no mapa, cada um com o minuto em que começa."],
+    ["Tempo em direto", "Do IPMA e do Open-Meteo, no ponto da ignição; cada valor muda-se à mão."],
+  ]],
+  ["Medir a incerteza", [
+    ["Centenas de cenários por decisão", "De 200 a 500, com o vento, a humidade, o combustível e a ignição a variar."],
+    ["Os mesmos cenários para A e B", "O painel diz em quantos cada decisão é melhor."],
+    ["Onde o fogo pode chegar", "O mapa mostra em quantos cenários arde cada célula."],
+  ]],
+  ["Perceber e melhorar", [
+    ["Porque o fogo chega aqui", "O caminho do fogo até um ponto e o que pesou: combustível, vento, declive."],
+    ["Uma terceira decisão", "Experimenta linhas de contenção no caminho do fogo e mostra as que mais poupam."],
+    ["Assistente com IA", "Explica o resultado, revê um plano e coloca ações; o motor confirma os números."],
+  ]],
+  ["Preparar e rever", [
+    ["Editor de grelha", "Muda o combustível, as barreiras e os coeficientes, e compara com a grelha oficial."],
+    ["Variantes para partilhar", "Cada grelha alterada guarda-se, exporta-se e importa-se, e entra em qualquer decisão."],
+    ["Histórico de simulações", "Cada simulação fica guardada e reabre com o resultado, sem simular de novo."],
+  ]],
+];
+
+function Features() {
+  return (
+    <section id="o-que-faz" aria-labelledby="o-que-faz-h" className="fit bg-panel px-margin">
+      <h2 id="o-que-faz-h" className="text-heading" data-reveal>O que faz</h2>
+      <div className="mt-[clamp(1rem,3.5svh,3rem)] grid gap-x-6 gap-y-[clamp(1rem,3svh,2.5rem)] md:grid-cols-2 lg:grid-cols-4">
+        {FEATURES.map(([group, items], g) => (
+          <div key={group} data-reveal="row" style={css({ "--i": g + 1 })}>
+            <h3 className="font-display text-statement leading-tight">{group}</h3>
+            <dl className="mt-[clamp(0.5rem,1.5svh,1rem)] grid gap-[clamp(0.35rem,1.2svh,1rem)]">
+              {items.map(([name, what]) => (
+                <div key={name} className="border-l-[5px] border-raised pl-4">
+                  <dt className="font-medium">{name}</dt>
+                  <dd className="m-0 text-small text-muted max-sm:hidden">{what}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 /* ---------- The answer: the sentences the interface writes, at the size of the page ---------- */
 
 const Slot = ({ children }: { children: React.ReactNode }) => <span className="slot">{children}</span>;
@@ -99,7 +147,7 @@ function Answer() {
           <div data-ui className="says mt-[clamp(1.25rem,4svh,2.5rem)] text-statement">
             <p className="win-B" data-reveal="row" style={css({ "--i": 2 })}>A decisão B protege <Slot>X</Slot> edifícios a mais do que a A.</p>
             <p className="win-B" data-reveal="row" style={css({ "--i": 3 })}>Com a decisão A, o fogo chega a <Slot>aldeia</Slot> às <Slot>hh:mm</Slot>. Com a B, não chega.</p>
-            <p className="win-B" data-reveal="row" style={css({ "--i": 4 })}>B é melhor do que A em <Slot>N</Slot> de 30 variações do vento.</p>
+            <p className="win-B" data-reveal="row" style={css({ "--i": 4 })}>B é melhor do que A em <Slot>N</Slot> de <Slot>M</Slot> cenários.</p>
             <p className="warn" data-reveal="row" style={css({ "--i": 5 })}>A equipa só chega à linha aos <Slot>mm</Slot> minutos; o fogo passa lá aos <Slot>mm</Slot>.</p>
           </div>
         </div>
@@ -230,7 +278,6 @@ const SOURCES: [string, string][] = [
   ["IPMA", "Vento, humidade e temperatura, hora a hora."],
   ["OpenStreetMap", "Estradas, aceiros e os edifícios da grelha."],
   ["Censos 2021", "Quem vive em cada um dos 88 lugares."],
-  ["fogos.pt", "As ocorrências ativas da ANEPC."],
 ];
 
 function Data() {
@@ -518,6 +565,7 @@ export function Home() {
       <Hero />
       <main id="conteudo" tabIndex={-1} className="outline-none">
         <HowItWorks />
+        <Features />
         <Answer />
         <Satellite />
         <Proof />

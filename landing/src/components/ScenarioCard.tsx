@@ -61,7 +61,7 @@ export function ScenarioCard({ stage }: { stage: Stage }) {
           <>
             <p className="say win-B">B protege <Slot>X</Slot> edifícios a mais do que a A</p>
             <p className="say win-B">Com a A, o fogo chega a <Slot>aldeia</Slot> às <Slot>hh:mm</Slot></p>
-            <p className="say win-B">B é melhor em <Slot>N</Slot> de 30 variações do vento</p>
+            <p className="say win-B">B é melhor em <Slot>N</Slot> de <Slot>M</Slot> cenários</p>
           </>
         )}
       </div>

@@ -61,7 +61,7 @@ export function EnginePage() {
         <p>
           O simulador responde a uma pergunta de quem comanda nas primeiras horas: <strong>se eu tomar a decisão A ou a decisão B, o
           que acontece ao fogo?</strong> Simula as duas com o mesmo território e o mesmo tempo e compara a área ardida hora a hora,
-          os edifícios atingidos, a hora a que o fogo chega a cada lugar e em quantas variações do vento uma decisão ganha à outra.
+          os edifícios atingidos, a hora a que o fogo chega a cada lugar e em quantos cenários uma decisão ganha à outra.
         </p>
         <p>
           Não é um oráculo. É uma estimativa física, honesta sobre a sua incerteza, para comparar opções. Não prevê o perímetro ao
