@@ -1,4 +1,5 @@
 using System.Text.Json;
+using LinhaZero.Api.Auth;
 using LinhaZero.Api.Models;
 using LinhaZero.Api.OpenApi;
 using LinhaZero.Api.Services;
@@ -45,12 +46,59 @@ public sealed class RunsController(RunService runs, RunEventStream events, GridC
         }
 
         var id = Guid.NewGuid();
-        if (!await runs.EnqueueAsync(id, parsed.Json, ct))
+        if (!await runs.EnqueueAsync(id, parsed.Json, AuthSetup.UserId(User), ct))
         {
             return StatusCode(StatusCodes.Status503ServiceUnavailable, new ErrorResponse(RunService.QueueUnavailable));
         }
 
         return Accepted($"/api/v1/runs/{id}", new RunAccepted(id));
+    }
+
+    /// <summary>The simulation history: the signed-in user's runs, newest first.</summary>
+    /// <remarks>
+    /// Only runs sent with the drawn scenario are listed (docs/decisoes/0073). all=true lists everyone's, for admins only
+    /// (403 otherwise). limit: 1–200, 50 by default.
+    /// </remarks>
+    /// <param name="all">Everyone's runs (admins).</param>
+    /// <param name="limit">How many, at most.</param>
+    /// <param name="ct">Request cancellation.</param>
+    [HttpGet]
+    [ProducesResponseType<IReadOnlyList<RunSummary>>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> List([FromQuery] bool all = false, [FromQuery] int limit = 50, CancellationToken ct = default)
+    {
+        if (all)
+        {
+            if (!User.IsInRole(AuthSetup.AdminRole))
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new ErrorResponse("só os administradores veem as simulações de todos"));
+            }
+
+            return Ok(await runs.ListAsync(null, Math.Clamp(limit, 1, 200), ct));
+        }
+
+        // Test sessions have no users row, so no runs of their own.
+        if (AuthSetup.UserId(User) is not { } userId)
+        {
+            return Ok(Array.Empty<RunSummary>());
+        }
+
+        return Ok(await runs.ListAsync(userId, Math.Clamp(limit, 1, 200), ct));
+    }
+
+    /// <summary>The drawn scenario sent with a run: a saved-scenario file (docs/referencia/formato-cenario.md).</summary>
+    /// <remarks>Only for who started the run, or an admin; 404 for anyone else, and for runs sent without one.</remarks>
+    /// <param name="id">The run id.</param>
+    /// <param name="ct">Request cancellation.</param>
+    [HttpGet("{id:guid}/scenario")]
+    [ProducesResponseType<JsonElement>(StatusCodes.Status200OK)]
+    [ProducesResponseType<ErrorResponse>(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Scenario(Guid id, CancellationToken ct)
+    {
+        var admin = User.IsInRole(AuthSetup.AdminRole);
+        var userId = AuthSetup.UserId(User);
+        var scenario = admin || userId is not null ? await runs.ScenarioAsync(id, admin ? null : userId, ct) : null;
+        return scenario is null ? NotFound(new ErrorResponse("cenário indisponível")) : Content(scenario, "application/json");
     }
 
     /// <summary>State of a run, and its result once done.</summary>

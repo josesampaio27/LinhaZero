@@ -1,5 +1,5 @@
 import { DEFAULT_ENSEMBLE, type GridHeader, type RunEvent, type RunRequest, type RunResult, type SimulationResult } from "@linha-zero/engine";
-import type { RunStatusResponse } from "../api/client";
+import type { RunStatusResponse, RunSummary } from "../api/client";
 import { healthApi, runsApi } from "./api";
 
 /** The ensemble always runs on the server: the browser's options, with 200 runs by default. */
@@ -90,6 +90,11 @@ function waitForDone(runId: string, onProgress: (done: number) => void): Promise
 export async function runOnServer(header: GridHeader, request: RunRequest, onProgress: (done: number) => void): Promise<ServerResults> {
   const { runId } = await runsApi.create(request);
   await waitForDone(runId, onProgress);
+  return fetchRunResults(header, runId);
+}
+
+/** The two SimulationResults of a finished run, from its stored result and its 4 rasters (also for the history). */
+export async function fetchRunResults(header: GridHeader, runId: string): Promise<ServerResults> {
   const row = await getRun(runId);
   const result = row.result;
   if (row.status !== "done" || !result) throw new Error(row.error ?? "corrida sem resultado");
@@ -107,6 +112,16 @@ export async function runOnServer(header: GridHeader, request: RunRequest, onPro
     B: { arrivalMin: bArr, burnProbability: bProb, metrics: result.B.metrics, runs: result.B.runs },
     elapsedMs: result.elapsedMs,
   };
+}
+
+/** The simulation history (GET /runs): the signed-in user's runs, or everyone's for an admin with `all`. */
+export function listRuns(all = false): Promise<RunSummary[]> {
+  return runsApi.list(all);
+}
+
+/** The drawn scenario stored with a run, still to be validated (readSavedScenario). */
+export async function fetchRunScenario(runId: string): Promise<unknown> {
+  return runsApi.scenario(runId);
 }
 
 /** True when the API answered and at least one worker is waiting for a job. */

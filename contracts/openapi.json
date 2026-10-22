@@ -553,7 +553,7 @@
           "Runs"
         ],
         "summary": "Queues a run of decisions A and B on the engine workers.",
-        "description": "Answers 202 at once with the run id; follow it with GET /runs/{id}/events. 503 when the queue is unavailable,\nand then the web runs the ensemble in the browser.",
+        "description": "Answers 202 at once with the run id; follow it with GET /runs/{id}/events. 503 when the queue is unavailable,\r\nand then the web runs the ensemble in the browser.",
         "operationId": "Runs_Create",
         "requestBody": {
           "content": {
@@ -588,6 +588,104 @@
           },
           "503": {
             "description": "Service Unavailable",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "The simulation history: the signed-in user's runs, newest first.",
+        "description": "Only runs sent with the drawn scenario are listed (docs/decisoes/0073). all=true lists everyone's, for admins only\r\n(403 otherwise). limit: 1–200, 50 by default.",
+        "operationId": "Runs_List",
+        "parameters": [
+          {
+            "name": "all",
+            "in": "query",
+            "description": "Everyone's runs (admins).",
+            "schema": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "How many, at most.",
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 50
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RunSummary"
+                  }
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/runs/{id}/scenario": {
+      "get": {
+        "tags": [
+          "Runs"
+        ],
+        "summary": "The drawn scenario sent with a run: a saved-scenario file (docs/referencia/formato-cenario.md).",
+        "description": "Only for who started the run, or an admin; 404 for anyone else, and for runs sent without one.",
+        "operationId": "Runs_Scenario",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "The run id.",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/JsonElement"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
             "content": {
               "application/json": {
                 "schema": {
@@ -648,7 +746,7 @@
           "Runs"
         ],
         "summary": "Progress of a run as Server-Sent Events.",
-        "description": "The event name is the type: progress, done or failed, with the RunEvent JSON as data. The stream ends after done\nor failed. An \"event: ping\" with no data every 15 s keeps proxies from closing the connection.",
+        "description": "The event name is the type: progress, done or failed, with the RunEvent JSON as data. The stream ends after done\r\nor failed. An \"event: ping\" with no data every 15 s keeps proxies from closing the connection.",
         "operationId": "Runs_Events",
         "parameters": [
           {
@@ -754,7 +852,7 @@
           "Weather"
         ],
         "summary": "Wind, humidity, fire risk and warnings for a point in mainland Portugal.",
-        "description": "Built from the newest snapshots saved by ingest: the nearest IPMA station within 25 km and 3 h, otherwise the\nOpen-Meteo model. Each source says how old it is and whether it is stale.",
+        "description": "Built from the newest snapshots saved by ingest: the nearest IPMA station within 25 km and 3 h, otherwise the\r\nOpen-Meteo model. Each source says how old it is and whether it is stale.",
         "operationId": "Weather_Get",
         "parameters": [
           {
@@ -850,7 +948,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The POST /api/v1/access-requests body, from the landing's \"Pedir acesso\" form. `Website` is a trap: the form\nhides it, so only bots fill it in, and their request is accepted and dropped."
+        "description": "The POST /api/v1/access-requests body, from the landing's \"Pedir acesso\" form. `Website` is a trap: the form\r\nhides it, so only bots fill it in, and their request is accepted and dropped."
       },
       "AccessRequestResponse": {
         "required": [
@@ -1060,7 +1158,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The POST /api/v1/feedback body: a problem or a suggestion from a signed-in user. Kind: bug, suggestion or other.\n`MayContact`: the team may answer by email (the address comes from the session)."
+        "description": "The POST /api/v1/feedback body: a problem or a suggestion from a signed-in user. Kind: bug, suggestion or other.\r\n`MayContact`: the team may answer by email (the address comes from the session)."
       },
       "FeedbackResponse": {
         "required": [
@@ -1194,7 +1292,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "One hour of the Open-Meteo forecast: wind, and the air (humidity, temperature, cloud cover in %) from which the\nbrowser computes fuel moisture. The engine can follow these hours (weatherSteps) or use a single wind."
+        "description": "One hour of the Open-Meteo forecast: wind, and the air (humidity, temperature, cloud cover in %) from which the\r\nbrowser computes fuel moisture. The engine can follow these hours (weatherSteps) or use a single wind."
       },
       "HealthResponse": {
         "required": [
@@ -1216,7 +1314,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The GET /api/v1/health body. `idleWorkers` counts the engine workers waiting for a job right now\n(a worker in the middle of a run is not counted)."
+        "description": "The GET /api/v1/health body. `idleWorkers` counts the engine workers waiting for a job right now\r\n(a worker in the middle of a run is not counted)."
       },
       "Incident": {
         "required": [
@@ -1346,7 +1444,7 @@
             "nullable": true
           }
         },
-        "description": "One intervention, already rasterised into cells by the browser. `kind`: containmentLine, suppression, protectZone,\naerialDrop or backfire. `endMin`: when it stops acting (absent = never). `litCells`: the cells a backfire\nsets alight (docs/decisoes/0070)."
+        "description": "One intervention, already rasterised into cells by the browser. `kind`: containmentLine, suppression, protectZone,\r\naerialDrop or backfire. `endMin`: when it stops acting (absent = never). `litCells`: the cells a backfire\r\nsets alight (docs/decisoes/0070)."
       },
       "JsonElement": { },
       "MeResponse": {
@@ -1446,7 +1544,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "Humidity and temperature at the nearest IPMA station that measured either in the last 2 h. Often a closer station\nthan the wind's: many stations have no anemometer."
+        "description": "Humidity and temperature at the nearest IPMA station that measured either in the last 2 h. Often a closer station\r\nthan the wind's: many stations have no anemometer."
       },
       "ObservedWind": {
         "required": [
@@ -1475,7 +1573,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "Wind observed at the nearest IPMA station that measured wind in the last 2 h. `directionDeg` is where it blows\nfrom; null when calm."
+        "description": "Wind observed at the nearest IPMA station that measured wind in the last 2 h. `directionDeg` is where it blows\r\nfrom; null when calm."
       },
       "RunAccepted": {
         "required": [
@@ -1520,7 +1618,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The run-event contract (contracts/examples/run-event-*.json): \"progress\" with status, done and total; \"done\"; or\n\"failed\" with error. Nulls are not written, so \"done\" is `{\"type\":\"done\"}`."
+        "description": "The run-event contract (contracts/examples/run-event-*.json): \"progress\" with status, done and total; \"done\"; or\r\n\"failed\" with error. Nulls are not written, so \"done\" is `{\"type\":\"done\"}`."
       },
       "RunRequest": {
         "required": [
@@ -1554,7 +1652,7 @@
           },
           "weather": { }
         },
-        "description": "The POST /api/v1/runs body (contracts/examples/run-request.json). Fields the API does not read, such as\n`variants`, are passed to the worker unchanged."
+        "description": "The POST /api/v1/runs body (contracts/examples/run-request.json). Fields the API does not read, such as\r\n`variants`, are passed to the worker unchanged."
       },
       "RunStatusResponse": {
         "required": [
@@ -1618,7 +1716,124 @@
           }
         },
         "additionalProperties": false,
-        "description": "The GET /api/v1/runs/{id} body: one row of the runs table. `status` is queued, running, done or failed;\n`progress` is the number of decisions done (0–2); `result` is the run-result contract once done."
+        "description": "The GET /api/v1/runs/{id} body: one row of the runs table. `status` is queued, running, done or failed;\r\n`progress` is the number of decisions done (0–2); `result` is the run-result contract once done."
+      },
+      "RunSummary": {
+        "required": [
+          "id",
+          "status",
+          "createdAt",
+          "finishedAt",
+          "error",
+          "grid",
+          "title",
+          "durationMin",
+          "windDirectionDeg",
+          "windSpeedMs",
+          "ensembleRuns",
+          "interventionsA",
+          "interventionsB",
+          "variantA",
+          "variantB",
+          "station",
+          "burnedHaA",
+          "burnedHaB",
+          "buildingsA",
+          "buildingsB",
+          "userName"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "finishedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "error": {
+            "type": "string",
+            "nullable": true
+          },
+          "grid": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string",
+            "nullable": true
+          },
+          "durationMin": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "windDirectionDeg": {
+            "type": "number",
+            "format": "double"
+          },
+          "windSpeedMs": {
+            "type": "number",
+            "format": "double"
+          },
+          "ensembleRuns": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "interventionsA": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "interventionsB": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "variantA": {
+            "type": "string",
+            "nullable": true
+          },
+          "variantB": {
+            "type": "string",
+            "nullable": true
+          },
+          "station": {
+            "type": "string",
+            "nullable": true
+          },
+          "burnedHaA": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "burnedHaB": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          },
+          "buildingsA": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "buildingsB": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "userName": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false,
+        "description": "One row of GET /api/v1/runs, the simulation history: what the list shows, read from the stored request and result\r\nwithout sending either. `status` is queued, running, done or failed; the burned hectares are at the end of the\r\nrun and, with the buildings reached, null until it is done. `userName` is who started it."
       },
       "SourceStatus": {
         "required": [
@@ -1774,7 +1989,7 @@
           }
         },
         "additionalProperties": false,
-        "description": "The GET /api/v1/weather body (contracts/examples/weather.json). `use` says which wind fills the form,\n\"observed\" or \"model\"; it is null when neither source has a wind (the endpoint answers 503). `air` is the\nhumidity and temperature of the nearest station, whichever wind is used."
+        "description": "The GET /api/v1/weather body (contracts/examples/weather.json). `use` says which wind fills the form,\r\n\"observed\" or \"model\"; it is null when neither source has a wind (the endpoint answers 503). `air` is the\r\nhumidity and temperature of the nearest station, whichever wind is used."
       },
       "WeatherStation": {
         "required": [
