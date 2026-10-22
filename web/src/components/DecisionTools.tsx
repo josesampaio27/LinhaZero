@@ -20,6 +20,8 @@ interface Props {
   defaultLineWidthM?: number;
   /** Ids of the actions the assistant placed, marked on their cards. */
   assistantIds?: ReadonlySet<string>;
+  /** The demo: the actions are shown, nothing can be added, changed or removed. */
+  readOnly?: boolean;
 }
 
 /** Typical containment line widths: hand line, machine line, fuel breaks. */
@@ -29,6 +31,8 @@ export const LINE_WIDTHS: { m: number; label: string }[] = [
   { m: 10, label: "10 m · faixa" },
   { m: 25, label: "25 m · faixa larga" },
 ];
+
+const widthLabel = (m: number) => LINE_WIDTHS.find((w) => w.m === m)?.label ?? `${m.toLocaleString("pt-PT")} m`;
 
 const AGENTS: { value: AerialAgent; label: string }[] = [
   { value: "water", label: `Água · ${AERIAL_DEFAULT_MIN.water} min` },
@@ -204,11 +208,17 @@ export function DecisionTools(p: Props) {
                 </span>
                 <span className="action-start">
                   <span>{iv.kind === "aerialDrop" ? "Descarga aos" : iv.kind === "backfire" ? "Aceso aos" : "Começa aos"}</span>
-                  <Stepper label={`Início de ${label}, em minutos`} value={iv.startMin} min={0} onChange={(v) => setStart(iv, v)} />
+                  {p.readOnly ? (
+                    <span>{iv.startMin} min</span>
+                  ) : (
+                    <Stepper label={`Início de ${label}, em minutos`} value={iv.startMin} min={0} onChange={(v) => setStart(iv, v)} />
+                  )}
                 </span>
                 <span className="action-end">
                   <span>{iv.kind === "aerialDrop" ? "Efeito até" : "Acaba aos"}</span>
-                  {iv.endMin === undefined ? (
+                  {p.readOnly ? (
+                    <span>{iv.endMin === undefined ? "sem fim" : `${iv.endMin} min`}</span>
+                  ) : iv.endMin === undefined ? (
                     <>
                       <span>sem fim</span>
                       <button className="link" onClick={() => p.onUpdate(iv.id, { endMin: iv.startMin + 60 })}>
@@ -233,7 +243,13 @@ export function DecisionTools(p: Props) {
                     </>
                   )}
                 </span>
-                {iv.kind === "aerialDrop" && (
+                {p.readOnly && iv.kind === "aerialDrop" && (
+                  <span className="action-width">Agente: {AGENTS.find((a) => a.value === (iv.agent ?? "water"))!.label}</span>
+                )}
+                {p.readOnly && hasWidth && (
+                  <span className="action-width">Largura: {widthLabel(iv.widthM ?? p.defaultLineWidthM!)}</span>
+                )}
+                {!p.readOnly && iv.kind === "aerialDrop" && (
                   <label className="action-width">
                     Agente
                     <select
@@ -252,7 +268,7 @@ export function DecisionTools(p: Props) {
                     </select>
                   </label>
                 )}
-                {hasWidth && (
+                {!p.readOnly && hasWidth && (
                   <label className="action-width">
                     Largura
                     <select
@@ -264,76 +280,84 @@ export function DecisionTools(p: Props) {
                         .sort((a, b) => a - b)
                         .map((m) => (
                           <option key={m} value={m}>
-                            {LINE_WIDTHS.find((w) => w.m === m)?.label ?? `${m.toLocaleString("pt-PT")} m`}
+                            {widthLabel(m)}
                           </option>
                         ))}
                     </select>
                   </label>
                 )}
-                <button className="icon-btn" aria-label={`Apagar ${label}`} title="Apagar" onClick={() => remove(iv, index)}>
-                  <Icon name="trash" size={18} />
-                </button>
+                {!p.readOnly && (
+                  <button className="icon-btn" aria-label={`Apagar ${label}`} title="Apagar" onClick={() => remove(iv, index)}>
+                    <Icon name="trash" size={18} />
+                  </button>
+                )}
               </li>
             );
           })}
         </ul>
       )}
-      {p.onRestore && (
-        <p className="decision-status" role="status">
-          {removed && (
-            <>
-              <span>Ação removida ({KIND_LABEL[removed.item.kind]}).</span>
-              <button
-                className="link"
-                onClick={() => {
-                  p.onRestore!(removed.item, removed.index);
-                  setRemoved(null);
-                }}
-              >
-                <Icon name="undo" size={16} />
-                Desfazer
-              </button>
-            </>
-          )}
-        </p>
-      )}
-      <h3 className="field-label">Adicionar ação à decisão {p.decision}</h3>
-      <div className="add-actions">
-        {TOOLS.map((t) => (
-          <button key={t.kind} className={`add-action dec-${p.decision}`} title={t.summary} onClick={() => p.onPickTool(t.kind)}>
-            <Icon name={t.icon} size={18} />
-            <span>
-              <b>{KIND_LABEL[t.kind]}</b>
-              <small>{t.summary}</small>
-            </span>
-          </button>
-        ))}
-      </div>
-      <details className="disclosure decision-more">
-        <summary>
-          Mais opções da decisão
-          {p.variantName && <span className="variant-badge">Variante: {p.variantName}</span>}
-        </summary>
-        {p.children}
-        {p.items.length > 1 && (
-          <>
-            <button
-              className={`link ${confirmClear ? "danger-text" : ""}`}
-              onClick={() => {
-                if (!confirmClear) return setConfirmClear(true);
-                setConfirmClear(false);
-                p.onClear();
-              }}
-              onBlur={() => setConfirmClear(false)}
-            >
-              {confirmClear ? "Confirmar: apagar todas as ações" : "Apagar todas as ações"}
-            </button>
+      {p.readOnly ? (
+        p.variantName && <p className="hint">Corre na variante de grelha "{p.variantName}".</p>
+      ) : (
+        <>
+          {p.onRestore && (
             <p className="decision-status" role="status">
-              {confirmClear && "Carregar outra vez para confirmar."}
+              {removed && (
+                <>
+                  <span>Ação removida ({KIND_LABEL[removed.item.kind]}).</span>
+                  <button
+                    className="link"
+                    onClick={() => {
+                      p.onRestore!(removed.item, removed.index);
+                      setRemoved(null);
+                    }}
+                  >
+                    <Icon name="undo" size={16} />
+                    Desfazer
+                  </button>
+                </>
+              )}
             </p>
-          </>
-        )}
-      </details>
+          )}
+          <h3 className="field-label">Adicionar ação à decisão {p.decision}</h3>
+          <div className="add-actions">
+            {TOOLS.map((t) => (
+              <button key={t.kind} className={`add-action dec-${p.decision}`} title={t.summary} onClick={() => p.onPickTool(t.kind)}>
+                <Icon name={t.icon} size={18} />
+                <span>
+                  <b>{KIND_LABEL[t.kind]}</b>
+                  <small>{t.summary}</small>
+                </span>
+              </button>
+            ))}
+          </div>
+          <details className="disclosure decision-more">
+            <summary>
+              Mais opções da decisão
+              {p.variantName && <span className="variant-badge">Variante: {p.variantName}</span>}
+            </summary>
+            {p.children}
+            {p.items.length > 1 && (
+              <>
+                <button
+                  className={`link ${confirmClear ? "danger-text" : ""}`}
+                  onClick={() => {
+                    if (!confirmClear) return setConfirmClear(true);
+                    setConfirmClear(false);
+                    p.onClear();
+                  }}
+                  onBlur={() => setConfirmClear(false)}
+                >
+                  {confirmClear ? "Confirmar: apagar todas as ações" : "Apagar todas as ações"}
+                </button>
+                <p className="decision-status" role="status">
+                  {confirmClear && "Carregar outra vez para confirmar."}
+                </p>
+              </>
+            )}
+          </details>
+        </>
+      )}
     </div>
   );
 }

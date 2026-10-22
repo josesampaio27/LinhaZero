@@ -31,12 +31,15 @@ export function ConditionsPanel({
   onRefresh,
   canRefresh,
   adjust,
+  readOnly = false,
 }: {
   weather: LiveWeather;
   onRefresh: () => void;
   canRefresh: boolean;
   /** More controls shown inside "Ajustar condições" (App passes the forecast toggle and the fuel dryness). */
   adjust?: React.ReactNode;
+  /** The demo: the scenario's weather is shown, not fetched again or adjusted. */
+  readOnly?: boolean;
 }) {
   const { conditions, manual, edit, reset } = weather;
   const { wind, air } = conditions;
@@ -44,42 +47,44 @@ export function ConditionsPanel({
 
   return (
     <div className="conditions">
-      <Summary weather={weather} onRefresh={onRefresh} canRefresh={canRefresh} />
+      <Summary weather={weather} onRefresh={onRefresh} canRefresh={canRefresh} readOnly={readOnly} />
 
-      <details className="disclosure">
-        <summary>Ajustar condições</summary>
-        <div className="conditions-group">
-          <h3 className="field-label">Vento</h3>
-          <WindControl wind={wind} onChange={weather.editWind} />
-          <div className="num-fields">
-            <NumberField label="Direção (de)" unit="°" value={Math.round(wind.directionDeg)} min={0} max={359} onChange={(v) => edit("direction", v)} {...field("direction")} />
-            <NumberField
-              label="Velocidade"
-              unit="km/h"
-              value={msToKmh(wind.speedMs)}
-              min={0}
-              max={MAX_SPEED_KMH}
-              onChange={(v) => edit("speed", kmhToMs(v))}
-              {...field("speed")}
-            />
+      {!readOnly && (
+        <details className="disclosure">
+          <summary>Ajustar condições</summary>
+          <div className="conditions-group">
+            <h3 className="field-label">Vento</h3>
+            <WindControl wind={wind} onChange={weather.editWind} />
+            <div className="num-fields">
+              <NumberField label="Direção (de)" unit="°" value={Math.round(wind.directionDeg)} min={0} max={359} onChange={(v) => edit("direction", v)} {...field("direction")} />
+              <NumberField
+                label="Velocidade"
+                unit="km/h"
+                value={msToKmh(wind.speedMs)}
+                min={0}
+                max={MAX_SPEED_KMH}
+                onChange={(v) => edit("speed", kmhToMs(v))}
+                {...field("speed")}
+              />
+            </div>
           </div>
-        </div>
-        <div className="conditions-group">
-          <h3 className="field-label">Ar</h3>
-          <div className="num-fields">
-            <NumberField label="Temperatura" unit="°C" value={air?.tempC ?? null} min={-20} max={50} step={0.5} onChange={(v) => edit("temp", v)} {...field("temp")} />
-            <NumberField label="Humidade" unit="%" value={air?.rhPct ?? null} min={1} max={100} onChange={(v) => edit("rh", v)} {...field("rh")} />
-            <NumberField label="Nuvens" unit="%" value={air?.cloudPct ?? null} min={0} max={100} onChange={(v) => edit("cloud", v)} {...field("cloud")} />
+          <div className="conditions-group">
+            <h3 className="field-label">Ar</h3>
+            <div className="num-fields">
+              <NumberField label="Temperatura" unit="°C" value={air?.tempC ?? null} min={-20} max={50} step={0.5} onChange={(v) => edit("temp", v)} {...field("temp")} />
+              <NumberField label="Humidade" unit="%" value={air?.rhPct ?? null} min={1} max={100} onChange={(v) => edit("rh", v)} {...field("rh")} />
+              <NumberField label="Nuvens" unit="%" value={air?.cloudPct ?? null} min={0} max={100} onChange={(v) => edit("cloud", v)} {...field("cloud")} />
+            </div>
+            {!air && <p className="hint">Sem dados do ar: indicar temperatura e humidade para calcular a secura.</p>}
           </div>
-          {!air && <p className="hint">Sem dados do ar: indicar temperatura e humidade para calcular a secura.</p>}
-        </div>
-        {adjust && <div className="conditions-group">{adjust}</div>}
-        {manual.size > 0 && (
-          <button className="link" onClick={weather.resetAll}>
-            Repor tudo
-          </button>
-        )}
-      </details>
+          {adjust && <div className="conditions-group">{adjust}</div>}
+          {manual.size > 0 && (
+            <button className="link" onClick={weather.resetAll}>
+              Repor tudo
+            </button>
+          )}
+        </details>
+      )}
 
       <details className="disclosure">
         <summary>Detalhes da fonte</summary>
@@ -115,7 +120,17 @@ function shortSource({ live, source }: LiveWeather): string {
  * Always shown: the wind, the air, the dryness, the source and its age, the refresh, the fire risk and warnings,
  * and anything that needs attention (values typed by hand, no service, an error, a stale wind).
  */
-function Summary({ weather, onRefresh, canRefresh }: { weather: LiveWeather; onRefresh: () => void; canRefresh: boolean }) {
+function Summary({
+  weather,
+  onRefresh,
+  canRefresh,
+  readOnly,
+}: {
+  weather: LiveWeather;
+  onRefresh: () => void;
+  canRefresh: boolean;
+  readOnly: boolean;
+}) {
   const { live, source, status, manual, conditions } = weather;
   const { wind, air } = conditions;
   const loading = status.kind === "loading";
@@ -145,15 +160,17 @@ function Summary({ weather, onRefresh, canRefresh }: { weather: LiveWeather; onR
       </p>
       <div className="conditions-source">
         <p className="hint">{loading ? "A obter o tempo…" : shortSource(weather)}</p>
-        <button
-          className="icon-btn"
-          disabled={loading || !canRefresh}
-          onClick={onRefresh}
-          aria-label={refreshLabel}
-          title={`${refreshLabel} no ponto de ignição (ou no centro da zona)`}
-        >
-          <Icon name="refresh" size={18} />
-        </button>
+        {!readOnly && (
+          <button
+            className="icon-btn"
+            disabled={loading || !canRefresh}
+            onClick={onRefresh}
+            aria-label={refreshLabel}
+            title={`${refreshLabel} no ponto de ignição (ou no centro da zona)`}
+          >
+            <Icon name="refresh" size={18} />
+          </button>
+        )}
       </div>
       {s && (s.fireRisk || s.warnings.length > 0) && (
         <p className="row">
@@ -169,7 +186,7 @@ function Summary({ weather, onRefresh, canRefresh }: { weather: LiveWeather; onR
           ))}
         </p>
       )}
-      {status.kind === "signedOut" && (
+      {status.kind === "signedOut" && !readOnly && (
         <p className="hint">
           Tempo em direto só com sessão iniciada ·{" "}
           <a href={loginUrl()}>Entrar</a>
@@ -178,7 +195,7 @@ function Summary({ weather, onRefresh, canRefresh }: { weather: LiveWeather; onR
       {status.kind === "offline" && <p className="hint">Sem tempo em direto (serviço indisponível): valores manuais.</p>}
       {status.kind === "error" && <p className="warn-text">{status.message}</p>}
       {s && s.sources.find((x) => x.name === s.windSource)?.stale && <p className="warn-text">Vento de {ageText(windOf(s).observedAt)} (sem ligação)</p>}
-      {manual.size > 0 && (
+      {manual.size > 0 && !readOnly && (
         <p className="hint">
           {manual.size === 1 ? "1 valor ajustado à mão" : `${manual.size} valores ajustados à mão`} ·{" "}
           <button className="link" onClick={weather.resetAll}>

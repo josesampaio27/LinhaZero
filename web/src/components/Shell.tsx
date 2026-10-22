@@ -15,8 +15,8 @@ interface Props<T extends string> {
   title: string;
   /** Optional: the title becomes a button ("Guimarães ▾") opening this panel, e.g. the zone and scenario switcher. */
   titleMenu?: (close: () => void) => ReactNode;
-  /** App bar menu; `close` hides it after an action. */
-  menu: (close: () => void) => ReactNode;
+  /** App bar menu; `close` hides it after an action. Omitted (the demo), there is no menu button. */
+  menu?: (close: () => void) => ReactNode;
   /** The map area. */
   stage: ReactNode;
   /** Steps shown as tabs; omit to hide them (e.g. while drawing). */
@@ -58,9 +58,11 @@ export function Shell<T extends string>({ title, titleMenu, menu, stage, tabs, t
         <SignIn />
         <FeedbackButton />
         <AccountMenu />
-        <Popover icon="menu" label="Menu" className="menu">
-          {menu}
-        </Popover>
+        {menu && (
+          <Popover icon="menu" label="Menu" className="menu">
+            {menu}
+          </Popover>
+        )}
       </header>
       <div className="stage">{stage}</div>
       <section className={`sheet ${open ? "" : "collapsed"}`}>

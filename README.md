@@ -53,7 +53,7 @@ docker compose restart api   # esquece as chaves do Keycloak antigo
 
 Em alternativa, quem não precisa dos dados antigos começa do zero: `docker compose down -v` e depois `docker compose up -d --build`.
 
-**4. Abrir.** **https://linhazero.localhost** → "Entrar", com o utilizador de teste `dev@linhazero.localhost` / `linhazero-dev` (é administrador: vê os pedidos de acesso). Os cenários de demonstração abrem sem login. O Keycloak demora um minuto a ficar pronto depois de arrancar: se o "Entrar" der erro logo no início, esperar e tentar de novo.
+**4. Abrir.** **https://linhazero.localhost** → "Entrar", com o utilizador de teste `dev@linhazero.localhost` / `linhazero-dev` (é administrador: vê os pedidos de acesso). Os cenários de demonstração abrem sem login, só de leitura (podem ser simulados, não alterados). O Keycloak demora um minuto a ficar pronto depois de arrancar: se o "Entrar" der erro logo no início, esperar e tentar de novo.
 
 Os emails (convites, recuperação de palavra-passe) não saem do computador: vão para uma caixa de correio falsa, em **http://localhost:8025**.
 
@@ -142,7 +142,7 @@ A CI (`.github/workflows/ci.yml`) corre o typecheck, o lint, os testes (motor e 
 8. **Sugerir uma terceira decisão:** no resultado, escolhe a decisão de partida, quando uma linha pode estar pronta e com que largura, e carrega em "Procurar linhas". O simulador experimenta linhas de contenção no caminho do fogo e mostra as que mais poupam; "Pôr na decisão B" (ou A) leva a sugestão para a comparação.
 9. **Assistente** (botão no canto inferior direito dos mapas, com sessão, quando o servidor tem uma chave da Anthropic em `ANTHROPIC_API_KEY`): uma conversa ao lado dos mapas que vê o que está no ecrã. Explica o resultado, revê um plano, propõe uma decisão B (desenha as ações, simula e diz o que ganhou) e escreve um resumo para o COS. As ações que coloca ficam marcadas a âmbar no mapa e com "assistente" no cartão; "Desfazer" repõe as decisões. Cada pessoa tem um limite diário de gasto ([ADR 0079](docs/decisoes/0079-assistente-com-claude-haiku.md)).
 
-Um cenário em `web/public/scenarios/` (listado em `index.json`) abre com `https://app.linhazero.localhost/?scenario=<nome>` (ou `http://localhost:5173/?scenario=<nome>` com `npm run dev`), sem login. Os cenários de demonstração são incêndios reais (Alijó 2019, Vieira do Minho 2016): a simulação parte da ignição e do tempo reais, e a camada "Fogo real" mostra o perímetro observado à hora da barra de tempo.
+Um cenário em `web/public/scenarios/` (listado em `index.json`) abre com `https://app.linhazero.localhost/?scenario=<nome>` (ou `http://localhost:5173/?scenario=<nome>` com `npm run dev`), sem login e só de leitura ([ADR 0080](docs/decisoes/0080-demonstracao-so-de-leitura.md)); `?demo` abre o primeiro. Os cenários de demonstração são incêndios reais (Alijó 2019, Vieira do Minho 2016): a simulação parte da ignição e do tempo reais, e a camada "Fogo real" mostra o perímetro observado à hora da barra de tempo.
 
 ### Editor de grelha
 
