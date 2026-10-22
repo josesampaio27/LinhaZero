@@ -67,6 +67,7 @@ docs/
 - [Semana do hackathon](plano/hackathon.md) (19 a 23 de outubro de 2026)
 - [Do protótipo à produção](plano/caminho-para-producao.md): o que falta para várias entidades numa intranet do Estado
 - [Roteiro](plano/roteiro.md): de 0 a 24 meses
+- [Melhorias do motor](plano/melhorias-do-motor.md): etapas e marcos para a grelha de 100 m, com a calibração no fim
 
 ## Convenções
 

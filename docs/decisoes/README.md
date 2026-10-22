@@ -105,3 +105,4 @@ O que se pôs de lado, e porquê.
 | [0069](0069-recalibracao-da-grelha-de-100-m.md) | Recalibração da grelha de 100 m pela cobertura do fogo real | aceite; fica a calibração em uso | 2026-10-21 |
 | [0070](0070-incerteza-sempre-no-servidor.md) | A incerteza corre sempre no servidor, com 200 a 500 cenários | aceite | 2026-10-22 |
 | [0071](0071-celulas-nas-variantes-de-grelha.md) | Células escolhidas uma a uma nas variantes de grelha | aceite | 2026-10-22 |
+| [0072](0072-explicacao-do-resultado-e-mapa-pelo-modelo-da-simulacao.md) | Explicação do resultado, e o mapa e o inspetor pelo modelo da simulação | aceite | 2026-10-22 |

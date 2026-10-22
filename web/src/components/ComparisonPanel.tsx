@@ -16,6 +16,8 @@ interface Props {
   actions?: { A: number; B: number };
   /** Run telemetry, shown at the bottom of the full table. */
   note?: string;
+  /** A place in the table was picked: explain how the fire gets there. */
+  onPlace?: (placeId: number) => void;
 }
 
 const MAX_VILLAGES = 10;
@@ -216,12 +218,22 @@ function Head({ actions }: { actions?: Props["actions"] }) {
   );
 }
 
-function Row({ label, a, b, d, title, strong }: {
+function Row({ label, a, b, d, title, strong, onLabel }: {
   label: string; a: string; b: string; d: { text: string; cls: string }; title?: string; strong?: boolean;
+  /** Makes the label a button (a place: explain how the fire gets there). */
+  onLabel?: () => void;
 }) {
   return (
     <tr className={strong ? "strong" : undefined}>
-      <td title={title}>{label}</td>
+      <td title={title}>
+        {onLabel ? (
+          <button className="link" title="Ver por onde e porque o fogo lá chega" onClick={onLabel}>
+            {label}
+          </button>
+        ) : (
+          label
+        )}
+      </td>
       <td className="num">{a}</td>
       <td className="num">{b}</td>
       <td className={`num ${d.cls}`}>{d.text}</td>
@@ -230,7 +242,7 @@ function Row({ label, a, b, d, title, strong }: {
 }
 
 /** Side-by-side impact metrics for decisions A and B: a verdict, a compact table, and the full table on demand. */
-export function ComparisonPanel({ a, b, durationMin, likelyHa, likelyIsExpected, paired, stale, actions, note }: Props) {
+export function ComparisonPanel({ a, b, durationMin, likelyHa, likelyIsExpected, paired, stale, actions, note, onPlace }: Props) {
   const hours = a.burnedHaByHour.length;
   const sum = headline(a, b, durationMin, paired, actions);
   const expectedInCompact = !!(likelyHa && likelyIsExpected);
@@ -271,6 +283,7 @@ export function ComparisonPanel({ a, b, durationMin, likelyHa, likelyIsExpected,
         a={fmtArrival(va.firstArrivalMin)}
         b={fmtArrival(vb.firstArrivalMin)}
         d={arrivalDiff(va.firstArrivalMin, vb.firstArrivalMin)}
+        onLabel={onPlace && (() => onPlace(va.id))}
       />
     ));
   return (

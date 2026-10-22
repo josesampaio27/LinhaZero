@@ -196,9 +196,9 @@ export function DataSheetPage() {
         </table>
         <h3>O que o mapa mostra</h3>
         <ul>
-          <li><strong>Cores do combustível:</strong> cinzento para o que não arde; nos combustíveis, do verde-escuro ao amarelo-claro conforme uma velocidade base indicativa, com sombreado do relevo. Barreiras a cinzento-azulado, edifícios a castanho.</li>
-          <li><strong>A cor não é a velocidade da simulação.</strong> A "velocidade base" (m/min) que dá a cor, e que o inspetor de células mostra, é uma tabela provisória do modelo simples, já retirado (<code>data-prep/fuel_rates.csv</code>). A simulação só a usa para saber se a célula arde; a velocidade vem do modelo de Rothermel, com o tempo, o declive e o coberto.</li>
-          <li><strong>Inspetor:</strong> ao passar o rato (ou tocar longamente) numa célula, a aplicação mostra o combustível, a altitude, o declive, se é barreira, os edifícios e o lugar.</li>
+          <li><strong>Cores do combustível:</strong> a velocidade da cabeça do fogo em cada célula pelo modelo da simulação (Rothermel, com a calibração em uso e o abrigo das árvores da célula), com vento de 10 km/h em terreno plano e a humidade de omissão: do verde-escuro (0,5 m/min ou menos) ao amarelo-claro (20 m/min ou mais), com sombreado do relevo. Cinzento para o que não arde, barreiras a cinzento-azulado, edifícios a castanho.</li>
+          <li><strong>Inspetor:</strong> ao passar o rato (ou tocar longamente) numa célula, a aplicação mostra o combustível, essa mesma velocidade, a altitude, o declive, se é barreira, os edifícios e o lugar.</li>
+          <li><strong>Porque o fogo chega aqui:</strong> no resultado, tocar num ponto do mapa (ou num lugar da tabela) desenha o caminho que o fogo fez até lá em cada decisão, e diz quanto tempo levou, a que velocidade média, e o que pesou na velocidade da cabeça do fogo: o combustível, o vento ou o declive. Vem da simulação sem sorteios.</li>
           <li><strong>Mapa de fundo:</strong> OpenStreetMap ou imagem de satélite (DGT, 2023), opcionais e só com internet; a simulação não os usa.</li>
         </ul>
       </Section>

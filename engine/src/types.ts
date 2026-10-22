@@ -122,6 +122,8 @@ export interface Scenario {
    * minute gives what a separate ensemble to each minute would (validation scripts).
    */
   probabilityAtMin?: number[];
+  /** Rothermel: also record, for the main run, how the fire reached each cell (SimulationResult.explain). */
+  explain?: boolean;
 }
 
 /** The weather from minute fromMin until the next step. */
@@ -181,8 +183,32 @@ export type InterventionKind = Intervention["kind"];
 /** Every intervention kind, in the order the app lists them. */
 export const INTERVENTION_KINDS: readonly InterventionKind[] = ["containmentLine", "suppression", "protectZone", "aerialDrop", "backfire"];
 
+/**
+ * How the fire reached each cell in the main run (Scenario.explain, Rothermel only): where it came from and
+ * what made it fast there. Read it with firePath and explainPath (explain.ts).
+ */
+export interface FireExplain {
+  /** Cell the fire came from; -1 = an ignition, a lit backfire cell or a cell not reached. */
+  from: Int32Array;
+  /** Rate (m/min) at which the fire entered the cell, in the direction it came, after any slowdown. */
+  rate: Float32Array;
+  /** The cell's head rate when the fire reached it (m/min): r0 × (1 + windPart + slopePart), or the crown fire's. */
+  headRate: Float32Array;
+  /** No-wind, no-slope rate of the cell's fuel at that moment (m/min, calibration included). */
+  r0: Float32Array;
+  windPart: Float32Array;
+  slopePart: Float32Array;
+  /** Bit 1: the crown fire set the head rate; bit 2: an "Ataque" or "Proteger zona" slowed the fire there. */
+  flags: Uint8Array;
+}
+
+export const EXPLAIN_CROWN = 1;
+export const EXPLAIN_SLOWED = 2;
+
 export interface SimulationResult {
   arrivalMin: Float32Array; // fire arrival minute per cell; Infinity = does not burn
+  /** With Scenario.explain (Rothermel): how the fire reached each cell in the main run. */
+  explain?: FireExplain;
   burnProbability?: Float32Array; // 0..1, only with ensemble
   /** With Scenario.probabilityAtMin: the burn probability at each of those minutes, in the same order. */
   burnProbabilityAt?: Float32Array[];

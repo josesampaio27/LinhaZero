@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "validate": "tsx scripts/validate.ts",
     "calibrate": "tsx scripts/calibrate.ts",
-    "reliability": "tsx scripts/reliability.ts"
+    "reliability": "tsx scripts/reliability.ts",
+    "landing-data": "tsx scripts/landing-data.ts"
   },
   "devDependencies": {
     "@types/node": "^20.17.0",

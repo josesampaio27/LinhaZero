@@ -7,6 +7,9 @@ import {
   cellAt,
   checkVariantBase,
   comparePaired,
+  explainPath,
+  firePath,
+  gridToProjected,
   nearestBurnable,
   DEFAULT_MOISTURE,
   DEFAULT_PARAMS,
@@ -14,6 +17,7 @@ import {
   variantHash,
   type DecisionId,
   type DrawnIntervention,
+  type FireExplain,
   type GridData,
   type GridVariant,
   type InterventionKind,
@@ -27,6 +31,7 @@ import {
 } from "@linha-zero/engine";
 import { CellInspector, cellUnder } from "./components/CellInspector";
 import { ComparisonPanel } from "./components/ComparisonPanel";
+import { ExplainPanel } from "./components/ExplainPanel";
 import { DecisionTools, TOOLS } from "./components/DecisionTools";
 import { Legend } from "./components/Legend";
 import { MapView, type Draft, type MapShape } from "./components/MapView";
@@ -86,6 +91,8 @@ interface Results {
   starts: { min: number; className: string }[];
   /** Where both maps go once the run lands: the burned extent of A and B plus the ignition and every drawn shape, keyed by run so it fits once. */
   fit: { key: string; bounds: [LngLat, LngLat] } | null;
+  /** How the fire reached each cell in each decision's run without random draws (explain.ts); absent if it failed. */
+  explain?: Record<DecisionId, { explain: FireExplain; arrivalMin: Float32Array }>;
 }
 
 /**
@@ -235,6 +242,9 @@ export function App() {
   }, [drawDecision]);
   const [draft, setDraft] = useState<SimDraft | null>(null);
   const [results, setResults] = useState<Results | null>(null);
+  // The cell whose arrival is being explained (a map click or a place in the table on the result step).
+  const [explainAt, setExplainAt] = useState<number | null>(null);
+  useEffect(() => setExplainAt(null), [results]);
   const [t, setT] = useState(0);
   const [playing, setPlaying] = useState(false);
   // Base map, contours and 3D relief: shared with the grid editor (lib/map-prefs.ts).
@@ -402,8 +412,21 @@ export function App() {
     const mapKind = (iv: DrawnIntervention) => (iv.kind === "aerialDrop" && iv.agent === "retardant" ? "aerialDropRetardant" : iv.kind);
     const of = (items: DrawnIntervention[]): MapShape[] => items.map((iv) => ({ kind: mapKind(iv), line: isLineKind(iv.kind), coords: iv.coords }));
     const burned: MapShape[] = burnedArea ? [{ kind: "burned", line: false, coords: burnedArea }] : [];
-    return { A: [...burned, ...of(decisions.A)], B: [...burned, ...of(decisions.B)] };
-  }, [decisions, burnedArea]);
+    // The fire's path to the cell being explained, through the cell centres.
+    const path = (d: DecisionId): MapShape[] => {
+      const ex = results?.explain?.[d];
+      if (!grid || !ex || explainAt === null || step !== "resultado") return [];
+      const { cols } = grid.header;
+      const cells = firePath(ex.explain, ex.arrivalMin, explainAt);
+      if (cells.length < 2) return [];
+      const coords = cells.map((i): [number, number] => {
+        const p = gridToProjected(grid.header, (i % cols) + 0.5, Math.floor(i / cols) + 0.5);
+        return [p.x, p.y];
+      });
+      return [{ kind: "firePath", line: true, coords }];
+    };
+    return { A: [...burned, ...of(decisions.A), ...path("A")], B: [...burned, ...of(decisions.B), ...path("B")] };
+  }, [decisions, burnedArea, results, explainAt, grid, step]);
 
   // --- Drawing ---
   const finishDraft = useCallback(() => {
@@ -493,6 +516,11 @@ export function App() {
 
   const onMapClick = (d: DecisionId) => (lngLat: LngLat) => {
     if (!grid) return;
+    if (tool.type === "none") {
+      // On the result, a tap asks why the fire gets there (or when it does not).
+      if (step === "resultado" && results?.explain) setExplainAt(cellUnder(decisionGrids[d], lngLat));
+      return;
+    }
     if (tool.type === "ignite") {
       igniteAt(lngLat);
     } else if (tool.type === "burned") {
@@ -611,14 +639,21 @@ export function App() {
         if (!current()) return;
         // What actually ran, for the result's key: without the server, no ensemble.
         const ran: SimInputs = { ...inputs, ensemble: !!server };
+        // The run without random draws, recording how the fire reached each cell: the map's arrival run.
+        const explainRun = (d: DecisionId) => ({ scenario: { ...scenarios[d], ensemble: undefined, explain: true }, variant: inputs.variants[d] });
+        let explain: Results["explain"];
+        const explainOf = (a: SimulationResult, b: SimulationResult) =>
+          a.explain && b.explain ? { A: { explain: a.explain, arrivalMin: a.arrivalMin }, B: { explain: b.explain, arrivalMin: b.arrivalMin } } : undefined;
         if (server) {
           ({ A, B } = server);
           done = `Simulação no servidor: 2×(${inputs.ensembleRuns}+1) corridas em ${server.elapsedMs.toLocaleString("pt-PT")} ms.`;
+          // The server does not send it back; one run per decision here takes milliseconds on a 100 m grid.
+          const ex = await sim.simulate(DECISIONS.map(explainRun)).catch(() => null);
+          if (ex) explain = explainOf(ex.results[0], ex.results[1]);
         } else {
-          const local = inputs.ensemble ? { A: buildScenario(header, ran, "A"), B: buildScenario(header, ran, "B") } : scenarios;
-          const jobs = DECISIONS.map((d) => ({ scenario: local[d], variant: inputs.variants[d] }));
-          const { results: res, elapsedMs } = await sim.simulate(jobs);
+          const { results: res, elapsedMs } = await sim.simulate(DECISIONS.map(explainRun));
           [A, B] = res;
+          explain = explainOf(A, B);
           done = `Simulação das duas decisões feita em ${Math.round(elapsedMs).toLocaleString("pt-PT")} ms.`;
           if (serverProblem) done = `${serverProblem}: simulado sem incerteza. ${done}`;
         }
@@ -654,6 +689,7 @@ export function App() {
               buildings: comparePaired(A.runs, B.runs, "buildingsReached"),
               ha: comparePaired(A.runs, B.runs, "burnedHa"),
             },
+          explain,
         });
         setViewMode(ran.ensemble ? "probability" : "arrival");
         // Losing the uncertainty is worth noticing: it goes to the message, not to the quiet note.
@@ -865,6 +901,39 @@ export function App() {
   };
 
   const places = useMemo(() => (grid ? placeStats(grid) : []), [grid]);
+
+  // --- Why the fire gets to a point (explain.ts) ---
+  /** The cell of a place the fire reaches first, in either decision; null if it reaches none. */
+  const firstReachedCell = (placeId: number): number | null => {
+    if (!grid || !results) return null;
+    let best: number | null = null;
+    let bestT = Infinity;
+    for (let i = 0; i < grid.village.length; i++) {
+      if (grid.village[i] !== placeId) continue;
+      const t = Math.min(results.A.arrivalMin[i], results.B.arrivalMin[i]);
+      if (t < bestT) {
+        bestT = t;
+        best = i;
+      }
+    }
+    return best;
+  };
+  const explanation = (() => {
+    const ex = results?.explain;
+    if (!ex || explainAt === null || !grid || !decisionGrids.A || !decisionGrids.B) return null;
+    const { cols } = grid.header;
+    const of = (d: DecisionId) => explainPath(decisionGrids[d]!, ex[d].explain, ex[d].arrivalMin, explainAt);
+    const reached = (d: DecisionId) => Number.isFinite(ex[d].arrivalMin[explainAt]);
+    return (
+      <ExplainPanel
+        place={describeCell(grid, places, Math.floor(explainAt / cols), explainAt % cols)}
+        grids={{ A: decisionGrids.A, B: decisionGrids.B }}
+        explanations={{ A: of("A"), B: of("B") }}
+        reached={{ A: reached("A"), B: reached("B") }}
+        onClose={() => setExplainAt(null)}
+      />
+    );
+  })();
   const ignitionText =
     tool.type === "ignite" && !ignition
       ? "A aguardar o ponto no mapa…"
@@ -1483,7 +1552,12 @@ export function App() {
               stale={stale}
               actions={{ A: decisions.A.length, B: decisions.B.length }}
               note={runNote ?? undefined}
+              onPlace={results.explain ? (id) => setExplainAt(firstReachedCell(id)) : undefined}
             />
+            {explanation}
+            {results.explain && !explanation && (
+              <p className="hint">Toca num ponto do mapa, ou num lugar da tabela, para ver por onde e porque o fogo lá chega.</p>
+            )}
           </>
         ) : (
           <p className="hint">Ainda sem resultado: acender o fogo, escolher as decisões e simular.</p>

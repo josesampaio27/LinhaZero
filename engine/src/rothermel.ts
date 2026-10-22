@@ -384,6 +384,12 @@ export interface HeadFire {
   intensityKwM: number;
   /** Flame length at the head (Byram 1959), m. */
   flameLengthM: number;
+  /**
+   * The head rate split into its causes: ros = r0 × (1 + windPart + slopePart). Each part is that effect's
+   * projection on the head direction (after the wind limit), so a slope against the wind is negative.
+   */
+  windPart: number;
+  slopePart: number;
 }
 
 /** Length-to-breadth ratio from the effective midflame wind (BehavePlus form of Anderson 1983). */
@@ -422,6 +428,8 @@ export function headFire(
       effectiveWindMs: 0,
       intensityKwM: 0,
       flameLengthM: 0,
+      windPart: 0,
+      slopePart: 0,
     };
   }
   const { windB: b, windC: c, windE: e, ratio } = bed;
@@ -436,6 +444,7 @@ export function headFire(
   const x = phiW * Math.sin(wr) + phiS * Math.sin(sr);
   const y = phiW * Math.cos(wr) + phiS * Math.cos(sr);
   let phiE = Math.hypot(x, y);
+  const phiEFree = phiE;
   let headDeg = phiE > 0 ? (Math.atan2(x, y) * 180) / Math.PI : upslopeDeg;
   if (headDeg < 0) headDeg += 360;
 
@@ -448,6 +457,11 @@ export function headFire(
     phiE = (c * Math.pow(effFtMin, b)) / ratioPowE;
   }
   const ros = r0 * (1 + phiE);
+  // The projections of wind and slope on the head add up to phiE (before the limit); the limit scales both.
+  const headRad = (headDeg * Math.PI) / 180;
+  const scale = phiEFree > 0 ? phiE / phiEFree : 0;
+  const windPart = scale * phiW * Math.cos(wr - headRad);
+  const slopePart = scale * phiS * Math.cos(sr - headRad);
   const effectiveWindMs = effFtMin / MS_TO_FTMIN;
   const lb = lengthToBreadth(effectiveWindMs);
   const ecc = Math.sqrt(lb * lb - 1) / lb;
@@ -465,6 +479,8 @@ export function headFire(
     effectiveWindMs,
     intensityKwM,
     flameLengthM,
+    windPart,
+    slopePart,
   };
 }
 

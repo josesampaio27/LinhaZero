@@ -1,25 +1,51 @@
-import { computeSlopeAspect, type GridData } from "@linha-zero/engine";
+import { computeSlopeAspect, DEFAULT_PARAMS, referenceHeadRates, rothermelParams, type GridData } from "@linha-zero/engine";
 
-// Colours for the synthetic fuel codes; other codes get a colour from their base rate.
-const FUEL_COLORS: Record<number, [number, number, number]> = {
-  1: [233, 228, 166], // Herbáceo
-  2: [181, 201, 138], // Mato
-  3: [94, 140, 74], // Floresta
-  4: [227, 201, 154], // Agrícola
-};
 const BARRIER: [number, number, number] = [120, 132, 150];
 const BUILDING: [number, number, number] = [122, 74, 42];
 /** CSS colours of barriers and buildings on the offline base map, for legends. */
 export const BARRIER_SWATCH = `rgb(${BARRIER.join(", ")})`;
 export const BUILDING_SWATCH = `rgb(${BUILDING.join(", ")})`;
+const NOT_BURNING: [number, number, number] = [205, 205, 200];
 
-function fuelColor(grid: GridData, code: number): [number, number, number] {
-  if (grid.header.name === "sintetica" && FUEL_COLORS[code]) return FUEL_COLORS[code];
-  const rate = grid.header.fuelTable[code]?.baseRate ?? 0;
-  if (rate <= 0) return [205, 205, 200];
-  // Slow fuels dark green, fast fuels pale yellow.
-  const t = Math.min(1, rate / 20);
+/** Head rates (m/min) the colour ramp spans: slower is the darkest green, faster the palest yellow. */
+export const REFERENCE_RATE_RANGE: [number, number] = [0.5, 20];
+
+const referenceCache = new WeakMap<GridData, Float32Array>();
+
+/**
+ * Each cell's head fire rate under the reference conditions of the engine's referenceHeadRates (a 10 km/h
+ * wind on flat ground, the calibration in use), cached per grid. The same model as the simulation.
+ */
+export function referenceRates(grid: GridData): Float32Array {
+  let r = referenceCache.get(grid);
+  if (!r) {
+    const p = { ...DEFAULT_PARAMS, ...rothermelParams(undefined, grid.header.cellSize) };
+    try {
+      r = referenceHeadRates(grid, p);
+    } catch {
+      r = new Float32Array(grid.fuel.length); // a grid without Rothermel parameters: everything grey
+    }
+    referenceCache.set(grid, r);
+  }
+  return r;
+}
+
+/** Colour of a head rate: dark green (slow) to pale yellow (fast), on a log scale; grey when nothing burns. */
+function rateColor(rate: number): [number, number, number] {
+  if (!(rate > 0)) return NOT_BURNING;
+  const [lo, hi] = REFERENCE_RATE_RANGE;
+  const t = Math.min(1, Math.max(0, Math.log(rate / lo) / Math.log(hi / lo)));
   return [Math.round(80 + 155 * t), Math.round(130 + 98 * t), Math.round(70 + 96 * t)];
+}
+
+/** Typical reference rate of a fuel code on this grid (the median of its cells); 0 if it does not burn or is absent. */
+export function fuelReferenceRate(grid: GridData, code: number): number {
+  const rates = referenceRates(grid);
+  const own: number[] = [];
+  for (let i = 0; i < grid.fuel.length; i++) if (grid.fuel[i] === code && grid.barrier[i] === 0) own.push(rates[i]);
+  if (!own.length) return 0;
+  own.sort((a, b) => a - b);
+  return own[own.length >> 1];
 }
 
 function toDataUrl(canvas: HTMLCanvasElement, img: ImageData): string {
@@ -34,9 +60,15 @@ function makeCanvas(cols: number, rows: number): HTMLCanvasElement {
   return c;
 }
 
-/** CSS colour of a fuel code on the offline base map, for legends and tables. */
+/** CSS colour of a fuel code on the offline base map (its typical cell), for legends and tables. */
 export function fuelSwatch(grid: GridData, code: number): string {
-  const [r, g, b] = fuelColor(grid, code);
+  const [r, g, b] = rateColor(fuelReferenceRate(grid, code));
+  return `rgb(${r}, ${g}, ${b})`;
+}
+
+/** CSS colour of a reference head rate, for the legend's ramp. */
+export function rateSwatch(rate: number): string {
+  const [r, g, b] = rateColor(rate);
   return `rgb(${r}, ${g}, ${b})`;
 }
 
@@ -74,11 +106,13 @@ function shaded(grid: GridData, colour: (i: number) => [number, number, number])
   return toDataUrl(makeCanvas(cols, rows), img);
 }
 
-/** Offline base map: fuel colours modulated by hillshade, barriers and buildings. Returns a PNG data URL. */
+/**
+ * Offline base map: each cell coloured by its reference head rate (referenceRates), modulated by hillshade,
+ * with barriers and buildings. Returns a PNG data URL.
+ */
 export function renderTerrain(grid: GridData): string {
-  return shaded(grid, (i) =>
-    grid.buildings[i] > 0 ? BUILDING : grid.barrier[i] === 1 ? BARRIER : fuelColor(grid, grid.fuel[i]),
-  );
+  const rates = referenceRates(grid);
+  return shaded(grid, (i) => (grid.buildings[i] > 0 ? BUILDING : grid.barrier[i] === 1 ? BARRIER : rateColor(rates[i])));
 }
 
 export type LayerView = "fuel" | "elevation" | "slope" | "village";

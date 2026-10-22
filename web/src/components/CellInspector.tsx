@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import { computeSlopeAspect, type GridData } from "@linha-zero/engine";
+import { computeSlopeAspect, REFERENCE_WIND_KMH, type GridData } from "@linha-zero/engine";
 import { lngLatToGrid, type LngLat } from "../lib/projection";
-import { fuelSwatch } from "../lib/render";
+import { fuelSwatch, referenceRates } from "../lib/render";
 
 /** Index of the cell under a map position, or null outside the grid. */
 export function cellUnder(grid: GridData | null, lngLat: LngLat | null): number | null {
@@ -42,8 +42,9 @@ export function CellInspector({ grid, base, cell, extra = [], placeholder = "Pas
   const code = grid.fuel[cell];
   const entry = fuelTable[code];
   const baseCode = base?.fuel[cell];
-  const baseRate = base?.header.fuelTable[code]?.baseRate;
-  const rate = entry?.baseRate ?? 0;
+  // The simulation's own model: the head fire rate with a 10 km/h wind on flat ground (referenceRates).
+  const rate = referenceRates(grid)[cell];
+  const baseRate = base ? referenceRates(base)[cell] : undefined;
   const barrier = grid.barrier[cell] === 1;
   const place = villages.find((v) => v.id === grid.village[cell])?.name;
 
@@ -58,13 +59,13 @@ export function CellInspector({ grid, base, cell, extra = [], placeholder = "Pas
       </>,
     ],
     [
-      "Velocidade base",
+      `Velocidade (vento de ${REFERENCE_WIND_KMH} km/h, plano)`,
       barrier ? (
         "0 (barreira)"
       ) : (
         <>
           {fmt(rate, 1)} m/min{rate <= 0 && " (não arde)"}
-          {base && baseRate !== undefined && baseRate !== rate && <small> (era {fmt(baseRate, 1)})</small>}
+          {base && baseRate !== undefined && Math.abs(baseRate - rate) > 0.05 && <small> (era {fmt(baseRate, 1)})</small>}
         </>
       ),
     ],

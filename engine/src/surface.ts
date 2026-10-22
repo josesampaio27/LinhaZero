@@ -12,10 +12,11 @@ import {
   windAdjustmentFactor,
   prepareFuelBed,
   surfaceBase,
+  DEFAULT_MOISTURE,
   type FuelMoisture,
   type SurfaceBase,
 } from "./rothermel";
-import type { PreparedGrid } from "./types";
+import type { GridData, PreparedGrid } from "./types";
 
 interface Terrain {
   /** Slope as rise over run. */
@@ -92,7 +93,7 @@ export function terrainOf(grid: PreparedGrid, smoothM = 0): Terrain {
  * Throws if a burnable fuel (baseRate > 0) has no Rothermel parameters.
  */
 export function fuelBases(
-  grid: PreparedGrid,
+  grid: Pick<GridData, "header">,
   moisture: FuelMoisture,
   /** Multiplier of every fuel's spread rate (calibration): one number, or per fuel group. */
   rosAdj: number | Parameters<typeof groupRosAdj>[0] = 1,
@@ -118,6 +119,37 @@ export function fuelBases(
   return bases;
 }
 
+/** Wind of the reference conditions the map shows (10 km/h at 10 m, open ground). */
+export const REFERENCE_WIND_KMH = 10;
+
+/**
+ * The head fire rate (m/min) of every cell under reference conditions: a REFERENCE_WIND_KMH wind, flat
+ * ground, the default fuel moisture and the given calibration (rosAdj, windAdj, crownRatio), with the
+ * shelter of the cell's own tree cover, as in the simulation. 0 where nothing burns. Surface fire only.
+ * This is what the map colours and the cell inspector show, so they speak the simulation's model.
+ */
+export function referenceHeadRates(
+  grid: GridData,
+  params: { rosAdj: number; windAdj: number; crownRatio: number },
+  moisture: FuelMoisture = DEFAULT_MOISTURE,
+  windKmh = REFERENCE_WIND_KMH,
+): Float32Array {
+  const bases = fuelBases(grid, moisture, params.rosAdj);
+  const out = new Float32Array(grid.fuel.length);
+  const wind10 = windKmh / 3.6;
+  for (let i = 0; i < out.length; i++) {
+    const base = bases[grid.fuel[i]];
+    if (!base || grid.barrier[i] > 0) continue;
+    const cover = grid.canopy?.[i];
+    const waf =
+      base.bed.params.underCanopy && cover !== undefined && cover <= 100
+        ? windAdjustmentFactor(base.bed.params.depthM, cover / 100, undefined, params.crownRatio)
+        : base.bed.waf;
+    out[i] = headFire(base, wind10 * WIND_20FT_PER_10M * waf * params.windAdj, 0, 0, 0).ros;
+  }
+  return out;
+}
+
 /** Per-cell head fire and fire ellipse for one weather; reset with setWind or setConditions when it changes. */
 export class RothermelRates {
   private readonly ros: Float32Array;
@@ -129,6 +161,12 @@ export class RothermelRates {
   /** Byram intensity per unit of spread rate, kW/m per m/min (intensity is proportional to the rate). */
   private readonly intensityPerRate: Float32Array;
   private readonly done: Uint8Array;
+  /** What makes up each cell's head rate (for the explanation of a result): r0 and the wind and slope parts. */
+  private readonly r0: Float32Array;
+  private readonly windPart: Float32Array;
+  private readonly slopePart: Float32Array;
+  /** 1 where the head rate is the crown fire's. */
+  private readonly crowning: Uint8Array;
   private readonly terrain: Terrain;
   private wind10mMs = 0;
   private windToDeg = 0;
@@ -153,6 +191,10 @@ export class RothermelRates {
     this.ecc = new Float32Array(n);
     this.intensityPerRate = new Float32Array(n);
     this.done = new Uint8Array(n);
+    this.r0 = new Float32Array(n);
+    this.windPart = new Float32Array(n);
+    this.slopePart = new Float32Array(n);
+    this.crowning = new Uint8Array(n);
     this.terrain = terrainOf(grid, terrainOptions.demSmoothM ?? 0);
   }
 
@@ -215,11 +257,25 @@ export class RothermelRates {
     return rate * this.intensityPerRate[i];
   }
 
+  /**
+   * Why cell i spreads as it does under the current conditions: its head rate (m/min), the no-wind no-slope
+   * rate of its fuel (r0, calibration included), the wind and slope parts (head = r0 × (1 + wind + slope))
+   * and whether the crown fire sets the head rate.
+   */
+  factors(i: number): { headRate: number; r0: number; windPart: number; slopePart: number; crown: boolean } {
+    if (this.done[i] === 0) this.compute(i);
+    return { headRate: this.ros[i], r0: this.r0[i], windPart: this.windPart[i], slopePart: this.slopePart[i], crown: this.crowning[i] === 1 };
+  }
+
   private compute(i: number): void {
     this.done[i] = 1;
+    this.crowning[i] = 0;
     const base = this.bases[this.grid.fuel[i]];
     if (!base || !(base.r0 > 0)) {
       this.ros[i] = 0;
+      this.r0[i] = 0;
+      this.windPart[i] = 0;
+      this.slopePart[i] = 0;
       return;
     }
     // Litter and understory fuels are sheltered by the cell's tree cover when the grid has it;
@@ -240,6 +296,9 @@ export class RothermelRates {
     );
     const rad = (h.headDeg * Math.PI) / 180;
     this.ros[i] = h.ros;
+    this.r0[i] = base.r0;
+    this.windPart[i] = h.windPart;
+    this.slopePart[i] = h.slopePart;
     this.headRad[i] = rad;
     this.cosHead[i] = Math.cos(rad);
     this.sinHead[i] = Math.sin(rad);
@@ -256,6 +315,7 @@ export class RothermelRates {
       const c = crownFire(canopy, surfaceKwM, this.wind10mMs * 3.6, base.d1 * 100, this.crown.rateAdj);
       if (c && c.rate > h.ros) {
         this.ros[i] = c.rate;
+        this.crowning[i] = 1;
         // Physical intensity at Cruz's rate (c.rate / rateAdj): the surface and the canopy fuel both burn
         // at it. Per unit of the adjusted rate in use, that is their heat per unit rate over rateAdj.
         const heatPerRate = h.intensityKwM / h.ros + c.extraIntensityPerRate;

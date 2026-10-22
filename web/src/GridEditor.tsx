@@ -111,8 +111,8 @@ function nonFuelCode(grid: GridData): number | null {
   const table = grid.header.fuelTable;
   return (
     codes.find((c) => /não combustível/i.test(table[c].label)) ??
-    codes.find((c) => c !== 0 && (table[c].baseRate ?? 0) <= 0 && !table[c].rothermel) ??
-    codes.find((c) => (table[c].baseRate ?? 0) <= 0) ??
+    codes.find((c) => c !== 0 && !table[c].rothermel) ??
+    codes.find((c) => !table[c].rothermel) ??
     null
   );
 }

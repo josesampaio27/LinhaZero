@@ -4,7 +4,7 @@ import { DEFAULT_PARAMS, type ModelParams } from "./params";
 import type { SurfaceBase } from "./rothermel";
 import { computeArrivalRothermel } from "./spread-rothermel";
 import type { RothermelRates } from "./surface";
-import type { CellRef, Ignition, PreparedGrid } from "./types";
+import type { CellRef, FireExplain, Ignition, PreparedGrid } from "./types";
 
 // 8-neighbour offsets and the bearing (degrees clockwise from north) of each step.
 // Rows grow southwards, columns eastwards.
@@ -38,6 +38,8 @@ export interface SpreadInput {
   rates?: RothermelRates;
   /** When given (Rothermel), receives each cell's fireline intensity (kW/m) as the fire arrives; 0 where it does not. */
   intensityOut?: Float32Array;
+  /** When given (Rothermel), receives how the fire reached each cell (see FireExplain). */
+  explainOut?: FireExplain;
   /** Fuel behaviour at the starting moisture (Rothermel); omitted = the one the rates were built with. */
   bases?: (SurfaceBase | null)[];
   /**
