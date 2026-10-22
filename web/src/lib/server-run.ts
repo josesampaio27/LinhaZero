@@ -2,11 +2,15 @@ import { DEFAULT_ENSEMBLE, type GridHeader, type RunEvent, type RunRequest, type
 import type { RunStatusResponse } from "../api/client";
 import { healthApi, runsApi } from "./api";
 
-/** The server runs the same ensemble as the browser, with more runs. */
+/** The ensemble always runs on the server: the browser's options, with 200 runs by default. */
 export const SERVER_ENSEMBLE = { ...DEFAULT_ENSEMBLE, runs: 200 };
+/** The runs the user can pick (the API accepts up to 500). */
+export const MIN_SERVER_RUNS = 200;
+export const MAX_SERVER_RUNS = 500;
 
 const START_TIMEOUT_MS = 20_000; // no worker picked the job up
-const DONE_TIMEOUT_MS = 120_000;
+// 500 runs of 8 h on the 30 m grid take about 45 s per decision (measured on a laptop); room for a slower server.
+const DONE_TIMEOUT_MS = 300_000;
 
 export interface ServerResults {
   A: SimulationResult;
@@ -14,7 +18,7 @@ export interface ServerResults {
   elapsedMs: number;
 }
 
-// Every call below throws on any failure (ApiError, ApiUnreachable); the caller then runs in the browser.
+// Every call below throws on any failure (ApiError, ApiUnreachable); the caller then runs without uncertainty.
 
 /** The run's row. The API passes `result` through as the run-result contract, so its type comes from the engine. */
 async function getRun(runId: string): Promise<RunStatusResponse & { result: RunResult | null }> {
@@ -29,7 +33,7 @@ async function raster(runId: string, decision: "A" | "B", layer: "arrival" | "pr
   return new Float32Array(buf);
 }
 
-/** Follows the SSE stream until done. Rejects when no worker starts within 20 s, nothing finishes within 120 s, or the run fails. */
+/** Follows the SSE stream until done. Rejects when no worker starts within 20 s, nothing finishes within 300 s, or the run fails. */
 function waitForDone(runId: string, onProgress: (done: number) => void): Promise<void> {
   return new Promise<void>((resolve, reject) => {
     // EventSource, not the generated runsApi.events(): that one waits for the whole body, and this stream is open-ended.
@@ -43,7 +47,7 @@ function waitForDone(runId: string, onProgress: (done: number) => void): Promise
       else resolve();
     };
     timers.push(setTimeout(() => !started && finish(new Error("nenhum worker começou em 20 s")), START_TIMEOUT_MS));
-    timers.push(setTimeout(() => finish(new Error("sem resultado em 120 s")), DONE_TIMEOUT_MS));
+    timers.push(setTimeout(() => finish(new Error("sem resultado em 300 s")), DONE_TIMEOUT_MS));
     const parse = <T extends RunEvent>(e: MessageEvent): T | null => {
       try {
         return JSON.parse(e.data) as T;

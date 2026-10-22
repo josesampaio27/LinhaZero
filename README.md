@@ -83,7 +83,7 @@ Para tornar alguém administrador: consola do Keycloak (https://account.linhazer
 | `postgres` | Base de dados: snapshots das fontes, corridas, utilizadores e pedidos de acesso | 127.0.0.1:5432 |
 | `nats` | Fila de trabalho entre a API e os workers | 127.0.0.1:4222 |
 
-Com tudo a correr, o tempo vem em direto do IPMA e do Open-Meteo, as ocorrências do fogos.pt aparecem nos mapas e a incerteza pode correr "no servidor (200)" em vez de "no browser (30)". Se o servidor falhar a meio, a interface volta ao browser sozinha.
+Com tudo a correr, o tempo vem em direto do IPMA e do Open-Meteo, as ocorrências do fogos.pt aparecem nos mapas e a incerteza corre no servidor, com 200 a 500 cenários por decisão. Sem workers disponíveis, a incerteza fica desligada; se o servidor falhar a meio, cada decisão corre uma vez no browser, sem incerteza.
 
 Para parar:
 
@@ -102,7 +102,7 @@ npm install
 npm run dev     # http://localhost:5173
 ```
 
-O `npm run dev` corre só a interface. Se os serviços estiverem a correr (`docker compose up -d`), encaminha `/api` para a API em http://localhost:8080. Sem eles, tudo corre no browser (corridas únicas e o ensemble de 30 corridas), sem internet nem Docker; o painel do tempo diz "sem tempo em direto" e os valores introduzem-se à mão, e "no servidor" fica desativado. Para desenvolver os serviços fora dos contentores: .NET 10 SDK e Node 24.
+O `npm run dev` corre só a interface. Se os serviços estiverem a correr (`docker compose up -d`), encaminha `/api` para a API em http://localhost:8080. Sem eles, as corridas únicas correm no browser, sem internet nem Docker; o painel do tempo diz "sem tempo em direto" e os valores introduzem-se à mão, e "Considerar a incerteza" fica desativado (a incerteza corre só no servidor). Para desenvolver os serviços fora dos contentores: .NET 10 SDK e Node 24.
 
 ### Outros comandos
 
@@ -136,7 +136,7 @@ A CI (`.github/workflows/ci.yml`) corre o typecheck, o lint, os testes (motor e 
    "Ocorrências ativas (fogos.pt)" mostra os fogos em curso na zona; clicar num põe lá a ignição.
 4. Para cada decisão, desenha ações no mapa respetivo: **Linha de contenção**, **Ataque** ou **Proteger zona**,
    com o minuto de início. Para terminar, faz duplo clique ou carrega em Enter; Esc cancela.
-5. **Simular**. Para ver a incerteza, liga "Incerteza" e escolhe "no browser (30)" ou, com os serviços a correr, "no servidor (200)": o painel diz em quantos cenários de vento cada decisão é melhor. As variantes de grelha também correm no servidor.
+5. **Simular**. Para ver a incerteza, com os serviços a correr, liga "Considerar a incerteza" e escolhe na barra quantos cenários por decisão (200 a 500): o painel diz em quantos cenários cada decisão é melhor. A incerteza corre sempre no servidor, e as variantes de grelha também.
 
 Um cenário em `web/public/scenarios/` (listado em `index.json`) abre com `https://app.linhazero.localhost/?scenario=<nome>` (ou `http://localhost:5173/?scenario=<nome>` com `npm run dev`), sem login. Os cenários de demonstração são incêndios reais (Alijó 2019, Vieira do Minho 2016): a simulação parte da ignição e do tempo reais, e a camada "Fogo real" mostra o perímetro observado à hora da barra de tempo.
 

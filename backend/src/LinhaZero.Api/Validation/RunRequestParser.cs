@@ -15,7 +15,7 @@ public static class RunRequestParser
     public const int MaxRuns = 500;
     public const int MaxInterventions = 50;
     public const int MinDurationMin = 60;
-    public const int MaxDurationMin = 480;
+    public const int MaxDurationMin = 1440; // 24 h: the replays of real fires run longer than the 8 h the UI offers
     public const string InvalidBody = "pedido inválido: JSON malformado, chave repetida ou campo obrigatório em falta";
 
     /// <summary>Required fields must be present, nulls only where the record allows them, and no key may appear twice.</summary>

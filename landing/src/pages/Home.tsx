@@ -74,7 +74,7 @@ function HowItWorks() {
             ))}
           </ol>
           <p className="mt-4 text-small" data-reveal style={css({ "--i": 6 })}>
-            <a href="/motor" className="link font-medium">Como o motor simula o fogo</a>
+            <a href="/motor" className="link font-medium">Como o simulador representa o fogo</a>
           </p>
         </div>
       </div>
@@ -172,7 +172,7 @@ function Proof() {
           <table className="mt-[clamp(1.25rem,4svh,3rem)] w-full border-collapse text-left tabular-nums" data-reveal style={css({ "--i": 2 })}>
             <caption className="mb-3 text-left text-small text-muted">
               Dos 80, só os 34 de 2018 a 2021 têm o combustível do próprio ano. Sobreposição com a área que ardeu: os fogos
-              reais foram combatidos e a simulação não, por isso nem um motor perfeito chegaria a 1. O modelo simples é o do
+              reais foram combatidos e a simulação não, por isso nem um simulador perfeito chegaria a 1. O modelo simples é o do
               primeiro protótipo: uma velocidade fixa por tipo de vegetação, mais rápida com vento e a subir.
             </caption>
             <thead>
@@ -196,12 +196,12 @@ function Proof() {
           </table>
           <p className="mt-6 max-w-[62ch]" data-reveal style={css({ "--i": 3 })}>
             <span className="max-sm:hidden">
-              Incêndios do PT-FireSprd simulados da ignição real, com o tempo real e sem combate. Uma mudança no motor só entra se
+              Incêndios do PT-FireSprd simulados da ignição real, com o tempo real e sem combate. Uma mudança no simulador só entra se
               melhorar em fogos que não serviram para a afinar.{" "}
             </span>
             <a href="/calibracao" className="link font-medium">Como foi calibrado e validado</a>
             {" · "}
-            <a href="/motor" className="link font-medium">Como funciona o motor</a>
+            <a href="/motor" className="link font-medium">Como funciona o simulador</a>
           </p>
         </div>
         <div className="mt-8 flex flex-col gap-4 max-md:hidden lg:col-span-5 lg:col-start-8 lg:mt-0">

@@ -12,7 +12,7 @@ Com "Incerteza" ligada, cada decisão corre **30 vezes com o tempo, o combustív
   - velocidade de cada grupo de combustível com um fator lognormal de média 1 (desvio 0,6 em escala logarítmica);
   - ponto de ignição até 400 m (uma ignição numa célula que não arde passa para a ardível mais próxima).
 - **Origem destes valores:** a secção seguinte. A versão inicial variava só o vento, ±20° e ±25%.
-- **Mapa principal e métricas** vêm da corrida com o vento previsto; a **probabilidade de arder** de cada célula é a fração das 30 corridas perturbadas em que ela arde dentro da duração ([ADR 0007](../decisoes/0007-ensemble.md)).
+- **Mapa principal e métricas** vêm da corrida com o vento previsto; a **probabilidade de arder** de cada célula é a fração das corridas perturbadas (200 a 500, no servidor: [ADR 0070](../decisoes/0070-incerteza-sempre-no-servidor.md)) em que ela arde dentro da duração ([ADR 0007](../decisoes/0007-ensemble.md)).
 - **Vista de incerteza:** os mapas mostram a probabilidade de arder até ao fim da duração; o painel acrescenta a área com probabilidade ≥ 50% ([ADR 0014](../decisoes/0014-vista-de-incerteza.md)).
 
 ### Ensemble emparelhado

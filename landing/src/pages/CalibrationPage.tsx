@@ -51,13 +51,13 @@ export function CalibrationPage() {
     <Article
       kicker="Calibração e validação"
       title="Como foi calibrado e posto à prova"
-      lead="Como os fatores do motor foram ajustados a incêndios portugueses reais, porque é que isso exige cuidado com fogos que foram combatidos, e o que os resultados dizem."
+      lead="Como os fatores do simulador foram ajustados a incêndios portugueses reais, porque é que isso exige cuidado com fogos que foram combatidos, e o que os resultados dizem."
       toc={TOC}
-      next={{ href: "/motor", label: "Como funciona o motor" }}
+      next={{ href: "/motor", label: "Como funciona o simulador" }}
     >
       <Section id="porque" title="Porquê calibrar">
         <p>
-          A física do motor é a de modelos publicados e testados. Mas uma simulação não tem tudo o que um incêndio real tem: o
+          A física do simulador é a de modelos publicados e testados. Mas uma simulação não tem tudo o que um incêndio real tem: o
           vento vem de uma reanálise com células de 31 km, o combustível de um mapa de 100 m, as estradas são células inteiras. A
           calibração não muda as equações; ajusta seis fatores que absorvem o que falta.
         </p>
@@ -92,9 +92,9 @@ export function CalibrationPage() {
 
       <Section id="combate" title="O problema do combate">
         <p>
-          O motor simula o fogo <strong>sem combate</strong>: só há combate onde quem o usa o desenha, para que comparar duas
+          O simulador representa o fogo <strong>sem combate</strong>: só há combate onde quem o usa o desenha, para que comparar duas
           decisões meça só o que se desenhou. Mas os incêndios do PT-FireSprd foram todos combatidos, e o combate não está nos
-          dados. Um motor certo deve, por isso, arder <strong>mais</strong> do que o fogo real onde os meios o travaram.
+          dados. Um simulador certo deve, por isso, arder <strong>mais</strong> do que o fogo real onde os meios o travaram.
         </p>
         <p>
           As pontuações habituais contam igual um hectare a mais e um a menos. Com elas, um ajuste aprende a imitar o combate,
@@ -176,7 +176,7 @@ export function CalibrationPage() {
             sortBy="current"
           />
         </Figure>
-        <Figure caption="Na última observação, a área simulada sobre a real. O motor não tem combate: arder mais do que o fogo real é esperado onde os meios o travaram. Mais de metade da área a mais dos intervalos fica para lá de flancos que os meios seguraram.">
+        <Figure caption="Na última observação, a área simulada sobre a real. O simulador não tem combate: arder mais do que o fogo real é esperado onde os meios o travaram. Mais de metade da área a mais dos intervalos fica para lá de flancos que os meios seguraram.">
           <DotPlot
             label="Área simulada contra a área real por incêndio"
             rows={rows.map((r) => ({ label: r.label, starred: r.starred, values: { fitted: r.fitted.areaRatio, current: r.current.areaRatio, physical: r.physical.areaRatio } }))}
@@ -227,7 +227,7 @@ export function CalibrationPage() {
       <Section id="validacao" title="Desde a ignição">
         <p>
           A prova mais direta: simular cada incêndio de 2018 a 2021 desde a ignição observada, com o tempo real hora a hora e sem
-          combate, e medir a sobreposição com o que ardeu (1 seria perfeito; os fogos reais foram combatidos, por isso nem um motor
+          combate, e medir a sobreposição com o que ardeu (1 seria perfeito; os fogos reais foram combatidos, por isso nem um simulador
           perfeito chegaria lá).
         </p>
         <p>
@@ -244,7 +244,7 @@ export function CalibrationPage() {
             ajustados a incêndios reais. Substituído pelo modelo de Rothermel em todo o lado (ADR 0058).
           </p>
         </Expert>
-        <Figure caption={`Sobreposição média nas horas observadas (índice de Sørensen), na grelha de 100 m. O motor calibrado ganha ao modelo simples, já retirado, em ${v.winsOverSimple} dos ${v.sets.all.fires} incêndios. Com o vento de cada hora invertido, cai para ${num(v.windReversed)}: a comparação mede de facto a física.`}>
+        <Figure caption={`Sobreposição média nas horas observadas (índice de Sørensen), na grelha de 100 m. O simulador calibrado ganha ao modelo simples, já retirado, em ${v.winsOverSimple} dos ${v.sets.all.fires} incêndios. Com o vento de cada hora invertido, cai para ${num(v.windReversed)}: a comparação mede de facto a física.`}>
           <ValidationBars
             label="Sobreposição com a área ardida, por conjunto de incêndios"
             sets={[

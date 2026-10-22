@@ -24,7 +24,7 @@ sequenceDiagram
 
 1. O utilizador marca a ignição. Com as ocorrências ativas ligadas, clicar numa delas põe lá a ignição.
 2. A interface pede logo à API o tempo para aquele ponto (ao abrir a zona, para o centro; [ADR 0060](../decisoes/0060-tempo-em-direto-por-omissao.md)): a estação IPMA mais próxima com observação válida até 25 km e 3 h, senão o modelo Open-Meteo ([ADR 0027](../decisoes/0027-estacao-ipma-antes-do-modelo-ate-25-km-e-3-h.md)). O cartão mostra a fonte, a idade, a humidade, o risco de incêndio, os avisos e as próximas 8 horas. No modelo de Rothermel, "Do tempo" calcula a humidade do combustível a partir do ar e da nebulosidade. "Seguir a previsão hora a hora" passa as próximas horas ao motor como passos de tempo ([ADR 0050](../decisoes/0050-humidade-do-combustivel-e-tempo-hora-a-hora-no-motor.md)). Cada valor (vento, temperatura, humidade, nuvens, secura do combustível) pode ser mudado à mão e mantém-se quando o tempo se atualiza. Sem a API, o painel diz "sem tempo em direto" e os valores introduzem-se à mão.
-3. O utilizador desenha as decisões A e B e carrega em "Simular". O motor corre as duas decisões no browser, com incerteza (30 corridas) se estiver ligada.
+3. O utilizador desenha as decisões A e B e carrega em "Simular". O motor corre as duas decisões no browser; com a incerteza ligada, o ensemble corre no servidor, com 200 a 500 cenários por decisão ([ADR 0070](../decisoes/0070-incerteza-sempre-no-servidor.md)).
 4. A interface mostra os mapas e a comparação. Um cenário guardado leva a proveniência do vento enquanto este não for mexido à mão; ao abrir um cenário, o tempo é o do ficheiro até se pedir o de agora.
 
 ## Ensemble no servidor
@@ -55,11 +55,11 @@ sequenceDiagram
   I-->>I: a mesma comparação das corridas locais
 ```
 
-1. Com "Incerteza" ligada e "no servidor (200)" escolhido, a interface constrói os mesmos cenários do motor que usaria no browser (intervenções já em células, fatores das variantes) e envia-os à API, com a variante de grelha de cada decisão ([ADR 0044](../decisoes/0044-variantes-de-grelha-tambem-no-servidor.md)).
+1. Com "Considerar a incerteza" ligada (só há quando um worker foi visto livre nos últimos 60 s) e o número de cenários escolhido na barra, a interface constrói os mesmos cenários do motor que usaria no browser (intervenções já em células, fatores das variantes) e envia-os à API, com a variante de grelha de cada decisão ([ADR 0044](../decisoes/0044-variantes-de-grelha-tambem-no-servidor.md)).
 2. A API valida o pedido, insere a linha `runs` e publica o job na fila. Com o NATS em baixo responde 503 de imediato, sem deixar nada inserido.
 3. Um worker livre tira o job (um de cada vez, [ADR 0039](../decisoes/0039-um-job-de-cada-vez-por-worker.md)), lê a grelha do disco, grava o seu `hashGrid`, verifica e aplica as variantes, corre A e B com as mesmas opções de ensemble e a mesma semente, e grava o resultado e os rasters numa só transação.
 4. O progresso chega ao browser por SSE ([ADR 0034](../decisoes/0034-server-sent-events-em-vez-de-signalr.md)). No fim, a interface descarrega o resultado e os rasters, confirma que têm o tamanho da grelha carregada e mostra a comparação pelo mesmo caminho das corridas locais.
-5. **Volta ao browser:** se o POST falhar, se nenhum worker começar em 20 s, se não houver resultado em 120 s, ou se a ligação cair sem progresso, a interface corre as 30 corridas no browser e diz porquê. A demonstração nunca fica presa no servidor.
+5. **Sem incerteza se o servidor falhar:** se o POST falhar, se nenhum worker começar em 20 s, se não houver resultado em 300 s, ou se a ligação cair sem progresso, a interface corre cada decisão uma vez no browser, sem incerteza, e diz porquê. A demonstração nunca fica presa no servidor.
 6. **Tolerância a falhas:** um worker que morre a meio deixa o job sem ack; o NATS volta a entregá-lo a outro worker, e ao fim de 3 tentativas a corrida fica `failed`. Uma variante feita para outra versão da grelha falha logo, sem novas tentativas.
 
 ## Recolher dados externos

@@ -66,4 +66,4 @@ Registos JSON em todos os serviços, `GET /api/v1/health` (PostgreSQL, NATS, wor
 
 ## Soberania e custo
 
-Nada depende de serviços exclusivos de um fornecedor. A carga do servidor cresce com os ensembles pedidos ao servidor, não com o número de utilizadores: as corridas únicas e as de 30 corridas continuam no browser.
+Nada depende de serviços exclusivos de um fornecedor. A carga do servidor cresce com os ensembles (200 a 500 corridas por decisão, sempre no servidor), não com o número de utilizadores: as corridas únicas continuam no browser.

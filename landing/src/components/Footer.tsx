@@ -11,7 +11,7 @@ const CREDITS: [string, string, string, string, string][] = [
 
 /** The site explains the engine itself: the two pages on how it works and how it was calibrated and validated. */
 const DOC_LINKS: [string, string][] = [
-  ["/motor", "Como funciona o motor"],
+  ["/motor", "Como funciona o simulador"],
   ["/calibracao", "Calibração e validação"],
 ];
 

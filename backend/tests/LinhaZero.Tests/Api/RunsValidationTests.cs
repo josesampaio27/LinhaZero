@@ -19,7 +19,7 @@ public class RunsValidationTests
 
     [Theory]
     [InlineData(59)]
-    [InlineData(481)]
+    [InlineData(1441)]
     public void Duration_out_of_range(int min) => Assert.Contains("durationMin", RunRequestParser.Validate(Ok with { DurationMin = min }, Grid));
 
     [Fact]
@@ -109,7 +109,7 @@ public class RunsValidationTests
         Assert.Null(Check(new(cells, 30, Kind: "aerialDrop", EndMin: 50)));
         Assert.Null(Check(new(cells, 30, 0.2, "suppression", EndMin: 90)));
         Assert.Contains("endMin", Check(new(cells, 30, Kind: "aerialDrop", EndMin: 30)));
-        Assert.Contains("endMin", Check(new(cells, 30, Kind: "aerialDrop", EndMin: 481)));
+        Assert.Contains("endMin", Check(new(cells, 30, Kind: "aerialDrop", EndMin: 1441)));
         Assert.Contains("endMin", Check(new(cells, 30, Kind: "aerialDrop", EndMin: double.NaN)));
         Assert.Null(Check(new(cells, 30, Kind: "backfire", LitCells: [new(9, 10), new(9, 11)])));
         Assert.Contains("litCells", Check(new(cells, 30, Kind: "backfire")));

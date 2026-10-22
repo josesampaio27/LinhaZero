@@ -7,7 +7,6 @@ import {
   cellAt,
   checkVariantBase,
   comparePaired,
-  DEFAULT_ENSEMBLE,
   nearestBurnable,
   DEFAULT_MOISTURE,
   DEFAULT_PARAMS,
@@ -53,7 +52,7 @@ import { describeCell, placeStats } from "./lib/places";
 import { isLineKind, KIND_LABEL, newId } from "./lib/scenario";
 import { ApiError } from "./lib/api";
 import { forecastSteps } from "./lib/weather-steps";
-import { runOnServer, SERVER_ENSEMBLE, workersAvailable } from "./lib/server-run";
+import { MAX_SERVER_RUNS, MIN_SERVER_RUNS, runOnServer, SERVER_ENSEMBLE, workersAvailable } from "./lib/server-run";
 import { SimClient } from "./lib/sim-client";
 import { syncMaps } from "./lib/sync-maps";
 import { newVariantId, useVariants, variantStore } from "./lib/variants";
@@ -94,11 +93,11 @@ type MapsView = "A" | "B" | "split";
 
 const HORIZONS = [1, 2, 3, 4, 5, 6, 7, 8];
 
-/** Where an ensemble runs: in the browser (30 runs) or on the engine workers (200 runs). Not saved with scenarios. */
-type EnsembleWhere = "browser" | "server";
-
-/** Inputs of one simulation, captured explicitly so a freshly loaded scenario can run before React re-renders. */
-type SimInputs = ScenarioInputs & { ensembleWhere: EnsembleWhere };
+/**
+ * Inputs of one simulation, captured explicitly so a freshly loaded scenario can run before React re-renders.
+ * The ensemble always runs on the engine workers; ensembleRuns is its size (not saved with scenarios).
+ */
+type SimInputs = ScenarioInputs & { ensembleRuns: number };
 
 const inputKeyOf = (gridName: string, i: SimInputs) =>
   JSON.stringify({
@@ -107,7 +106,7 @@ const inputKeyOf = (gridName: string, i: SimInputs) =>
     wind: i.wind,
     durationMin: i.durationMin,
     ensemble: i.ensemble,
-    ensembleWhere: i.ensemble ? i.ensembleWhere : null, // only matters when an ensemble runs
+    ensembleRuns: i.ensemble ? i.ensembleRuns : null, // only matters when an ensemble runs
     decisions: i.decisions,
     variants: { A: i.variants.A && variantHash(i.variants.A), B: i.variants.B && variantHash(i.variants.B) },
     // Absent means the default, as in the engine (a file may omit it).
@@ -189,7 +188,7 @@ export function App() {
   const [terrain3d, setTerrain3d] = useState(true);
   const [contours, setContours] = useState(true);
   const [ensemble, setEnsemble] = useState(false);
-  const [ensembleWhere, setEnsembleWhere] = useState<EnsembleWhere>("browser");
+  const [ensembleRuns, setEnsembleRuns] = useState(SERVER_ENSEMBLE.runs);
   // Last health check: when it ran and whether a worker was idle then.
   const [health, setHealth] = useState<{ at: number; idle: boolean } | null>(null);
   const [lastWorkerSeen, setLastWorkerSeen] = useState(0);
@@ -468,7 +467,7 @@ export function App() {
   const removeIv = (d: DecisionId) => (id: string) =>
     setDecisions((prev) => ({ ...prev, [d]: prev[d].filter((iv) => iv.id !== id) }));
 
-  // --- Server health (only while the "where" select is shown, plus once on load) ---
+  // --- Server health (every 15 s: the uncertainty toggle turns on and off with it) ---
   useEffect(() => {
     let cancelled = false;
     const check = () =>
@@ -478,17 +477,15 @@ export function App() {
         if (idle) setLastWorkerSeen(Date.now());
       });
     void check();
-    if (!ensemble) return;
     const timer = setInterval(() => void check(), 15_000);
     return () => {
       cancelled = true;
       clearInterval(timer);
     };
-  }, [ensemble]);
+  }, []);
   const serverAvailable = health !== null && Date.now() - lastWorkerSeen < WORKER_WINDOW_MS;
-  // The option silently drops back to the browser when no worker has been seen lately.
-  const where: EnsembleWhere = ensembleWhere === "server" && serverAvailable ? "server" : "browser";
-  const ensembleRuns = where === "server" ? SERVER_ENSEMBLE.runs : DEFAULT_ENSEMBLE.runs;
+  // Uncertainty needs the workers: without one seen lately it is off, and each decision runs once in the browser.
+  const ensembleOn = ensemble && serverAvailable;
 
   // --- Weather over time and fuel moisture from the weather ---
   const snapshot = liveSnapshot;
@@ -505,8 +502,8 @@ export function App() {
     ignition,
     wind,
     durationMin,
-    ensemble,
-    ensembleWhere: where,
+    ensemble: ensembleOn,
+    ensembleRuns,
     decisions,
     variants,
     spreadModel,
@@ -529,9 +526,9 @@ export function App() {
         // The same engine scenarios feed the browser and the server: interventions in cells, zone factors from each variant.
         const scenarios = { A: buildScenario(header, inputs, "A"), B: buildScenario(header, inputs, "B") };
         let A: SimulationResult, B: SimulationResult, done: string;
-        const onServer = inputs.ensemble && inputs.ensembleWhere === "server";
-        let fallbackNote = `Servidor indisponível; a simular no dispositivo (${DEFAULT_ENSEMBLE.runs} corridas).`;
-        const server = onServer
+        // Why the ensemble could not run on the server; the decisions then run once each in the browser.
+        let serverProblem = null as string | null;
+        const server = inputs.ensemble
           ? await runOnServer(
               header,
               {
@@ -539,7 +536,7 @@ export function App() {
                 ignition: scenarios.A.ignition,
                 wind: inputs.wind,
                 durationMin: inputs.durationMin,
-                ensemble: SERVER_ENSEMBLE,
+                ensemble: { ...SERVER_ENSEMBLE, runs: inputs.ensembleRuns },
                 decisions: { A: scenarios.A.interventions, B: scenarios.B.interventions },
                 variants: inputs.variants.A || inputs.variants.B ? inputs.variants : undefined,
                 weather: provenance,
@@ -549,22 +546,24 @@ export function App() {
               },
               (n) => current() && setMessage(`A simular no servidor: ${n}/2`),
             ).catch((e: unknown) => {
-              console.warn("servidor indisponível, a simular no browser", e);
-              if (e instanceof ApiError && e.status === 400) fallbackNote = `Pedido inválido: ${e.message}; a simular no dispositivo (${DEFAULT_ENSEMBLE.runs} corridas).`;
+              console.warn("servidor indisponível, a simular sem incerteza", e);
+              serverProblem = e instanceof ApiError && e.status === 400 ? `Pedido inválido: ${e.message}` : "Servidor indisponível";
               return null;
             })
           : null;
         if (!current()) return;
+        // What actually ran, for the result's key: without the server, no ensemble.
+        const ran: SimInputs = { ...inputs, ensemble: !!server };
         if (server) {
           ({ A, B } = server);
-          done = `Simulação no servidor: 2×(${SERVER_ENSEMBLE.runs}+1) corridas em ${server.elapsedMs.toLocaleString("pt-PT")} ms.`;
+          done = `Simulação no servidor: 2×(${inputs.ensembleRuns}+1) corridas em ${server.elapsedMs.toLocaleString("pt-PT")} ms.`;
         } else {
-          const jobs = DECISIONS.map((d) => ({ scenario: scenarios[d], variant: inputs.variants[d] }));
+          const local = inputs.ensemble ? { A: buildScenario(header, ran, "A"), B: buildScenario(header, ran, "B") } : scenarios;
+          const jobs = DECISIONS.map((d) => ({ scenario: local[d], variant: inputs.variants[d] }));
           const { results: res, elapsedMs } = await sim.simulate(jobs);
           [A, B] = res;
-          const runs = inputs.ensemble ? ` (2×(${DEFAULT_ENSEMBLE.runs}+1) corridas)` : "";
-          done = `Simulação das duas decisões feita em ${elapsedMs.toFixed(0)} ms${runs}.`;
-          if (onServer) done = `${fallbackNote} ${done}`;
+          done = `Simulação das duas decisões feita em ${elapsedMs.toFixed(0)} ms.`;
+          if (serverProblem) done = `${serverProblem}: simulado sem incerteza. ${done}`;
         }
         if (!current()) return;
         // Rothermel: the ensemble checked against real fires; the share of runs that burn each cell is the
@@ -575,7 +574,7 @@ export function App() {
           B,
           burnChance: chance,
           durationMin: inputs.durationMin,
-          key: inputKeyOf(bundle.name, inputs),
+          key: inputKeyOf(bundle.name, ran),
           starts: DECISIONS.flatMap((d) => inputs.decisions[d].map((iv) => ({ min: iv.startMin, className: `dec-${d}` }))),
           likelyHa: A.burnProbability && {
             a: chance ? expectedHa(A.burnProbability, header.cellSize) : hectaresAbove(A.burnProbability, 0.5, header.cellSize),
@@ -587,15 +586,15 @@ export function App() {
               ha: comparePaired(A.runs, B.runs, "burnedHa"),
             },
         });
-        setViewMode(inputs.ensemble ? "probability" : "arrival");
-        // A fallback to the browser is worth noticing: it goes to the message, not to the quiet note.
-        setRunNote(onServer && !server ? null : done);
-        setMessage(onServer && !server ? done : null);
+        setViewMode(ran.ensemble ? "probability" : "arrival");
+        // Losing the uncertainty is worth noticing: it goes to the message, not to the quiet note.
+        setRunNote(serverProblem ? null : done);
+        setMessage(serverProblem ? done : null);
         if (!drawingRef.current) {
           setStep("resultado");
           setMapsView("split");
         }
-        if (opts.animate && !inputs.ensemble) {
+        if (opts.animate && !ran.ensemble) {
           setT(0);
           setPlaying(true);
         } else setT(inputs.durationMin);
@@ -667,9 +666,10 @@ export function App() {
   useEffect(() => {
     if (!pending || !bundle || bundle.name !== pending.grid) return;
     setPending(null);
-    // The scenario's inputs are passed explicitly: React has not re-rendered with them yet.
-    if (pending.ignition) void runSimulation({ ...pending, ensembleWhere: where }, { animate: false });
-  }, [pending, bundle, runSimulation, where]);
+    // The scenario's inputs are passed explicitly: React has not re-rendered with them yet. Its ensemble goes to
+    // the server even before the first health check answers; without workers it runs without uncertainty.
+    if (pending.ignition) void runSimulation({ ...pending, ensembleRuns }, { animate: false });
+  }, [pending, bundle, runSimulation, ensembleRuns]);
 
   const loadScenarioByName = useCallback(
     async (name: string) => {
@@ -1296,31 +1296,28 @@ export function App() {
           </label>
         </DecisionTools>
         <div className="uncertainty">
-          <Toggle checked={ensemble} onChange={setEnsemble}>
+          <Toggle checked={ensembleOn} onChange={setEnsemble} disabled={!serverAvailable}>
             Considerar a incerteza
             <small>
-              {ensemble
-                ? `${ensembleRuns} cenários por decisão. Em cada um variam a direção e a força do vento, a humidade do combustível, a velocidade de cada combustível e o ponto de ignição; há faúlhas que acendem focos à frente, e linhas e estradas que podem ceder`
+              {ensembleOn
+                ? `${ensembleRuns} cenários por decisão, no servidor. Em cada um variam a direção e a força do vento, a humidade do combustível, a velocidade de cada combustível e o ponto de ignição; há faúlhas que acendem focos à frente, e linhas e estradas que podem ceder`
                 : "Uma só simulação por decisão, com os valores indicados, sem faúlhas"}
             </small>
           </Toggle>
-          {ensemble && (
-            <Segmented
-              label="Onde simular"
-              value={where}
-              onChange={setEnsembleWhere}
-              options={[
-                { value: "browser", label: `No dispositivo · ${DEFAULT_ENSEMBLE.runs}` },
-                {
-                  value: "server",
-                  label: `No servidor · ${SERVER_ENSEMBLE.runs}`,
-                  disabled: !serverAvailable,
-                  title: serverAvailable ? "Workers do motor disponíveis" : "Sem workers disponíveis (npm run up)",
-                },
-              ]}
-            />
+          {ensembleOn && (
+            <label className="ensemble-runs">
+              Cenários por decisão: {ensembleRuns}
+              <input
+                type="range"
+                min={MIN_SERVER_RUNS}
+                max={MAX_SERVER_RUNS}
+                step={50}
+                value={ensembleRuns}
+                onChange={(e) => setEnsembleRuns(Number(e.target.value))}
+              />
+            </label>
           )}
-          {ensemble && !serverAvailable && <p className="hint">Servidor sem workers disponíveis: corre no dispositivo.</p>}
+          {!serverAvailable && <p className="hint">Servidor sem workers disponíveis: a incerteza precisa do servidor.</p>}
         </div>
       </div>
 

@@ -152,8 +152,8 @@ docker compose --profile demo run --rm demo-seed
 
 **Correr sem rede:** põe `INGEST_OFFLINE=1` em `infra/.env` (funciona em qualquer shell, Windows incluído) e `npm run up:offline`, que nunca faz build nem pull.
 
-**Lista antes da demo:** com rede, `docker compose up -d --build` uma vez, para que as imagens fiquem descarregadas e construídas; gravar ou atualizar o seed; sem rede, usar só `up:offline`. Testar três vezes seguidas: botão do tempo, ocorrências, "no servidor (200)".
+**Lista antes da demo:** com rede, `docker compose up -d --build` uma vez, para que as imagens fiquem descarregadas e construídas; gravar ou atualizar o seed; sem rede, usar só `up:offline`. Testar três vezes seguidas: botão do tempo, ocorrências, incerteza com 200 e com 500 cenários.
 
 ## Nota para o pitch
 
-200 corridas no servidor demoram alguns segundos, o que um portátil também faria no browser. O caminho do servidor não é "mais rápido para um utilizador": é a arquitetura — muitos incidentes ao mesmo tempo, escalar acrescentando workers, e um rasto auditável (`runs` guarda o pedido, a hash da grelha, o worker e o resultado de cada simulação).
+200 a 500 corridas na grelha de 100 m demoram menos de um segundo no servidor, o que um portátil também faria no browser. O caminho do servidor não é "mais rápido para um utilizador": é a arquitetura — muitos incidentes ao mesmo tempo, escalar acrescentando workers, e um rasto auditável (`runs` guarda o pedido, a hash da grelha, o worker e o resultado de cada simulação).

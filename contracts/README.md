@@ -9,7 +9,7 @@ Os ficheiros em `examples/` são a fonte de verdade dos tipos partilhados entre 
 | `grid` | Nome da grelha em `web/public/grids/<grid>/` (a mesma pasta que a API e os workers montam em `/grids`) |
 | `ignition` | Célula `{ row, col }`, dentro da grelha |
 | `wind` | `directionDeg` 0–359 (de onde sopra), `speedMs` 0–20 |
-| `durationMin` | 60–480 |
+| `durationMin` | 60–1440 |
 | `ensemble` | `runs` 1–500, `windDirJitterDeg`, `windSpeedJitterPct`, `seed`. A e B correm com as mesmas opções e a mesma semente (ensemble emparelhado) |
 | `decisions` | `A` e `B`: listas de `Intervention` do motor, já rasterizadas em células pelo browser (`toEngineIntervention`). No máximo 50 intervenções por decisão e `rows × cols` células por intervenção |
 | `weather` | Opcional, proveniência do vento (`source`, `station`, `observedAt`, `fetchedAt`), guardada tal como vem |

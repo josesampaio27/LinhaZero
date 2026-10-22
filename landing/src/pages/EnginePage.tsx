@@ -51,15 +51,15 @@ export function EnginePage() {
   const top = rel[rel.length - 1];
   return (
     <Article
-      kicker="O motor"
-      title="Como funciona o motor"
+      kicker="O simulador"
+      title="Como funciona o simulador"
       lead="O que o LinhaZero calcula quando se marca uma ignição e se desenham duas decisões: o território, a física do fogo, o combate e a incerteza, explicados sem fórmulas."
       toc={TOC}
       next={{ href: "/calibracao", label: "Como foi calibrado e validado" }}
     >
       <Section id="pergunta" title="A pergunta">
         <p>
-          O motor responde a uma pergunta de quem comanda nas primeiras horas: <strong>se eu tomar a decisão A ou a decisão B, o
+          O simulador responde a uma pergunta de quem comanda nas primeiras horas: <strong>se eu tomar a decisão A ou a decisão B, o
           que acontece ao fogo?</strong> Simula as duas com o mesmo território e o mesmo tempo e compara a área ardida hora a hora,
           os edifícios atingidos, a hora a que o fogo chega a cada lugar e em quantas variações do vento uma decisão ganha à outra.
         </p>
@@ -71,7 +71,7 @@ export function EnginePage() {
 
       <Section id="territorio" title="O território em células">
         <p>
-          O motor vê Guimarães como uma grelha de quadrados de {g.cellSize} m, {g.rows} por {g.cols}, cerca de{" "}
+          O simulador vê Guimarães como uma grelha de quadrados de {g.cellSize} m, {g.rows} por {g.cols}, cerca de{" "}
           {Math.round(g.areaKm2)} km² da cidade à Penha. Há também uma grelha de 30 m, com estradas e rios mais finos e cerca de oito
           vezes mais cálculo. Cada célula guarda o que importa ao fogo:
         </p>
@@ -104,20 +104,20 @@ export function EnginePage() {
           </tbody>
         </table>
         <p>
-          O motor junta-os em quatro grupos, que trata de forma diferente: a folhada no chão da floresta, o mato debaixo das
+          O simulador junta-os em quatro grupos, que trata de forma diferente: a folhada no chão da floresta, o mato debaixo das
           árvores (onde o vento é mais fraco), o mato a céu aberto e a erva, que seca no verão.
         </p>
         <h3>Barreiras que cedem</h3>
         <p>
           Uma estrada ou um rio não param sempre um fogo: depende da largura e de quão alta é a chama. Cada linha guarda a sua
-          largura (autoestrada 30 m, estrada nacional 10 m, rio 15 m) e o motor decide se a chama a galga. Só lagos e albufeiras são
+          largura (autoestrada 30 m, estrada nacional 10 m, rio 15 m) e o simulador decide se a chama a galga. Só lagos e albufeiras são
           barreiras absolutas.
         </p>
       </Section>
 
       <Section id="avanco" title="Como o fogo avança">
         <p>
-          Para cada célula, o motor calcula <strong>a que horas o fogo lá chega</strong>. Pense-se num mapa de estradas em que cada
+          Para cada célula, o simulador calcula <strong>a que horas o fogo lá chega</strong>. Pense-se num mapa de estradas em que cada
           troço demora um certo tempo a percorrer: o fogo faz sempre o caminho mais rápido, e o tempo de cada troço é o que o fogo
           demora a atravessar aquele terreno naquela direção, com aquele vento.
         </p>
@@ -146,7 +146,7 @@ export function EnginePage() {
         </p>
         <p>
           Debaixo das árvores o vento é muito mais fraco: um eucaliptal com metade do chão coberto deixa passar cerca de um décimo
-          do vento. O motor usa o coberto de cada célula para isso.
+          do vento. O simulador usa o coberto de cada célula para isso.
         </p>
         <Expert>
           <p>
@@ -214,7 +214,7 @@ export function EnginePage() {
       <Section id="incerteza" title="A incerteza">
         <p>
           O vento previsto nunca é exato, a humidade varia de sítio para sítio e a ignição nem sempre se conhece ao metro. Com a
-          incerteza ligada, o motor corre <strong>{data.reliability.runs} simulações</strong> de cada decisão e, em cada uma, sorteia:
+          incerteza ligada, o simulador corre <strong>{data.reliability.runs} simulações</strong> de cada decisão e, em cada uma, sorteia:
         </p>
         <ul>
           <li>a direção do vento, até ±{data.reliability.perturbation.windDirJitterDeg}°, e a velocidade, até ±{num(data.reliability.perturbation.windSpeedJitterPct, 1)}%;</li>
@@ -240,12 +240,12 @@ export function EnginePage() {
 
       <Section id="limites" title="O que ainda não faz">
         <ul>
-          <li><strong>Corridas rápidas:</strong> nas horas em que os fogos reais correram mais depressa, o motor fica abaixo da velocidade observada. Os fogos reais são mais alongados do que o modelo dá: cabeça mais rápida, flancos mais lentos.</li>
+          <li><strong>Corridas rápidas:</strong> nas horas em que os fogos reais correram mais depressa, o simulador fica abaixo da velocidade observada. Os fogos reais são mais alongados do que o modelo dá: cabeça mais rápida, flancos mais lentos.</li>
           <li><strong>Vento igual em toda a grelha:</strong> muda hora a hora, mas não entre vales e cumeadas.</li>
           <li><strong>Combustível de 100 m:</strong> o mapa perde faixas de gestão estreitas e pequenas manchas, mesmo na grelha de 30 m.</li>
           <li><strong>Relevo com árvores e casas:</strong> o modelo de elevação inclui a altura das copas e dos edifícios.</li>
           <li><strong>Copas e erva com valores típicos:</strong> a altura das copas e a humidade da vegetação verde não são medidas.</li>
-          <li><strong>Faúlhas de longa distância:</strong> a casca de eucalipto leva fogo a quilómetros; o motor só tem focos a dezenas ou centenas de metros.</li>
+          <li><strong>Faúlhas de longa distância:</strong> a casca de eucalipto leva fogo a quilómetros; o simulador só tem focos a dezenas ou centenas de metros.</li>
         </ul>
         <p>
           Os parâmetros em uso na grelha de 100 m: velocidade ×{num(p.rosAdj, 1)}, vento ×{num(p.windAdj, 1)}, linhas que seguram com{" "}

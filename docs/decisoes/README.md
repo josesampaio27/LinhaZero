@@ -103,3 +103,4 @@ O que se pôs de lado, e porquê.
 | [0067](0067-email-aos-administradores-por-pedido-de-acesso.md) | Um email aos administradores por cada pedido de acesso, com limite diário | aceite | 2026-10-21 |
 | [0068](0068-calibracao-por-cobertura-30-m.md) | Calibração da grelha de 30 m pela cobertura do fogo real | proposta | 2026-10-21 |
 | [0069](0069-recalibracao-da-grelha-de-100-m.md) | Recalibração da grelha de 100 m pela cobertura do fogo real | aceite; fica a calibração em uso | 2026-10-21 |
+| [0070](0070-incerteza-sempre-no-servidor.md) | A incerteza corre sempre no servidor, com 200 a 500 cenários | aceite | 2026-10-22 |

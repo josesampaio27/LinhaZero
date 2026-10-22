@@ -6,7 +6,7 @@ import { SIGNIN_URL, SIGNUP_URL } from "@/components/Hero";
  */
 const NAV = [
   ["/#como-funciona", "Como funciona"],
-  ["/motor", "O motor"],
+  ["/motor", "O simulador"],
   ["/calibracao", "Calibração"],
   ["/#dados", "Dados"],
   ["/#quem-somos", "Quem somos"],

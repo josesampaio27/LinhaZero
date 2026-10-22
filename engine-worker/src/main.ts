@@ -29,11 +29,17 @@ try {
 } catch {
   await jsm.streams.add({ name: "RUNS", subjects: ["runs.jobs"], retention: RetentionPolicy.Workqueue, storage: StorageType.File, duplicate_window: nanos(120_000) });
 }
+// simulate blocks the event loop, so working() cannot be sent during a decision: ack_wait must cover the longest one
+// (500 runs of 8 h on the 30 m grid: about 45 s on a laptop), with room for a slower server.
+const ACK_WAIT = nanos(180_000);
+let consumerInfo;
 try {
-  await jsm.consumers.info("RUNS", "engine");
+  consumerInfo = await jsm.consumers.info("RUNS", "engine");
 } catch {
-  await jsm.consumers.add("RUNS", { durable_name: "engine", ack_policy: AckPolicy.Explicit, ack_wait: nanos(60_000), max_deliver: -1 });
+  await jsm.consumers.add("RUNS", { durable_name: "engine", ack_policy: AckPolicy.Explicit, ack_wait: ACK_WAIT, max_deliver: -1 });
 }
+// A consumer created by an older worker keeps its old ack_wait until it is updated.
+if (consumerInfo && consumerInfo.config.ack_wait !== ACK_WAIT) await jsm.consumers.update("RUNS", "engine", { ack_wait: ACK_WAIT });
 const consumer = await nc.jetstream().consumers.get("RUNS", "engine");
 
 const publish = (runId: string, ev: RunEvent) => nc.publish(`runs.${runId}.events`, JSON.stringify(ev));

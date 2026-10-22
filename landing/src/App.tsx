@@ -10,13 +10,13 @@ import { CalibrationPage } from "@/pages/CalibrationPage";
 const PAGES = {
   "/motor": {
     page: EnginePage,
-    title: "Como funciona o motor · LinhaZero",
+    title: "Como funciona o simulador · LinhaZero",
     description: "Como o LinhaZero simula um incêndio rural: o território em células, a física do fogo, as decisões desenhadas e a incerteza.",
   },
   "/calibracao": {
     page: CalibrationPage,
     title: "Calibração e validação · LinhaZero",
-    description: "Como o motor do LinhaZero foi ajustado e posto à prova em incêndios portugueses reais, e o que os resultados dizem.",
+    description: "Como o simulador do LinhaZero foi ajustado e posto à prova em incêndios portugueses reais, e o que os resultados dizem.",
   },
 } as const;
 
