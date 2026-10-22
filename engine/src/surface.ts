@@ -2,12 +2,15 @@
 // head fire (fuel × wind × slope) computed lazily, only for the cells the fire reaches.
 import { computeSlopeAspect } from "./grid";
 import { crownFire } from "./crown";
-import { groupRosAdj } from "./params";
+import { groupFactor, groupRosAdj } from "./params";
+import { terrainWind, type TerrainWind } from "./terrain-wind";
 
 /** Tree cover (%) below which a forest fuel cell has no canopy to carry a crown fire. */
 export const CROWN_MIN_COVER_PCT = 30;
 import {
+  andersonShrubRate,
   headFire,
+  lengthToBreadthTaylor,
   WIND_20FT_PER_10M,
   windAdjustmentFactor,
   prepareFuelBed,
@@ -109,7 +112,8 @@ export function fuelBases(
     }
     const base = surfaceBase(prepareFuelBed(entry.rothermel, moisture), moisture);
     const adj = typeof rosAdj === "number" ? rosAdj : groupRosAdj(rosAdj, entry.rothermel.group);
-    bases[code] = adj === 1 ? base : { ...base, r0: base.r0 * adj, rosAdj: adj };
+    const groupAdj = typeof rosAdj === "number" ? 1 : groupFactor(rosAdj, entry.rothermel.group);
+    bases[code] = adj === 1 && groupAdj === 1 ? base : { ...base, r0: base.r0 * adj, rosAdj: adj, groupAdj };
   }
   if (missing.length) {
     throw new Error(
@@ -170,6 +174,7 @@ export class RothermelRates {
   private readonly terrain: Terrain;
   private wind10mMs = 0;
   private windToDeg = 0;
+  private cellWind: TerrainWind | null = null;
 
   constructor(
     private readonly grid: PreparedGrid,
@@ -180,8 +185,11 @@ export class RothermelRates {
     private readonly crown: { enabled: boolean; rateAdj: number } = { enabled: false, rateAdj: 1 },
     /** Wind limit (headFire): 1 Rothermel 1972, 2 Andrews et al. 2013, 0 none. */
     private readonly windLimit = 1,
-    /** Crown ratio for the sheltered wind factor, and DEM smoothing (ModelParams.crownRatio, demSmoothM). */
-    private readonly terrainOptions: { crownRatio?: number; demSmoothM?: number } = {},
+    /**
+     * Crown ratio for the sheltered wind factor, DEM smoothing, and the stage B model switches
+     * (ModelParams.crownRatio, demSmoothM, shrubModel, shapeModel, terrainWind).
+     */
+    private readonly terrainOptions: { crownRatio?: number; demSmoothM?: number; shrubModel?: number; shapeModel?: number; terrainWind?: number } = {},
   ) {
     const n = grid.header.rows * grid.header.cols;
     this.ros = new Float32Array(n);
@@ -217,6 +225,8 @@ export class RothermelRates {
   setConditions(speedMs: number, fromDeg: number, bases: (SurfaceBase | null)[]): void {
     this.wind10mMs = Math.max(0, speedMs);
     this.windToDeg = (((fromDeg + 180) % 360) + 360) % 360;
+    // Wind over the relief (M8): each cell's own speed and direction from the zone's wind.
+    this.cellWind = this.terrainOptions.terrainWind === 1 ? terrainWind(this.grid, fromDeg) : null;
     this.bases = bases;
     this.done.fill(0);
   }
@@ -285,26 +295,62 @@ export class RothermelRates {
       base.bed.params.underCanopy && cover !== undefined && cover <= 100
         ? windAdjustmentFactor(base.bed.params.depthM, cover / 100, undefined, this.terrainOptions.crownRatio ?? 1)
         : base.bed.waf;
-    const wind = this.wind10mMs * WIND_20FT_PER_10M * waf * this.windAdj;
+    // The 10-m wind of this cell: the zone's, or adjusted for the relief (M8).
+    const cw = this.cellWind;
+    const wind10 = cw ? this.wind10mMs * cw.speedFactor[i] : this.wind10mMs;
+    const windTo = cw ? (cw.fromDeg[i] + 180) % 360 : this.windToDeg;
+    const wind = wind10 * WIND_20FT_PER_10M * waf * this.windAdj;
     const h = headFire(
       base,
       wind,
-      this.windToDeg,
+      windTo,
       this.terrain.slopeTan[i],
       this.terrain.upslopeDeg[i],
       this.windLimit === 2 ? "revised" : this.windLimit !== 0,
     );
-    const rad = (h.headDeg * Math.PI) / 180;
-    this.ros[i] = h.ros;
-    this.r0[i] = base.r0;
-    this.windPart[i] = h.windPart;
-    this.slopePart[i] = h.slopePart;
+    let { ros, headDeg, eccentricity, windPart, slopePart } = h;
+    let r0 = base.r0;
+    // Intensity per unit of the rate in use: heat per area, over the calibration factor when the rate carries it.
+    let adj = base.rosAdj ?? 1;
+    const u10Kmh = wind10 * 3.6;
+    // Open shrublands (M4): the empirical rate of Anderson et al. (2015) for wind and fuel, with Rothermel's slope
+    // effect relative to its calm-wind rate, added as a vector as in Rothermel. Rothermel still decides whether the
+    // fuel burns at all (moisture of extinction). Of the calibration, only the shrub group's own factor
+    // (rosAdjShrub) applies, so the calibration can tune the model; 1 = the published rate. It takes the measured
+    // 10-m wind, so windAdj (a midflame wind factor for Rothermel) does not apply.
+    if (this.terrainOptions.shrubModel === 1 && base.bed.params.group === "V" && h.ros > 0) {
+      const height = base.bed.params.depthM;
+      const deadPct = base.d1 * 100;
+      const calm = andersonShrubRate(0, height, deadPct) * (base.groupAdj ?? 1);
+      const phiW = andersonShrubRate(u10Kmh, height, deadPct) / andersonShrubRate(0, height, deadPct) - 1;
+      const phiS = base.bed.slopeK * this.terrain.slopeTan[i] * this.terrain.slopeTan[i];
+      const wr = (windTo * Math.PI) / 180;
+      const sr = (this.terrain.upslopeDeg[i] * Math.PI) / 180;
+      const x = phiW * Math.sin(wr) + phiS * Math.sin(sr);
+      const y = phiW * Math.cos(wr) + phiS * Math.cos(sr);
+      const phiE = Math.hypot(x, y);
+      headDeg = phiE > 0 ? ((Math.atan2(x, y) * 180) / Math.PI + 360) % 360 : this.terrain.upslopeDeg[i];
+      const head = (headDeg * Math.PI) / 180;
+      r0 = calm;
+      ros = calm * (1 + phiE);
+      windPart = phiW * Math.cos(wr - head);
+      slopePart = phiS * Math.cos(sr - head);
+      adj = base.groupAdj ?? 1; // intensity from the uncalibrated rate, as for Rothermel
+    }
+    // Fire shape (M4): length-to-breadth from the 10-m wind, forest curve under trees, grassland curve in the open.
+    if (this.terrainOptions.shapeModel === 1) {
+      const lb = lengthToBreadthTaylor(u10Kmh, base.bed.params.group === "F" || base.bed.params.group === "M");
+      eccentricity = Math.sqrt(lb * lb - 1) / lb;
+    }
+    const rad = (headDeg * Math.PI) / 180;
+    this.ros[i] = ros;
+    this.r0[i] = r0;
+    this.windPart[i] = windPart;
+    this.slopePart[i] = slopePart;
     this.headRad[i] = rad;
     this.cosHead[i] = Math.cos(rad);
     this.sinHead[i] = Math.sin(rad);
-    this.ecc[i] = h.eccentricity;
-    // Intensity per unit rate from the physical (unadjusted) rate: I = heat per area × physical rate.
-    const adj = base.rosAdj ?? 1;
+    this.ecc[i] = eccentricity;
     this.intensityPerRate[i] = h.ros > 0 ? h.intensityKwM / h.ros / adj : 0;
     const surfaceKwM = h.intensityKwM / adj;
     // Crown fire: where there are trees (canopy layer ≥ 30% cover, or no data), an intense enough
@@ -312,7 +358,7 @@ export class RothermelRates {
     // (eccentricity) stays the surface fire's.
     const canopy = base.bed.params.crown;
     if (this.crown.enabled && canopy && h.ros > 0 && !(cover !== undefined && cover <= 100 && cover < CROWN_MIN_COVER_PCT)) {
-      const c = crownFire(canopy, surfaceKwM, this.wind10mMs * 3.6, base.d1 * 100, this.crown.rateAdj);
+      const c = crownFire(canopy, surfaceKwM, wind10 * 3.6, base.d1 * 100, this.crown.rateAdj);
       if (c && c.rate > h.ros) {
         this.ros[i] = c.rate;
         this.crowning[i] = 1;

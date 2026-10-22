@@ -115,6 +115,15 @@ export interface ModelParams {
    * firefighting other than what is drawn, ADR 0057).
    */
   bgSuppression: number;
+  /**
+   * Stage B, M4 (docs/plano/melhorias-do-motor.md): 1 = the open shrubland fuels (group V) spread at the empirical
+   * rate of Anderson et al. (2015) instead of Rothermel's, with Rothermel's slope effect scaled to it; 0 = Rothermel.
+   */
+  shrubModel: number;
+  /** Stage B, M4: 1 = fire shape (length-to-breadth) from the 10-m wind by Taylor et al. (1997); 0 = BehavePlus (Anderson 1983). */
+  shapeModel: number;
+  /** Stage B, M8: 1 = each cell's wind adjusted for the relief (MicroMet, terrain-wind.ts); 0 = one wind for the whole zone. */
+  terrainWind: number;
 }
 
 export const DEFAULT_PARAMS: ModelParams = {
@@ -147,15 +156,17 @@ export const DEFAULT_PARAMS: ModelParams = {
   crownRatio: 1,
   demSmoothM: 0,
   bgSuppression: 1,
+  shrubModel: 0,
+  shapeModel: 0,
+  terrainWind: 0,
 };
 
-/** The spread factor of a fuel group (no group: rosAdj alone). */
-export function groupRosAdj(
-  p: Pick<ModelParams, "rosAdj" | "rosAdjLitter" | "rosAdjUnderstory" | "rosAdjShrub" | "rosAdjGrass">,
+/** The spread factor of a fuel group alone, without the global rosAdj (no group: 1). */
+export function groupFactor(
+  p: Pick<ModelParams, "rosAdjLitter" | "rosAdjUnderstory" | "rosAdjShrub" | "rosAdjGrass">,
   group: "F" | "M" | "V" | "H" | undefined,
 ): number {
-  const g =
-    group === "F"
+  return group === "F"
       ? p.rosAdjLitter
       : group === "M"
         ? p.rosAdjUnderstory
@@ -164,7 +175,14 @@ export function groupRosAdj(
           : group === "H"
             ? p.rosAdjGrass
             : 1;
-  return p.rosAdj * g;
+}
+
+/** The spread factor of a fuel group (no group: rosAdj alone). */
+export function groupRosAdj(
+  p: Pick<ModelParams, "rosAdj" | "rosAdjLitter" | "rosAdjUnderstory" | "rosAdjShrub" | "rosAdjGrass">,
+  group: "F" | "M" | "V" | "H" | undefined,
+): number {
+  return p.rosAdj * groupFactor(p, group);
 }
 
 /** Share of an intervention's effect that remains against a fire of this intensity (1 = full, 0 = none). */
@@ -218,4 +236,7 @@ export const PARAM_RANGES: Record<keyof ModelParams, [number, number]> = {
   crownRatio: [0.1, 1],
   demSmoothM: [0, 500],
   bgSuppression: [0.05, 1],
+  shrubModel: [0, 1],
+  shapeModel: [0, 1],
+  terrainWind: [0, 1],
 };

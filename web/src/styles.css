@@ -663,3 +663,12 @@ kbd {
 .explain-decision ul { margin: 0; padding-left: 1.2em; display: grid; gap: 2px; font-size: 14px; }
 .comparison td .link { padding: 0; min-height: 0; text-align: left; font: inherit; }
 
+
+/* Suggested third decision (components/SuggestPanel.tsx). */
+.suggest { display: grid; gap: 10px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+.suggest .field-label { margin: 0; }
+.suggest-form { display: grid; gap: 8px; }
+.suggest-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.suggest-list li { display: grid; gap: 4px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; }
+.suggest-list li.shown { border-color: #db2777; box-shadow: inset 3px 0 0 #db2777; }
+.suggest-list p { margin: 0; }
