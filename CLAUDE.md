@@ -22,7 +22,7 @@ backend/        .NET 10: LinhaZero.Core (DB/Dapper, sources, weather, incidents,
 contracts/      JSON examples = source of truth for types shared by UI, API and worker; openapi.json (generated)
 infra/          docker-compose (included by root compose.yaml), Caddy, Keycloak realm/themes, SQL init, demo seed, k8s, smoke.sh
 data-prep/      Python scripts that build web/public/grids/<zone>/ from real data (FUMOD, Copernicus DEM, OSM)
-docs/           all documentation (Portuguese): architecture (arc42), fire model, reference, plan, ADRs
+docs/           all documentation (Portuguese): architecture (arc42), fire model, reference, plan, ADRs, hackathon PDFs
 ```
 
 Services in compose: `proxy` (Caddy HTTPS), `landing`, `web`, `keycloak`, `api`, `ingest`, `engine-worker`, `mailpit`,

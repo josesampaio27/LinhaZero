@@ -98,7 +98,7 @@ const FEATURES: [string, [string, string][]][] = [
   ["Perceber e melhorar", [
     ["Porque o fogo chega aqui", "O caminho do fogo até um ponto e o que pesou: combustível, vento, declive."],
     ["Uma terceira decisão", "Experimenta linhas de contenção no caminho do fogo e mostra as que mais poupam."],
-    ["Assistente com IA", "Explica o resultado, revê um plano e coloca ações; o motor confirma os números."],
+    ["Assistente com IA", "Explica porque uma decisão ganha, testa outros ventos e procura o melhor sítio para cada ação; os números vêm do motor."],
   ]],
   ["Preparar e rever", [
     ["Editor de grelha", "Muda o combustível, as barreiras e os coeficientes, e compara com a grelha oficial."],
