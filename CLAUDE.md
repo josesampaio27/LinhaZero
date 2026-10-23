@@ -7,7 +7,7 @@ draws (containment lines, attacks, protected zones), and a paired wind ensemble 
 wins. A grid editor builds grid variants (fuel, barriers, speeds, coefficients) to compare prevention measures.
 
 The UI and engine run fully in the browser, offline. The backend services add live weather, active incidents, large
-ensembles, login and access requests.
+ensembles, login and access requests. 
 
 ## Layout
 

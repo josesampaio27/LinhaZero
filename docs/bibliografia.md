@@ -21,6 +21,68 @@ Bibliografia e fontes citadas na documentação.
 - Emuladores neuronais de propagação: https://arxiv.org/html/2206.08523v4
 - Comparação FARSITE / ForeFire em zonas mediterrânicas: https://hal.archives-ouvertes.fr/hal-00667463
 
+## Assistente com IA
+
+Fontes da [investigação para o assistente](investigacao-assistente.md), consultadas a 22 de outubro de 2026. As
+pré-publicações (arXiv) não foram revistas por pares.
+
+Modelos de linguagem e raciocínio espacial:
+
+- *Do LLMs Build Spatial World Models?* (2026). arXiv 2604.10690. https://arxiv.org/html/2604.10690
+- *TopoBench* (2026). arXiv 2603.12133. Lido só no resumo. https://arxiv.org/html/2603.12133
+- *Stuck in the Matrix* (2025). arXiv 2510.20198. Números lidos só num resumo. https://arxiv.org/html/2510.20198
+- Dihan, M.L. et al. (2025). *MapEval.* ICML 2025, PMLR v267. https://proceedings.mlr.press/v267/dihan25a.html
+- *Can LVLMs Read Maps Like a Human?* (MapBench, 2025). arXiv 2503.14607. https://arxiv.org/pdf/2503.14607
+- Hyun et al. (2025). *CREW-Wildfire.* TMLR. https://arxiv.org/html/2507.05178v2
+- Chen et al. (2025). *Geospatial Awareness Layer.* arXiv 2510.12061. https://arxiv.org/html/2510.12061v2
+- *GPSBench* (2026). arXiv 2602.16105. https://arxiv.org/html/2602.16105v1
+- Orientação e raciocínio espacial em modelos de linguagem. EMNLP 2025. https://aclanthology.org/2025.emnlp-main.759.pdf
+
+O modelo a propor e um verificador a decidir:
+
+- Yang, C. et al. (2024). *Large Language Models as Optimizers* (OPRO). ICLR 2024. https://arxiv.org/html/2309.03409v3
+- Romera-Paredes, B. et al. (2023). *Mathematical discoveries from program search with large language models*
+  (FunSearch). Nature. https://www.nature.com/articles/s41586-023-06924-6
+- Heurísticas de planeamento evoluídas por modelos de linguagem (2026). arXiv 2606.02438. https://arxiv.org/html/2606.02438
+- *SimTIO* (2026). arXiv 2609.05740. https://arxiv.org/abs/2609.05740
+- Kambhampati, S. et al. (2024). *LLMs Can't Plan, But Can Help Planning in LLM-Modulo Frameworks.* ICML 2024, PMLR
+  v235. https://proceedings.mlr.press/v235/kambhampati24a.html
+- *OptiMUS-0.3* (2024). arXiv 2407.19633. https://arxiv.org/html/2407.19633v4
+- *Opt-Verifier* (2026), reavaliação do OptiMUS. arXiv 2605.29556. https://arxiv.org/pdf/2605.29556
+- Planeamento pós-catástrofe com modelos de linguagem (2025). arXiv 2506.04276. https://arxiv.org/pdf/2506.04276
+- *TopoLLM*, planeamento de redes de emergência. https://www.sciencedirect.com/science/article/pii/S2352864825001476
+
+Otimização e aprendizagem automática para linhas e aceiros:
+
+- Wei, Y. et al. (2019). Área de resposta e calendário da linha de contenção, aplicado ao Sliderock Fire de 2017.
+  https://www.frames.gov/catalog/57646
+- Belval, E.J., Wei, Y., Bevers, M. Programação inteira mista espacial para o combate. https://research.fs.usda.gov/treesearch/55936
+- Aprendizagem por reforço para aceiros sobre o Cell2Fire (2024). arXiv 2404.08523. https://arxiv.org/abs/2404.08523
+- O'Connor, C.D., Calkin, D.E., Thompson, M.P. (2017). Locais potenciais de controlo. International Journal of Wildland
+  Fire 26(7): 587. https://connectsci.au/wf/article-pdf/26/7/587/846972/wf16135.pdf
+
+Sistemas e produtos:
+
+- *WildfireGPT* (Argonne, 2025). arXiv 2504.17200. https://arxiv.org/html/2504.17200v1
+- *COA-GPT* (US Army DEVCOM ARL, 2024). arXiv 2402.01786. https://arxiv.org/abs/2402.01786v2
+- *FactoryFlow* (2026). arXiv 2603.25898. https://arxiv.org/pdf/2603.25898v2
+- Relatórios de situação humanitários com modelos de linguagem (ISI Foundation e UNICEF, 2025). arXiv 2512.19475.
+  https://arxiv.org/html/2512.19475v1
+- Esri, assistentes de IA no ArcGIS (2025). https://nsgic.org/wp-content/uploads/2025/11/2025-11-18-AI-in-ArcGIS-Update-for-NSGIC.pdf
+- map-mcp, um agente a ler e mexer num mapa MapLibre GL. https://pypi.org/project/map-mcp/
+- OroraTech, simulação de aceiros. https://ororatech.com/resources/news-blog/introducing-fire-break-simulation-for-smarter-wildfire-containment
+
+API da Anthropic:
+
+- Modelos: https://platform.claude.com/docs/en/about-claude/models/overview
+- Preços: https://platform.claude.com/docs/en/about-claude/pricing
+- Saídas estruturadas e ferramentas `strict`: https://platform.claude.com/docs/en/build-with-claude/structured-outputs
+- Imagens: https://platform.claude.com/docs/en/build-with-claude/vision
+- Limites de uso: https://platform.claude.com/docs/en/api/rate-limits
+- SDK de C#: https://platform.claude.com/docs/en/cli-sdks-libraries/sdks/csharp
+- Chamadas diretas do browser: https://simonwillison.net/2024/Aug/23/anthropic-dangerous-direct-browser-access
+- Especificação MCP: https://modelcontextprotocol.io/specification/latest
+
 ## Simuladores
 
 - Cell2Fire: https://ar5iv.labs.arxiv.org/html/1905.09317 · otimização de aceiros: https://ar5iv.labs.arxiv.org/html/2311.17393
