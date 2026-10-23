@@ -378,7 +378,7 @@ function Audience() {
 
 /* ---------- Who makes it: the two developers, between who it is for and the request ---------- */
 
-// Sample content until the real one arrives: the pictures in public/team/ are placeholders (4:5); swap the files.
+// Portraits in public/team/ are 4:5 WebP crops; to change one, swap the file.
 const TEAM: { name: string; role: string; photo: string }[] = [
   // Alphabetical.
   { name: "José Sampaio", role: "Senior Software Engineer", photo: "/team/jose-sampaio.webp" },
