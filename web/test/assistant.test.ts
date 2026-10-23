@@ -16,8 +16,10 @@ import {
 import { makeGrid } from "../../engine/test/helpers";
 import type { AssistantActions, AssistantContext, AssistantSnapshot, FireRun } from "../src/assistant/context";
 import { stateDigest } from "../src/assistant/digest";
+import { anchorLine } from "../src/assistant/anchor";
+import { MAX_OPTIONS, placementOptions } from "../src/assistant/compare";
 import { checkPlan } from "../src/assistant/plan-check";
-import { cellCentre, gridPoint, placeCells, resolvePlace } from "../src/assistant/places";
+import { cellCentre, firePlace, firePlaceOf, gridPoint, offsetPlace, placeCells, resolvePlace } from "../src/assistant/places";
 import { buildShape } from "../src/assistant/shapes";
 import { runTool, TOOL_NAMES } from "../src/assistant/tools";
 import { placeStats } from "../src/lib/places";
@@ -126,6 +128,52 @@ describe("places by name", () => {
   });
 });
 
+describe("places on the fire and away from villages", () => {
+  it("finds the head downwind and a flank on each side of it", () => {
+    expect(firePlaceOf("Cabeça do fogo")).toBe("head");
+    expect(firePlaceOf("flanco direito do fogo")).toBe("right");
+    expect(firePlaceOf("Aldeia")).toBe(null);
+    const at = (which: "head" | "left" | "right") => {
+      const r = firePlace(grid.header, free.arrivalMin, ignition, which, DURATION);
+      if ("error" in r) throw new Error(r.error);
+      // East and north of the ignition, in cells.
+      return { x: r.place.col - 10.5, y: 30.5 - r.place.row };
+    };
+    const head = at("head");
+    // The wind blows from the south-west: the head runs north-east.
+    expect(head.x).toBeGreaterThan(5);
+    expect(head.y).toBeGreaterThan(5);
+    // Looking north-east, the left flank lies to the north-west of the axis and the right flank to the south-east.
+    const side = (p: { x: number; y: number }) => head.x * p.y - head.y * p.x;
+    expect(side(at("left"))).toBeGreaterThan(0);
+    expect(side(at("right"))).toBeLessThan(0);
+  });
+
+  it("moves a place by a distance and a compass direction", () => {
+    const moved = offsetPlace(grid.header, aldeia, 1000, "sul");
+    if ("error" in moved) throw new Error(moved.error);
+    expect(moved.place.row).toBeCloseTo(aldeia.row + 10);
+    expect(moved.place.col).toBeCloseTo(aldeia.col);
+    expect(moved.place.name).toBe("1 km a sul de Aldeia");
+    expect("error" in offsetPlace(grid.header, aldeia, 5000, "norte")).toBe(true);
+  });
+});
+
+describe("anchoring line ends", () => {
+  it("stretches an end to the nearest road and leaves an end with nothing near", () => {
+    // A road down column 30 of an otherwise open grid.
+    const roads = makeGrid({ rows: N, cols: N, cellSize: 100, rothermel: ANDERSON_13[1], barrier: (_r, c) => c === 30 });
+    roads.barrier = roads.barrier.map((b) => (b ? 7 : 0));
+    const anchored = anchorLine(roads, [gridPoint(grid.header, 20.5, 20.5), gridPoint(grid.header, 20.5, 24.5)]);
+    const [a, b] = anchored.coords.map(([x, y]) => projectedToGrid(grid.header, x, y));
+    expect(a.x).toBeCloseTo(20.5);
+    // One cell short of the road: the road is next to it.
+    expect(b.x).toBeCloseTo(29.5);
+    expect(anchored.note).toContain("estrada ou rio");
+    expect(anchored.note).toContain("sem apoio");
+  });
+});
+
 describe("shapes from the fire's path", () => {
   it("a line across the path to a place cuts that path", () => {
     const built = buildShape(
@@ -199,6 +247,58 @@ describe("tools", () => {
     expect(added[0].decision).toBe("B");
     expect(added[0].item).toMatchObject({ kind: "containmentLine", startMin: 10, widthM: 10 });
     expect(out.content).toContain(added[0].item.id);
+  });
+
+  it("place_intervention puts a line across the head of the fire, or anywhere a distance from a place", async () => {
+    const { context, added } = fakeContext(snapshot());
+    const head = await runTool(
+      "place_intervention",
+      { decision: "A", kind: "containmentLine", shape: "across_path", place: "cabeça do fogo", start_min: 30 },
+      context,
+    );
+    expect(head.isError).toBeUndefined();
+    expect(head.content).toContain("cabeça do fogo");
+    expect(head.content).toMatch(/Pontas|As duas pontas/);
+    const away = await runTool(
+      "place_intervention",
+      { decision: "A", kind: "suppression", shape: "around_place", place: "Aldeia", offset_m: 800, offset_direction: "sudoeste", start_min: 30 },
+      context,
+    );
+    expect(away.isError).toBeUndefined();
+    expect(away.content).toContain("800 m a sudoeste de Aldeia");
+    expect(added).toHaveLength(2);
+    const half = await runTool(
+      "place_intervention",
+      { decision: "A", kind: "suppression", shape: "around_place", place: "Aldeia", offset_m: 800, start_min: 30 },
+      context,
+    );
+    expect(half).toMatchObject({ isError: true, content: expect.stringContaining("offset_direction") });
+  });
+
+  it("compare_placements ranks spots with the engine and can place the best one", async () => {
+    const { context, added } = fakeContext(snapshot());
+    const out = await runTool("compare_placements", { decision: "B", kind: "containmentLine", start_min: 20, width_m: 25 }, context);
+    expect(out.isError).toBeUndefined();
+    expect(out.content).toContain("1. shape=");
+    expect(out.content).toContain("cabeça do fogo");
+    expect(added).toHaveLength(0);
+    const placed = await runTool("compare_placements", { decision: "B", kind: "containmentLine", start_min: 20, width_m: 25, place_best: true }, context);
+    expect(placed.content).toContain("Colocada a opção 1");
+    expect(added).toHaveLength(1);
+    // The placed line burns less than the decision without it.
+    const ha = (r: FireRun) => [...r.arrivalMin].filter((t) => t <= DURATION).length;
+    expect(ha(run([added[0].item]))).toBeLessThan(ha(free));
+  });
+
+  it("placement options take the targets in turn and stay under the cap", () => {
+    const targets = ["Aldeia", "São Tomé", "cabeça do fogo"].map((name, i) => ({ name, village: i < 2, arrivalMin: 200 }));
+    const options = placementOptions("containmentLine", targets, 20);
+    expect(options).toHaveLength(MAX_OPTIONS);
+    expect(options.slice(0, 3).map((o) => o.place)).toEqual(["Aldeia", "São Tomé", "cabeça do fogo"]);
+    expect(placementOptions("protectZone", [{ name: "cabeça do fogo", village: false, arrivalMin: 200 }], 20)).toEqual([]);
+    expect(placementOptions("containmentLine", [{ name: "Aldeia", village: true, arrivalMin: Infinity }], 20)).toEqual([
+      { shape: "around_place", place: "Aldeia", radiusM: 300 },
+    ]);
   });
 
   it("returns bad input as an error the model can fix, without touching the app", async () => {

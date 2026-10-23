@@ -1,7 +1,8 @@
 // check_plan: what is wrong with a decision's actions, found by code, not by the model (docs/decisoes/0079). Each
 // action is judged against a run of the fire without any of the decision's actions (where and when the fire would
 // pass) and, when the results are current, against what happened in the latest run. Pure function, tested in Node.
-import { firePath, isBurnable, toEngineIntervention, type DecisionId, type GridData } from "@linha-zero/engine";
+import { firePath, toEngineIntervention, type DecisionId } from "@linha-zero/engine";
+import { anchorAt } from "./anchor";
 import { KIND_LABEL } from "../lib/scenario";
 import type { AssistantSnapshot, FireRun } from "./context";
 import { sizeOf } from "./digest";
@@ -9,21 +10,6 @@ import { sizeOf } from "./digest";
 const LINES = new Set(["containmentLine", "backfire", "aerialDrop"]);
 const min = (m: number) => `${Math.round(m)} min`;
 const pct = (x: number) => `${Math.round(x * 100)}%`;
-
-/** A line end with something that stops the fire next to it (no fuel, a road, a river, the grid's edge). */
-function anchored(grid: GridData, row: number, col: number): boolean {
-  const { rows, cols } = grid.header;
-  for (let dr = -1; dr <= 1; dr++) {
-    for (let dc = -1; dc <= 1; dc++) {
-      const r = row + dr;
-      const c = col + dc;
-      if (r < 0 || c < 0 || r >= rows || c >= cols) return true;
-      const i = r * cols + c;
-      if (!isBurnable(grid, i) || grid.barrier[i] > 0) return true;
-    }
-  }
-  return false;
-}
 
 /**
  * Findings, one line each, prefixed with the action's id. `free` is a run of the decision with no actions at all; the
@@ -93,7 +79,7 @@ export function checkPlan(s: AssistantSnapshot, decision: DecisionId, free: Fire
     if (iv.kind === "containmentLine" || iv.kind === "backfire") {
       const closed = iv.coords.length > 2 && iv.coords[0][0] === iv.coords[iv.coords.length - 1][0] && iv.coords[0][1] === iv.coords[iv.coords.length - 1][1];
       if (!closed) {
-        const loose = [cells[0], cells[cells.length - 1]].filter((c) => !anchored(grid, Math.floor(c / cols), c % cols)).length;
+        const loose = [cells[0], cells[cells.length - 1]].filter((c) => !anchorAt(grid, Math.floor(c / cols), c % cols)).length;
         if (loose) {
           problems.push(
             `${loose === 2 ? "as duas pontas não se apoiam" : "uma ponta não se apoia"} em nada que trave o fogo (estrada, rio, zona sem combustível): o fogo pode contorná-la`,

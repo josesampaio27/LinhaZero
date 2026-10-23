@@ -120,7 +120,7 @@ export function buildShape(header: GridHeader, req: ShapeRequest, run: FireRun |
       dr /= norm;
       dc /= norm;
       const late = atMin < req.startMin ? ` Atenção: o fogo passa ali aos ${fmtMin(atMin)}, antes de a ação começar.` : "";
-      const spot = `no caminho do fogo para ${req.place.name}, onde ele chega aos ${fmtMin(atMin)} (a ${req.place.name} chega aos ${fmtMin(arrival)})`;
+      const spot = `no caminho do fogo até ${req.place.name}, onde o fogo passa aos ${fmtMin(atMin)} (até ${req.place.name}: ${fmtMin(arrival)})`;
       if (req.line) {
         const lengthM = req.lengthM ?? (req.shape === "fire_head" ? DEFAULT_HEAD_LENGTH_M : DEFAULT_LENGTH_M);
         const half = cellsOf(lengthM) / 2;

@@ -3,6 +3,7 @@
 // in step with TOOL_NAMES. Every input is checked here again: the schema allows no ranges.
 import {
   AERIAL_DEFAULT_MIN,
+  computeMetrics,
   explainPath,
   projectedToGrid,
   toEngineIntervention,
@@ -13,10 +14,12 @@ import {
 import { formatMinutes } from "../components/TimeBar";
 import { describeCell } from "../lib/places";
 import { isLineKind, KIND_LABEL, newId } from "../lib/scenario";
-import type { AssistantContext, AssistantSnapshot } from "./context";
+import { anchorLine } from "./anchor";
+import { placementOptions, specText, type PlacementSpec, type Target } from "./compare";
+import type { AssistantContext, AssistantSnapshot, FireRun } from "./context";
 import { fromIgnition, resultLines, stateDigest, threatenedPlaces } from "./digest";
 import { checkPlan } from "./plan-check";
-import { cellCentre, gridPoint, normalize, placeCells, resolvePlace, type NamedPlace } from "./places";
+import { cellCentre, COMPASS, firePlace, firePlaceOf, gridPoint, normalize, offsetPlace, placeCells, resolvePlace, type NamedPlace } from "./places";
 import { buildShape, type ShapeName } from "./shapes";
 
 export const TOOL_NAMES = [
@@ -26,6 +29,7 @@ export const TOOL_NAMES = [
   "find_places",
   "show_place",
   "check_plan",
+  "compare_placements",
   "place_intervention",
   "update_intervention",
   "remove_intervention",
@@ -86,6 +90,21 @@ function oneOf<T extends string>(input: Input, key: string, values: readonly T[]
   return v as T;
 }
 
+function flag(input: Input, key: string): boolean | undefined {
+  const v = input[key];
+  if (v === undefined || v === null) return undefined;
+  if (typeof v !== "boolean") throw new InputError(`${key} tem de ser true ou false.`);
+  return v;
+}
+
+function textList(input: Input, key: string, max: number): string[] {
+  const v = input[key];
+  if (v === undefined || v === null) return [];
+  if (!Array.isArray(v) || v.some((x) => typeof x !== "string")) throw new InputError(`${key} tem de ser uma lista de nomes.`);
+  if (v.length > max) throw new InputError(`${key} leva no máximo ${max} nomes.`);
+  return v as string[];
+}
+
 function place(s: AssistantSnapshot, name: string): NamedPlace {
   if (!s.grid) throw new InputError("A zona ainda está a carregar.");
   const found = resolvePlace(name, s.places, s.grid.header, s.ignition);
@@ -116,6 +135,141 @@ function needResults(s: AssistantSnapshot) {
 }
 
 const pct = (x: number) => `${Math.round(x * 100)}%`;
+
+/** What an action is, apart from where it goes. */
+interface ActionBasics {
+  decision: DecisionId;
+  kind: InterventionKind;
+  startMin: number;
+  endMin?: number;
+  widthM?: number;
+  agent?: "water" | "retardant";
+}
+
+function actionBasics(s: AssistantSnapshot, input: Input): ActionBasics {
+  if (!s.grid) throw new InputError("A zona ainda está a carregar.");
+  if (!s.ignition) throw new InputError("Ainda não há ignição: o utilizador tem de acender o fogo primeiro (ou usar set_conditions).");
+  const decision = oneOf(input, "decision", DECISIONS);
+  const kind = oneOf(input, "kind", KINDS);
+  const startMin = number(input, "start_min", 0, s.durationMin);
+  if (startMin === undefined) throw new InputError("Falta start_min.");
+  const endMin = number(input, "end_min", 1, 1440);
+  if (endMin !== undefined && endMin <= startMin) throw new InputError("end_min tem de ser depois de start_min.");
+  const widthM = number(input, "width_m", 0.5, 100);
+  const agent = input.agent === undefined || input.agent === null ? undefined : oneOf(input, "agent", ["water", "retardant"] as const);
+  if (agent && kind !== "aerialDrop") throw new InputError("agent só se usa em descargas aéreas.");
+  if (widthM !== undefined && kind !== "containmentLine" && kind !== "backfire")
+    throw new InputError("width_m só se usa em linhas de contenção e contrafogos.");
+  return { decision, kind, startMin: Math.round(startMin), endMin, widthM, agent };
+}
+
+function placementSpec(input: Input): PlacementSpec {
+  const offsetM = number(input, "offset_m", 0, 5000);
+  const offsetDirection = input.offset_direction === undefined || input.offset_direction === null ? undefined : oneOf(input, "offset_direction", COMPASS);
+  if ((offsetM === undefined) !== (offsetDirection === undefined)) throw new InputError("offset_m e offset_direction usam-se juntos.");
+  return {
+    shape: oneOf(input, "shape", SHAPES),
+    place: text(input, "place", true),
+    toPlace: text(input, "to_place"),
+    minute: number(input, "minute", 0, 1440),
+    lengthM: number(input, "length_m", 100, 5000),
+    radiusM: number(input, "radius_m", 50, 3000),
+    offsetM,
+    offsetDirection,
+    anchor: flag(input, "anchor"),
+  };
+}
+
+/** A placement needs a run of the fire when it follows the fire's path or names the fire's head or flanks. */
+const needsRun = (spec: PlacementSpec) =>
+  spec.shape === "across_path" ||
+  spec.shape === "fire_head" ||
+  firePlaceOf(spec.place) !== null ||
+  (spec.toPlace !== undefined && firePlaceOf(spec.toPlace) !== null);
+
+/** A place by name, including the fire's head and flanks, found in `run`. */
+function target(s: AssistantSnapshot, name: string, run: FireRun | null): NamedPlace {
+  const which = firePlaceOf(name);
+  if (!which) return place(s, name);
+  if (!run || !s.grid || !s.ignition) throw new InputError("A cabeça e os flancos do fogo precisam de uma corrida do fogo.");
+  const found = firePlace(s.grid.header, run.arrivalMin, s.ignition, which, s.durationMin);
+  if ("error" in found) throw new InputError(found.error);
+  return found.place;
+}
+
+/** The drawn action for a placement, checked as the simulation will check it; bad placements are InputErrors. */
+function buildPlacement(s: AssistantSnapshot, basics: ActionBasics, spec: PlacementSpec, run: FireRun | null): { item: DrawnIntervention; where: string } {
+  const { kind, agent } = basics;
+  const grid = s.decisionGrids[basics.decision] ?? s.grid!;
+  let p = target(s, spec.place, run);
+  if (spec.offsetM !== undefined && spec.offsetDirection !== undefined) {
+    const moved = offsetPlace(grid.header, p, spec.offsetM, spec.offsetDirection);
+    if ("error" in moved) throw new InputError(moved.error);
+    p = moved.place;
+  }
+  const built = buildShape(
+    grid.header,
+    {
+      shape: spec.shape,
+      line: isLineKind(kind),
+      place: p,
+      placeCells: placeCells(grid, p),
+      toPlace: spec.toPlace ? target(s, spec.toPlace, run) : undefined,
+      minute: spec.minute,
+      startMin: basics.startMin,
+      lengthM: spec.lengthM,
+      radiusM: spec.radiusM,
+    },
+    run,
+    s.durationMin,
+  );
+  if ("error" in built) throw new InputError(built.error);
+  let { coords, where } = built;
+  // Ground lines are stretched to a road, river or bare ground, so the fire cannot simply go round their ends. Lines
+  // between two named places keep the ends the model chose unless it asks.
+  if ((kind === "containmentLine" || kind === "backfire") && coords.length === 2 && (spec.anchor ?? spec.shape !== "between_places")) {
+    const anchored = anchorLine(grid, coords);
+    coords = anchored.coords;
+    where = `${where} ${anchored.note}`;
+  }
+  const item: DrawnIntervention = {
+    id: newId(),
+    kind,
+    startMin: basics.startMin,
+    ...(kind === "aerialDrop" && { agent: agent ?? "water", endMin: Math.round(basics.endMin ?? basics.startMin + AERIAL_DEFAULT_MIN[agent ?? "water"]) }),
+    ...(kind !== "aerialDrop" && basics.endMin !== undefined && { endMin: Math.round(basics.endMin) }),
+    ...(basics.widthM !== undefined && { widthM: basics.widthM }),
+    coords,
+  };
+  // The same check the simulation makes, so a bad action never reaches the map.
+  try {
+    if (!toEngineIntervention(grid.header, item, {}, s.ignition!).cells.length) throw new Error("fica fora da zona simulada");
+  } catch (e) {
+    throw new InputError(`Não foi possível colocar: ${e instanceof Error ? e.message : String(e)}.`);
+  }
+  return { item, where };
+}
+
+/** Where to look by default: the first two villages the fire reaches after the action starts, and its head. */
+function defaultTargets(s: AssistantSnapshot, run: FireRun, startMin: number): string[] {
+  const grid = s.grid!;
+  const first = new Map<number, number>();
+  for (let i = 0; i < grid.village.length; i++) {
+    const id = grid.village[i];
+    const t = run.arrivalMin[i];
+    if (id && t > startMin && t <= s.durationMin && t < (first.get(id) ?? Infinity)) first.set(id, t);
+  }
+  const villages = s.places
+    .filter((p) => first.has(p.id))
+    .sort((a, b) => first.get(a.id)! - first.get(b.id)!)
+    .slice(0, 2)
+    .map((p) => p.name);
+  return [...villages, "cabeça do fogo"];
+}
+
+const buildingCount = (n: number) => `${n.toLocaleString("pt-PT")} ${n === 1 ? "edifício" : "edifícios"}`;
+const hectares = (n: number) => `${n.toLocaleString("pt-PT", { maximumFractionDigits: n < 10 ? 1 : 0 })} ha`;
+const delta = (n: number) => (n === 0 ? "igual" : n < 0 ? `${n.toLocaleString("pt-PT")}` : `+${n.toLocaleString("pt-PT")}`);
 
 const handlers: Record<ToolName, (input: Input, context: () => AssistantContext) => Promise<string>> = {
   async get_state(_input, context) {
@@ -208,61 +362,97 @@ const handlers: Record<ToolName, (input: Input, context: () => AssistantContext)
     return checkPlan(context().snapshot, d, free).join("\n");
   },
 
+  async compare_placements(input, context) {
+    const { snapshot: s, actions } = context();
+    const basics = actionBasics(s, input);
+    const d = basics.decision;
+    const grid = s.decisionGrids[d] ?? s.grid!;
+    const items = s.decisions[d];
+    const placeBest = flag(input, "place_best") ?? false;
+    // Every option is judged against the decision as it is now: its own actions stay, the new one is added.
+    const base = await actions.fireRun(d, items);
+    const names = textList(input, "places", 3);
+    const targets: Target[] = [];
+    for (const name of names.length ? names : defaultTargets(s, base, basics.startMin)) {
+      const p = target(s, name, base);
+      const first = Math.min(...placeCells(grid, p).map((c) => base.arrivalMin[c]));
+      targets.push({ name, village: p.id !== null, arrivalMin: first <= s.durationMin ? first : Infinity });
+    }
+    const specs = placementOptions(basics.kind, targets, basics.startMin);
+    if (!specs.length) {
+      throw new InputError(
+        basics.kind === "protectZone"
+          ? "Proteger zona só se compara à volta de lugares com casas: indicar places."
+          : `O fogo não chega a ${targets.map((t) => t.name).join(", ")} depois dos ${basics.startMin} min: não há sítios no caminho para comparar.`,
+      );
+    }
+
+    const before = computeMetrics(grid, base.arrivalMin, s.durationMin);
+    const baseHa = before.burnedHaByHour.at(-1) ?? 0;
+    const villages = targets.filter((t) => t.village);
+    const arrivals = (arrivalMin: Float32Array) =>
+      villages.map((t) => {
+        const first = Math.min(...placeCells(grid, target(s, t.name, base)).map((c) => arrivalMin[c]));
+        return `${t.name} ${first <= s.durationMin ? `aos ${formatMinutes(first)}` : "não chega"}`;
+      });
+    const seen = new Set<string>();
+    const options: { spec: PlacementSpec; item: DrawnIntervention; where: string; buildings: number; ha: number; arrivals: string[] }[] = [];
+    let unusable = 0;
+    for (const spec of specs) {
+      let built: { item: DrawnIntervention; where: string };
+      try {
+        built = buildPlacement(s, basics, spec, base);
+      } catch (e) {
+        if (!(e instanceof InputError)) throw e;
+        unusable++;
+        continue;
+      }
+      const key = JSON.stringify(built.item.coords);
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const r = await actions.fireRun(d, [...items, built.item]);
+      const m = computeMetrics(grid, r.arrivalMin, s.durationMin);
+      options.push({ spec, ...built, buildings: m.buildingsReached, ha: m.burnedHaByHour.at(-1) ?? 0, arrivals: arrivals(r.arrivalMin) });
+    }
+    if (!options.length) throw new InputError("Nenhuma opção coube: o fogo passa antes de a ação começar. Começar mais cedo.");
+    // Fewer buildings first, then less burned area; equal options keep the order made, shorter lines first.
+    options.sort((x, y) => x.buildings - y.buildings || x.ha - y.ha);
+
+    const lines = [
+      `Decisão ${d} como está (${items.length} ${items.length === 1 ? "ação" : "ações"}), sem a nova: ${buildingCount(before.buildingsReached)}, ${hectares(baseHa)}${villages.length ? `; ${arrivals(base.arrivalMin).join(", ")}` : ""}.`,
+      `${options.length} opções de ${KIND_LABEL[basics.kind]} a partir dos ${basics.startMin} min, uma corrida sem incerteza cada, da melhor para a pior:`,
+      ...options
+        .slice(0, 6)
+        .map(
+          (o, i) =>
+            `${i + 1}. ${specText(o.spec)} → ${buildingCount(o.buildings)} (${delta(o.buildings - before.buildingsReached)}), ${hectares(o.ha)} (${delta(Math.round(o.ha - baseHa))})${o.arrivals.length ? `; ${o.arrivals.join(", ")}` : ""}. ${o.where}`,
+        ),
+    ];
+    if (unusable)
+      lines.push(`${unusable} ${unusable === 1 ? "opção não coube" : "opções não couberam"} (o fogo passa antes de a ação começar, ou fora da zona).`);
+    const best = options[0];
+    const helps = best.buildings < before.buildingsReached || (best.buildings === before.buildingsReached && best.ha < baseHa - 0.5);
+    if (!placeBest) {
+      lines.push("Para colocar uma: place_intervention com os mesmos kind, start_min e estes parâmetros. Confirmar com run_simulation.");
+    } else if (!helps) {
+      lines.push("Nenhuma opção melhora a decisão nesta corrida: nada foi colocado.");
+    } else {
+      actions.addIntervention(d, best.item);
+      lines.push(`Colocada a opção 1 como [${best.item.id}] na decisão ${d}. Os resultados ficam desatualizados até simular de novo.`);
+    }
+    return lines.join("\n");
+  },
+
   async place_intervention(input, context) {
     const { snapshot: s, actions } = context();
-    const grid = s.grid;
-    if (!grid) throw new InputError("A zona ainda está a carregar.");
-    if (!s.ignition) throw new InputError("Ainda não há ignição: o utilizador tem de acender o fogo primeiro (ou usar set_conditions).");
-    const d = oneOf(input, "decision", DECISIONS);
-    const kind = oneOf(input, "kind", KINDS);
-    const shape = oneOf(input, "shape", SHAPES);
-    const startMin = number(input, "start_min", 0, s.durationMin);
-    if (startMin === undefined) throw new InputError("Falta start_min.");
-    const endMin = number(input, "end_min", 1, 1440);
-    if (endMin !== undefined && endMin <= startMin) throw new InputError("end_min tem de ser depois de start_min.");
-    const widthM = number(input, "width_m", 0.5, 100);
-    const agent = input.agent === undefined || input.agent === null ? undefined : oneOf(input, "agent", ["water", "retardant"] as const);
-    if (agent && kind !== "aerialDrop") throw new InputError("agent só se usa em descargas aéreas.");
-    if (widthM !== undefined && kind !== "containmentLine" && kind !== "backfire") throw new InputError("width_m só se usa em linhas de contenção e contrafogos.");
-    const target = place(s, text(input, "place", true));
-    const toName = text(input, "to_place");
-    const line = isLineKind(kind);
-    const run = shape === "across_path" || shape === "fire_head" ? await actions.fireRun(d, s.decisions[d]) : null;
-    const built = buildShape(
-      grid.header,
-      {
-        shape,
-        line,
-        place: target,
-        placeCells: placeCells(grid, target),
-        toPlace: toName ? place(s, toName) : undefined,
-        minute: number(input, "minute", 0, 1440),
-        startMin,
-        lengthM: number(input, "length_m", 100, 5000),
-        radiusM: number(input, "radius_m", 50, 3000),
-      },
-      run,
-      s.durationMin,
-    );
-    if ("error" in built) throw new InputError(built.error);
-    const item: DrawnIntervention = {
-      id: newId(),
-      kind,
-      startMin: Math.round(startMin),
-      ...(kind === "aerialDrop" && { agent: agent ?? "water", endMin: Math.round(endMin ?? startMin + AERIAL_DEFAULT_MIN[agent ?? "water"]) }),
-      ...(kind !== "aerialDrop" && endMin !== undefined && { endMin: Math.round(endMin) }),
-      ...(widthM !== undefined && { widthM }),
-      coords: built.coords,
-    };
-    // The same check the simulation makes, so a bad action never reaches the map.
-    try {
-      if (!toEngineIntervention(grid.header, item, {}, s.ignition).cells.length) throw new Error("fica fora da zona simulada");
-    } catch (e) {
-      throw new InputError(`Não foi possível colocar: ${e instanceof Error ? e.message : String(e)}.`);
-    }
+    const basics = actionBasics(s, input);
+    const spec = placementSpec(input);
+    const d = basics.decision;
+    const run = needsRun(spec) ? await actions.fireRun(d, s.decisions[d]) : null;
+    const { item, where } = buildPlacement(s, basics, spec, run);
     actions.addIntervention(d, item);
     const ends = item.endMin !== undefined ? ` até aos ${item.endMin} min` : "";
-    return `Colocada [${item.id}] ${KIND_LABEL[kind]} na decisão ${d}, a partir dos ${item.startMin} min${ends}. ${built.where} Os resultados ficam desatualizados até simular de novo.`;
+    return `Colocada [${item.id}] ${KIND_LABEL[item.kind]} na decisão ${d}, a partir dos ${item.startMin} min${ends}. ${where} Os resultados ficam desatualizados até simular de novo.`;
   },
 
   async update_intervention(input, context) {
@@ -396,6 +586,8 @@ export function toolLabel(name: string, input: unknown): string {
       return `A mostrar ${String(i.place ?? "um lugar")} no mapa`;
     case "check_plan":
       return `A rever o plano${d}`;
+    case "compare_placements":
+      return `A comparar sítios para ${kind.toLowerCase()}${d}`;
     case "place_intervention":
       return `A colocar ${kind.toLowerCase()}${d}`;
     case "update_intervention":
