@@ -33,7 +33,11 @@ export function TimeBar({ t, durationMin, playing, disabled, onChange, onPlaying
     if (!playing) return;
     let raf = 0;
     let last = performance.now();
-    if (tRef.current >= durationMin) onChange(0);
+    // Rewind the ref too: the first frame runs before React re-renders with t = 0.
+    if (tRef.current >= durationMin) {
+      tRef.current = 0;
+      onChange(0);
+    }
     const step = (now: number) => {
       const next = Math.min(durationMin, tRef.current + ((now - last) / 1000) * (durationMin / PLAY_SECONDS));
       last = now;
