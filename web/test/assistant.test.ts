@@ -18,6 +18,7 @@ import type { AssistantActions, AssistantContext, AssistantSnapshot, FireRun } f
 import { stateDigest } from "../src/assistant/digest";
 import { anchorLine } from "../src/assistant/anchor";
 import { MAX_OPTIONS, placementOptions } from "../src/assistant/compare";
+import { percentile, verdict, widthThatHolds, withWind, type WindChange } from "../src/assistant/explain";
 import { checkPlan } from "../src/assistant/plan-check";
 import { cellCentre, firePlace, firePlaceOf, gridPoint, offsetPlace, placeCells, resolvePlace } from "../src/assistant/places";
 import { buildShape } from "../src/assistant/shapes";
@@ -43,16 +44,17 @@ const ignition: ProjectedPoint = cellCentre(grid.header, ignitionCell);
 const wind = { directionDeg: 225, speedMs: 6 };
 const DURATION = 480;
 
-function run(interventions: DrawnIntervention[] = []): FireRun {
-  const r = simulate(grid, {
+function run(interventions: DrawnIntervention[] = [], change?: WindChange): FireRun {
+  const scenario = {
     ignition: { row: 30, col: 10 },
     wind,
     durationMin: DURATION,
     interventions: interventions.map((iv) => toEngineIntervention(grid.header, iv, {}, ignition)),
-    spreadModel: "rothermel",
+    spreadModel: "rothermel" as const,
     explain: true,
-  });
-  return { arrivalMin: r.arrivalMin, explain: r.explain! };
+  };
+  const r = simulate(grid, change ? withWind(scenario, change) : scenario);
+  return { arrivalMin: r.arrivalMin, explain: r.explain!, intensityKwM: r.intensityKwM! };
 }
 const free = run();
 const aldeia = places.find((p) => p.name === "Aldeia")!;
@@ -100,7 +102,7 @@ function fakeContext(snap: AssistantSnapshot) {
     setDuration: vi.fn(),
     setIgnition: () => null,
     runSimulation: async () => ({ results: null, error: "sem simulação nos testes" }),
-    fireRun: async (_d, items) => run(items),
+    fireRun: async (_d, items, opts) => run(items, opts?.wind),
     show: vi.fn(),
   };
   const context: AssistantContext = { snapshot: snap, actions };
@@ -219,13 +221,23 @@ describe("check_plan", () => {
     const duration = Math.floor(Math.min(...farCells.map((c) => free.arrivalMin[c]))) - 1;
     // Right next to the ignition, ready just before the end: the fire is long past.
     const late = line("iv-late", [gridPoint(grid.header, 26, 6), gridPoint(grid.header, 26, 14)], duration - 1);
-    const findings = checkPlan(snapshot({ decisions: { A: [late, far], B: [] }, durationMin: duration }), "A", free);
+    const findings = checkPlan(snapshot({ decisions: { A: [late, far], B: [] }, durationMin: duration }), "A", free, run([late, far]));
     expect(findings.find((f) => f.startsWith("[iv-late]"))).toContain("antes de ela começar");
     expect(findings.find((f) => f.startsWith("[iv-far]"))).toContain("não tem efeito");
   });
 
   it("says when a decision has nothing to check", () => {
-    expect(checkPlan(snapshot(), "B", free)).toEqual(["A decisão B não tem ações (deixar arder)."]);
+    expect(checkPlan(snapshot(), "B", free, free)).toEqual(["A decisão B não tem ações (deixar arder)."]);
+  });
+
+  it("says how long the flames are at a crossed line and what width would hold them", async () => {
+    const thin = await placeLine({ width_m: 1 });
+    const findings = checkPlan(snapshot({ decisions: { A: [thin], B: [] } }), "A", free, run([thin]));
+    const finding = findings.find((f) => f.startsWith(`[${thin.id}]`))!;
+    expect(finding).toContain("o fogo galga-a");
+    expect(finding).toMatch(/chamas junto a ela até [\d,]+ m/);
+    expect(finding).toMatch(/segura-as só em \d+%/);
+    expect(finding).toMatch(/uma linha de \d+ m seguraria|nenhuma largura/);
   });
 });
 
@@ -317,6 +329,72 @@ describe("tools", () => {
   });
 });
 
+/** A line across the fire's path to Aldeia, placed by the tool as the assistant would. */
+async function placeLine(over: Record<string, unknown> = {}): Promise<DrawnIntervention> {
+  const { context, added } = fakeContext(snapshot());
+  const out = await runTool(
+    "place_intervention",
+    { decision: "B", kind: "containmentLine", shape: "across_path", place: "Aldeia", start_min: 10, width_m: 25, length_m: 3000, ...over },
+    context,
+  );
+  if (out.isError) throw new Error(out.content);
+  return added[0].item;
+}
+
+describe("explaining decisions", () => {
+  it("explain_decision credits the line that cuts the path and calls a far-away one useless", async () => {
+    const cut = await placeLine();
+    // In the far south-west corner; the run ends before the fire backs into it.
+    const far = line("iv-far", [gridPoint(grid.header, 39, 0.5), gridPoint(grid.header, 39, 3)], 0);
+    const farCells = toEngineIntervention(grid.header, far).cells.map((c) => c.row * N + c.col);
+    const durationMin = Math.floor(Math.min(...farCells.map((c) => free.arrivalMin[c]))) - 1;
+    const { context } = fakeContext(snapshot({ decisions: { A: [], B: [cut, far] }, durationMin }));
+    const out = await runTool("explain_decision", { decision: "B" }, context);
+    expect(out.isError).toBeUndefined();
+    const lines = out.content.split("\n");
+    expect(lines.find((l) => l.includes(`[${cut.id}]`))).toContain("sem ela, mais");
+    expect(lines.find((l) => l.includes("[iv-far]"))).toContain("sem efeito");
+  });
+
+  it("stress_test reports who wins under each wind change", async () => {
+    const cut = await placeLine();
+    const { context } = fakeContext(snapshot({ decisions: { A: [], B: [cut] } }));
+    const out = await runTool("stress_test", {}, context);
+    expect(out.isError).toBeUndefined();
+    expect(out.content).toContain("- Vento como está: B ganha");
+    expect(out.content.split("\n").filter((l) => l.startsWith("- vento "))).toHaveLength(4);
+    const { context: empty } = fakeContext(snapshot());
+    expect((await runTool("stress_test", {}, empty)).isError).toBe(true);
+  });
+
+  it("latest_start finds a start before the fire reaches the line", async () => {
+    const cut = await placeLine();
+    const { context } = fakeContext(snapshot({ decisions: { A: [], B: [cut] } }));
+    const out = await runTool("latest_start", { decision: "B", id: cut.id }, context);
+    expect(out.isError).toBeUndefined();
+    const latest = Number(/até aos (\d+) min/.exec(out.content)?.[1]);
+    const cells = toEngineIntervention(grid.header, cut).cells.map((c) => c.row * N + c.col);
+    const reached = Math.min(...cells.map((c) => free.arrivalMin[c]));
+    expect(latest).toBeGreaterThanOrEqual(10);
+    expect(latest).toBeLessThan(reached);
+  });
+
+  it("verdicts, widths, percentiles and wind changes", () => {
+    const m = (buildingsReached: number, ha: number) => ({ buildingsReached, burnedHaByHour: [ha], villages: [] });
+    expect(verdict(m(5, 100), m(2, 200)).winner).toBe("B");
+    expect(verdict(m(2, 100), m(2, 150)).winner).toBe("A");
+    expect(verdict(m(2, 100), m(2, 100.5)).winner).toBe(null);
+    expect(widthThatHolds(0.5)).toBeLessThanOrEqual(4);
+    expect(widthThatHolds(30)).toBe(null);
+    expect(percentile([5, 1, 4, 2, 3, 10, 9, 8, 7, 6], 0.1)).toBe(1);
+    expect(percentile([5, 1, 4, 2, 3, 10, 9, 8, 7, 6], 0.9)).toBe(9);
+    const steps = withWind({ wind: { directionDeg: 350, speedMs: 10 }, weatherSteps: [{ fromMin: 60, wind: { directionDeg: 10, speedMs: 4 } }] } as never, { turnDeg: 20, speedFactor: 1.3 });
+    expect(steps.wind).toEqual({ directionDeg: 10, speedMs: 13 });
+    expect(steps.weatherSteps![0].wind.directionDeg).toBe(30);
+    expect(steps.weatherSteps![0].wind.speedMs).toBeCloseTo(5.2);
+  });
+});
+
 describe("state digest", () => {
   it("lists the setup and every action with its id", () => {
     const iv = line("iv-1", [gridPoint(grid.header, 20, 20), gridPoint(grid.header, 20, 30)], 30);
@@ -326,6 +404,14 @@ describe("state digest", () => {
     expect(text).toContain("colocada pelo assistente");
     expect(text).toContain("Decisão B: sem ações (deixar arder)");
     expect(text).toContain("Resultado: ainda não simulado.");
+  });
+
+  it("gives the spread across the uncertainty scenarios", () => {
+    const r = simulate(grid, { ignition: { row: 30, col: 10 }, wind, durationMin: DURATION, interventions: [], spreadModel: "rothermel" });
+    const runs = Array.from({ length: 10 }, (_, i) => ({ buildingsReached: i, burnedHa: 100 + 10 * i }));
+    const text = stateDigest(snapshot({ results: { A: { ...r, runs }, B: r, durationMin: DURATION } }));
+    expect(text).toContain("Dispersão de A nos 10 cenários (80% dos cenários entre): 100 ha a 180 ha (mediana 140 ha) ardidos, 0 a 8 (mediana 4) edifícios.");
+    expect(text).not.toContain("Dispersão de B");
   });
 
   it("warns that stale results must not be quoted", () => {

@@ -52,12 +52,40 @@
   },
   {
     "name": "check_plan",
-    "description": "Checks the actions of one decision against a run of the fire without them: actions that start after the fire already passed, that the fire never reaches, aerial drops that end before it arrives, line ends with nothing to anchor them, and lines the fire crossed in the latest result. Use it to review a plan before giving advice.",
+    "description": "Checks the actions of one decision against a run of the fire without them and a run with them: actions that start after the fire already passed, that the fire never reaches, aerial drops that end before it arrives, line ends with nothing to anchor them, and lines the fire crosses. For each action it also gives the fire it faces: flame lengths next to a line and how often its width holds them (and the width that would), how often an aerial drop holds, how much effect crews keep in an attack or protected zone. Use it to review a plan, and to explain why a line was crossed.",
     "strict": true,
     "input_schema": {
       "type": "object",
       "properties": { "decision": { "type": "string", "enum": ["A", "B"] } },
       "required": ["decision"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "explain_decision",
+    "description": "Explains what each action of a decision contributes: runs the decision without each action in turn (the others in place) and reports the buildings and hectares lost without it and the villages it protects, plus whether the actions only work together or overlap. One run without uncertainty per case. Use it when the user asks why a decision wins or loses, or which action matters.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": { "decision": { "type": "string", "enum": ["A", "B"] } },
+      "required": ["decision"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "stress_test",
+    "description": "Tests whether the answer survives other winds: runs A and B without uncertainty with the wind turned 20 degrees each way, 30% weaker and 30% stronger (every forecast step changed alike), and reports who wins in each case and which changes flip the verdict. Use it for \"what changes the answer\" and in the briefing for the commander.",
+    "strict": true,
+    "input_schema": { "type": "object", "properties": {}, "required": [], "additionalProperties": false }
+  },
+  {
+    "name": "latest_start",
+    "description": "Finds until what minute one action can still be ready and keep at least half of what it saves now, searching its start minute (to within 5 min) with the rest of the decision unchanged. Reports the margin in minutes, or that the action has no effect (and what it would do from minute 0). Use it when the user asks how much time they have.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": { "decision": { "type": "string", "enum": ["A", "B"] }, "id": { "type": "string" } },
+      "required": ["decision", "id"],
       "additionalProperties": false
     }
   },

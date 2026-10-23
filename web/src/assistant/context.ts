@@ -11,6 +11,7 @@ import type {
   Wind,
 } from "@linha-zero/engine";
 import type { PlaceStats } from "../lib/places";
+import type { WindChange } from "./explain";
 
 /** The latest simulation, as App.tsx keeps it (a structural subset of its Results). */
 export interface AssistantResults {
@@ -64,6 +65,8 @@ export interface AssistantSnapshot {
 export interface FireRun {
   arrivalMin: Float32Array;
   explain: FireExplain;
+  /** Fireline intensity (kW/m) as the fire reached each cell; 0 = not burned. */
+  intensityKwM: Float32Array;
 }
 
 export interface AssistantActions {
@@ -79,8 +82,8 @@ export interface AssistantActions {
   setIgnition(point: ProjectedPoint): string | null;
   /** Runs A and B with the current setup (as the "Simular" button); null when it could not run, with the reason. */
   runSimulation(): Promise<{ results: AssistantResults | null; error: string | null }>;
-  /** One run of a decision with the given actions, without random draws, to see where the fire goes. */
-  fireRun(decision: DecisionId, items: DrawnIntervention[]): Promise<FireRun>;
+  /** One run of a decision with the given actions, without random draws, to see where the fire goes; `wind` changes every wind alike (what-ifs). */
+  fireRun(decision: DecisionId, items: DrawnIntervention[], opts?: { wind?: WindChange }): Promise<FireRun>;
   /** Opens the fire path of a cell on the result (null closes it) and moves both maps to these points. */
   show(cell: number | null, points: ProjectedPoint[]): void;
 }

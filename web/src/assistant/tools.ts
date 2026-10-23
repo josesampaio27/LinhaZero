@@ -10,14 +10,17 @@ import {
   type DecisionId,
   type DrawnIntervention,
   type InterventionKind,
+  type Metrics,
 } from "@linha-zero/engine";
 import { formatMinutes } from "../components/TimeBar";
+import { compassName } from "../components/WindControl";
 import { describeCell } from "../lib/places";
 import { isLineKind, KIND_LABEL, newId } from "../lib/scenario";
 import { anchorLine } from "./anchor";
 import { placementOptions, specText, type PlacementSpec, type Target } from "./compare";
 import type { AssistantContext, AssistantSnapshot, FireRun } from "./context";
-import { fromIgnition, resultLines, stateDigest, threatenedPlaces } from "./digest";
+import { fromIgnition, interventionLine, resultLines, stateDigest, threatenedPlaces } from "./digest";
+import { STRESS_CASES, verdict, type Verdict, type WindChange } from "./explain";
 import { checkPlan } from "./plan-check";
 import { cellCentre, COMPASS, firePlace, firePlaceOf, gridPoint, normalize, offsetPlace, placeCells, resolvePlace, type NamedPlace } from "./places";
 import { buildShape, type ShapeName } from "./shapes";
@@ -29,6 +32,9 @@ export const TOOL_NAMES = [
   "find_places",
   "show_place",
   "check_plan",
+  "explain_decision",
+  "stress_test",
+  "latest_start",
   "compare_placements",
   "place_intervention",
   "update_intervention",
@@ -267,6 +273,51 @@ function defaultTargets(s: AssistantSnapshot, run: FireRun, startMin: number): s
   return [...villages, "cabeça do fogo"];
 }
 
+/** Precision of latest_start's search, in minutes. */
+const LATEST_START_STEP_MIN = 5;
+
+type FireRunFn = AssistantContext["actions"]["fireRun"];
+
+/** Metrics of one decision run with the given actions (and wind change), on the decision's grid. */
+function runMeasure(s: AssistantSnapshot, d: DecisionId, fireRun: FireRunFn, wind?: WindChange) {
+  const grid = s.decisionGrids[d] ?? s.grid;
+  if (!grid) throw new InputError("A zona ainda está a carregar.");
+  if (!s.ignition) throw new InputError("Ainda não há ignição.");
+  return async (items: DrawnIntervention[]) => computeMetrics(grid, (await fireRun(d, items, wind && { wind })).arrivalMin, s.durationMin);
+}
+
+const finalHa = (m: Metrics) => m.burnedHaByHour[m.burnedHaByHour.length - 1] ?? 0;
+const outcome = (m: Metrics) => `${buildingCount(m.buildingsReached)}, ${hectares(finalHa(m))}`;
+
+/** An action moved to start at `start`, keeping how long it lasts. */
+function startingAt(iv: DrawnIntervention, start: number): DrawnIntervention {
+  const shift = start - iv.startMin;
+  return { ...iv, startMin: start, ...(iv.endMin !== undefined && { endMin: iv.endMin + shift }) };
+}
+
+/** Villages the fire reaches later, or not at all, in `after` than in `before`, earliest first. */
+function villageChanges(before: Metrics, after: Metrics, limit: number): string[] {
+  const at = new Map(after.villages.map((v) => [v.id, v.firstArrivalMin]));
+  return before.villages
+    .filter((v) => v.firstArrivalMin !== null)
+    .map((v) => ({ name: v.name, was: v.firstArrivalMin!, now: at.get(v.id) ?? null }))
+    .filter((v) => v.now === null || v.now - v.was >= 5)
+    .sort((a, b) => a.was - b.was)
+    .slice(0, limit)
+    .map((v) => (v.now === null ? `${v.name} (o fogo deixa de lá chegar; chegava aos ${formatMinutes(v.was)})` : `${v.name} (o fogo chega aos ${formatMinutes(v.now)} em vez de ${formatMinutes(v.was)})`));
+}
+
+/** "B ganha: menos 12 edifícios e menos 40 ha", from a verdict. */
+function winnerText(v: Verdict): string {
+  if (!v.winner) return "empatam";
+  const sign = v.winner === "B" ? 1 : -1;
+  const buildings = sign * v.buildings;
+  const ha = sign * v.ha;
+  const parts = [buildings > 0 ? `menos ${buildingCount(buildings)}` : buildings < 0 ? `mais ${buildingCount(-buildings)}` : "os mesmos edifícios"];
+  parts.push(ha >= 1 ? `menos ${hectares(ha)}` : ha <= -1 ? `mais ${hectares(-ha)}` : "a mesma área");
+  return `${v.winner} ganha (${parts.join(", ")})`;
+}
+
 const buildingCount = (n: number) => `${n.toLocaleString("pt-PT")} ${n === 1 ? "edifício" : "edifícios"}`;
 const hectares = (n: number) => `${n.toLocaleString("pt-PT", { maximumFractionDigits: n < 10 ? 1 : 0 })} ha`;
 const delta = (n: number) => (n === 0 ? "igual" : n < 0 ? `${n.toLocaleString("pt-PT")}` : `+${n.toLocaleString("pt-PT")}`);
@@ -359,7 +410,118 @@ const handlers: Record<ToolName, (input: Input, context: () => AssistantContext)
     const { snapshot, actions } = context();
     if (!snapshot.ignition) throw new InputError("Ainda não há ignição.");
     const free = await actions.fireRun(d, []);
-    return checkPlan(context().snapshot, d, free).join("\n");
+    const current = await actions.fireRun(d, snapshot.decisions[d]);
+    return checkPlan(context().snapshot, d, free, current).join("\n");
+  },
+
+  async explain_decision(input, context) {
+    const { snapshot: s, actions } = context();
+    const d = oneOf(input, "decision", DECISIONS);
+    const measure = runMeasure(s, d, actions.fireRun);
+    const items = s.decisions[d];
+    if (!items.length) return `A decisão ${d} não tem ações (deixar arder): não há contributos a explicar.`;
+    const all = await measure(items);
+    const none = await measure([]);
+    const lines = [
+      `Decisão ${d}, uma corrida sem incerteza por caso. Sem ações: ${outcome(none)}. Com as ${items.length} ${items.length === 1 ? "ação" : "ações"}: ${outcome(all)}.`,
+      "O que cada ação faz (o que se perde sem ela, com as outras no lugar):",
+    ];
+    let sumBuildings = 0;
+    let sumHa = 0;
+    for (const iv of items) {
+      const without = await measure(items.filter((x) => x !== iv));
+      const buildings = without.buildingsReached - all.buildingsReached;
+      const ha = finalHa(without) - finalHa(all);
+      sumBuildings += buildings;
+      sumHa += ha;
+      const places = villageChanges(without, all, 3);
+      // A backfire burns area of its own, and a line can turn the fire toward houses: an action can make it worse.
+      const worse = [buildings < 0 && `mais ${buildingCount(-buildings)}`, ha <= -1 && `mais ${hectares(-ha)}`].filter(Boolean);
+      const effect =
+        buildings <= 0 && ha < 1
+          ? worse.length
+            ? `piora o resultado: com ela, ${worse.join(" e ")}`
+            : "sem efeito nesta corrida: sem ela o resultado é o mesmo"
+          : `sem ela, ${[buildings > 0 && `mais ${buildingCount(buildings)}`, ha >= 1 && `mais ${hectares(ha)}`].filter(Boolean).join(" e ")}${places.length ? `; protege ${places.join(", ")}` : ""}`;
+      lines.push(`${interventionLine(s, iv)}: ${effect}.`);
+    }
+    if (items.length > 1) {
+      const jointBuildings = none.buildingsReached - all.buildingsReached;
+      const jointHa = finalHa(none) - finalHa(all);
+      const together = `juntas poupam ${buildingCount(jointBuildings)} e ${hectares(jointHa)}; uma a uma, a soma é ${buildingCount(sumBuildings)} e ${hectares(sumHa)}`;
+      if (jointBuildings > sumBuildings || jointHa > sumHa * 1.2 + 1) lines.push(`Valem mais juntas do que separadas (${together}): só resultam em conjunto.`);
+      else if (jointBuildings < sumBuildings || jointHa < sumHa * 0.8 - 1) lines.push(`Fazem em parte o mesmo trabalho (${together}): tirar uma pesa pouco porque as outras compensam.`);
+      else lines.push(`Os efeitos somam-se (${together}).`);
+    }
+    return lines.join("\n");
+  },
+
+  async stress_test(_input, context) {
+    const { snapshot: s, actions } = context();
+    if (!s.decisions.A.length && !s.decisions.B.length) throw new InputError("Nenhuma decisão tem ações: A e B são iguais com qualquer vento.");
+    const both = async (wind?: WindChange) => {
+      const a = await runMeasure(s, "A", actions.fireRun, wind)(s.decisions.A);
+      const b = await runMeasure(s, "B", actions.fireRun, wind)(s.decisions.B);
+      return verdict(a, b);
+    };
+    const base = await both();
+    const cases: { label: string; v: Verdict }[] = [];
+    for (const c of STRESS_CASES) cases.push({ label: c.label, v: await both(c.change) });
+    const flips = cases.filter((c) => c.v.winner !== base.winner);
+    const w = s.wind;
+    const summary = !flips.length
+      ? `A resposta não muda: ${base.winner ? `${base.winner} ganha` : "empatam"} em todas as ${cases.length} variações.`
+      : `${base.winner ? `${base.winner} ganha` : "Empatam"} com o vento atual e em ${cases.length - flips.length} de ${cases.length} variações; muda com ${flips.map((c) => `${c.label} (${winnerText(c.v)})`).join(", ")}.`;
+    return [
+      `Teste ao vento: A e B corridos sem incerteza com o vento mudado (agora de ${compassName(w.directionDeg)} a ${Math.round(w.speedMs * 3.6)} km/h${s.weatherSteps ? ", e cada passo da previsão mudado da mesma forma" : ""}).`,
+      `- Vento como está: ${winnerText(base)}.`,
+      ...cases.map((c) => `- ${c.label}: ${winnerText(c.v)}.`),
+      summary,
+      "São variações fixas, não o ensemble: dizem o que pode virar a resposta, não com que probabilidade.",
+    ].join("\n");
+  },
+
+  async latest_start(input, context) {
+    const { snapshot: s, actions } = context();
+    const d = oneOf(input, "decision", DECISIONS);
+    const id = text(input, "id", true);
+    const items = s.decisions[d];
+    const iv = items.find((x) => x.id === id);
+    if (!iv) throw new InputError(`Não há nenhuma ação ${id} na decisão ${d}.`);
+    const measure = runMeasure(s, d, actions.fireRun);
+    const without = await measure(items.filter((x) => x !== iv));
+    // What the action saves when it starts at `start`, the rest of the decision unchanged.
+    const saved = async (start: number) => {
+      const m = await measure(items.map((x) => (x === iv ? startingAt(iv, start) : x)));
+      return { buildings: without.buildingsReached - m.buildingsReached, ha: finalHa(without) - finalHa(m) };
+    };
+    const label = `[${id}] ${KIND_LABEL[iv.kind]}`;
+    const now = await saved(iv.startMin);
+    const savedText = (r: { buildings: number; ha: number }) => `poupa ${buildingCount(r.buildings)} e ${hectares(r.ha)}`;
+    if (now.buildings <= 0 && now.ha < 1) {
+      if (iv.startMin === 0) return `${label} não tem efeito nesta corrida, mesmo desde o início: mudar o sítio ou o tipo de ação.`;
+      const early = await saved(0);
+      return early.buildings > 0 || early.ha >= 1
+        ? `${label} não tem efeito a começar aos ${iv.startMin} min: o fogo passa antes. A começar aos 0 min, ${savedText(early)}.`
+        : `${label} não tem efeito nesta corrida, nem desde o início: mudar o sítio ou o tipo de ação.`;
+    }
+    // Still works = keeps at least half of what it saves now (buildings when it saves any, else hectares).
+    const works = (r: { buildings: number; ha: number }) => (now.buildings > 0 ? r.buildings >= Math.ceil(now.buildings / 2) : r.ha >= now.ha / 2);
+    let lo = iv.startMin;
+    let hi = s.durationMin;
+    let atLo = now;
+    const atEnd = await saved(hi);
+    if (works(atEnd)) return `${label}, a começar aos ${iv.startMin} min, ${savedText(now)}, e continua a servir mesmo a começar aos ${hi} min (${savedText(atEnd)}).`;
+    while (hi - lo > LATEST_START_STEP_MIN) {
+      const mid = Math.round((lo + hi) / 2);
+      const r = await saved(mid);
+      if (works(r)) [lo, atLo] = [mid, r];
+      else hi = mid;
+    }
+    return [
+      `${label}, a começar aos ${iv.startMin} min, ${savedText(now)} (uma corrida sem incerteza).`,
+      `Continua a servir (pelo menos metade disso) se começar até aos ${lo} min (${savedText(atLo)}); a começar aos ${hi} min já não. Margem: ${lo - iv.startMin} min.`,
+    ].join("\n");
   },
 
   async compare_placements(input, context) {
@@ -586,6 +748,12 @@ export function toolLabel(name: string, input: unknown): string {
       return `A mostrar ${String(i.place ?? "um lugar")} no mapa`;
     case "check_plan":
       return `A rever o plano${d}`;
+    case "explain_decision":
+      return `A explicar o contributo de cada ação${d}`;
+    case "stress_test":
+      return "A testar A e B com outros ventos";
+    case "latest_start":
+      return `A procurar até quando a ação ainda serve${d}`;
     case "compare_placements":
       return `A comparar sítios para ${kind.toLowerCase()}${d}`;
     case "place_intervention":

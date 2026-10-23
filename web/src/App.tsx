@@ -64,6 +64,7 @@ import { isLineKind, KIND_LABEL, newId, savedScenarioOf } from "./lib/scenario";
 import { ApiError, assistantApi } from "./lib/api";
 import type { AssistantContext } from "./assistant/context";
 import { weatherSourceText } from "./assistant/digest";
+import { withWind } from "./assistant/explain";
 import { DRYNESS } from "./lib/moisture";
 import { forecastSteps } from "./lib/weather-steps";
 import { fetchRunResults, fetchRunScenario, MAX_SERVER_RUNS, MIN_SERVER_RUNS, runOnServer, SERVER_ENSEMBLE, workersAvailable } from "./lib/server-run";
@@ -1173,14 +1174,15 @@ export function App() {
         return "error" in placed ? placed.error : null;
       },
       runSimulation: () => runSimulation(inputsRef.current, { animate: false }),
-      fireRun: async (d, items) => {
+      fireRun: async (d, items, opts) => {
         if (!bundle) throw new Error("A zona ainda está a carregar.");
         const now = inputsRef.current;
-        const scenario = buildScenario(bundle.data.header, { ...now, decisions: { ...now.decisions, [d]: items } }, d);
+        const built = buildScenario(bundle.data.header, { ...now, decisions: { ...now.decisions, [d]: items } }, d);
+        const scenario = opts?.wind ? withWind(built, opts.wind) : built;
         const { results: runs } = await sim.simulate([{ scenario: { ...scenario, ensemble: undefined, explain: true }, variant: now.variants[d] }]);
         const run = runs[0];
         if (!run.explain) throw new Error("A corrida não registou o caminho do fogo.");
-        return { arrivalMin: run.arrivalMin, explain: run.explain };
+        return { arrivalMin: run.arrivalMin, explain: run.explain, intensityKwM: run.intensityKwM ?? new Float32Array(run.arrivalMin.length) };
       },
       show: (cell, points) => {
         if (cell !== null && results?.explain) {
