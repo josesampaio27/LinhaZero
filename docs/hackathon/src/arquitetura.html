@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<title>LinhaZero · Arquitetura</title>
+<link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+
+<header class="cover">
+  <p class="kicker">LinhaZero · Hack4Guimarães 2035</p>
+  <h1>Arquitetura</h1>
+  <p class="lead">Como o LinhaZero está construído e porque está pronto para produção: onde corre cada peça, como uma simulação passa pelo sistema e como cresce com a procura.</p>
+</header>
+
+<div class="summary">
+  <p><b>Em resumo.</b> O mesmo motor de propagação, em TypeScript, corre no browser (uma corrida responde em menos de um segundo) e em workers no servidor (as centenas de cenários da incerteza). Tudo está em produção num cluster <b>Kubernetes</b>, com login, HTTPS e deploy automático. Para ter mais capacidade, acrescentam-se workers.</p>
+</div>
+
+<h2>As peças</h2>
+
+<figure>
+<svg viewBox="0 0 760 380" xmlns="http://www.w3.org/2000/svg" font-family="Public Sans, Arial, sans-serif" role="img" aria-label="Diagrama: o browser fala por HTTPS com o cluster Kubernetes, onde estão a interface, o login, a API, a fila NATS, os workers do motor, o PostgreSQL e a ingestão de dados do IPMA, Open-Meteo e fogos.pt.">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#b8461a"/>
+    </marker>
+  </defs>
+
+  <!-- Browser -->
+  <rect x="8" y="104" width="160" height="176" rx="10" fill="#f4f1ea" stroke="#e0d9cb"/>
+  <text x="88" y="128" text-anchor="middle" font-size="13" font-weight="700" fill="#18202a">Browser</text>
+  <rect x="20" y="142" width="136" height="54" rx="7" fill="#ffffff" stroke="#e0d9cb"/>
+  <text x="88" y="164" text-anchor="middle" font-size="12" font-weight="700" fill="#18202a">Interface</text>
+  <text x="88" y="181" text-anchor="middle" font-size="10.5" fill="#4a5560">React + MapLibre</text>
+  <rect x="20" y="208" width="136" height="58" rx="7" fill="#ffffff" stroke="#e0d9cb"/>
+  <text x="88" y="230" text-anchor="middle" font-size="12" font-weight="700" fill="#18202a">Motor</text>
+  <text x="88" y="247" text-anchor="middle" font-size="10.5" fill="#4a5560">uma corrida, &lt; 1 s</text>
+
+  <!-- Browser to the cluster -->
+  <line x1="168" y1="160" x2="246" y2="160" stroke="#b8461a" stroke-width="2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+  <text x="197" y="150" text-anchor="middle" font-size="10.5" font-weight="700" fill="#b8461a">HTTPS</text>
+  <text x="197" y="178" text-anchor="middle" font-size="9.5" fill="#4a5560">Cloudflare</text>
+
+  <!-- Cluster -->
+  <rect x="226" y="14" width="408" height="352" rx="12" fill="#ffffff" stroke="#141a1f" stroke-width="1.5" stroke-dasharray="6 4"/>
+  <text x="242" y="36" font-size="12" font-weight="700" fill="#141a1f">Kubernetes (k3s)</text>
+
+  <rect x="246" y="52" width="160" height="46" rx="7" fill="#f4f1ea"/>
+  <text x="326" y="72" text-anchor="middle" font-size="12" font-weight="700" fill="#18202a">Aplicação e site</text>
+  <text x="326" y="88" text-anchor="middle" font-size="10.5" fill="#4a5560">ficheiros e grelhas</text>
+
+  <rect x="464" y="52" width="150" height="46" rx="7" fill="#f4f1ea"/>
+  <text x="539" y="72" text-anchor="middle" font-size="12" font-weight="700" fill="#18202a">Keycloak</text>
+  <text x="539" y="88" text-anchor="middle" font-size="10.5" fill="#4a5560">login e acessos</text>
+
+  <rect x="246" y="132" width="160" height="56" rx="7" fill="#141a1f"/>
+  <text x="326" y="155" text-anchor="middle" font-size="12" font-weight="700" fill="#f4f1ea">API · .NET 10</text>
+  <text x="326" y="173" text-anchor="middle" font-size="10.5" fill="#b9c3cc">REST + SSE · 2 réplicas</text>
+
+  <rect x="464" y="132" width="150" height="56" rx="7" fill="#f4f1ea"/>
+  <text x="539" y="155" text-anchor="middle" font-size="12" font-weight="700" fill="#18202a">NATS</text>
+  <text x="539" y="173" text-anchor="middle" font-size="10.5" fill="#4a5560">fila de simulações</text>
+
+  <rect x="246" y="222" width="160" height="56" rx="7" fill="#f4f1ea"/>
+  <text x="326" y="245" text-anchor="middle" font-size="12" font-weight="700" fill="#18202a">PostgreSQL</text>
+  <text x="326" y="263" text-anchor="middle" font-size="10.5" fill="#4a5560">resultados, tempo, contas</text>
+
+  <rect x="464" y="222" width="150" height="56" rx="7" fill="#141a1f"/>
+  <text x="539" y="245" text-anchor="middle" font-size="12" font-weight="700" fill="#f4f1ea">Workers do motor</text>
+  <text x="539" y="263" text-anchor="middle" font-size="10.5" fill="#b9c3cc">× N, escalam</text>
+
+  <rect x="246" y="306" width="160" height="46" rx="7" fill="#f4f1ea"/>
+  <text x="326" y="326" text-anchor="middle" font-size="12" font-weight="700" fill="#18202a">Ingestão · .NET 10</text>
+  <text x="326" y="342" text-anchor="middle" font-size="10.5" fill="#4a5560">tempo e ocorrências</text>
+
+  <!-- Arrows inside the cluster -->
+  <line x1="406" y1="160" x2="462" y2="160" stroke="#b8461a" stroke-width="2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+  <line x1="539" y1="188" x2="539" y2="220" stroke="#b8461a" stroke-width="2" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+  <line x1="326" y1="188" x2="326" y2="220" stroke="#b8461a" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="464" y1="250" x2="408" y2="250" stroke="#b8461a" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="326" y1="306" x2="326" y2="280" stroke="#b8461a" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- External sources -->
+  <rect x="652" y="294" width="102" height="70" rx="8" fill="#ffffff" stroke="#e0d9cb"/>
+  <text x="703" y="316" text-anchor="middle" font-size="11" font-weight="700" fill="#18202a">IPMA</text>
+  <text x="703" y="333" text-anchor="middle" font-size="11" font-weight="700" fill="#18202a">Open-Meteo</text>
+  <text x="703" y="350" text-anchor="middle" font-size="11" font-weight="700" fill="#18202a">fogos.pt</text>
+  <line x1="406" y1="329" x2="650" y2="329" stroke="#b8461a" stroke-width="2" marker-end="url(#arrow)"/>
+  <text x="530" y="321" text-anchor="middle" font-size="9.5" fill="#4a5560">a cada 2 a 15 minutos</text>
+</svg>
+<figcaption>Tudo o que está dentro do tracejado corre no cluster. O browser só fala com o cluster por HTTPS, através de um túnel da Cloudflare: não há portas abertas.</figcaption>
+</figure>
+
+<table>
+  <thead><tr><th>Peça</th><th>O que faz</th><th>Tecnologia</th></tr></thead>
+  <tbody>
+    <tr><td><b>Interface</b></td><td>Os dois mapas, o desenho das decisões, a comparação, o assistente e o editor de grelha</td><td>React, MapLibre, TypeScript</td></tr>
+    <tr><td><b>Motor</b></td><td>A propagação do fogo (Rothermel), a incerteza e as métricas. É uma biblioteca: o mesmo código no browser e nos workers</td><td>TypeScript</td></tr>
+    <tr><td><b>API</b></td><td>Tempo e ocorrências, pedidos de simulação, progresso em direto, histórico, contas e o intermediário do assistente</td><td>.NET 10, sem estado</td></tr>
+    <tr><td><b>Workers</b></td><td>Tiram uma simulação de cada vez da fila e correm as centenas de cenários de A e B</td><td>Node 24</td></tr>
+    <tr><td><b>Ingestão</b></td><td>Recolhe o tempo do IPMA e do Open-Meteo e as ocorrências do fogos.pt; um líder e réplicas de reserva</td><td>.NET 10</td></tr>
+    <tr><td><b>Dados</b></td><td>Resultados, tempo, histórico e pedidos de acesso; a fila de trabalho</td><td>PostgreSQL 16, NATS</td></tr>
+    <tr><td><b>Login</b></td><td>Contas, convites e pedidos de acesso aprovados por um administrador</td><td>Keycloak</td></tr>
+  </tbody>
+</table>
+
+<h2>Uma simulação, do clique ao resultado</h2>
+
+<div class="flow">
+  <div class="step"><b>1. Desenhar</b>A ignição e as decisões A e B, no browser.</div>
+  <div class="arrow">→</div>
+  <div class="step"><b>2. Ver logo</b>O browser corre uma simulação de cada decisão em menos de um segundo.</div>
+  <div class="arrow">→</div>
+  <div class="step"><b>3. Pedir a incerteza</b>A API valida o pedido e põe-no na fila.</div>
+  <div class="arrow">→</div>
+  <div class="step"><b>4. Calcular</b>Um worker corre 200 a 500 cenários por decisão, os mesmos para A e B.</div>
+  <div class="arrow">→</div>
+  <div class="step"><b>5. Comparar</b>O progresso chega em direto; o resultado fica guardado no histórico.</div>
+</div>
+
+<p>Sem servidor (ou sem rede), os passos 1 e 2 continuam a funcionar: o motor está no browser. O servidor só é preciso para os cenários de incerteza, o tempo em direto, as ocorrências e o histórico.</p>
+
+<h2>Pronto para produção</h2>
+
+<div class="cards">
+  <div class="card"><div class="big">Kubernetes</div><p>Em produção num cluster k3s, com <a href="https://linhazero.dev">linhazero.dev</a> atrás de um túnel da Cloudflare e políticas de rede entre os serviços.</p></div>
+  <div class="card"><div class="big">Deploy automático</div><p>Cada alteração aprovada constrói as imagens e atualiza o cluster; as alterações à base de dados aplicam-se sozinhas ao arrancar.</p></div>
+  <div class="card"><div class="big">Seguro</div><p>Login com Keycloak, sessões no servidor, acesso só por pedido aprovado; a chave da IA nunca chega ao browser.</p></div>
+</div>
+
+<ul>
+  <li><b>Resiliente:</b> a API não tem estado e corre em duas réplicas; se um worker cai, a simulação volta à fila; se o IPMA não responde, usa-se o último tempo recebido, com a idade à vista.</li>
+  <li><b>Observável:</b> registos estruturados em todos os serviços, verificações de saúde da API, dos workers e da ingestão, e um teste de ponta a ponta ao sistema inteiro.</li>
+  <li><b>Sem dependências exclusivas:</b> tudo são peças abertas (PostgreSQL, NATS, Keycloak); o mesmo sistema corre com um só comando (Docker Compose) num portátil ou numa intranet do Estado.</li>
+</ul>
+
+<h2>Escala</h2>
+
+<div class="cards">
+  <div class="card"><div class="big">Workers × N</div><p>A capacidade cresce acrescentando réplicas de workers: cada um corre uma simulação de cada vez, tirada da fila.</p></div>
+  <div class="card"><div class="big">&lt; 1 s</div><p>Uma corrida no browser, na grelha de 30 m de Guimarães (235 km²). O custo segue a área que arde, não o tamanho do mapa.</p></div>
+  <div class="card"><div class="big">Outro concelho</div><p>É uma questão de dados, não de código: os scripts que construíram Guimarães (FUMOD, Copernicus, OpenStreetMap) constroem qualquer zona do país.</p></div>
+</div>
+
+<p>As simulações simples correm no computador de quem usa, por isso mais utilizadores não pesam no servidor: o que pesa são os cenários de incerteza, e esses distribuem-se pelos workers.</p>
+
+<h2>Qualidade</h2>
+
+<ul>
+  <li><b>Cerca de 400 testes automáticos</b> (motor, interface, workers e backend), mais 9 incêndios reais reproduzidos nos testes do motor.</li>
+  <li><b>Integração contínua</b> em cada alteração: tipos, lint, testes, build e formatação do código .NET.</li>
+  <li><b>Contratos partilhados:</b> os mesmos exemplos JSON são lidos pelos testes da interface, da API e dos workers, por isso as três partes não se desencontram.</li>
+  <li><b>Documentação como código:</b> arquitetura no modelo arc42 e mais de 80 decisões técnicas registadas, atualizadas no mesmo commit do código.</li>
+</ul>
+
+<p class="footer">LinhaZero · Hack4Guimarães 2035 · Desafio "Resposta a emergências e incêndios rurais" · <a href="https://linhazero.dev">linhazero.dev</a></p>
+
+</body>
+</html>

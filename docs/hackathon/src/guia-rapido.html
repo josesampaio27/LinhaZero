@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<title>LinhaZero · Guia rápido</title>
+<link rel="stylesheet" href="estilo.css">
+<style>h2 { margin-top: 15pt; } .two { break-inside: avoid; } .first img { width: 88%; margin: 0 auto; } .first figcaption { text-align: center; } .footer { margin-top: 8pt; } @page { margin-bottom: 13mm; }</style>
+</head>
+<body>
+
+<header class="cover">
+  <p class="kicker">LinhaZero · Hack4Guimarães 2035</p>
+  <h1>Guia rápido</h1>
+  <p class="lead">Do primeiro clique à comparação de duas decisões, em cinco minutos.</p>
+</header>
+
+<div class="access">
+  <b>Para experimentar:</b> abra <b>linhazero.dev</b> e carregue em <b>"Pedir acesso"</b>. Se é júri ou mentor do Hack4Guimarães, diga-o no pedido: aprovamos em poucos minutos. Sem conta, o <b>"Cenário de demonstração"</b> abre logo um exemplo, só de leitura (pode simular, não alterar).
+</div>
+
+<h2>Comparar duas decisões</h2>
+
+<ol class="steps">
+  <li><b>Situação: acender o fogo.</b> Carregue em "Acender o fogo" e toque no mapa. O vento, a temperatura e a humidade do momento chegam sozinhos (IPMA, Open-Meteo); qualquer valor pode ser mudado à mão.</li>
+  <li><b>Decisões: desenhar A e B.</b> Em cada mapa, desenhe o que faria: linha de contenção, ataque, proteger zona, descarga aérea ou contrafogo, cada uma com o minuto em que fica pronta. Uma decisão sem ações é "deixar arder".</li>
+  <li><b>Simular.</b> As duas decisões correm sobre o mesmo fogo. Com <b>"Considerar a incerteza"</b>, cada uma corre 200 a 500 vezes com o vento e o combustível a variar, nos mesmos cenários para A e B.</li>
+  <li><b>Resultado: ler a comparação.</b> O painel diz qual decisão é melhor, quantos edifícios e hectares poupa, a que horas o fogo chega a cada aldeia e com que confiança ("B é melhor em 143 de 200 cenários"). A barra de tempo faz avançar o fogo nos dois mapas.</li>
+</ol>
+
+<figure class="first">
+  <img src="img/resultado.jpg" alt="O resultado: dois mapas, a decisão A a deixar arder e a decisão B com uma linha de contenção; o painel diz que B poupa 4 edifícios.">
+  <figcaption>O mesmo fogo nas duas decisões. À direita, uma linha de contenção a norte impede o fogo de chegar a Tabuadelo: B poupa 4 edifícios.</figcaption>
+</figure>
+
+<h2>Histórico de simulações</h2>
+<p>Cada simulação com incerteza fica guardada. No menu ☰, <b>"Histórico de simulações"</b> lista as suas simulações (data, vento, ações de A e B, área ardida, edifícios) e abre qualquer uma tal como foi vista, sem simular de novo; a partir daí pode alterá-la e comparar outra vez.</p>
+
+<div class="two">
+  <div>
+    <h2 style="margin-top:0">Perceber o porquê</h2>
+    <ul>
+      <li><b>Tocar num ponto do mapa</b> desenha o caminho que o fogo fez até lá em cada decisão, e diz o que o tornou rápido: o combustível, o vento ou o declive.</li>
+      <li><b>"Cenários"</b>, ao lado de "Chegada", mostra em quantos dos cenários cada ponto arde.</li>
+      <li><b>"Sugerir uma terceira decisão"</b> experimenta linhas de contenção no caminho do fogo e mostra as que mais poupam, prontas a passar para a decisão B.</li>
+    </ul>
+  </div>
+  <figure style="margin-top:0">
+    <img src="img/cenarios.jpg" alt="Vista de cenários: em cada mapa, a cor diz em quantos dos 200 cenários cada ponto arde.">
+    <figcaption>Vista de cenários: a cor diz em quantos dos 200 cenários cada ponto arde.</figcaption>
+  </figure>
+</div>
+
+<h2>O assistente</h2>
+
+<div class="two">
+  <div>
+    <p>O botão <b>"Assistente"</b> abre um painel de conversa (é preciso conta). Experimente os atalhos <b>"Explicar o resultado"</b>, <b>"Rever o meu plano"</b> e <b>"Propor uma decisão B"</b>, ou pergunte:</p>
+    <ul>
+      <li>"Porque é que B ganha?"</li>
+      <li>"Esta linha aguenta? Que largura precisava?"</li>
+      <li>"A resposta muda se o vento rodar?"</li>
+      <li>"Até quando posso esperar para abrir a linha?"</li>
+      <li>"Põe um ataque na cabeça do fogo na decisão B."</li>
+      <li>"Faz um resumo para o COS."</li>
+    </ul>
+    <p class="note">A IA explica, a física decide: todos os números vêm do simulador. O que o assistente muda no mapa fica marcado e desfaz-se com "Desfazer".</p>
+  </div>
+  <figure style="margin-top:0">
+    <img src="img/assistente.png" alt="O painel do assistente a explicar que B é melhor sobretudo por proteger Tabuadelo." style="max-width:48%;margin:0 auto">
+  </figure>
+</div>
+
+<h2>Prevenção</h2>
+
+<div class="two">
+  <figure style="margin-top:0">
+    <img src="img/editor-grelha.jpg" alt="O editor de grelha com o mapa de combustível de Guimarães e uma faixa nova desenhada.">
+  </figure>
+  <div>
+    <p>No <b>Editor de grelha</b> (menu ☰), um município muda o território: pinta combustível, abre uma faixa de gestão de combustível, acrescenta uma barreira. Guarda a variante e carrega em <b>"Testar na simulação"</b>: a decisão A corre no território de hoje e a B no território com a faixa, contra o mesmo fogo.</p>
+    <p>Assim vê-se quanto a faixa teria atrasado ou travado o fogo, antes de gastar dinheiro nela.</p>
+  </div>
+</div>
+
+<p class="footer">LinhaZero · Hack4Guimarães 2035 · <a href="https://linhazero.dev">linhazero.dev</a> · Mais detalhe: Ficha técnica do simulador e Arquitetura.</p>
+
+</body>
+</html>

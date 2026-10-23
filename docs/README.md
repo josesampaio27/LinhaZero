@@ -6,7 +6,7 @@ Esta pasta explica o que é o LinhaZero, como está construído e para onde vai.
 
 | Se és… | Lê primeiro | Depois |
 | --- | --- | --- |
-| Júri ou parceiro | [Proposta do desafio](proposta-desafio.md) | [Objetivos](arquitetura/01-introducao-e-objetivos.md) e [Do protótipo à produção](plano/caminho-para-producao.md) |
+| Júri ou parceiro | [Proposta do desafio](proposta-desafio.md) e os PDFs de [hackathon/](hackathon/README.md) | [Objetivos](arquitetura/01-introducao-e-objetivos.md) e [Do protótipo à produção](plano/caminho-para-producao.md) |
 | Quem vai programar | [README do projeto](../README.md) | [Estratégia](arquitetura/04-estrategia.md), [Blocos](arquitetura/05-blocos.md), [Referência](#referência) |
 | Quem prepara dados | [data-prep](../data-prep/README.md) | [Formato da grelha](referencia/formato-grelha.md), [Fontes de dados](referencia/fontes-de-dados.md) |
 | Quem avalia a instalação numa entidade | [Implantação](arquitetura/07-implantacao.md) | [Conceitos transversais](arquitetura/08-conceitos.md), [Do protótipo à produção](plano/caminho-para-producao.md) |
@@ -37,6 +37,7 @@ docs/
   referencia/                formatos, API, base de dados, fontes de dados
   plano/                     semana do hackathon, caminho para produção, roteiro
   decisoes/                  uma página por decisão técnica (ADR)
+  hackathon/                 os PDFs entregues ao Hack4Guimarães (ficha técnica, arquitetura, guia rápido) e as suas fontes
 ```
 
 ### Arquitetura

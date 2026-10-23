@@ -301,6 +301,7 @@
   .article table.wide { min-width: 0; font-size: 11px; }
   main.article { padding: 0; }
   section { break-inside: auto; }
+  h2, h3 { break-after: avoid; }
   tr { break-inside: avoid; }
 }
 
