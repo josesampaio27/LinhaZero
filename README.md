@@ -174,6 +174,34 @@ A interface e o motor funcionam sozinhos no browser. Os serviços (API e ingest�
 NATS) acrescentam o tempo real, as ocorrências e os ensembles grandes; a arquitetura está em
 [docs/arquitetura/](docs/arquitetura/README.md) e a documentação começa em [docs/README.md](docs/README.md).
 
+## Licença
+
+© 2026 José Sampaio e Rodrigo Vicente. Todos os direitos reservados: o código está público só para consulta e não
+pode ser usado, copiado nem modificado sem autorização escrita dos autores (ver [LICENSE](LICENSE)). Os dados de
+terceiros mantêm as suas licenças, abaixo.
+
+## Créditos dos dados
+
+O LinhaZero usa dados de terceiros, cada um com a sua licença. As grelhas em `web/public/grids/` e
+`engine/test/reference*/`, as fixtures dos testes e a seed da demo (`infra/demo/`) incluem dados derivados destas fontes.
+
+| Dado | Fonte e crédito | Licença |
+| --- | --- | --- |
+| Modelos de combustível | FUMOD: Sá, A.C.L. et al., *A method to produce a flexible and customized fuel models dataset*, MethodsX; dados em [github.com/anasa30/PT_FuelModels](https://github.com/anasa30/PT_FuelModels) | Sem licença declarada; usados com crédito aos autores |
+| Relevo | Copernicus DEM GLO-30: "produced using Copernicus WorldDEM-30 © DLR e.V. 2010-2014 and © Airbus Defence and Space GmbH 2014-2018 provided under COPERNICUS by the European Union and ESA; all rights reserved" | Licença do Copernicus DEM GLO-30: acesso livre e gratuito, com esta atribuição |
+| Coberto arbóreo | Copernicus High Resolution Layer Tree Cover Density 2018: © European Union, Copernicus Land Monitoring Service 2018, European Environment Agency (EEA) | Acesso livre e gratuito, com atribuição |
+| Estradas, rios, edifícios, lugares e mapa de ruas | © contribuidores do [OpenStreetMap](https://www.openstreetmap.org/copyright) | [ODbL 1.0](https://opendatacommons.org/licenses/odbl/1-0/): as camadas derivadas do OSM nas grelhas (barreiras, edifícios, lugares) ficam sob a ODbL |
+| Ortofotografia (vista satélite) | OrtoSat 2023 © Direção-Geral do Território (DGT) | Dados abertos da DGT |
+| Incêndios de referência | PT-FireSprd v0.08: Benali, A. et al. (2023), [doi:10.5281/zenodo.7495506](https://doi.org/10.5281/zenodo.7495506) | CC BY 4.0 |
+| Tempo (previsão e arquivo) | [Open-Meteo.com](https://open-meteo.com/); o arquivo histórico usa o ERA5 do Copernicus Climate Change Service | CC BY 4.0 |
+| Observações, avisos e risco de incêndio | Instituto Português do Mar e da Atmosfera ([IPMA](https://api.ipma.pt/)) | Dados abertos do IPMA |
+| Ocorrências ativas | [fogos.pt](https://fogos.pt/) (VOST Portugal), a partir dos dados da ANEPC | Termos de utilização do fogos.pt |
+| Fotografias da página inicial | Autores e licenças em `landing/public/photos/credits.json` (NASA MODIS, Wikimedia Commons) | Domínio público e CC BY-SA |
+| Tipo de letra Barlow | Jeremy Tribby | SIL Open Font License 1.1 (`web/src/fonts/OFL.txt`) |
+
+As bibliotecas de código (npm e NuGet) têm as suas próprias licenças, indicadas em cada pacote. As referências
+científicas estão em [docs/bibliografia.md](docs/bibliografia.md).
+
 ## Aviso
 
 O simulador é uma aproximação coerente e explicável, não uma previsão operacional.

@@ -1,6 +1,7 @@
 {
   "name": "linha-zero",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "workspaces": [
     "engine",

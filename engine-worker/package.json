@@ -2,6 +2,7 @@
   "name": "@linha-zero/engine-worker",
   "version": "0.1.0",
   "private": true,
+  "license": "UNLICENSED",
   "type": "module",
   "scripts": {
     "start": "tsx src/main.ts",
