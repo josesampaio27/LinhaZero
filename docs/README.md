@@ -21,7 +21,7 @@ A documentação segue o [Diátaxis](https://diataxis.fr/), que separa quatro ti
 | Tutorial | Aprender fazendo | [README do projeto](../README.md): "Como correr" e "Usar" |
 | Guia prático | Fazer uma tarefa concreta | [data-prep/README.md](../data-prep/README.md): gerar uma grelha real |
 | Referência | Consultar factos exatos | [referencia/](#referência) |
-| Explicação | Perceber como funciona e porquê | [arquitetura/](arquitetura/README.md), [modelo/](#modelo-do-fogo), [estado-da-arte.md](estado-da-arte.md), [decisoes/](decisoes/README.md) |
+| Explicação | Perceber como funciona e porquê | [arquitetura/](arquitetura/README.md), [modelo/](#modelo-do-fogo), [estado-da-arte.md](estado-da-arte.md), [investigacao-assistente.md](investigacao-assistente.md), [decisoes/](decisoes/README.md) |
 
 Mais duas pastas que não são documentação técnica no sentido estrito: a [proposta do desafio](proposta-desafio.md), escrita para o júri, e o [plano](#plano).
 
@@ -31,6 +31,7 @@ docs/
   proposta-desafio.md        a proposta para o júri do Hack4Guimarães
   estado-da-arte.md          simuladores existentes e o que nos distingue
   investigacao-propagacao.md a investigação de base: modelos, algoritmos e dados (em inglês)
+  investigacao-assistente.md a investigação para o assistente com IA: modelos de linguagem, mapas e simuladores
   bibliografia.md            bibliografia e fontes
   arquitetura/               a arquitetura, em arc42 (uma página por secção)
   modelo/                    o modelo do fogo: propagação, incerteza, calibração, o motor explicado
