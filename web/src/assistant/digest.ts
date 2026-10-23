@@ -9,6 +9,7 @@ import { compassName } from "../components/WindControl";
 import { describeCell } from "../lib/places";
 import { KIND_LABEL, isLineKind } from "../lib/scenario";
 import type { AssistantSnapshot } from "./context";
+import { percentile } from "./explain";
 import { distanceAndDirection } from "./places";
 
 /** Where the weather comes from, for the state: the IPMA station and time, the model, a scenario file or defaults. */
@@ -118,6 +119,15 @@ export function resultLines(s: AssistantSnapshot): string[] {
     const m = r[d].metrics;
     const likely = r.likelyHa ? ` (área ardida esperada nos cenários: ${ha(d === "A" ? r.likelyHa.a : r.likelyHa.b)})` : "";
     lines.push(`- Decisão ${d}: ${ha(totalHa(m))} ardidos em ${formatMinutes(r.durationMin)}${likely}, ${int(m.buildingsReached)} edifícios atingidos.`);
+  }
+  for (const d of DECISIONS) {
+    const runs = r[d].runs;
+    if (!runs?.length) continue;
+    const range = (values: number[], fmt: (n: number) => string) =>
+      `${fmt(percentile(values, 0.1))} a ${fmt(percentile(values, 0.9))} (mediana ${fmt(percentile(values, 0.5))})`;
+    lines.push(
+      `- Dispersão de ${d} nos ${int(runs.length)} cenários (80% dos cenários entre): ${range(runs.map((x) => x.burnedHa), ha)} ardidos, ${range(runs.map((x) => x.buildingsReached), int)} edifícios.`,
+    );
   }
   return lines;
 }

@@ -114,3 +114,5 @@ O que se pôs de lado, e porquê.
 | [0078](0078-verificacao-dos-valores-das-acoes-de-combate.md) | Verificação dos valores das ações de combate | aceite: não se muda nenhum valor | 2026-10-22 |
 | [0079](0079-assistente-com-claude-haiku.md) | Assistente com IA (Claude Haiku 5.5), que vê a aplicação e coloca ações | aceite (prova de conceito) | 2026-10-22 |
 | [0080](0080-demonstracao-so-de-leitura.md) | Demonstração só de leitura | aceite | 2026-10-22 |
+| [0081](0081-assistente-coloca-acoes-em-qualquer-sitio.md) | O assistente coloca ações em qualquer sítio, e o motor escolhe o melhor | aceite | 2026-10-23 |
+| [0082](0082-assistente-explica-decisoes.md) | O assistente explica as decisões e diz o que muda a resposta | aceite | 2026-10-23 |

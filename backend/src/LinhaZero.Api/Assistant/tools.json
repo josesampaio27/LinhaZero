@@ -52,7 +52,7 @@
   },
   {
     "name": "check_plan",
-    "description": "Checks the actions of one decision against a run of the fire without them: actions that start after the fire already passed, that the fire never reaches, aerial drops that end before it arrives, line ends with nothing to anchor them, and lines the fire crossed in the latest result. Use it to review a plan before giving advice.",
+    "description": "Checks the actions of one decision against a run of the fire without them and a run with them: actions that start after the fire already passed, that the fire never reaches, aerial drops that end before it arrives, line ends with nothing to anchor them, and lines the fire crosses. For each action it also gives the fire it faces: flame lengths next to a line and how often its width holds them (and the width that would), how often an aerial drop holds, how much effect crews keep in an attack or protected zone. Use it to review a plan, and to explain why a line was crossed.",
     "strict": true,
     "input_schema": {
       "type": "object",
@@ -62,8 +62,56 @@
     }
   },
   {
+    "name": "explain_decision",
+    "description": "Explains what each action of a decision contributes: runs the decision without each action in turn (the others in place) and reports the buildings and hectares lost without it and the villages it protects, plus whether the actions only work together or overlap. One run without uncertainty per case. Use it when the user asks why a decision wins or loses, or which action matters.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": { "decision": { "type": "string", "enum": ["A", "B"] } },
+      "required": ["decision"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "stress_test",
+    "description": "Tests whether the answer survives other winds: runs A and B without uncertainty with the wind turned 20 degrees each way, 30% weaker and 30% stronger (every forecast step changed alike), and reports who wins in each case and which changes flip the verdict. Use it for \"what changes the answer\" and in the briefing for the commander.",
+    "strict": true,
+    "input_schema": { "type": "object", "properties": {}, "required": [], "additionalProperties": false }
+  },
+  {
+    "name": "latest_start",
+    "description": "Finds until what minute one action can still be ready and keep at least half of what it saves now, searching its start minute (to within 5 min) with the rest of the decision unchanged. Reports the margin in minutes, or that the action has no effect (and what it would do from minute 0). Use it when the user asks how much time they have.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": { "decision": { "type": "string", "enum": ["A", "B"] }, "id": { "type": "string" } },
+      "required": ["decision", "id"],
+      "additionalProperties": false
+    }
+  },
+  {
+    "name": "compare_placements",
+    "description": "Finds the best spot for one action by letting the engine try it: the app builds up to 16 placements (lines across the fire's path at several points and lengths, attacks at the head, zones around the houses), runs this decision once per placement, without uncertainty, with its current actions plus the new one, and returns them ranked by buildings reached, then hectares, with the parameters to give place_intervention. Use it before placing a containment line, backfire, aerial drop or attack when you have to choose where. Without `places` it looks at the first two villages the fire reaches after start_min and the head of the fire. place_best=true also places the best option, if it improves the decision.",
+    "strict": true,
+    "input_schema": {
+      "type": "object",
+      "properties": {
+        "decision": { "type": "string", "enum": ["A", "B"] },
+        "kind": { "type": "string", "enum": ["containmentLine", "suppression", "protectZone", "aerialDrop", "backfire"] },
+        "start_min": { "type": "integer", "description": "Minute from ignition when the action is in place. 0 to the duration." },
+        "places": { "type": "array", "items": { "type": "string" }, "description": "Up to 3 places to cut the fire off from or protect: villages, \"cabeça do fogo\", \"flanco esquerdo\", \"flanco direito\"." },
+        "end_min": { "type": "integer", "description": "Minute it stops acting; absent = never (aerial drops default to 20 min for water, 120 for retardant)." },
+        "width_m": { "type": "number", "description": "Line width in m: 1 hand line, 4 machine line (default), 10 or 25 fuel break." },
+        "agent": { "type": "string", "enum": ["water", "retardant"], "description": "Aerial drops only. Default water." },
+        "place_best": { "type": "boolean", "description": "Also place the best option in the decision. Default false." }
+      },
+      "required": ["decision", "kind", "start_min"],
+      "additionalProperties": false
+    }
+  },
+  {
     "name": "place_intervention",
-    "description": "Adds one action to a decision, placed by the app from a named place and a shape (you never give coordinates). Shapes: across_path = across the fire's path toward `place`, where the fire arrives at `minute`; fire_head = at the head of the fire heading to `place`, where it is at `minute`; around_place = around the houses of `place` (a ring for line actions, an area for zones); between_places = a straight line from `place` to `to_place`. `place` may be \"ignição\". Line actions: containmentLine, backfire, aerialDrop. Zone actions: suppression (attack), protectZone. The action appears on the map at once, marked as yours, and the user can undo it. Returns its id, size and where it ended up.",
+    "description": "Adds one action to a decision, placed by the app from a named place and a shape (you never give coordinates). `place` is a village, \"ignição\", or a spot on the fire itself: \"cabeça do fogo\" (its head, the burning point farthest from the ignition), \"flanco esquerdo\" or \"flanco direito\" (its widest points to each side, looking from the ignition toward the head), all found from a run of this decision. offset_m with offset_direction moves `place` that far in that direction (\"800 m a norte de X\"), to put an action anywhere. Shapes: across_path = across the fire's path toward `place`, where the fire arrives at `minute`; fire_head = at the head of the fire heading to `place`, where it is at `minute`; around_place = around the houses of `place` (a ring for line actions, an area for zones; a circle of radius_m around a point); between_places = a straight line from `place` to `to_place`. Containment lines and backfires are stretched at each end (up to 1 km) to the nearest road, river, water or bare ground, so the fire cannot go round them; the result says where each end rests. Line actions: containmentLine, backfire, aerialDrop. Zone actions: suppression (attack), protectZone. The action appears on the map at once, marked as yours, and the user can undo it. Returns its id, size and where it ended up.",
     "strict": true,
     "input_schema": {
       "type": "object",
@@ -73,6 +121,9 @@
         "shape": { "type": "string", "enum": ["across_path", "fire_head", "around_place", "between_places"] },
         "place": { "type": "string" },
         "to_place": { "type": "string", "description": "between_places only: where the line ends." },
+        "offset_m": { "type": "integer", "description": "Moves `place` this many metres (0 to 5000) toward offset_direction. Use with offset_direction." },
+        "offset_direction": { "type": "string", "enum": ["norte", "nordeste", "este", "sudeste", "sul", "sudoeste", "oeste", "noroeste"] },
+        "anchor": { "type": "boolean", "description": "Containment lines and backfires: stretch the ends to a road, river or bare ground. Default true, false for between_places." },
         "minute": { "type": "integer", "description": "across_path and fire_head: the fire's arrival minute that picks the spot on its path. Default: halfway between start_min and the fire reaching the place." },
         "length_m": { "type": "integer", "description": "Length of a line across the path, 100 to 5000 m. Default 1000 (500 for fire_head)." },
         "radius_m": { "type": "integer", "description": "Radius of a zone or margin around a place's houses, 50 to 3000 m. Default 300." },
